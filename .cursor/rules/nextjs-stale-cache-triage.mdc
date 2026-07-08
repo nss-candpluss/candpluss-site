@@ -1,0 +1,21 @@
+---
+description: Next.js 不具合時はコード変更前に .next 削除とキャッシュクリアを試す
+alwaysApply: true
+---
+
+# Next.js stale CSS / dev server 切り分け
+
+不具合（スタイル未反映・アイコン消失・Hero scroll 異常など）が発生した場合、**コードを変更する前に**次を試す。
+
+## 手順（この順）
+
+1. dev server を停止
+2. `.next` を削除: `rm -rf .next`
+3. dev server を再起動: `npm run dev`
+4. ブラウザで **キャッシュ無効のハードリロード**（DevTools → Network → Disable cache → Cmd+Shift+R）
+
+## 原則
+
+- 上記で改善する場合、原因は **ソースと配信 CSS のズレ（stale `.next` / ブラウザキャッシュ）** の可能性が高い
+- 改善しない場合のみ、コード側の調査・修正に進む
+- Hero scroll では `scroll(root block)` 等が Styles に出ているかも併せて確認する

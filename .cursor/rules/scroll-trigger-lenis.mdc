@@ -1,0 +1,71 @@
+---
+description: Lenis + GSAP ScrollTrigger の必須パターン（他ページ回帰防止）
+globs: sections/**/*.tsx,lib/motion/**/*.ts,components/motion/**/*.tsx
+alwaysApply: false
+---
+
+# ScrollTrigger + Lenis（必須）
+
+`SmoothScrollProvider` が `document.documentElement` に `scrollerProxy` を設定している。
+**ScrollTrigger を使うページは以下を必ず守る。省略すると opacity 0 のまま等のサイレント不具合になる。**
+
+## 必須 3 点
+
+1. **`scroller` を明示** — `@/lib/motion/scroll-trigger-scroller` の `getScrollTriggerScroller()` を使う
+2. **`subscribeMotionReady` で再構築** — Lenis 準備前に ST を作らない（`lib/motion/motion-ready.ts`）
+3. **横断影響を確認** — 共通基盤変更時は `.cursor/rules/cross-page-impact-check.mdc` のチェックリストに従う
+
+## テンプレート
+
+```typescript
+import { subscribeMotionReady } from "@/lib/motion/motion-ready";
+import { getScrollTriggerScroller } from "@/lib/motion/scroll-trigger-scroller";
+
+useLayoutEffect(() => {
+  gsap.registerPlugin(ScrollTrigger);
+
+  let context: gsap.Context | null = null;
+  let setupFrameId = 0;
+
+  const setup = () => {
+    context?.revert();
+    context = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: section,
+        scroller: getScrollTriggerScroller(),
+        // ...
+      });
+    }, section);
+    ScrollTrigger.refresh();
+  };
+
+  const scheduleSetup = () => {
+    cancelAnimationFrame(setupFrameId);
+    setupFrameId = requestAnimationFrame(setup);
+  };
+
+  const unsubscribe = subscribeMotionReady(scheduleSetup);
+  queueMicrotask(scheduleSetup);
+
+  return () => {
+    cancelAnimationFrame(setupFrameId);
+    unsubscribe();
+    context?.revert();
+  };
+}, []);
+```
+
+## 禁止
+
+- `scrollTrigger: { ... }` に `scroller` なしで Lenis 有効環境を前提にする
+- `lib/motion/setup-lenis-scroll-trigger.ts` / `motion-ready.ts` / `SmoothScrollProvider.tsx` を変更したまま関連ページを未確認で完了にする
+- 1 ページ（例: Quality）だけ直して他ページの ST 初期化順を無視する
+
+## 確認手順（ScrollTrigger 利用ページ）
+
+ScrollTrigger 固有の確認。共通ファイル変更時の横断確認は `.cursor/rules/cross-page-impact-check.mdc` を必ず併用する。
+
+1. `npm run dev` → `/concept`（各セクションのフェードイン）
+2. `/quality`（テキスト fade / slide 切替）
+3. `/`（HomeLab・ProductLinks 等 ST 利用箇所）
+4. 切り分け: `lib/motion/smooth-scroll-config.ts` の `enabled: false` でネイティブ scroll も確認

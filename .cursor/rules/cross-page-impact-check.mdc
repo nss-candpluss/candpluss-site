@@ -1,0 +1,48 @@
+---
+description: 共通ファイル変更時のページ横断影響確認（回帰防止・必須）
+alwaysApply: true
+---
+
+# ページ横断影響確認（必須）
+
+**motion 基盤に限らず、共通・横断ファイルを変更したら、影響を受けるページ全体を必ず確認してから完了とする。**
+
+## 対象になりやすい変更
+
+- `app/layout.tsx` / `app/globals.css` — 全ページ
+- `components/layout/` — Header / Footer 等
+- `lib/` の共通ユーティリティ — typography, site, motion 等
+- `components/ui/` — 複数ページで使う UI
+- `data/navigation.ts` 等 — ナビ・導線
+- 依存追加・Tailwind / CSS 変数の変更
+
+## 作業前
+
+1. **影響範囲を特定** — どのページ・セクションがそのファイルに依存しているか洗い出す
+2. **スコープを明示** — 「Quality のみ」と決めた場合でも、共通ファイルを触ったら横断確認は省略しない
+
+## 作業後（完了条件）
+
+1. **変更したファイルが及ぶページをブラウザで確認**（見た目・スクロール・ナビ・レスポンシブ）
+2. **`npm run lint` と `npm run build` を実行**
+3. 影響が読み取れない場合は **推測で完了にせず**、関連ページを開いて確認する
+
+## 最低限の横断チェック（共通基盤を触った場合）
+
+| ページ | 確認ポイント |
+|--------|-------------|
+| `/` | Hero、各セクション、Header テーマ切替 |
+| `/concept` | フェード、背景パララックス、FeatureLinks |
+| `/quality` | scroll 連動、テキスト fade、画像切替 |
+| `/products` | 一覧レイアウト、Header |
+| Legal / Support 系 | タイポ・余白・Header |
+
+## 禁止
+
+- 1 ページだけ直したつもりで、共通ファイル変更の横断確認を省略する
+- lint / build 成功だけでブラウザ確認をスキップする
+- 「たぶん影響ない」で関連ページの確認を省略する
+
+## 関連ルール
+
+- ScrollTrigger 固有: `.cursor/rules/scroll-trigger-lenis.mdc`

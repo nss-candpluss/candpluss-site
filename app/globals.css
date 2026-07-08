@@ -1,26 +1,343 @@
 @import "tailwindcss";
 
+@source "../lib/typography.ts";
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #191919;
+  --color-muted: #676767;
+  --color-line: #ded9cf;
+  --color-divider: #e5e5e5;
+  --color-surface: #fffdf8;
+  /* Text Scale: 375px → 88%, 1440px+ → 100% */
+  --text-scale-min: 0.88;
+  --text-scale-max: 1;
+  --text-scale: clamp(
+    var(--text-scale-min),
+    calc(0.88 + (100vw - 375px) / (1440px - 375px) * 0.12),
+    var(--text-scale-max)
+  );
+  /* Legacy alias — prefer --text-scale in new code */
+  --fluid-scale: var(--text-scale);
+
+  /* Layout Scale X: 390px → 16px container-x, 1920px+ → 72px */
+  --layout-scale-x-min: 0.2222;
+  --layout-scale-x-max: 1;
+  --layout-scale-x: clamp(
+    var(--layout-scale-x-min),
+    calc(0.2222 + (100vw - 390px) / (1920px - 390px) * 0.7778),
+    var(--layout-scale-x-max)
+  );
+  /* Layout Scale Y: 390px → 62px container-y, 1920px+ → 164px */
+  --layout-scale-y-min: calc(62 / 164);
+  --layout-scale-y-max: 1;
+  --layout-scale-y: clamp(
+    var(--layout-scale-y-min),
+    calc(62 / 164 + (100vw - 390px) / (1920px - 390px) * (1 - 62 / 164)),
+    var(--layout-scale-y-max)
+  );
+  /* Legacy alias — prefer --layout-scale-x / --layout-scale-y */
+  --layout-scale: var(--layout-scale-x);
+  --container-x-max: 72px;
+  --container-x: calc(var(--container-x-max) * var(--layout-scale-x));
+  --container-y-top-max: 164px;
+  --container-y-bottom-max: 164px;
+  --container-y-top: calc(var(--container-y-top-max) * var(--layout-scale-y));
+  --container-y-bottom: calc(var(--container-y-bottom-max) * var(--layout-scale-y));
+  --product-page-title-top-max: 144px;
+  --product-page-title-top: calc(
+    var(--header-height) + var(--product-page-title-top-max) * var(--layout-scale-y)
+  );
+  --section-title-gap-max: 92px;
+  --section-title-gap: calc(var(--section-title-gap-max) * var(--layout-scale-y));
+
+  /* Gap Scale X: 375px → ~34.3%, 1920px+ → 100%（左右・横 gap） */
+  --gap-scale-x-min: 0.343;
+  --gap-scale-x-max: 1;
+  --gap-scale-x: clamp(
+    var(--gap-scale-x-min),
+    calc(0.343 + (100vw - 375px) / (1920px - 375px) * 0.657),
+    var(--gap-scale-x-max)
+  );
+  /* Gap Scale Y: Layout Scale Y と同一（390px → 62/164, 1920px+ → 100%） */
+  --gap-scale-y: var(--layout-scale-y);
+  /* Legacy alias — prefer --gap-scale-x / --gap-scale-y */
+  --gap-scale: var(--gap-scale-x);
+  --header-nav-gap-max: 52px;
+  --header-nav-gap: calc(var(--header-nav-gap-max) * var(--gap-scale-x));
+  --header-icon-gap-min: 20px;
+  --header-icon-gap-max: 32px;
+  --header-icon-gap: clamp(
+    var(--header-icon-gap-min),
+    calc(var(--header-icon-gap-max) * var(--gap-scale-x)),
+    var(--header-icon-gap-max)
+  );
+  --feature-links-gap-max: 26px;
+  --feature-links-gap: calc(var(--feature-links-gap-max) * var(--gap-scale-x));
+  --product-links-gap-max: 52px;
+  --product-links-gap: calc(var(--product-links-gap-max) * var(--gap-scale-x));
+  --product-detail-panel-height: 0px;
+
+  /* Header height: 390px → 70px, 1920px+ → 100px */
+  --header-height-min: 70px;
+  --header-height-max: 100px;
+  --header-height: clamp(
+    var(--header-height-min),
+    calc(70px + (100vw - 390px) * 30 / 1530),
+    var(--header-height-max)
+  );
+  --font-heading: var(--font-baskervville), "Baskerville", "Georgia",
+    "Hiragino Mincho ProN", "Hiragino Mincho Pro", "BIZ UDMincho",
+    "Yu Mincho", serif;
+  --font-ui-en: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-body-ja: "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "BIZ UDPGothic", "Yu Gothic", "Meiryo", system-ui, sans-serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-divider: #e5e5e5;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-body-ja);
+    line-height: 1.6;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-heading);
+    font-weight: 400;
+  }
+
+  .font-heading {
+    font-family: var(--font-heading);
+  }
+
+  .font-ui-en {
+    font-family: var(--font-ui-en);
+  }
+
+  .font-body-ja {
+    font-family: var(--font-body-ja);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.hero-overlay {
+  background-color: rgba(0, 0, 0, 0);
 }
+
+@supports (animation-timeline: scroll(root)) {
+  [data-hero-section] {
+    --hero-scroll-end: 100vh;
+  }
+
+  [data-hero-section] .hero-overlay {
+    animation: hero-overlay-fade linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 var(--hero-scroll-end);
+  }
+
+  [data-hero-section] .hero-title-layer {
+    animation: hero-title-fade-desktop linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 var(--hero-scroll-end);
+  }
+
+  @media (max-width: 767px) {
+    [data-hero-section] .hero-title-layer {
+      animation-name: hero-title-fade-mobile;
+    }
+  }
+}
+
+@keyframes hero-overlay-fade {
+  from {
+    background-color: rgba(0, 0, 0, 0);
+  }
+
+  to {
+    background-color: rgba(0, 0, 0, 0.82);
+  }
+}
+
+@keyframes hero-title-fade-desktop {
+  from {
+    opacity: 1;
+    transform: translate3d(0, -135px, 0);
+  }
+
+  to {
+    opacity: 0.32;
+    transform: translate3d(0, -85px, 0);
+  }
+}
+
+@keyframes hero-title-fade-mobile {
+  from {
+    opacity: 1;
+    transform: translate3d(0, -160px, 0);
+  }
+
+  to {
+    opacity: 0.32;
+    transform: translate3d(0, -60px, 0);
+  }
+}
+
+.image-mask-frame {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(#fff, #fff);
+  mask-image: linear-gradient(#fff, #fff);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.header-mobile-menu-backdrop {
+  opacity: 0;
+  transition: opacity 300ms ease-in-out;
+}
+
+.header-mobile-menu-backdrop.is-open {
+  opacity: 1;
+}
+
+@starting-style {
+  .header-mobile-menu-backdrop.is-open {
+    opacity: 0;
+  }
+}
+
+.header-mobile-menu-panel {
+  transform: translate3d(100%, 0, 0);
+  transition: transform 300ms ease-in-out;
+  will-change: transform;
+}
+
+.header-mobile-menu-panel.is-open {
+  transform: translate3d(0, 0, 0);
+}
+
+.home-product-links-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+}
+
+@media (max-width: 1023px) {
+  .home-product-links-scroll {
+    padding-left: var(--container-x);
+    scroll-padding-left: var(--container-x);
+  }
+}
+
+@media (pointer: fine) and (min-width: 1024px) {
+  .home-product-links-scroll {
+    overflow: hidden;
+    scroll-snap-type: none;
+  }
+}
+
+.home-product-links-card {
+  scroll-snap-align: start;
+}
+
+@media (pointer: fine) and (min-width: 1024px) {
+  .home-product-links-card {
+    scroll-snap-align: none;
+  }
+}
+
+.section-title-responsive {
+  font-size: calc(var(--section-title-responsive-max, 62px) * var(--text-scale));
+  line-height: calc(var(--section-title-responsive-max, 62px) * var(--text-scale));
+}
+
+@media (max-width: 430px) {
+  .section-title-responsive {
+    font-size: clamp(
+      36px,
+      calc(36px + (100vw - 375px) / (430px - 375px) * 6px),
+      42px
+    );
+    line-height: clamp(
+      36px,
+      calc(36px + (100vw - 375px) / (430px - 375px) * 6px),
+      42px
+    );
+  }
+}
+
+.section-title-62 {
+  --section-title-responsive-max: 62px;
+}
+
+.home-beginning-title {
+  --section-title-responsive-max: 67px;
+}
+
+/** QUALITY / SUPPORT hero タイトル。1023px以下: 48–102px、1024px+: 108px × text-scale */
+.quality-hero-title {
+  font-size: clamp(
+    48px,
+    calc(48px + (100vw - 375px) / (1023px - 375px) * 54px),
+    102px
+  );
+  line-height: clamp(
+    48px,
+    calc(48px + (100vw - 375px) / (1023px - 375px) * 54px),
+    102px
+  );
+}
+
+@media (min-width: 1024px) {
+  .quality-hero-title {
+    font-size: calc(108px * var(--text-scale));
+    line-height: calc(108px * var(--text-scale));
+  }
+}
+
+/** QUALITY ページのみ: 実 viewport 高さ（--app-vh × 100） */
+html.quality-page,
+html.quality-page body {
+  height: calc(var(--app-vh) * 100);
+}
+
+/** QUALITY スクロールエリア: 1023px 以下は画像上に白テキスト */
+@media (max-width: 1023px) {
+  .quality-scroll-section .quality-slide-panel-text,
+  .quality-scroll-section .quality-slide-panel-text .quality-section-title-header,
+  .quality-scroll-section .quality-slide-panel-text .quality-section-title,
+  .quality-scroll-section .quality-slide-panel-text .quality-item-subtitle,
+  .quality-scroll-section .quality-slide-panel-text .quality-item-body {
+    color: #fff;
+  }
+}
+
+@starting-style {
+  .header-mobile-menu-panel.is-open {
+    transform: translate3d(100%, 0, 0);
+  }
+}
+

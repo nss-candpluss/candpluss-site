@@ -1,0 +1,109 @@
+---
+description: レスポンシブスケール（Text / Layout / Gap / Typography / Header専用）の適用ルール
+alwaysApply: true
+---
+
+# Responsive Scale Rules
+
+## Text Scale (`--text-scale`)
+
+対象: 文字、アイコン、ロゴ、SVG、TextLink矢印、Headerアイコン
+
+```css
+calc(Npx * var(--text-scale))
+```
+
+- 375px → 88%、1440px+ → 100%
+- `--fluid-scale` は互換エイリアス（新規は `--text-scale`）
+- **font-size と line-height の両方に適用**
+
+---
+
+# Typography Rule
+
+## 目的
+
+C AND+Sでは、フォントサイズだけでなく line-height も Typography のルールとして管理する。
+
+**font-size だけ指定すれば、line-height とレスポンシブも自動で決まる**状態を目指す。
+
+`lib/typography.ts` のヘルパーを使用する。
+
+**重要:** Tailwind は動的テンプレートリテラル（`` `text-[calc(${n}px*...)]` ``）内のクラスを検出できない。`typography.ts` では使用サイズを**リテラル文字列**として列挙すること。新サイズ追加時は `UI_TEXT_PX` 等のマップに追記する。
+
+## ① UIテキスト・見出し（font-size = line-height）
+
+対象: Headerナビ、Footer、Button、TextLink、Newsタイトル/日付、商品名、ラベル、CTA、1行想定の見出し、その他UIテキスト
+
+```ts
+uiText(26)      // 26px / 26px
+uiTextRem(2.75) // 2.75rem / 2.75rem
+```
+
+Text Scale により font-size / line-height 両方を同じ比率で縮小する。
+
+余白は line-height ではなく **margin / gap** で管理する。
+
+## ② 本文（20:35 = ×1.75）
+
+対象: 本文、説明文、商品説明、ブランドストーリー、News本文、2行以上になる文章
+
+```ts
+bodyText(20) // 20px / 35px
+bodyText(15) // 15px / 26.25px
+bodyText(14) // 14px / 24.5px
+```
+
+Text Scale により font-size / line-height 両方を同じ比率で縮小する。
+
+## Text Scale との関係
+
+```css
+font-size: calc(16px * var(--text-scale));
+line-height: calc(28px * var(--text-scale));
+```
+
+## 運用ルール
+
+- 「見出し26px」→ `uiText(26)`（26 / 26）
+- 「本文15px」→ `bodyText(15)`（15 / 26.25）
+- ユーザーは font-size のみ指定。line-height はこのルールに従い自動決定
+- 特殊なデザインのみ個別対応
+
+---
+
+## Layout Scale (`--layout-scale`)
+
+対象: セクション左右/上下余白、大枠 padding
+
+```css
+px-[var(--container-x)]  /* = 72px * layout-scale */
+pt-[var(--container-y-top)] pb-[var(--container-y-bottom)]  /* 上 164px / 下 164px * layout-scale */
+mt-[var(--section-title-gap)]  /* = 92px * layout-scale（見出し→コンテンツ） */
+```
+
+- 390px → 16px（左右）、~32px（上下）、~20px（見出し→コンテンツ）
+- 1920px+ → 72px（左右）、164px（上）/ 164px（下）、92px（見出し→コンテンツ）
+
+## Gap Scale (`--gap-scale`)
+
+対象: カラム/カード/Grid/Flex gap、Headerナビgap、Headerアイコン間gap
+
+```css
+gap-[calc(32px*var(--gap-scale))]
+gap-[var(--header-nav-gap)]  /* = 52px * gap-scale */
+```
+
+- Headerナビ: 1024px → ~32px、1920px → 52px
+
+## Header 専用
+
+| 項目 | ルール |
+|------|--------|
+| 高さ | `h-[var(--header-height)]`（390px→70px、1920px+→100px） |
+| SP左右padding | `px-6`（24px固定、1023px以下） |
+| PC左右padding | `min-[1024px]:px-[var(--container-x)]` |
+
+## 個別管理（共通スケール非適用）
+
+ボタン内padding、バッジ位置、テキスト下線間隔（4px）、特殊レイアウト

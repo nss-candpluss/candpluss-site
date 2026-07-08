@@ -1,0 +1,34 @@
+---
+description: 商品詳細 Size & Spec エリアのレイアウト（寸法図あり/なし）
+globs: components/products/ProductSizeSpec.tsx,data/products.ts,types/product.ts
+alwaysApply: false
+---
+
+# Product Size & Spec Layout
+
+`components/products/ProductSizeSpec.tsx` の実装を基準とする。
+
+## 寸法図あり（`sizeSpec.drawingImage` あり）
+
+- セクション見出し「Size & Spec」はコンテナ左端
+- 2カラム: 左 = スペック本文、右 = 寸法図（白背景ボックス内）
+- PC: `min-[1024px]:grid-cols-2`
+- 取扱説明書 PDF 等の `downloads` はセクション下部・左揃え
+
+## 寸法図なし（`drawingImage` 未設定）
+
+**今後このレイアウトを標準とする。**
+
+- タイトル・スペック・downloads を **同一の** `mx-auto w-full max-w-[880px]` コンテナ内にまとめる
+- タイトルは **左端揃え**（`text-center` にしない）。スペック本文の左端と揃える
+- ブロック全体のみページ中央に配置する
+- 2カラムグリッドは使わない
+
+## データ側
+
+- 寸法図不要の商品は `drawingImage` を省略する（`drawing.webp` を付けない）
+- スペックは `specGroups` または `specs` で定義
+
+## 変更時
+
+寸法図の有無で分岐している `hasDrawing` ロジックを崩さないこと。寸法図なし用の中央配置＋タイトル左揃えを、新規商品追加時も維持する。
