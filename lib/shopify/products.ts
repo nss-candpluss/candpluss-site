@@ -453,9 +453,10 @@ function mapSizeSpec(
   };
 }
 
+type SiteCategory = Exclude<(typeof productCategories)[number], { slug: "all" }>;
+
 const SITE_CATEGORIES = productCategories.filter(
-  (category): category is { label: string; slug: Exclude<ProductCategorySlug, "all"> } =>
-    category.slug !== "all"
+  (category): category is SiteCategory => category.slug !== "all"
 );
 
 function categorySlug(productType?: string): ProductCategorySlug {
