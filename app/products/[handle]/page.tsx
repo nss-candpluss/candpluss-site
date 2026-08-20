@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 
-import { ProductDetailView } from "@/components/products/ProductDetailView";
+import { Moya500DesignDetailView } from "@/components/products/moya500-design/Moya500DesignDetailView";
 import {
   getAllProductHandles,
   getProductByHandle,
@@ -60,14 +59,12 @@ export default async function ProductDetailPage({
       data-header-theme="onLight"
       className="pb-[var(--container-y-bottom)] min-[1024px]:pt-0"
     >
-      <Suspense fallback={null}>
-        <ProductDetailView
-          product={product}
-          initialVariantId={initialVariantId}
-          optionProducts={optionProducts}
-          priority
-        />
-      </Suspense>
+      <Moya500DesignDetailView
+        product={product}
+        initialVariantId={initialVariantId}
+        optionProducts={optionProducts}
+        priority
+      />
     </main>
   );
 }

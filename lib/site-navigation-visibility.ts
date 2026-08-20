@@ -4,9 +4,9 @@
  */
 export const siteNavigationVisibility = {
   membership: false,
-  headerSearch: false,
-  headerUser: false,
-  headerCart: false,
+  headerSearch: true,
+  headerUser: true,
+  headerCart: true,
   contact: true,
   snsFacebook: false,
   snsX: false,

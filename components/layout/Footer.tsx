@@ -4,15 +4,14 @@ import { hoverUnderlineHoverClassName } from "@/components/ui/TextLink";
 import { footerContent } from "@/data/footer";
 import { isContactLinkVisible, isSocialLinkVisible } from "@/lib/site-navigation-visibility";
 import { maskGraphicStyle } from "@/lib/maskStyle";
-import { uiText } from "@/lib/typography";
 
 const snsIconMaskStyle = maskGraphicStyle;
 
-const primaryLinkClassName = `${hoverUnderlineHoverClassName} font-body-ja ${uiText(14)} text-[var(--foreground)]`;
+const primaryLinkClassName = `${hoverUnderlineHoverClassName} font-body-ja text-[clamp(13px,calc(14px*var(--text-scale)),14px)] leading-[clamp(13px,calc(14px*var(--text-scale)),14px)] text-[var(--foreground)]`;
 
-const legalLinkClassName = `font-body-ja ${uiText(13)} text-[var(--foreground)] transition-opacity duration-300 hover:opacity-60`;
+const legalLinkClassName = "font-body-ja text-[clamp(12px,calc(13px*var(--text-scale)),13px)] leading-[clamp(12px,calc(13px*var(--text-scale)),13px)] text-[var(--foreground)] transition-opacity duration-300 hover:opacity-60";
 
-const copyrightClassName = `font-ui-en font-bold ${uiText(13)} text-[var(--foreground)]`;
+const copyrightClassName = "font-ui-en text-[13px] leading-[13px] font-bold text-[var(--foreground)]";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Baskervville, Inter } from "next/font/google";
+import { CartProvider } from "@/components/commerce/CartProvider";
+import { CustomerProvider } from "@/components/commerce/CustomerProvider";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { HeroReturnHomeSync } from "@/components/layout/HeroReturnHomeSync";
@@ -46,12 +48,16 @@ export default function RootLayout({
       className={`${baskervville.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <SmoothScrollProvider>
-          <HeroReturnHomeSync />
-          <Header />
-          <div className="flex-1">{children}</div>
-          <Footer />
-        </SmoothScrollProvider>
+        <CustomerProvider>
+          <CartProvider>
+            <SmoothScrollProvider>
+              <HeroReturnHomeSync />
+              <Header />
+              <div className="flex-1">{children}</div>
+              <Footer />
+            </SmoothScrollProvider>
+          </CartProvider>
+        </CustomerProvider>
       </body>
     </html>
   );

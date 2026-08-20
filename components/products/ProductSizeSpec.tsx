@@ -5,9 +5,23 @@ import { bodyText, sectionTitle62ClassName, uiText } from "@/lib/typography";
 
 type ProductSizeSpecProps = {
   sizeSpec: ProductSizeSpec;
+  typography?: {
+    title?: string;
+    itemName?: string;
+    content?: string;
+    note?: string;
+    download?: string;
+  };
 };
 
-function ProductSizeSpecContent({ sizeSpec }: ProductSizeSpecProps) {
+function ProductSizeSpecContent({
+  sizeSpec,
+  typography,
+}: ProductSizeSpecProps) {
+  const itemNameClassName = typography?.itemName ?? uiText(14);
+  const contentClassName = typography?.content ?? bodyText(14);
+  const noteClassName = typography?.note ?? bodyText(14);
+
   if (sizeSpec.specGroups?.length) {
     return (
       <div className="flex flex-col">
@@ -16,11 +30,11 @@ function ProductSizeSpecContent({ sizeSpec }: ProductSizeSpecProps) {
             key={group.label}
             className="flex flex-col gap-[calc(16px*var(--gap-scale-y))] border-b border-divider py-[calc(32px*var(--gap-scale-y))] first:pt-0 last:border-b-0 last:pb-0"
           >
-            <h3 className={`font-body-ja font-semibold text-[var(--foreground)] ${uiText(14)}`}>
+            <h3 className={`font-body-ja font-semibold text-[var(--foreground)] ${itemNameClassName}`}>
               {group.label}
             </h3>
             <p
-              className={`whitespace-pre-line font-body-ja text-[var(--foreground)] ${bodyText(14)}`}
+              className={`whitespace-pre-line font-body-ja text-[var(--foreground)] ${contentClassName}`}
             >
               {group.value}
             </p>
@@ -32,7 +46,7 @@ function ProductSizeSpecContent({ sizeSpec }: ProductSizeSpecProps) {
             {sizeSpec.notes.map((note) => (
               <li
                 key={note}
-                className={`font-body-ja text-[var(--color-muted)] ${bodyText(14)}`}
+                className={`font-body-ja text-[var(--color-muted)] ${noteClassName}`}
               >
                 {note}
               </li>
@@ -54,10 +68,10 @@ function ProductSizeSpecContent({ sizeSpec }: ProductSizeSpecProps) {
           key={spec.label}
           className="grid grid-cols-[minmax(0,120px)_1fr] gap-x-[calc(16px*var(--gap-scale-x))] gap-y-[calc(16px*var(--gap-scale-y))] border-b border-divider pb-[calc(12px*var(--gap-scale-y))]"
         >
-          <dt className={`font-body-ja text-[var(--color-muted)] ${uiText(14)}`}>
+          <dt className={`font-body-ja text-[var(--color-muted)] ${itemNameClassName}`}>
             {spec.label}
           </dt>
-          <dd className={`font-body-ja text-[var(--foreground)] ${bodyText(14)}`}>
+          <dd className={`font-body-ja text-[var(--foreground)] ${contentClassName}`}>
             {spec.value}
           </dd>
         </div>
@@ -66,11 +80,17 @@ function ProductSizeSpecContent({ sizeSpec }: ProductSizeSpecProps) {
   );
 }
 
-export function ProductSizeSpecSection({ sizeSpec }: ProductSizeSpecProps) {
+export function ProductSizeSpecSection({
+  sizeSpec,
+  typography,
+}: ProductSizeSpecProps) {
   const hasDrawing = Boolean(sizeSpec.drawingImage);
   const centeredContentClassName = "mx-auto w-full max-w-[880px]";
 
-  const titleClassName = `font-heading text-[var(--foreground)] ${sectionTitle62ClassName}`;
+  const titleClassName = `font-heading text-[var(--foreground)] ${
+    typography?.title ?? sectionTitle62ClassName
+  }`;
+  const downloadClassName = typography?.download ?? uiText(14);
 
   const downloadsList =
     sizeSpec.downloads?.length ? (
@@ -79,7 +99,7 @@ export function ProductSizeSpecSection({ sizeSpec }: ProductSizeSpecProps) {
           <li key={download.href}>
             <a
               href={download.href}
-              className={`font-body-ja text-[var(--foreground)] underline decoration-1 underline-offset-[calc(4px*var(--text-scale))] ${uiText(14)}`}
+              className={`font-body-ja text-[var(--foreground)] underline decoration-1 underline-offset-[calc(4px*var(--text-scale))] ${downloadClassName}`}
             >
               {download.label}
             </a>
@@ -98,7 +118,7 @@ export function ProductSizeSpecSection({ sizeSpec }: ProductSizeSpecProps) {
           <h2 className={titleClassName}>Size &amp; Spec</h2>
 
           <div className="mt-[calc(98px*var(--gap-scale-y))] grid grid-cols-1 items-start gap-x-[calc(72px*var(--gap-scale-x))] gap-y-[calc(72px*var(--gap-scale-y))] min-[1024px]:grid-cols-2">
-            <ProductSizeSpecContent sizeSpec={sizeSpec} />
+            <ProductSizeSpecContent sizeSpec={sizeSpec} typography={typography} />
 
             <div className="w-full self-start bg-white px-[calc(144px*var(--gap-scale-x))] py-[calc(92px*var(--gap-scale-y))]">
               <SiteImage
@@ -121,7 +141,7 @@ export function ProductSizeSpecSection({ sizeSpec }: ProductSizeSpecProps) {
           <h2 className={titleClassName}>Size &amp; Spec</h2>
 
           <div className="mt-[calc(98px*var(--gap-scale-y))]">
-            <ProductSizeSpecContent sizeSpec={sizeSpec} />
+            <ProductSizeSpecContent sizeSpec={sizeSpec} typography={typography} />
           </div>
 
           {downloadsList}

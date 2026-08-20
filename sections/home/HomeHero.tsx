@@ -200,13 +200,7 @@ export function HomeHero() {
               {topHeroContent.beginning.bodyLines.map((line, index, lines) => (
                 <span key={`${line}-${index}`}>
                   {line}
-                  {index < lines.length - 1 ? (
-                    index === 2 ? (
-                      <br className="max-[1249px]:hidden" />
-                    ) : (
-                      <br />
-                    )
-                  ) : null}
+                  {index < lines.length - 1 ? <br /> : null}
                 </span>
               ))}
             </p>

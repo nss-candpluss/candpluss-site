@@ -7,7 +7,10 @@ import { useState } from "react";
 import { ProductColorChips } from "@/components/products/ProductColorChips";
 import { ProductStatusLabel, hasProductStatusLabel } from "@/components/products/ProductStatusLabel";
 import { getProductListingImage } from "@/lib/products/gallery";
-import { getProductDetailHref, resolveProductVariantId } from "@/lib/products";
+import {
+  getProductDetailHref,
+  resolveProductVariantId,
+} from "@/lib/products/helpers";
 import type { Product } from "@/types/product";
 import { uiText } from "@/lib/typography";
 
@@ -15,12 +18,28 @@ type ProductCardProps = {
   product: Product;
   sizes?: string;
   priority?: boolean;
+  presentation?: "default" | "productsListing";
 };
+
+const listingText14ClassName =
+  "text-[clamp(13px,calc(14px*var(--text-scale)),14px)] leading-[clamp(13px,calc(14px*var(--text-scale)),14px)]";
+const listingTitleClassName =
+  "text-[clamp(15px,calc(16px*var(--text-scale)),16px)] leading-[clamp(15px,calc(16px*var(--text-scale)),16px)]";
+const listingStatusClassName =
+  "!text-[clamp(13px,calc(14px*var(--text-scale)),14px)] !leading-[clamp(13px,calc(14px*var(--text-scale)),14px)]";
+const listingTaxClassName = "text-[11px] leading-[11px]";
+const listingImageToColorsClassName =
+  "mt-[clamp(10px,calc(18px*var(--gap-scale-y)),18px)]";
+const listingColorsToTextClassName =
+  "mt-[clamp(14px,calc(24px*var(--gap-scale-y)),24px)]";
+const listingTextGapClassName =
+  "mt-[clamp(6px,calc(14px*var(--gap-scale-y)),14px)]";
 
 export function ProductCard({
   product,
   sizes = "(min-width: 1024px) 33vw, 100vw",
   priority = false,
+  presentation = "default",
 }: ProductCardProps) {
   const defaultVariantId = resolveProductVariantId(product);
   const [selectedVariantId, setSelectedVariantId] = useState(defaultVariantId);
@@ -30,6 +49,7 @@ export function ProductCard({
   const hasMultipleVariants = product.variants.length > 1;
   const showStatusLabel = hasProductStatusLabel(product.status, product.statusLabel);
   const priceAmount = product.priceLabel.replace(/^¥/, "");
+  const usesProductsListingStyles = presentation === "productsListing";
 
   return (
     <article>
@@ -48,20 +68,41 @@ export function ProductCard({
         </div>
       </Link>
 
-      <div className="mt-[calc(18px*var(--gap-scale-y))] px-[calc(8px*var(--gap-scale-x))]">
+      <div
+        className={`px-[calc(8px*var(--gap-scale-x))] ${
+          usesProductsListingStyles && product.variants.length > 0
+            ? listingImageToColorsClassName
+            : "mt-[calc(18px*var(--gap-scale-y))]"
+        }`}
+      >
         {product.variants.length > 0 ? (
           <ProductColorChips
             variants={product.variants}
             selectedVariantId={selectedVariantId}
             onSelect={hasMultipleVariants ? setSelectedVariantId : undefined}
-            className="pl-[calc(5px*var(--gap-scale-x))]"
+            className={
+              usesProductsListingStyles
+                ? ""
+                : "pl-[calc(5px*var(--gap-scale-x))]"
+            }
+            selectionIndicator={
+              usesProductsListingStyles ? "underline" : "outline"
+            }
+            underlineOffset={
+              usesProductsListingStyles ? "compact" : "default"
+            }
+            dimUnselected={!usesProductsListingStyles}
           />
         ) : null}
 
         <Link
           href={detailHref}
           className={`flex flex-col ${
-            product.variants.length > 0 ? "mt-[calc(24px*var(--gap-scale-y))]" : ""
+            product.variants.length > 0
+              ? usesProductsListingStyles
+                ? listingColorsToTextClassName
+                : "mt-[calc(24px*var(--gap-scale-y))]"
+              : ""
           }`}
         >
           {showStatusLabel ? (
@@ -70,31 +111,68 @@ export function ProductCard({
               label={product.statusLabel}
               color={product.statusColor}
               size={14}
+              className={
+                usesProductsListingStyles ? listingStatusClassName : ""
+              }
             />
           ) : null}
 
           <h2
-            className={`font-body-ja font-semibold text-[var(--foreground)] ${uiText(16)} ${
-              showStatusLabel ? "mt-[calc(14px*var(--gap-scale-y))]" : ""
+            className={`font-body-ja font-semibold text-[var(--foreground)] ${
+              usesProductsListingStyles
+                ? listingTitleClassName
+                : uiText(16)
+            } ${
+              showStatusLabel
+                ? usesProductsListingStyles
+                  ? listingTextGapClassName
+                  : "mt-[calc(14px*var(--gap-scale-y))]"
+                : ""
             }`}
           >
             {product.title}
           </h2>
 
           <p
-            className={`mt-[calc(14px*var(--gap-scale-y))] font-body-ja text-[var(--color-muted)] ${uiText(14)}`}
+            className={`font-body-ja text-[var(--color-muted)] ${
+              usesProductsListingStyles
+                ? listingText14ClassName
+                : uiText(14)
+            } ${
+              usesProductsListingStyles
+                ? listingTextGapClassName
+                : "mt-[calc(14px*var(--gap-scale-y))]"
+            }`}
           >
             {product.category}
           </p>
 
-          <p className="mt-[calc(14px*var(--gap-scale-y))] inline-flex items-baseline gap-x-[calc(4px*var(--gap-scale-x))] gap-y-[calc(4px*var(--gap-scale-y))] text-[var(--foreground)]">
+          <p
+            className={`inline-flex items-baseline gap-x-[calc(4px*var(--gap-scale-x))] gap-y-[calc(4px*var(--gap-scale-y))] text-[var(--foreground)] ${
+              usesProductsListingStyles
+                ? listingTextGapClassName
+                : "mt-[calc(14px*var(--gap-scale-y))]"
+            }`}
+          >
             <span
-              className={`inline-flex items-baseline gap-x-[calc(2px*var(--gap-scale-x))] gap-y-[calc(2px*var(--gap-scale-y))] font-ui-en font-semibold ${uiText(14)}`}
+              className={`inline-flex items-baseline gap-x-[calc(2px*var(--gap-scale-x))] gap-y-[calc(2px*var(--gap-scale-y))] font-ui-en font-semibold ${
+                usesProductsListingStyles
+                  ? listingText14ClassName
+                  : uiText(14)
+              }`}
             >
               <span>¥</span>
               <span>{priceAmount}</span>
             </span>
-            <span className={`font-body-ja ${uiText(11)}`}>税込</span>
+            <span
+              className={`font-body-ja ${
+                usesProductsListingStyles
+                  ? listingTaxClassName
+                  : uiText(11)
+              }`}
+            >
+              税込
+            </span>
           </p>
         </Link>
       </div>

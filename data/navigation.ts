@@ -36,7 +36,6 @@ export const headerIconLinks = [
     label: "Cart",
     href: "/cart",
     iconSrc: "/assets/icons/icon-cart.svg",
-    badgeCount: 1,
   },
 ] as const;
 

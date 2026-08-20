@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { ProductCard } from "@/components/products/ProductCard";
 import { productCategories } from "@/data/products";
@@ -14,6 +14,36 @@ type ProductsListingProps = {
 
 export function ProductsListing({ products }: ProductsListingProps) {
   const [activeCategory, setActiveCategory] = useState<ProductCategorySlug>("all");
+
+  useEffect(() => {
+    const syncCategoryFromHash = () => {
+      const categorySlug = window.location.hash.slice(1);
+      const categoryExists = productCategories.some(
+        (category) => category.slug === categorySlug
+      );
+
+      if (categoryExists) {
+        setActiveCategory(categorySlug as ProductCategorySlug);
+      }
+    };
+    const timeoutId = window.setTimeout(syncCategoryFromHash, 0);
+
+    window.addEventListener("hashchange", syncCategoryFromHash);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener("hashchange", syncCategoryFromHash);
+    };
+  }, []);
+
+  const handleCategorySelect = (categorySlug: ProductCategorySlug) => {
+    setActiveCategory(categorySlug);
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${window.location.search}#${categorySlug}`
+    );
+  };
 
   const filteredProducts = useMemo(() => {
     if (activeCategory === "all") {
@@ -36,10 +66,11 @@ export function ProductsListing({ products }: ProductsListingProps) {
             return (
               <li key={category.slug}>
                 <button
+                  id={category.slug}
                   type="button"
-                  onClick={() => setActiveCategory(category.slug)}
+                  onClick={() => handleCategorySelect(category.slug)}
                   aria-current={isActive ? "true" : undefined}
-                  className={`shrink-0 transition-colors duration-300 ${
+                  className={`scroll-mt-[var(--header-height)] shrink-0 transition-colors duration-300 ${
                     isActive
                       ? "text-[var(--foreground)]"
                       : "text-[var(--color-muted)] hover:text-[var(--foreground)]"
@@ -60,7 +91,12 @@ export function ProductsListing({ products }: ProductsListingProps) {
 
       <div className="mt-[calc(52px*var(--gap-scale-y))] grid grid-cols-1 gap-x-[calc(16px*var(--gap-scale-x))] gap-y-[calc(62px*var(--gap-scale-y))] min-[640px]:grid-cols-2 min-[1024px]:grid-cols-3">
         {filteredProducts.map((product, index) => (
-          <ProductCard key={product.id} product={product} priority={index < 3} />
+          <ProductCard
+            key={product.id}
+            product={product}
+            priority={index < 3}
+            presentation="productsListing"
+          />
         ))}
       </div>
     </>

@@ -6,10 +6,18 @@ const basePath = process.env.BASE_PATH?.replace(/\/$/, "") ?? "";
 
 const nextConfig: NextConfig = {
   ...(basePath ? { basePath, assetPrefix: basePath } : {}),
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.shopify.com",
+      },
+    ],
+    ...(isStaticExport ? { unoptimized: true } : {}),
+  },
   ...(isStaticExport
     ? {
         output: "export",
-        images: { unoptimized: true },
         trailingSlash: true,
       }
     : {}),

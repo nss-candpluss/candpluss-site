@@ -22,7 +22,10 @@ import {
   usesCarouselGallery,
 } from "@/lib/products/gallery";
 import { getVisibleProductDetailTabs } from "@/lib/products/detail-tabs";
-import { getSelectedVariant, resolveProductVariantId } from "@/lib/products";
+import {
+  getSelectedVariant,
+  resolveProductVariantId,
+} from "@/lib/products/helpers";
 import type { OpenCloseGroupId, Product, ProductVariant } from "@/types/product";
 
 type ProductDetailViewProps = {

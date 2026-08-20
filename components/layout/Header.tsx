@@ -9,6 +9,8 @@ import {
   headerIconLinks,
   headerMenuButton,
 } from "@/data/navigation";
+import { useCart } from "@/components/commerce/CartProvider";
+import { useCustomer } from "@/components/commerce/CustomerProvider";
 import {
   isHeaderIconLinkVisible,
   isMembershipLinkVisible,
@@ -86,6 +88,8 @@ function resolveHeaderTheme(header: HTMLElement | null, pathname: string): Heade
 
 export function Header() {
   const pathname = usePathname();
+  const { cart } = useCart();
+  const { customer } = useCustomer();
   const headerRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(true);
   const [isAtPageTop, setIsAtPageTop] = useState(true);
@@ -289,18 +293,22 @@ export function Header() {
           {headerIconLinks.filter((link) => isHeaderIconLinkVisible(link.label)).map((link) => (
             <Link
               key={link.href}
-              href={link.href}
+              href={
+                link.label === "User" && customer
+                  ? "/account"
+                  : link.href
+              }
               aria-label={link.label}
               className={`relative items-center justify-center ${
                 link.label === "Search" ? "hidden min-[1024px]:inline-flex" : "inline-flex"
               }`}
             >
               <HeaderMaskGraphic src={link.iconSrc} className={headerIconClassName} />
-              {"badgeCount" in link ? (
+              {link.label === "Cart" && cart?.totalQuantity ? (
                 <span
                   className={`font-ui-en absolute top-[calc(-8px*var(--text-scale))] right-[calc(-8px*var(--text-scale))] flex size-[calc(16px*var(--text-scale))] items-center justify-center rounded-full ${uiText(10)} ${badgeClassName}`}
                 >
-                  {link.badgeCount}
+                  {Math.min(cart.totalQuantity, 99)}
                 </span>
               ) : null}
             </Link>

@@ -4,9 +4,15 @@ import { sectionTitle62ClassName } from "@/lib/typography";
 
 type ProductOptionsProps = {
   products: Product[];
+  titleTypographyClassName?: string;
+  cardPresentation?: "default" | "productsListing";
 };
 
-export function ProductOptions({ products }: ProductOptionsProps) {
+export function ProductOptions({
+  products,
+  titleTypographyClassName = sectionTitle62ClassName,
+  cardPresentation = "default",
+}: ProductOptionsProps) {
   if (!products.length) {
     return null;
   }
@@ -16,11 +22,17 @@ export function ProductOptions({ products }: ProductOptionsProps) {
       id="options"
       className="scroll-mt-[var(--header-height)] px-[var(--container-x)] pt-[var(--container-y-top)] pb-[var(--container-y-bottom)]"
     >
-      <h2 className={`font-heading text-[var(--foreground)] ${sectionTitle62ClassName}`}>Options</h2>
+      <h2 className={`font-heading text-[var(--foreground)] ${titleTypographyClassName}`}>
+        Options
+      </h2>
 
       <div className="mt-[calc(98px*var(--gap-scale-y))] grid grid-cols-1 gap-x-[calc(16px*var(--gap-scale-x))] gap-y-[calc(46px*var(--gap-scale-y))] min-[640px]:grid-cols-2 min-[1024px]:grid-cols-3">
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard
+            key={product.id}
+            product={product}
+            presentation={cardPresentation}
+          />
         ))}
       </div>
     </section>

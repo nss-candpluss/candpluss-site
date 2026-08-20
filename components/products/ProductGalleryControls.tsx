@@ -1,12 +1,25 @@
-import { maskGraphicStyle } from "@/lib/maskStyle";
-
-const iconMaskStyle = maskGraphicStyle;
-
 type ProductGalleryControlsProps = {
   onPrevious: () => void;
   onNext: () => void;
   hasImages: boolean;
 };
+
+export function ProductGalleryChevron({
+  direction,
+}: {
+  direction: "left" | "right";
+}) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`block size-[8px] border-t-[1.5px] border-l-[1.5px] border-current ${
+        direction === "left"
+          ? "-rotate-45 translate-x-[2px]"
+          : "rotate-135 -translate-x-[2px]"
+      }`}
+    />
+  );
+}
 
 export function ProductGalleryControls({
   onPrevious,
@@ -23,25 +36,17 @@ export function ProductGalleryControls({
         type="button"
         aria-label="Previous image"
         onClick={onPrevious}
-        className="absolute top-1/2 left-[calc(32px*var(--gap-scale-x))] z-10 flex size-[38px] -translate-y-1/2 items-center justify-center bg-white/80 text-[var(--foreground)] min-[768px]:size-[48px]"
+        className="absolute top-1/2 left-[calc(32px*var(--gap-scale-x))] z-10 flex size-[48px] -translate-y-1/2 items-center justify-center rounded-full border border-[#ccc] bg-white/80 text-[var(--foreground)]"
       >
-        <span
-          aria-hidden="true"
-          className="block size-[19px] bg-current min-[768px]:size-[24px]"
-          style={iconMaskStyle("/assets/icons/icon-gallery-prev.svg")}
-        />
+        <ProductGalleryChevron direction="left" />
       </button>
       <button
         type="button"
         aria-label="Next image"
         onClick={onNext}
-        className="absolute top-1/2 right-[calc(32px*var(--gap-scale-x))] z-10 flex size-[38px] -translate-y-1/2 items-center justify-center bg-white/80 text-[var(--foreground)] min-[768px]:size-[48px]"
+        className="absolute top-1/2 right-[calc(32px*var(--gap-scale-x))] z-10 flex size-[48px] -translate-y-1/2 items-center justify-center rounded-full border border-[#ccc] bg-white/80 text-[var(--foreground)]"
       >
-        <span
-          aria-hidden="true"
-          className="block size-[19px] bg-current min-[768px]:size-[24px]"
-          style={iconMaskStyle("/assets/icons/icon-gallery-next.svg")}
-        />
+        <ProductGalleryChevron direction="right" />
       </button>
     </>
   );

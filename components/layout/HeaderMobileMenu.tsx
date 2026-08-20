@@ -13,13 +13,14 @@ import {
   isSocialLinkVisible,
 } from "@/lib/site-navigation-visibility";
 import { maskGraphicStyle } from "@/lib/maskStyle";
-import { uiText } from "@/lib/typography";
 
 const headerIconClassName = "size-[24px]";
 
-const primaryLinkClassName = `font-ui-en font-bold text-[var(--foreground)] ${uiText(18)}`;
+const primaryLinkClassName =
+  "font-ui-en text-[clamp(16px,calc(18px*var(--text-scale)),18px)] leading-[clamp(16px,calc(18px*var(--text-scale)),18px)] font-bold text-[var(--foreground)] min-[1024px]:font-semibold";
 
-const secondaryLinkClassName = `font-body-ja text-[var(--foreground)] ${uiText(14)}`;
+const secondaryLinkClassName =
+  "font-body-ja text-[clamp(13px,calc(14px*var(--text-scale)),14px)] leading-[clamp(13px,calc(14px*var(--text-scale)),14px)] text-[var(--foreground)]";
 
 type HeaderMobileMenuProps = {
   id: string;
