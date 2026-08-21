@@ -642,7 +642,7 @@ export function Moya500DesignFeatureSection({
         <div className="mt-[calc(98px*var(--gap-scale-y))] flex flex-col gap-[clamp(72px,calc(120px*var(--layout-scale-y)),120px)]">
           {groupedFeatures.map((group) => (
             <section key={group.title}>
-              <h3 className="font-ui-en text-[clamp(23px,calc(32px*var(--text-scale)),32px)] leading-[clamp(23px,calc(32px*var(--text-scale)),32px)] font-semibold text-[var(--foreground)]">
+              <h3 className="font-ui-en text-[clamp(23px,calc(32px*var(--text-scale)),32px)] leading-[clamp(23px,calc(32px*var(--text-scale)),32px)] font-medium text-[var(--foreground)]">
                 {group.title}
               </h3>
 
