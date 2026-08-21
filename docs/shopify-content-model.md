@@ -65,7 +65,9 @@ will not match the Shopify option.
 
 - `admin_name`: single line text (admin display name)
 - `product`: product reference
-- `group`: single line text (`Fabric`, `Flame`, `Structure`, or `Parts`)
+- `group`: single line text shown as the Feature mid-title. Any value is
+  allowed. `Fabric`, `Flame`, `Structure`, and `Parts` are normalized
+  case-insensitively. Empty values hide the mid-title.
 - `title`: single line text
 - `body`: multi-line text
 - `media`: list of file references

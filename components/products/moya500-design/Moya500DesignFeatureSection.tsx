@@ -23,7 +23,6 @@ import { splitFeatureNotes } from "@/lib/products/feature-notes";
 import type { ProductFeature } from "@/types/product";
 
 export type Moya500DesignFeature = ProductFeature & {
-  group?: "Fabric" | "Flame" | "Structure" | "Parts";
   images?: string[];
   mediaSlots?: (string | null)[];
   video?: {
@@ -569,15 +568,11 @@ export function Moya500DesignFeatureSection({
   const hasFeatureGroups = features.some((feature) => feature.group);
   const groupedFeatures = features.reduce<
     Array<{
-      title: NonNullable<Moya500DesignFeature["group"]>;
+      title: string;
       features: Moya500DesignFeature[];
     }>
   >((groups, feature) => {
-    if (!feature.group) {
-      return groups;
-    }
-
-    const groupTitle = feature.group;
+    const groupTitle = feature.group?.trim() ?? "";
     const currentGroup = groups.find((group) => group.title === groupTitle);
 
     if (currentGroup) {
@@ -641,12 +636,20 @@ export function Moya500DesignFeatureSection({
       {hasFeatureGroups ? (
         <div className="mt-[calc(98px*var(--gap-scale-y))] flex flex-col gap-[clamp(72px,calc(120px*var(--layout-scale-y)),120px)]">
           {groupedFeatures.map((group) => (
-            <section key={group.title}>
-              <h3 className="font-ui-en text-[clamp(23px,calc(32px*var(--text-scale)),32px)] leading-[clamp(23px,calc(32px*var(--text-scale)),32px)] font-medium text-[var(--foreground)]">
-                {group.title}
-              </h3>
+            <section key={group.title || "ungrouped"}>
+              {group.title ? (
+                <h3
+                  className={`${
+                    /[\u3040-\u30ff\u3400-\u9fff]/.test(group.title)
+                      ? "font-body-ja"
+                      : "font-ui-en"
+                  } text-[clamp(23px,calc(32px*var(--text-scale)),32px)] leading-[clamp(23px,calc(32px*var(--text-scale)),32px)] font-medium text-[var(--foreground)]`}
+                >
+                  {group.title}
+                </h3>
+              ) : null}
 
-              <div className="mt-[clamp(32px,calc(48px*var(--gap-scale-y)),48px)] grid grid-cols-1 gap-x-[calc(52px*var(--gap-scale-x))] gap-y-[clamp(32px,calc(62px*var(--gap-scale-y)),62px)] md:grid-cols-2 min-[1024px]:grid-cols-3">
+              <div className={`${group.title ? "mt-[clamp(32px,calc(48px*var(--gap-scale-y)),48px)]" : ""} grid grid-cols-1 gap-x-[calc(52px*var(--gap-scale-x))] gap-y-[clamp(32px,calc(62px*var(--gap-scale-y)),62px)] md:grid-cols-2 min-[1024px]:grid-cols-3`}>
                 {group.features.map((feature) => (
                   <Moya500DesignFeatureCard
                     key={feature.id}

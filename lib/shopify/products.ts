@@ -339,12 +339,16 @@ function mapVariant(
 const FEATURE_GROUPS = ["Fabric", "Flame", "Structure", "Parts"] as const;
 
 function mapFeatureGroup(value?: string | null) {
-  if (!value) {
+  const trimmed = value?.trim();
+
+  if (!trimmed) {
     return undefined;
   }
 
-  return FEATURE_GROUPS.find(
-    (group) => group.toLowerCase() === value.trim().toLowerCase()
+  return (
+    FEATURE_GROUPS.find(
+      (group) => group.toLowerCase() === trimmed.toLowerCase()
+    ) ?? trimmed
   );
 }
 

@@ -82,7 +82,7 @@ export type ProductVariant = {
 
 export type ProductFeature = {
   id: string;
-  group?: "Fabric" | "Flame" | "Structure" | "Parts";
+  group?: string;
   title: string;
   body: string;
   image?: string;

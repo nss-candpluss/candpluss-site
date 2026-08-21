@@ -120,13 +120,6 @@ for (const product of products) {
         (node.fields ?? []).map((field) => [field.key, field.value])
       );
       const issues = [];
-      const group = fields.group?.trim();
-      if (
-        group &&
-        !["Fabric", "Flame", "Structure", "Parts"].includes(group)
-      ) {
-        issues.push(`group "${group}"`);
-      }
       const linkKeys = [
         ["link_label", "link_url", "link 1"],
         ["link_label_1", "link_url_1", "link_1"],

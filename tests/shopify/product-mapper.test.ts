@@ -110,6 +110,23 @@ describe("mapShopifyProductToProduct", () => {
                 },
               ],
             },
+            {
+              id: "gid://shopify/Metaobject/3",
+              type: "product_feature",
+              fields: [
+                {
+                  key: "group",
+                  type: "single_line_text_field",
+                  value: "TEST01",
+                },
+                {
+                  key: "title",
+                  type: "single_line_text_field",
+                  value: "Custom group",
+                },
+                { key: "body", type: "multi_line_text_field", value: "Body" },
+              ],
+            },
           ],
         },
       },
@@ -178,6 +195,10 @@ describe("mapShopifyProductToProduct", () => {
         { label: "自在金具", href: "/products/aluminum-jammer-set" },
         { label: "準備中の関連商品", href: undefined },
       ],
+    });
+    expect(product.features?.[2]).toMatchObject({
+      group: "TEST01",
+      title: "Custom group",
     });
     expect(mapStorefrontHref("/products/zig-stake20")).toBe(
       "/products/zig-stake20"
