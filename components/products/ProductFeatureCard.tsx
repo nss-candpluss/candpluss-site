@@ -1,7 +1,9 @@
 import { ProductFeatureLinks } from "@/components/products/ProductFeatureLinks";
+import { ProductNotes } from "@/components/products/ProductNotes";
 import { SiteImage } from "@/components/ui/SiteImage";
 
 import type { ProductFeature } from "@/types/product";
+import { splitFeatureNotes } from "@/lib/products/feature-notes";
 import { uiText } from "@/lib/typography";
 
 type ProductFeatureCardProps = {
@@ -15,6 +17,8 @@ export function ProductFeatureCard({
   sizes = "(min-width: 768px) 33vw, 100vw",
   priority = false,
 }: ProductFeatureCardProps) {
+  const { body, notes } = splitFeatureNotes(feature.body);
+
   return (
     <article className="block">
       {feature.image ? (
@@ -37,11 +41,15 @@ export function ProductFeatureCard({
           {feature.title}
         </h3>
 
-        <p
-          className="mt-[calc(15px*var(--gap-scale-y))] font-body-ja text-[calc(15px*var(--text-scale))] leading-[calc(23px*var(--text-scale))] text-[var(--foreground)]"
-        >
-          {feature.body}
-        </p>
+        {body ? (
+          <p
+            className="mt-[calc(15px*var(--gap-scale-y))] whitespace-pre-line font-body-ja text-[calc(15px*var(--text-scale))] leading-[calc(23px*var(--text-scale))] text-[var(--foreground)]"
+          >
+            {body}
+          </p>
+        ) : null}
+
+        <ProductNotes notes={notes} />
 
         {feature.links?.length ? <ProductFeatureLinks links={feature.links} /> : null}
       </div>

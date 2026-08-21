@@ -279,7 +279,7 @@ Feature は「商品の特徴カード」です。1カード = メタオブジ�
 | Product | 対象商品 |
 | Group | `Fabric` / `Flame` / `Structure` / `Parts` のいずれか |
 | Title | カードの見出し |
-| Body | 本文。改行可 |
+| Body | 本文。改行可。`※` で始まる行は本文下の注釈になる（Size & Spec と同じ見た目） |
 | Media | 画像・動画。複数可。空ならグレー表示 |
 | Link label / Link URL | 1本目のリンク（任意） |
 | Link label 2 / Link URL 2 | 2本目（任意） |

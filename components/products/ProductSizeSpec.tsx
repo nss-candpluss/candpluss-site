@@ -1,4 +1,5 @@
 import { SiteImage } from "@/components/ui/SiteImage";
+import { ProductNotes } from "@/components/products/ProductNotes";
 
 import type { ProductSizeSpec } from "@/types/product";
 import { bodyText, sectionTitle62ClassName, uiText } from "@/lib/typography";
@@ -42,16 +43,7 @@ function ProductSizeSpecContent({
         ))}
 
         {sizeSpec.notes?.length ? (
-          <ul className="mt-[calc(24px*var(--gap-scale-y))] flex flex-col gap-[calc(12px*var(--gap-scale-y))]">
-            {sizeSpec.notes.map((note) => (
-              <li
-                key={note}
-                className={`font-body-ja text-[var(--color-muted)] ${noteClassName}`}
-              >
-                {note}
-              </li>
-            ))}
-          </ul>
+          <ProductNotes notes={sizeSpec.notes} className={noteClassName} />
         ) : null}
       </div>
     );

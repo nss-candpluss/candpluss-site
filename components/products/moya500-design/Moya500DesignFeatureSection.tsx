@@ -16,8 +16,10 @@ import {
 } from "@/components/products/moya500-design/slide-timing";
 import { ProductFeatureLinks } from "@/components/products/ProductFeatureLinks";
 import { ProductGalleryChevron } from "@/components/products/ProductGalleryControls";
+import { ProductNotes } from "@/components/products/ProductNotes";
 import { SiteImage } from "@/components/ui/SiteImage";
 import { assetPath } from "@/lib/assetPath";
+import { splitFeatureNotes } from "@/lib/products/feature-notes";
 import type { ProductFeature } from "@/types/product";
 
 export type Moya500DesignFeature = ProductFeature & {
@@ -493,6 +495,8 @@ function Moya500DesignFeatureCard({
   feature: Moya500DesignFeature;
   priority: boolean;
 }) {
+  const { body, notes } = splitFeatureNotes(feature.body);
+
   return (
     <article className="block">
       {feature.video ? (
@@ -534,9 +538,13 @@ function Moya500DesignFeatureCard({
           {feature.title}
         </h4>
 
-        <p className="mt-[clamp(12px,calc(15px*var(--gap-scale-y)),15px)] whitespace-pre-line font-body-ja text-[clamp(14px,calc(15px*var(--text-scale)),15px)] leading-[clamp(21.47px,calc(23px*var(--text-scale)),23px)] text-[var(--foreground)]">
-          {feature.body}
-        </p>
+        {body ? (
+          <p className="mt-[clamp(12px,calc(15px*var(--gap-scale-y)),15px)] whitespace-pre-line font-body-ja text-[clamp(14px,calc(15px*var(--text-scale)),15px)] leading-[clamp(21.47px,calc(23px*var(--text-scale)),23px)] text-[var(--foreground)]">
+            {body}
+          </p>
+        ) : null}
+
+        <ProductNotes notes={notes} />
 
         {feature.links?.length ? <ProductFeatureLinks links={feature.links} /> : null}
       </div>
