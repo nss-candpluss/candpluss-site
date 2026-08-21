@@ -18,7 +18,7 @@ const statusLabels: Partial<Record<ProductStatus, string>> = {
 const STATUS_LABEL_SEPARATOR = "　";
 const NEW_STATUS_TEXT = "NEW";
 const newBadgeClassName =
-  "inline-flex items-center justify-center rounded-[4px] border border-[var(--color-new)] px-[calc(6px*var(--text-scale))] py-[calc(2px*var(--text-scale))] font-ui-en text-[var(--color-new)]";
+  "inline-flex items-center justify-center rounded-[4px] border border-[var(--color-new)] px-[calc(6px*var(--text-scale))] py-[calc(3px*var(--text-scale))] font-ui-en leading-none text-[var(--color-new)]";
 
 type ProductStatusLabelProps = {
   status: ProductStatus;
