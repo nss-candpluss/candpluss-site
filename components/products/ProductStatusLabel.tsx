@@ -15,6 +15,9 @@ const statusLabels: Partial<Record<ProductStatus, string>> = {
   discontinued: "販売終了",
 };
 
+const STATUS_LABEL_SEPARATOR = "　";
+const NEW_STATUS_TEXT = "NEW";
+
 type ProductStatusLabelProps = {
   status: ProductStatus;
   label?: string;
@@ -28,6 +31,34 @@ export function hasProductStatusLabel(
   label?: string
 ): boolean {
   return Boolean(label ?? statusLabels[status]);
+}
+
+function StatusLabelContent({
+  label,
+  color,
+}: {
+  label: string;
+  color?: string;
+}) {
+  const parts = label.split(STATUS_LABEL_SEPARATOR);
+
+  if (!parts.includes(NEW_STATUS_TEXT)) {
+    return label;
+  }
+
+  return parts.map((part, index) => (
+    <span key={`${part}-${index}`}>
+      {index > 0 ? STATUS_LABEL_SEPARATOR : null}
+      <span
+        className={part === NEW_STATUS_TEXT ? "text-[var(--color-new)]" : undefined}
+        style={
+          part === NEW_STATUS_TEXT || !color ? undefined : { color }
+        }
+      >
+        {part}
+      </span>
+    </span>
+  ));
 }
 
 export function ProductStatusLabel({
@@ -44,15 +75,18 @@ export function ProductStatusLabel({
   }
 
   const isCustomLabel = Boolean(label);
+  const hasNewLabel = displayLabel
+    .split(STATUS_LABEL_SEPARATOR)
+    .includes(NEW_STATUS_TEXT);
 
   return (
     <p
       className={`${
         isCustomLabel ? "font-body-ja" : "font-ui-en"
-      } ${color ? "" : "text-[var(--color-muted)]"} ${uiText(size)} ${className}`.trim()}
-      style={color ? { color } : undefined}
+      } ${color && !hasNewLabel ? "" : "text-[var(--color-muted)]"} ${uiText(size)} ${className}`.trim()}
+      style={color && !hasNewLabel ? { color } : undefined}
     >
-      {displayLabel}
+      <StatusLabelContent label={displayLabel} color={color} />
     </p>
   );
 }
