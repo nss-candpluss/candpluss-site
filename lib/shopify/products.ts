@@ -363,6 +363,41 @@ export function mapStorefrontHref(url: string) {
   }
 }
 
+const FEATURE_LINK_MAX = 5;
+
+function mapPairedFeatureLink(
+  fields: Map<string, ShopifyMetaobjectField>,
+  labelKey: string,
+  urlKey: string
+) {
+  const label = fields.get(labelKey)?.value?.trim();
+  const href = fields.get(urlKey)?.value?.trim();
+
+  if (!label || !href) {
+    return null;
+  }
+
+  return {
+    label,
+    href: mapStorefrontHref(href),
+  };
+}
+
+function mapFeatureLinks(fields: Map<string, ShopifyMetaobjectField>) {
+  const links = [
+    mapPairedFeatureLink(fields, "link_label", "link_url"),
+    ...Array.from({ length: FEATURE_LINK_MAX }, (_, index) =>
+      mapPairedFeatureLink(
+        fields,
+        `link_label_${index + 1}`,
+        `link_url_${index + 1}`
+      )
+    ),
+  ].filter((link): link is NonNullable<typeof link> => Boolean(link));
+
+  return links.length ? links : undefined;
+}
+
 function mapFeature(metaobject: ShopifyMetaobject, index: number): ProductFeature {
   const fields = fieldMap(metaobject);
   const media = mapMediaNodes(
@@ -373,8 +408,6 @@ function mapFeature(metaobject: ShopifyMetaobject, index: number): ProductFeatur
     .filter((item) => item.kind === "image")
     .map((item) => item.src);
   const video = media.find((item) => item.kind === "video");
-  const label = fields.get("link_label")?.value?.trim();
-  const href = fields.get("link_url")?.value?.trim();
 
   return {
     id: metaobject.id,
@@ -387,15 +420,7 @@ function mapFeature(metaobject: ShopifyMetaobject, index: number): ProductFeatur
       video?.kind === "video"
         ? { src: video.src, poster: video.poster, alt: video.alt }
         : undefined,
-    links:
-      label && href
-        ? [
-            {
-              label,
-              href: mapStorefrontHref(href),
-            },
-          ]
-        : undefined,
+    links: mapFeatureLinks(fields),
   };
 }
 

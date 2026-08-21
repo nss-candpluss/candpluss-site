@@ -1,3 +1,4 @@
+import { ProductFeatureLinks } from "@/components/products/ProductFeatureLinks";
 import { SiteImage } from "@/components/ui/SiteImage";
 
 import type { ProductFeature } from "@/types/product";
@@ -41,6 +42,8 @@ export function ProductFeatureCard({
         >
           {feature.body}
         </p>
+
+        {feature.links?.length ? <ProductFeatureLinks links={feature.links} /> : null}
       </div>
     </article>
   );

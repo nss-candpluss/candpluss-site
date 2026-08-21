@@ -127,8 +127,21 @@ for (const product of products) {
       ) {
         issues.push(`group "${group}"`);
       }
-      if (fields.link_label && !fields.link_url) {
-        issues.push("link_url missing");
+      const linkKeys = [
+        ["link_label", "link_url", "link 1"],
+        ["link_label_1", "link_url_1", "link_1"],
+        ["link_label_2", "link_url_2", "link 2"],
+        ["link_label_3", "link_url_3", "link 3"],
+        ["link_label_4", "link_url_4", "link 4"],
+        ["link_label_5", "link_url_5", "link 5"],
+      ];
+      for (const [labelKey, urlKey, name] of linkKeys) {
+        if (fields[labelKey] && !fields[urlKey]) {
+          issues.push(`${name} url missing`);
+        }
+        if (!fields[labelKey] && fields[urlKey]) {
+          issues.push(`${name} label missing`);
+        }
       }
       return issues.length
         ? [`#${index + 1} ${fields.title || "untitled"}: ${issues.join(", ")}`]

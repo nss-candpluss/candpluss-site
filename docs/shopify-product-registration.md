@@ -275,14 +275,15 @@ Feature は「商品の特徴カード」です。1カード = メタオブジ�
 
 | 項目 | 入れ方 |
 | --- | --- |
-| 表示名（Admin name） | `商品名｜グループ｜タイトル` |
+| 表示名（Admin name） | 管理画面の一覧用。サイトには出ない。`商品名｜グループ｜タイトル` |
 | Product | 対象商品 |
 | Group | `Fabric` / `Flame` / `Structure` / `Parts` のいずれか |
 | Title | カードの見出し |
 | Body | 本文。改行可 |
 | Media | 画像・動画。複数可。空ならグレー表示 |
-| Link label | テキストリンクの文言（任意） |
-| Link URL | リンク先の**フルURL**（任意） |
+| Link label / Link URL | 1本目のリンク（任意） |
+| Link label 2 / Link URL 2 | 2本目（任意） |
+| Link label 3 / Link URL 3 | 3本目（任意） |
 
 5. Headless へ公開して保存する
 6. 必要なカードの数だけ繰り返す
@@ -296,18 +297,32 @@ MOYA500｜Flame｜DAC社製フレームを採用
 NOKUTA｜Structure｜MOYA500との連結
 ```
 
-グループ見出しは Group の値から自動でまとまります。大文字小文字の違いはサイト側で吸収しますが、入力は上の4語にしてください。
+Admin name は「どのカードか」を管理画面で見分ける名前です。サイトのリンク文言には使いません。グループ見出しは Group の値から自動でまとまります。大文字小文字の違いはサイト側で吸収しますが、入力は上の4語にしてください。
 
-### リンクURLの例
+### リンクの入れ方（複数可）
+
+同じ Feature 画面に、番号付きの欄を足します。1本目は今ある `link_label` / `link_url` です。2本目以降だけフィールドを追加します。`link_label_1` は作らないでください。
+
+| 管理画面の名前（例） | キー | タイプ |
+| --- | --- | --- |
+| リンク文言 | `link_label` | 単一行テキスト（既存） |
+| リンクURL | `link_url` | URL（既存） |
+| リンク文言 2 | `link_label_2` | 単一行テキスト |
+| リンクURL 2 | `link_url_2` | URL |
+| リンク文言 3 | `link_label_3` | 単一行テキスト |
+| リンクURL 3 | `link_url_3` | URL |
+
+サイトに出る文字は「リンク文言」です。文言と URL が両方入っている組だけ表示します。片方だけだとその組は出ません。空の組は飛ばします。
 
 ShopifyのURL欄はフルURLが必要です。
 
 ```text
 https://candpluss.camp/products#tent-option
 https://candpluss.camp/products/zig-stake20
+https://candpluss.camp/products/aluminum-jammer-set
 ```
 
-サイト側で `/products/...` のパスに変換します。`Link label` だけ入れて URL が空だと、リンクは出ません。関連商品がまだ無い場合は、商品登録後にURLを追加してください。
+サイト側で `/products/...` のパスに変換します。関連商品がまだ無い場合は、商品登録後にURLを追加してください。4本目が必要なら `link_label_4` / `link_url_4` を同じルールで足せます（サイトは5本目まで読みます）。
 
 ---
 
@@ -394,7 +409,7 @@ npm run shopify:verify
 | 購入できない | Member only が未設定ではないか。Sales status が購入不可ではないか。在庫・販売可能か |
 | カラーチップが色面だけ | そのバリエーションの Gallery 1枚目があるか |
 | Feature がグループに入らない | Group が `Fabric` / `Flame` / `Structure` / `Parts` か |
-| Feature のリンクが出ない | Link label と Link URL の両方があるか |
+| Feature のリンクが出ない | 同じ番号のリンク文言と URL が両方あるか。Admin name ではなく Link label に文言を入れているか |
 | カテゴリがアクセサリーになる / パンクズが違う | メタフィールド Category を選んでいるか。未選択だと旧商品タイプを代用する。新しいカテゴリはサイト側の一覧定義も必要 |
 | 途中の内容が一覧に出た | 同じハンドルの商品が Headless 公開されている。公開を外すか、内容を完成させる |
 
@@ -511,3 +526,23 @@ Slug を後から変えると、古い `/products#旧slug` のリンクは開き
 - Product category エントリーの Admin name と Label
 - `types/product.ts` の `productCategories` の label
 - 手順書のカテゴリ表
+
+### 5. Feature の複数リンクを使えるようにする
+
+1回だけ行います。すでに Product feature 定義がある前提です。新しいメタオブジェクトは作りません。
+
+1. Product feature 定義を開く
+2. 既存の `link_label` / `link_url` はそのまま残す
+3. 「フィールドを追加」で次を足す。名前は日本語、キーは半角にする
+
+| 名前 | キー | タイプ | 値 |
+| --- | --- | --- | --- |
+| リンク文言 2 | `link_label_2` | 単一行テキスト | 1つ |
+| リンクURL 2 | `link_url_2` | URL | 1つ |
+| リンク文言 3 | `link_label_3` | 単一行テキスト | 1つ |
+| リンクURL 3 | `link_url_3` | URL | 1つ |
+
+4. 各フィールドの Storefront APIアクセスを ON にする
+5. 保存する
+
+Admin name は触らないでください。あれは Feature カード全体の管理画面用の名前です。

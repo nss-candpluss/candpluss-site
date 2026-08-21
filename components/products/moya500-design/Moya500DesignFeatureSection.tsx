@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   useCallback,
   useEffect,
@@ -15,11 +14,10 @@ import {
   MOYA500_DESIGN_SLIDE_MS,
   moya500DesignSlideDurationMs,
 } from "@/components/products/moya500-design/slide-timing";
+import { ProductFeatureLinks } from "@/components/products/ProductFeatureLinks";
 import { ProductGalleryChevron } from "@/components/products/ProductGalleryControls";
 import { SiteImage } from "@/components/ui/SiteImage";
-import { HoverUnderlineText } from "@/components/ui/TextLink";
 import { assetPath } from "@/lib/assetPath";
-import { arrowMaskStyle } from "@/lib/maskStyle";
 import type { ProductFeature } from "@/types/product";
 
 export type Moya500DesignFeature = ProductFeature & {
@@ -540,27 +538,7 @@ function Moya500DesignFeatureCard({
           {feature.body}
         </p>
 
-        {feature.links?.length ? (
-          <ul className="mt-[clamp(14px,calc(18px*var(--gap-scale-y)),18px)] flex flex-col items-start gap-3">
-            {feature.links.map((link) => (
-              <li key={`${feature.id}-${link.href}`}>
-                <Link
-                  href={link.href}
-                  className="group inline-flex items-center gap-[calc(8px*var(--gap-scale-x))] font-body-ja text-[clamp(14px,calc(15px*var(--text-scale)),15px)] leading-[clamp(21.47px,calc(23px*var(--text-scale)),23px)] font-semibold"
-                >
-                  <span
-                    aria-hidden="true"
-                    className="my-auto size-[calc(20px*var(--text-scale))] shrink-0 bg-current"
-                    style={arrowMaskStyle}
-                  />
-                  <HoverUnderlineText variant="groupHover">
-                    {link.label}
-                  </HoverUnderlineText>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        ) : null}
+        {feature.links?.length ? <ProductFeatureLinks links={feature.links} /> : null}
       </div>
     </article>
   );

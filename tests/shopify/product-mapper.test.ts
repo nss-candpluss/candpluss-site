@@ -73,6 +73,38 @@ describe("mapShopifyProductToProduct", () => {
                 },
               ],
             },
+            {
+              id: "gid://shopify/Metaobject/2",
+              type: "product_feature",
+              fields: [
+                {
+                  key: "title",
+                  type: "single_line_text_field",
+                  value: "ZIG STAKE 20",
+                },
+                { key: "body", type: "multi_line_text_field", value: "Body" },
+                {
+                  key: "link_label",
+                  type: "single_line_text_field",
+                  value: "ZIG STAKE20",
+                },
+                {
+                  key: "link_url",
+                  type: "url",
+                  value: "https://candpluss.camp/products/zig-stake20",
+                },
+                {
+                  key: "link_label_2",
+                  type: "single_line_text_field",
+                  value: "自在金具",
+                },
+                {
+                  key: "link_url_2",
+                  type: "url",
+                  value: "https://candpluss.camp/products/aluminum-jammer-set",
+                },
+              ],
+            },
           ],
         },
       },
@@ -132,6 +164,13 @@ describe("mapShopifyProductToProduct", () => {
           label: "拡張用プロダクト一覧へ",
           href: "/products#tent-option",
         },
+      ],
+    });
+    expect(product.features?.[1]).toMatchObject({
+      title: "ZIG STAKE 20",
+      links: [
+        { label: "ZIG STAKE20", href: "/products/zig-stake20" },
+        { label: "自在金具", href: "/products/aluminum-jammer-set" },
       ],
     });
     expect(mapStorefrontHref("/products/zig-stake20")).toBe(

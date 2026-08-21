@@ -69,11 +69,16 @@ will not match the Shopify option.
 - `title`: single line text
 - `body`: multi-line text
 - `media`: list of file references
-- `link_label`: single line text (optional)
-- `link_url`: URL (optional)
+- `link_label` / `link_url`: first optional text link
+- `link_label_2` / `link_url_2` … `link_label_5` / `link_url_5`: additional
+  optional text links
 
 The first media item is displayed directly. Multiple images use the existing
 carousel. A video item is rendered as autoplay, muted, looped media.
+
+Each numbered pair is shown only when both label and URL are present. Empty
+pairs are skipped. `admin_name` is the admin list label for the Feature entry
+and is not shown on the site.
 
 `link_url` should be a full URL. The storefront converts `/products...` paths,
 including `https://candpluss.camp/test/products/...`, into site-relative hrefs.
