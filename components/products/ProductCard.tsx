@@ -5,7 +5,11 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { ProductColorChips } from "@/components/products/ProductColorChips";
-import { ProductStatusLabel, hasProductStatusLabel } from "@/components/products/ProductStatusLabel";
+import {
+  ProductStatusLabel,
+  hasProductStatusLabel,
+  listingStatusRowMinHeightClassName,
+} from "@/components/products/ProductStatusLabel";
 import { getProductListingImage } from "@/lib/products/gallery";
 import {
   getProductDetailHref,
@@ -26,7 +30,7 @@ const listingText14ClassName =
 const listingTitleClassName =
   "text-[clamp(15px,calc(16px*var(--text-scale)),16px)] leading-[clamp(15px,calc(16px*var(--text-scale)),16px)]";
 const listingStatusClassName =
-  "!text-[clamp(13px,calc(14px*var(--text-scale)),14px)] !leading-[clamp(13px,calc(14px*var(--text-scale)),14px)]";
+  `flex items-center ${listingStatusRowMinHeightClassName} !text-[clamp(13px,calc(14px*var(--text-scale)),14px)] !leading-[clamp(13px,calc(14px*var(--text-scale)),14px)]`;
 const listingTaxClassName = "text-[11px] leading-[11px]";
 const listingImageToColorsClassName =
   "mt-[clamp(10px,calc(18px*var(--gap-scale-y)),18px)]";

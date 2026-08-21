@@ -17,6 +17,8 @@ const statusLabels: Partial<Record<ProductStatus, string>> = {
 
 const STATUS_LABEL_SEPARATOR = "　";
 const NEW_STATUS_TEXT = "NEW";
+export const listingStatusRowMinHeightClassName =
+  "min-h-[calc(1.5*clamp(11px,calc(12px*var(--text-scale)),12px))]";
 const newBadgeClassName =
   "inline-flex h-[1.5em] shrink-0 items-center justify-center box-border rounded-[4px] border border-[var(--color-new)] px-[0.45em] font-ui-en !text-[clamp(11px,calc(12px*var(--text-scale)),12px)] text-[var(--color-new)] !leading-none";
 
