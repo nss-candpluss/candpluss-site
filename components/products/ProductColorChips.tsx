@@ -82,6 +82,7 @@ export function ProductColorChips({
             alt={chipImage.alt}
             width={chipSizePx ?? CHIP_SIZE_MAX_PX}
             height={chipSizePx ?? CHIP_SIZE_MAX_PX}
+            sizes={`${(chipSizePx ?? CHIP_SIZE_MAX_PX) * 2}px`}
             className="size-full object-cover object-center"
           />
         ) : (
