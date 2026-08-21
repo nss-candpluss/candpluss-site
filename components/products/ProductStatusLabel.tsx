@@ -17,6 +17,8 @@ const statusLabels: Partial<Record<ProductStatus, string>> = {
 
 const STATUS_LABEL_SEPARATOR = "　";
 const NEW_STATUS_TEXT = "NEW";
+const newBadgeClassName =
+  "inline-flex items-center justify-center rounded-[4px] border border-[var(--color-new)] px-[calc(6px*var(--text-scale))] py-[calc(2px*var(--text-scale))] font-ui-en text-[var(--color-new)]";
 
 type ProductStatusLabelProps = {
   status: ProductStatus;
@@ -46,19 +48,17 @@ function StatusLabelContent({
     return label;
   }
 
-  return parts.map((part, index) => (
-    <span key={`${part}-${index}`}>
-      {index > 0 ? STATUS_LABEL_SEPARATOR : null}
-      <span
-        className={part === NEW_STATUS_TEXT ? "text-[var(--color-new)]" : undefined}
-        style={
-          part === NEW_STATUS_TEXT || !color ? undefined : { color }
-        }
-      >
+  return parts.map((part, index) =>
+    part === NEW_STATUS_TEXT ? (
+      <span key={`${part}-${index}`} className={newBadgeClassName}>
         {part}
       </span>
-    </span>
-  ));
+    ) : (
+      <span key={`${part}-${index}`} style={color ? { color } : undefined}>
+        {part}
+      </span>
+    )
+  );
 }
 
 export function ProductStatusLabel({
@@ -83,6 +83,10 @@ export function ProductStatusLabel({
     <p
       className={`${
         isCustomLabel ? "font-body-ja" : "font-ui-en"
+      } ${
+        hasNewLabel
+          ? "inline-flex items-center flex-wrap gap-x-[calc(8px*var(--gap-scale-x))] gap-y-[calc(4px*var(--gap-scale-y))]"
+          : ""
       } ${color && !hasNewLabel ? "" : "text-[var(--color-muted)]"} ${uiText(size)} ${className}`.trim()}
       style={color && !hasNewLabel ? { color } : undefined}
     >
