@@ -18,7 +18,7 @@ const statusLabels: Partial<Record<ProductStatus, string>> = {
 const STATUS_LABEL_SEPARATOR = "　";
 const NEW_STATUS_TEXT = "NEW";
 const newBadgeClassName =
-  "inline-flex items-center justify-center rounded-[4px] border border-[var(--color-new)] px-[calc(6px*var(--text-scale))] py-[calc(3px*var(--text-scale))] font-ui-en leading-none text-[var(--color-new)]";
+  "inline-flex h-[1.5em] shrink-0 items-center justify-center box-border rounded-[4px] border border-[var(--color-new)] px-[0.45em] font-ui-en !text-[clamp(11px,calc(12px*var(--text-scale)),12px)] text-[var(--color-new)] !leading-none";
 
 type ProductStatusLabelProps = {
   status: ProductStatus;
@@ -50,8 +50,14 @@ function StatusLabelContent({
 
   return parts.map((part, index) =>
     part === NEW_STATUS_TEXT ? (
-      <span key={`${part}-${index}`} className={newBadgeClassName}>
-        {part}
+      <span
+        key={`${part}-${index}`}
+        className={newBadgeClassName}
+        style={{ lineHeight: 1 }}
+      >
+        <span className="block !leading-none" style={{ lineHeight: 1 }}>
+          {part}
+        </span>
       </span>
     ) : (
       <span key={`${part}-${index}`} style={color ? { color } : undefined}>
