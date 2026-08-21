@@ -103,6 +103,11 @@ describe("mapShopifyProductToProduct", () => {
                   type: "url",
                   value: "https://candpluss.camp/products/aluminum-jammer-set",
                 },
+                {
+                  key: "link_label_3",
+                  type: "single_line_text_field",
+                  value: "準備中の関連商品",
+                },
               ],
             },
           ],
@@ -171,6 +176,7 @@ describe("mapShopifyProductToProduct", () => {
       links: [
         { label: "ZIG STAKE20", href: "/products/zig-stake20" },
         { label: "自在金具", href: "/products/aluminum-jammer-set" },
+        { label: "準備中の関連商品", href: undefined },
       ],
     });
     expect(mapStorefrontHref("/products/zig-stake20")).toBe(

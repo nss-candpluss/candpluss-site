@@ -373,13 +373,13 @@ function mapPairedFeatureLink(
   const label = fields.get(labelKey)?.value?.trim();
   const href = fields.get(urlKey)?.value?.trim();
 
-  if (!label || !href) {
+  if (!label) {
     return null;
   }
 
   return {
     label,
-    href: mapStorefrontHref(href),
+    href: href ? mapStorefrontHref(href) : undefined,
   };
 }
 

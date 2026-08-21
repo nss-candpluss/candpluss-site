@@ -76,9 +76,10 @@ will not match the Shopify option.
 The first media item is displayed directly. Multiple images use the existing
 carousel. A video item is rendered as autoplay, muted, looped media.
 
-Each numbered pair is shown only when both label and URL are present. Empty
-pairs are skipped. `admin_name` is the admin list label for the Feature entry
-and is not shown on the site.
+Each numbered pair is shown when a label is present. A missing URL still
+renders the arrow and label, but it is not clickable. Empty labels are
+skipped. `admin_name` is the admin list label for the Feature entry and is
+not shown on the site.
 
 `link_url` should be a full URL. The storefront converts `/products...` paths,
 including `https://candpluss.camp/test/products/...`, into site-relative hrefs.

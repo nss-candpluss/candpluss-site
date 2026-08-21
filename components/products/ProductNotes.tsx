@@ -3,9 +3,10 @@ import { bodyText } from "@/lib/typography";
 type ProductNotesProps = {
   notes: string[];
   className?: string;
+  listClassName?: string;
 };
 
-export function ProductNotes({ notes, className }: ProductNotesProps) {
+export function ProductNotes({ notes, className, listClassName }: ProductNotesProps) {
   if (!notes.length) {
     return null;
   }
@@ -13,7 +14,9 @@ export function ProductNotes({ notes, className }: ProductNotesProps) {
   const noteClassName = className ?? bodyText(14);
 
   return (
-    <ul className="mt-[calc(24px*var(--gap-scale-y))] flex flex-col gap-[calc(12px*var(--gap-scale-y))]">
+    <ul
+      className={`${listClassName ?? "mt-[calc(24px*var(--gap-scale-y))]"} flex flex-col gap-[calc(12px*var(--gap-scale-y))]`}
+    >
       {notes.map((note) => (
         <li
           key={note}

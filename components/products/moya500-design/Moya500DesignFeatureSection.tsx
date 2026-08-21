@@ -32,7 +32,7 @@ export type Moya500DesignFeature = ProductFeature & {
   };
   links?: Array<{
     label: string;
-    href: string;
+    href?: string;
   }>;
 };
 
@@ -544,7 +544,10 @@ function Moya500DesignFeatureCard({
           </p>
         ) : null}
 
-        <ProductNotes notes={notes} />
+        <ProductNotes
+          notes={notes}
+          listClassName="mt-[calc(18px*var(--gap-scale-y))]"
+        />
 
         {feature.links?.length ? <ProductFeatureLinks links={feature.links} /> : null}
       </div>

@@ -136,9 +136,6 @@ for (const product of products) {
         ["link_label_5", "link_url_5", "link 5"],
       ];
       for (const [labelKey, urlKey, name] of linkKeys) {
-        if (fields[labelKey] && !fields[urlKey]) {
-          issues.push(`${name} url missing`);
-        }
         if (!fields[labelKey] && fields[urlKey]) {
           issues.push(`${name} label missing`);
         }

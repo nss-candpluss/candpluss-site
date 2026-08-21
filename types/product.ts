@@ -90,7 +90,7 @@ export type ProductFeature = {
   video?: ProductVideo;
   links?: Array<{
     label: string;
-    href: string;
+    href?: string;
   }>;
 };
 
