@@ -110,8 +110,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addLine = useCallback(
     async (merchandiseId: string, quantity = 1) => {
-      await mutate("POST", { merchandiseId, quantity });
       setIsCartOpen(true);
+      await mutate("POST", { merchandiseId, quantity });
     },
     [mutate]
   );

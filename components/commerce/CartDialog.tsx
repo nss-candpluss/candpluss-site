@@ -168,7 +168,7 @@ function CartDialogView({ onDismiss }: { onDismiss: () => void }) {
           ref={scrollerRef}
           className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          {isLoading && !cart ? (
+          {isLoading && !lines.length ? (
             <p className={`mt-[24px] font-body-ja ${uiTextRange("14-16")}`}>
               カートを読み込んでいます。
             </p>
