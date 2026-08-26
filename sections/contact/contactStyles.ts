@@ -1,8 +1,8 @@
 import type { ContactFieldStatus } from "@/lib/contact/field-status";
-import { uiText } from "@/lib/typography";
+import { inputText, uiText } from "@/lib/typography";
 
 const contactFieldBaseClassName =
-  "w-full border bg-white px-[calc(16px*var(--gap-scale-x))] py-[calc(14px*var(--gap-scale-y))] font-body-ja text-[calc(15px*var(--text-scale))] text-[var(--foreground)] outline-none transition-colors duration-200";
+  `w-full border bg-white px-[calc(16px*var(--gap-scale-x))] py-[calc(14px*var(--gap-scale-y))] font-body-ja ${inputText(15)} text-[var(--foreground)] outline-none transition-colors duration-200`;
 
 const contactFieldBorderByStatus: Record<ContactFieldStatus, string> = {
   idle: "border-[var(--color-divider)] focus:border-[var(--foreground)]",

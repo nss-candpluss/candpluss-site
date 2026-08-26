@@ -7,7 +7,7 @@ import {
   clampCartQuantity,
   shouldRemoveCartLineOnDecrement,
 } from "@/lib/commerce/cart-quantity";
-import { uiText } from "@/lib/typography";
+import { inputText } from "@/lib/typography";
 
 type CartQuantityStepperProps = {
   value: number;
@@ -77,7 +77,7 @@ export function CartQuantityStepper({
             event.currentTarget.blur();
           }
         }}
-        className={`size-[36px] border border-[#ccc] bg-white p-0 text-center font-ui-en ${uiText(16)} outline-none focus-visible:border-[var(--foreground)] disabled:opacity-50`}
+        className={`size-[36px] border border-[#ccc] bg-white p-0 text-center font-ui-en ${inputText(16)} outline-none focus-visible:border-[var(--foreground)] disabled:opacity-50`}
       />
       <button
         type="button"

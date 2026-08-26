@@ -48,10 +48,18 @@ const BODY_TEXT_PX = {
   20: "text-[calc(20px*var(--text-scale))] leading-[calc(35px*var(--text-scale))]",
 } as const;
 
+/** iOS Safari は計算後 16px 未満の入力欄をフォーカスするとズームするため、下限を 16px にする */
+const INPUT_TEXT_PX = {
+  14: "text-[max(16px,calc(14px*var(--text-scale)))] leading-[max(16px,calc(14px*var(--text-scale)))]",
+  15: "text-[max(16px,calc(15px*var(--text-scale)))]",
+  16: "text-[max(16px,calc(16px*var(--text-scale)))] leading-[max(16px,calc(16px*var(--text-scale)))]",
+} as const;
+
 export type UiTextSizePx = keyof typeof UI_TEXT_PX;
 export type UiTextSizeRem = keyof typeof UI_TEXT_REM;
 export type UiTextRangePx = keyof typeof UI_TEXT_RANGE_PX;
 export type BodyTextSizePx = keyof typeof BODY_TEXT_PX;
+export type InputTextSizePx = keyof typeof INPUT_TEXT_PX;
 
 /** 62px セクション見出し: 430px以下 36–42px、431px+ は 62px × text-scale */
 export const sectionTitle62ClassName =
@@ -79,4 +87,9 @@ export function uiTextRem(sizeRem: UiTextSizeRem): string {
 /** 本文: line-height = font-size × 1.75（20:35 比率、Text Scale 適用） */
 export function bodyText(sizePx: BodyTextSizePx): string {
   return BODY_TEXT_PX[sizePx];
+}
+
+/** 入力欄: Text Scale 適用、iOS ズーム防止のため 16px 未満にしない */
+export function inputText(sizePx: InputTextSizePx): string {
+  return INPUT_TEXT_PX[sizePx];
 }

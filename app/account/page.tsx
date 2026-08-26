@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { fetchCustomerAccount } from "@/lib/shopify/customer-account";
 import { getCustomerTokenSession } from "@/lib/shopify/customer-session";
+import { inputText } from "@/lib/typography";
 
 function formatMoney(amount: string, currencyCode: string) {
   return new Intl.NumberFormat("ja-JP", {
@@ -12,7 +13,7 @@ function formatMoney(amount: string, currencyCode: string) {
 }
 
 const inputClassName =
-  "mt-2 w-full border border-[#ccc] bg-transparent px-4 py-3 font-body-ja text-sm";
+  `mt-2 w-full border border-[#ccc] bg-transparent px-4 py-3 font-body-ja ${inputText(14)}`;
 
 export default async function AccountPage() {
   const isStaticExport = process.env.STATIC_EXPORT === "true";

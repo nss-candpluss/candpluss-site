@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { safeAccountReturnTo } from "@/lib/commerce/account-login";
 import { siteConfig } from "@/lib/site";
 import { getCustomerTokenSession } from "@/lib/shopify/customer-session";
-import { bodyText, uiText } from "@/lib/typography";
+import { bodyText, inputText, uiText } from "@/lib/typography";
 
 export const metadata: Metadata = {
   title: `ログインまたはアカウント作成 | ${siteConfig.name}`,
@@ -83,7 +83,7 @@ export default async function AccountLoginPage({
                 autoComplete="email"
                 inputMode="email"
                 placeholder="メールアドレス *"
-                className={`w-full bg-[#f5f5f5] px-[16px] py-[16px] font-body-ja text-[var(--foreground)] outline-none placeholder:text-[var(--color-muted)] ${uiText(16)}`}
+                className={`w-full bg-[#f5f5f5] px-[16px] py-[16px] font-body-ja text-[var(--foreground)] outline-none placeholder:text-[var(--color-muted)] ${inputText(16)}`}
               />
             </label>
 
