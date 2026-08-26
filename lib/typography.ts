@@ -69,6 +69,10 @@ export const sectionTitle62ClassName =
 export const sectionTitle67ClassName =
   "section-title-responsive home-beginning-title";
 
+/** 商品詳細セクション見出し（Feature / Size & Spec / Options）: 最大 62px、最小 46px */
+export const productDetailSectionTitleClassName =
+  "text-[clamp(46px,calc(32.13px+3.7vw),62px)] leading-[clamp(46px,calc(32.13px+3.7vw),62px)]";
+
 /** UIテキスト: font-size = line-height（Text Scale 適用） */
 export function uiText(sizePx: UiTextSizePx): string {
   return UI_TEXT_PX[sizePx];

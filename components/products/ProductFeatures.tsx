@@ -1,6 +1,6 @@
 import type { ProductFeature } from "@/types/product";
 import { resolveFeatureImageSrc } from "@/lib/products/image-paths";
-import { sectionTitle62ClassName } from "@/lib/typography";
+import { productDetailSectionTitleClassName } from "@/lib/typography";
 
 import { ProductFeatureCard } from "./ProductFeatureCard";
 
@@ -26,7 +26,7 @@ export function ProductFeatures({
       id="feature"
       className="scroll-mt-[var(--header-height)] px-[var(--container-x)] pt-[var(--container-y-top)] pb-[var(--container-y-bottom)]"
     >
-      <h2 className={`font-heading text-[var(--foreground)] ${sectionTitle62ClassName}`}>Feature</h2>
+      <h2 className={`font-heading text-[var(--foreground)] ${productDetailSectionTitleClassName}`}>Feature</h2>
 
       <div className="mt-[calc(98px*var(--gap-scale-y))] grid grid-cols-1 gap-x-[calc(52px*var(--gap-scale-x))] gap-y-[calc(62px*var(--gap-scale-y))] md:grid-cols-2 min-[1024px]:grid-cols-3">
         {features.map((feature, index) => (

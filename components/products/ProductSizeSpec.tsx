@@ -2,7 +2,7 @@ import { SiteImage } from "@/components/ui/SiteImage";
 import { ProductNotes } from "@/components/products/ProductNotes";
 
 import type { ProductSizeSpec } from "@/types/product";
-import { bodyText, sectionTitle62ClassName, uiText } from "@/lib/typography";
+import { bodyText, productDetailSectionTitleClassName, uiText } from "@/lib/typography";
 
 type ProductSizeSpecProps = {
   sizeSpec: ProductSizeSpec;
@@ -80,7 +80,7 @@ export function ProductSizeSpecSection({
   const centeredContentClassName = "mx-auto w-full max-w-[880px]";
 
   const titleClassName = `font-heading text-[var(--foreground)] ${
-    typography?.title ?? sectionTitle62ClassName
+    typography?.title ?? productDetailSectionTitleClassName
   }`;
   const downloadClassName = typography?.download ?? uiText(14);
 

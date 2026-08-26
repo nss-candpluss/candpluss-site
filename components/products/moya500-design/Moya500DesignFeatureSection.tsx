@@ -20,6 +20,7 @@ import { ProductNotes } from "@/components/products/ProductNotes";
 import { SiteImage } from "@/components/ui/SiteImage";
 import { assetPath } from "@/lib/assetPath";
 import { splitFeatureNotes } from "@/lib/products/feature-notes";
+import { productDetailSectionTitleClassName } from "@/lib/typography";
 import type { ProductFeature } from "@/types/product";
 
 export type Moya500DesignFeature = ProductFeature & {
@@ -629,7 +630,7 @@ export function Moya500DesignFeatureSection({
         }
       `}</style>
 
-      <h2 className="font-heading text-[clamp(38px,calc(24.13px+3.7vw),62px)] leading-[clamp(38px,calc(24.13px+3.7vw),62px)] text-[var(--foreground)]">
+      <h2 className={`font-heading text-[var(--foreground)] ${productDetailSectionTitleClassName}`}>
         {title}
       </h2>
 

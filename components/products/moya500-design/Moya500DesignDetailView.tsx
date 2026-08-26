@@ -28,6 +28,7 @@ import {
   resolveProductVariantId,
 } from "@/lib/products/helpers";
 import { resolveFeatureImageSrc } from "@/lib/products/image-paths";
+import { productDetailSectionTitleClassName } from "@/lib/typography";
 import type { Product, ProductFeature } from "@/types/product";
 
 type Moya500DesignDetailViewProps = {
@@ -49,8 +50,7 @@ type DesignFeatureConfig = {
   links?: Moya500DesignFeature["links"];
 };
 
-const DESIGN_SECTION_TITLE_CLASS_NAME =
-  "text-[clamp(38px,calc(24.13px+3.7vw),62px)] leading-[clamp(38px,calc(24.13px+3.7vw),62px)]";
+const DESIGN_SECTION_TITLE_CLASS_NAME = productDetailSectionTitleClassName;
 
 const DESIGN_SIZE_SPEC_TYPOGRAPHY = {
   title: DESIGN_SECTION_TITLE_CLASS_NAME,

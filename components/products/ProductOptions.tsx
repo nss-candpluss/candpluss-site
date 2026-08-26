@@ -1,6 +1,6 @@
 import { ProductCard } from "@/components/products/ProductCard";
 import type { Product } from "@/types/product";
-import { sectionTitle62ClassName } from "@/lib/typography";
+import { productDetailSectionTitleClassName } from "@/lib/typography";
 
 type ProductOptionsProps = {
   products: Product[];
@@ -10,7 +10,7 @@ type ProductOptionsProps = {
 
 export function ProductOptions({
   products,
-  titleTypographyClassName = sectionTitle62ClassName,
+  titleTypographyClassName = productDetailSectionTitleClassName,
   cardPresentation = "default",
 }: ProductOptionsProps) {
   if (!products.length) {
