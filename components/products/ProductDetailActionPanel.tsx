@@ -2,7 +2,9 @@
 
 import { ProductColorChips } from "@/components/products/ProductColorChips";
 import { ProductStatusLabel } from "@/components/products/ProductStatusLabel";
+import { useCustomer } from "@/components/commerce/CustomerProvider";
 import { isAddToCartButtonVisible } from "@/lib/products/add-to-cart-visibility";
+import { canPurchaseProduct } from "@/lib/products/purchase";
 import type { Product, ProductVariant } from "@/types/product";
 import { arrowMaskStyle } from "@/lib/maskStyle";
 import { uiText } from "@/lib/typography";
@@ -47,10 +49,15 @@ export function ProductDetailActionPanel({
   selectedColorCode,
   onVariantChange,
 }: ProductDetailActionPanelProps) {
+  const { customer } = useCustomer();
   const priceAmount = product.priceLabel.replace(/^¥/, "");
   const hasMultipleVariants = product.variants.length > 1;
   const displayCode = selectedVariant?.code ?? product.code;
   const showAddToCartButton = isAddToCartButtonVisible();
+  const canAddToCart =
+    Boolean(selectedVariant?.shopifyVariantId) &&
+    selectedVariant?.availableForSale !== false &&
+    canPurchaseProduct(product, Boolean(customer));
 
   return (
     <div className="flex flex-col">
@@ -101,7 +108,12 @@ export function ProductDetailActionPanel({
           data-variant-id={selectedVariant?.id ?? ""}
           data-color-code={selectedColorCode}
           data-shopify-variant-id={selectedVariant?.shopifyVariantId ?? ""}
-          className={`${actionPanelTopSpacingClassName} flex w-full items-center justify-between bg-[var(--foreground)] px-[calc(32px*var(--gap-scale-x))] py-[calc(32px*var(--layout-scale-y))] text-white min-[1024px]:py-[calc(18px*var(--gap-scale-y))]`}
+          disabled={!canAddToCart}
+          className={`${actionPanelTopSpacingClassName} flex w-full items-center justify-between px-[calc(32px*var(--gap-scale-x))] py-[calc(32px*var(--layout-scale-y))] text-white disabled:cursor-not-allowed min-[1024px]:py-[calc(18px*var(--gap-scale-y))] ${
+            canAddToCart
+              ? "bg-[var(--foreground)]"
+              : "bg-[#C6C6C6]"
+          }`}
         >
           <span
             className={`inline-flex items-center gap-[calc(8/18*1em)] font-ui-en font-medium ${uiText(16)}`}

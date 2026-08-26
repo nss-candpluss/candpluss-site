@@ -10,6 +10,7 @@ import {
   headerMenuButton,
 } from "@/data/navigation";
 import { useCart } from "@/components/commerce/CartProvider";
+import { shouldOpenCartPopup } from "@/components/commerce/dialog-panel";
 import { useCustomer } from "@/components/commerce/CustomerProvider";
 import {
   isHeaderIconLinkVisible,
@@ -88,7 +89,7 @@ function resolveHeaderTheme(header: HTMLElement | null, pathname: string): Heade
 
 export function Header() {
   const pathname = usePathname();
-  const { cart } = useCart();
+  const { cart, openCart } = useCart();
   const { customer } = useCustomer();
   const headerRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(true);
@@ -259,7 +260,7 @@ export function Header() {
           opacity: headerOpacity,
         }}
       >
-      <div className="grid h-[var(--header-height)] grid-cols-[1fr_auto] items-center px-6 transition-colors duration-300 ease-out min-[1024px]:grid-cols-[1fr_auto_1fr] min-[1024px]:px-[var(--container-x)]">
+      <div className="grid h-[var(--header-height)] grid-cols-[1fr_auto] items-center px-6 transition-colors duration-300 ease-out min-[1025px]:grid-cols-[1fr_auto_1fr] min-[1025px]:px-[var(--container-x)]">
         <Link href="/" aria-label="C AND+S" className="inline-flex w-fit items-center">
           <HeaderMaskGraphic
             src="/assets/logos/logo-candpluss.svg"
@@ -267,7 +268,7 @@ export function Header() {
           />
         </Link>
 
-        <nav aria-label="Global navigation" className="hidden min-[1024px]:block">
+        <nav aria-label="Global navigation" className="hidden min-[1025px]:block">
           <ul className="font-ui-en flex items-center gap-[var(--header-nav-gap)] font-medium">
             {globalNavigationLinks
               .filter((link) => link.label !== "MEMBERSHIP" || isMembershipLinkVisible())
@@ -299,14 +300,27 @@ export function Header() {
                   : link.href
               }
               aria-label={link.label}
+              aria-haspopup={link.label === "Cart" ? "dialog" : undefined}
+              onClick={
+                link.label === "Cart"
+                  ? (event) => {
+                      if (!shouldOpenCartPopup(event)) {
+                        return;
+                      }
+
+                      event.preventDefault();
+                      openCart();
+                    }
+                  : undefined
+              }
               className={`relative items-center justify-center ${
-                link.label === "Search" ? "hidden min-[1024px]:inline-flex" : "inline-flex"
+                link.label === "Search" ? "hidden min-[1025px]:inline-flex" : "inline-flex"
               }`}
             >
               <HeaderMaskGraphic src={link.iconSrc} className={headerIconClassName} />
               {link.label === "Cart" && cart?.totalQuantity ? (
                 <span
-                  className={`font-ui-en absolute top-[calc(-8px*var(--text-scale))] right-[calc(-8px*var(--text-scale))] flex size-[calc(16px*var(--text-scale))] items-center justify-center rounded-full ${uiText(10)} ${badgeClassName}`}
+                  className={`font-ui-en absolute top-[-10px] right-[-10px] flex size-[20px] items-center justify-center rounded-full text-[10px] leading-[10px] ${badgeClassName}`}
                 >
                   {Math.min(cart.totalQuantity, 99)}
                 </span>

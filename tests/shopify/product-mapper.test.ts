@@ -209,4 +209,45 @@ describe("mapShopifyProductToProduct", () => {
       )
     ).toBe("/products/moya500-inner-tent");
   });
+
+  it("keeps variant ids unique when Shopify colors collide", () => {
+    const duplicateColor = {
+      title: "Classic Yellow",
+      sku: null,
+      availableForSale: true,
+      quantityAvailable: 1,
+      selectedOptions: [{ name: "Color", value: "Classic Yellow" }],
+      price: { amount: "1000", currencyCode: "JPY" },
+      compareAtPrice: null,
+      image: null,
+      colorCode: null,
+      swatch: { value: "#d8b24a" },
+      gallery: null,
+    };
+
+    const product = mapShopifyProductToProduct({
+      id: "gid://shopify/Product/2",
+      handle: "option-product",
+      title: "Option",
+      description: "",
+      productType: "テント・シェルター",
+      availableForSale: true,
+      featuredImage: null,
+      media: { nodes: [] },
+      variants: {
+        nodes: [
+          { ...duplicateColor, id: "gid://shopify/ProductVariant/10" },
+          { ...duplicateColor, id: "gid://shopify/ProductVariant/11" },
+        ],
+      },
+      salesStatus: null,
+      features: null,
+      optionProducts: null,
+    } as Parameters<typeof mapShopifyProductToProduct>[0]);
+
+    expect(product.variants.map((variant) => variant.id)).toEqual([
+      "classic-yellow-10",
+      "classic-yellow-11",
+    ]);
+  });
 });

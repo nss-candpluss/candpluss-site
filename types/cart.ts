@@ -18,7 +18,7 @@ export type CartLine = {
       width?: number | null;
       height?: number | null;
     } | null;
-    product: { handle: string; title: string };
+    product: { handle: string; title: string; productType?: string | null };
     price: CartMoney;
   };
 };

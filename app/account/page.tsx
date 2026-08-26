@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { fetchCustomerAccount } from "@/lib/shopify/customer-account";
 import { getCustomerTokenSession } from "@/lib/shopify/customer-session";
@@ -21,6 +21,10 @@ export default async function AccountPage() {
     ? await fetchCustomerAccount(session.accessToken).catch(() => null)
     : null;
 
+  if (!customer && !isStaticExport) {
+    redirect("/account/login");
+  }
+
   return (
     <main
       data-header-theme="onLight"
@@ -35,18 +39,9 @@ export default async function AccountPage() {
           <p className="font-body-ja text-sm leading-relaxed">
             Shopifyアカウントでログインすると、プロフィールと注文履歴を確認できます。
           </p>
-          {isStaticExport ? (
-            <p className="mt-6 font-body-ja text-sm text-[var(--color-muted)]">
-              アカウント機能はVercel環境への移行後に利用できます。
-            </p>
-          ) : (
-            <Link
-              href="/account/login"
-              className="mt-8 inline-flex bg-[var(--foreground)] px-8 py-4 font-ui-en text-sm font-medium text-white"
-            >
-              LOGIN
-            </Link>
-          )}
+          <p className="mt-6 font-body-ja text-sm text-[var(--color-muted)]">
+            アカウント機能はVercel環境への移行後に利用できます。
+          </p>
         </div>
       ) : (
         <div className="mt-12">

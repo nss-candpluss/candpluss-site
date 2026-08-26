@@ -239,6 +239,117 @@
   transform: translate3d(0, 0, 0);
 }
 
+.added-to-cart-overlay {
+  opacity: 0;
+}
+
+.added-to-cart-overlay.is-in {
+  animation: added-to-cart-overlay-in 250ms ease-out both;
+}
+
+.added-to-cart-overlay.is-out {
+  animation: added-to-cart-overlay-out 150ms ease-out both;
+}
+
+.added-to-cart-panel {
+  opacity: 0;
+}
+
+.added-to-cart-panel.is-in {
+  animation: added-to-cart-panel-in-mobile 250ms ease-out both;
+}
+
+.added-to-cart-panel.is-out {
+  animation: added-to-cart-panel-out 150ms ease-out both;
+}
+
+@media (max-width: 1024px) {
+  .added-to-cart-panel.is-in {
+    animation: added-to-cart-panel-in-mobile 250ms ease-out both;
+  }
+}
+
+@media (min-width: 1025px) {
+  .added-to-cart-panel.is-in {
+    animation: added-to-cart-panel-in-desktop 250ms ease-out both;
+  }
+}
+
+@keyframes added-to-cart-overlay-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes added-to-cart-overlay-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes added-to-cart-panel-in-mobile {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 100%, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes added-to-cart-panel-in-desktop {
+  from {
+    opacity: 0;
+    transform: translate3d(100%, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes added-to-cart-panel-out {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .added-to-cart-overlay.is-in,
+  .added-to-cart-overlay.is-out,
+  .added-to-cart-panel.is-in,
+  .added-to-cart-panel.is-out {
+    animation: none;
+  }
+
+  .added-to-cart-overlay.is-in,
+  .added-to-cart-panel.is-in {
+    opacity: 1;
+  }
+
+  .added-to-cart-overlay.is-out,
+  .added-to-cart-panel.is-out {
+    opacity: 0;
+  }
+}
+
 .home-product-links-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;

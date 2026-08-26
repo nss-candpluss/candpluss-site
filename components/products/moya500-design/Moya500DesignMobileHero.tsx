@@ -5,6 +5,7 @@ import {
   useEffect,
   useRef,
   useState,
+  type CSSProperties,
   type AnimationEvent as ReactAnimationEvent,
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
@@ -23,7 +24,10 @@ import {
 } from "@/components/products/moya500-design/gallery-media";
 import { preloadMoya500Image } from "@/components/products/moya500-design/image-preload";
 import { canPurchaseProduct } from "@/lib/products/purchase";
-import { Moya500DesignThumbnailStripHorizontal } from "@/components/products/moya500-design/Moya500DesignThumbnailStripHorizontal";
+import {
+  MOYA500_MOBILE_THUMB_STRIP_HEIGHT,
+  Moya500DesignThumbnailStripHorizontal,
+} from "@/components/products/moya500-design/Moya500DesignThumbnailStripHorizontal";
 import {
   MOYA500_DESIGN_SLIDE_MS,
   moya500DesignSlideDurationMs,
@@ -429,7 +433,14 @@ export function Moya500DesignMobileHero({
 
   return (
     <>
-      <section className="min-[1025px]:hidden">
+      <section
+        className="min-[1025px]:hidden"
+        style={
+          {
+            "--moya500-mobile-thumb-strip-height": MOYA500_MOBILE_THUMB_STRIP_HEIGHT,
+          } as CSSProperties
+        }
+      >
       <style>{`
         @keyframes moya500-design-mobile-main-in-left {
           from { transform: translate3d(-100%, 0, 0); }
@@ -473,18 +484,20 @@ export function Moya500DesignMobileHero({
         }
       `}</style>
 
-      {/* 1. 画像エリア：ヘッダー下＋メイン 4:5＋横サムネ */}
+      {/* 1. 画像エリア：1画面にヘッダー＋メイン＋サムネ＋パンくず＋商品名の半分 */}
       <div
         id="photo"
         className="pt-[var(--header-height)] scroll-mt-[var(--header-height)]"
       >
         <div
           ref={mainViewportRef}
-          className={`relative aspect-[4/5] w-full touch-pan-y overflow-hidden bg-[#eef1f3] ${
+          className={`relative w-full touch-pan-y overflow-hidden bg-[#eef1f3] ${
             isMainDragging ? "touch-none" : ""
           }`}
           style={{
             cursor: isMainDragging ? "grabbing" : MOYA500_ZOOM_IN_CURSOR,
+            height:
+              "calc(100svh - var(--header-height) - var(--moya500-mobile-thumb-strip-height) - 8px - 13px - 16px - clamp(13px, calc(15px * var(--text-scale)), 15px))",
           }}
           onPointerDown={handleMainPointerDown}
           onPointerMove={handleMainPointerMove}
@@ -673,7 +686,9 @@ export function Moya500DesignMobileHero({
               void addLine(selectedVariant.shopifyVariantId);
             }
           }}
-          className="mt-[28px] flex w-full items-center justify-between bg-[var(--foreground)] px-[20px] py-[16px] text-white disabled:cursor-not-allowed"
+          className={`mt-[28px] flex w-full items-center justify-between px-[20px] py-[16px] text-white disabled:cursor-not-allowed ${
+            canAddToCart ? "bg-[var(--foreground)]" : "bg-[#C6C6C6]"
+          }`}
         >
           <span
             className="inline-flex items-center gap-[calc(8/18*1em)] font-ui-en text-[clamp(15px,calc(16px*var(--text-scale)),16px)] leading-[clamp(15px,calc(16px*var(--text-scale)),16px)] font-medium"

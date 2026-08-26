@@ -6,7 +6,7 @@ const root = process.cwd();
 const backupRoot = join(root, ".static-build-runtime-backup");
 const runtimePaths = [
   "app/api/shopify",
-  "app/account/login",
+  "app/account/login/start",
   "app/account/authorize",
   "app/account/logout",
 ];

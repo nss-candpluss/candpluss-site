@@ -286,10 +286,35 @@ function colorCode(variant: ShopifyVariant) {
   );
 }
 
+function variantNumericId(gid: string) {
+  const numericId = gid.split("/").pop();
+  return numericId && numericId !== gid ? numericId : gid;
+}
+
+function uniqueVariantIds(nodes: ShopifyVariant[]): string[] {
+  const codes = nodes.map((variant) => colorCode(variant) || "variant");
+  const usage = new Map<string, number>();
+
+  for (const code of codes) {
+    usage.set(code, (usage.get(code) ?? 0) + 1);
+  }
+
+  return nodes.map((variant, index) => {
+    const code = codes[index] ?? "variant";
+
+    if ((usage.get(code) ?? 0) <= 1) {
+      return code;
+    }
+
+    return `${code}-${variantNumericId(variant.id)}`;
+  });
+}
+
 function mapVariant(
   variant: ShopifyVariant,
   product: ShopifyProduct,
-  productMedia: ProductGalleryMedia[]
+  productMedia: ProductGalleryMedia[],
+  id: string
 ): ProductVariant {
   const variantImage = mapImage(variant.image, `${product.title} ${variant.title}`);
   const galleryMedia = mapMediaNodes(
@@ -307,7 +332,7 @@ function mapVariant(
   );
 
   return {
-    id: colorCode(variant),
+    id,
     colorCode: colorCode(variant),
     colorName: colorValue(variant),
     swatch: variant.swatch?.value || "#191919",
@@ -561,8 +586,14 @@ function mapStatus(product: ShopifyProduct): {
 
 export function mapShopifyProductToProduct(product: ShopifyProduct): Product {
   const productMedia = mapMediaNodes(product.media.nodes, product.title);
-  const variants = product.variants.nodes.map((variant) =>
-    mapVariant(variant, product, productMedia)
+  const variantIds = uniqueVariantIds(product.variants.nodes);
+  const variants = product.variants.nodes.map((variant, index) =>
+    mapVariant(
+      variant,
+      product,
+      productMedia,
+      variantIds[index] ?? colorCode(variant)
+    )
   );
   const firstVariant = variants[0];
   const mappedCategory = mapCategory(product);

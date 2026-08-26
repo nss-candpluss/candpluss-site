@@ -640,7 +640,9 @@ export function Moya500DesignDesktopHero({
               void addLine(selectedVariant.shopifyVariantId);
             }
           }}
-          className="mt-[clamp(32px,5vh,58px)] flex w-full items-center justify-between bg-[var(--foreground)] px-[clamp(22px,2.2vw,36px)] py-[clamp(16px,2.2vh,24px)] text-white disabled:cursor-not-allowed"
+          className={`mt-[clamp(32px,5vh,58px)] flex w-full items-center justify-between px-[clamp(22px,2.2vw,36px)] py-[clamp(16px,2.2vh,24px)] text-white disabled:cursor-not-allowed ${
+            canAddToCart ? "bg-[var(--foreground)]" : "bg-[#C6C6C6]"
+          }`}
         >
           <span
             className="inline-flex items-center gap-[calc(8/18*1em)] font-ui-en text-[clamp(15px,calc(16px*var(--text-scale)),16px)] leading-[clamp(15px,calc(16px*var(--text-scale)),16px)] font-medium"

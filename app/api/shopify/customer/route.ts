@@ -13,7 +13,7 @@ export const runtime = "nodejs";
 export async function GET() {
   let session = await getCustomerTokenSession();
   if (!session) {
-    return Response.json({ customer: null }, { status: 401 });
+    return Response.json({ customer: null });
   }
 
   try {
@@ -26,6 +26,6 @@ export async function GET() {
     return Response.json({ customer });
   } catch {
     await clearCustomerTokenSession();
-    return Response.json({ customer: null }, { status: 401 });
+    return Response.json({ customer: null });
   }
 }

@@ -107,10 +107,14 @@ export async function createCustomerAuthorizationUrl({
   state,
   codeChallenge,
   returnTo,
+  loginHint,
+  locale,
 }: {
   state: string;
   codeChallenge: string;
   returnTo?: string;
+  loginHint?: string;
+  locale?: string;
 }) {
   const { config, openid } = await discoverCustomerAccount();
   const url = new URL(openid.authorization_endpoint);
@@ -124,6 +128,14 @@ export async function createCustomerAuthorizationUrl({
 
   if (returnTo) {
     url.searchParams.set("return_to", returnTo);
+  }
+
+  if (loginHint) {
+    url.searchParams.set("login_hint", loginHint);
+  }
+
+  if (locale) {
+    url.searchParams.set("locale", locale);
   }
 
   return url;

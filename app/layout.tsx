@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Baskervville, Inter } from "next/font/google";
+import { CartDialog } from "@/components/commerce/CartDialog";
 import { CartProvider } from "@/components/commerce/CartProvider";
 import { CustomerProvider } from "@/components/commerce/CustomerProvider";
 import { Footer } from "@/components/layout/Footer";
@@ -55,6 +56,7 @@ export default function RootLayout({
               <Header />
               <div className="flex-1">{children}</div>
               <Footer />
+              <CartDialog />
             </SmoothScrollProvider>
           </CartProvider>
         </CustomerProvider>

@@ -16,10 +16,13 @@ type CartContextValue = {
   cart: ShopifyCart | null;
   isLoading: boolean;
   error: string | null;
+  isCartOpen: boolean;
   addLine: (merchandiseId: string, quantity?: number) => Promise<void>;
   updateLine: (lineId: string, quantity: number) => Promise<void>;
   removeLine: (lineId: string) => Promise<void>;
   refreshCart: () => Promise<void>;
+  openCart: () => void;
+  closeCart: () => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -50,6 +53,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<ShopifyCart | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   const refreshCart = useCallback(async () => {
     try {
@@ -81,7 +85,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setError(null);
 
       try {
-        setCart(await requestCart(method, body));
+        const nextCart = await requestCart(method, body);
+        setCart(nextCart);
+        return nextCart;
       } catch (cause) {
         const message =
           cause instanceof Error ? cause.message : "カートの更新に失敗しました。";
@@ -94,19 +100,50 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
+  const openCart = useCallback(() => {
+    setIsCartOpen(true);
+  }, []);
+
+  const closeCart = useCallback(() => {
+    setIsCartOpen(false);
+  }, []);
+
+  const addLine = useCallback(
+    async (merchandiseId: string, quantity = 1) => {
+      await mutate("POST", { merchandiseId, quantity });
+      setIsCartOpen(true);
+    },
+    [mutate]
+  );
+
   const value = useMemo<CartContextValue>(
     () => ({
       cart,
       isLoading,
       error,
-      addLine: (merchandiseId, quantity = 1) =>
-        mutate("POST", { merchandiseId, quantity }),
-      updateLine: (lineId, quantity) =>
-        mutate("PATCH", { lineId, quantity }),
-      removeLine: (lineId) => mutate("DELETE", { lineId }),
+      isCartOpen,
+      addLine,
+      updateLine: async (lineId, quantity) => {
+        await mutate("PATCH", { lineId, quantity });
+      },
+      removeLine: async (lineId) => {
+        await mutate("DELETE", { lineId });
+      },
       refreshCart,
+      openCart,
+      closeCart,
     }),
-    [cart, error, isLoading, mutate, refreshCart]
+    [
+      addLine,
+      cart,
+      closeCart,
+      error,
+      isCartOpen,
+      isLoading,
+      mutate,
+      openCart,
+      refreshCart,
+    ]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

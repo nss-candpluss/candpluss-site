@@ -94,7 +94,7 @@ export function ProductColorChips({
         );
 
         return (
-          <li key={variant.id}>
+          <li key={variant.shopifyVariantId ?? `${variant.id}-${variant.colorCode}`}>
             {isInteractive ? (
               <button
                 type="button"

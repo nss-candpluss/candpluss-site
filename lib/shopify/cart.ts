@@ -23,7 +23,7 @@ const CART_FIELDS = `
           sku
           availableForSale
           image { url altText width height }
-          product { handle title }
+          product { handle title productType }
           price { amount currencyCode }
         }
       }

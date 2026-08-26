@@ -27,6 +27,19 @@ const UI_TEXT_REM = {
   2.75: "text-[calc(2.75rem*var(--text-scale))] leading-[calc(2.75rem*var(--text-scale))]",
 } as const;
 
+const UI_TEXT_RANGE_PX = {
+  "13-14":
+    "text-[clamp(13px,calc(14px*var(--text-scale)),14px)] leading-[clamp(13px,calc(14px*var(--text-scale)),14px)]",
+  "13-15":
+    "text-[clamp(13px,calc(15px*var(--text-scale)),15px)] leading-[clamp(13px,calc(15px*var(--text-scale)),15px)]",
+  "14-16":
+    "text-[clamp(14px,calc(16px*var(--text-scale)),16px)] leading-[clamp(14px,calc(16px*var(--text-scale)),16px)]",
+  "16-18":
+    "text-[clamp(16px,calc(18px*var(--text-scale)),18px)] leading-[clamp(16px,calc(18px*var(--text-scale)),18px)]",
+  "16-20":
+    "text-[clamp(16px,calc(20px*var(--text-scale)),20px)] leading-[clamp(16px,calc(20px*var(--text-scale)),20px)]",
+} as const;
+
 const BODY_TEXT_PX = {
   14: "text-[calc(14px*var(--text-scale))] leading-[calc(24.5px*var(--text-scale))]",
   15: "text-[calc(15px*var(--text-scale))] leading-[calc(26.25px*var(--text-scale))]",
@@ -37,6 +50,7 @@ const BODY_TEXT_PX = {
 
 export type UiTextSizePx = keyof typeof UI_TEXT_PX;
 export type UiTextSizeRem = keyof typeof UI_TEXT_REM;
+export type UiTextRangePx = keyof typeof UI_TEXT_RANGE_PX;
 export type BodyTextSizePx = keyof typeof BODY_TEXT_PX;
 
 /** 62px セクション見出し: 430px以下 36–42px、431px+ は 62px × text-scale */
@@ -50,6 +64,11 @@ export const sectionTitle67ClassName =
 /** UIテキスト: font-size = line-height（Text Scale 適用） */
 export function uiText(sizePx: UiTextSizePx): string {
   return UI_TEXT_PX[sizePx];
+}
+
+/** UIテキスト（最小〜最大。Text Scale、最小値未満にはしない） */
+export function uiTextRange(rangePx: UiTextRangePx): string {
+  return UI_TEXT_RANGE_PX[rangePx];
 }
 
 /** UIテキスト（rem指定） */

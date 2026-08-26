@@ -50,6 +50,14 @@ export function getLenisScrollPosition(): number | null {
   return boundLenis?.scroll ?? null;
 }
 
+export function stopBoundLenis() {
+  boundLenis?.stop();
+}
+
+export function startBoundLenis() {
+  boundLenis?.start();
+}
+
 export function unbindLenisFromScrollTrigger(lenis: Lenis) {
   if (boundLenis !== lenis) {
     return;
