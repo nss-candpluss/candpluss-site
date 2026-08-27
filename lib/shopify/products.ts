@@ -271,12 +271,38 @@ function mapMediaNodes(nodes: ShopifyMediaNode[], fallbackAlt: string) {
     .filter((media): media is ProductGalleryMedia => Boolean(media));
 }
 
+const DEFAULT_TITLE_OPTION = /^title$/i;
+
+function primarySelectedOption(variant: ShopifyVariant) {
+  return (
+    variant.selectedOptions.find((option) => !DEFAULT_TITLE_OPTION.test(option.name)) ??
+    variant.selectedOptions[0]
+  );
+}
+
 function colorValue(variant: ShopifyVariant) {
   return (
     variant.selectedOptions.find((option) =>
       /^(color|colour|カラー)$/i.test(option.name)
-    )?.value ?? variant.title
+    )?.value ??
+    primarySelectedOption(variant)?.value ??
+    variant.title
   );
+}
+
+function mapVariantOptionName(variants: ShopifyVariant[]): string | undefined {
+  const firstVariant = variants[0];
+  if (!firstVariant) {
+    return undefined;
+  }
+
+  const name = primarySelectedOption(firstVariant)?.name?.trim();
+
+  if (!name || DEFAULT_TITLE_OPTION.test(name)) {
+    return undefined;
+  }
+
+  return name.toUpperCase();
 }
 
 function colorCode(variant: ShopifyVariant) {
@@ -648,6 +674,7 @@ export function mapShopifyProductToProduct(product: ShopifyProduct): Product {
     isOnSale: Boolean(isOnSale),
     description: product.description,
     variants,
+    variantOptionName: mapVariantOptionName(product.variants.nodes),
     features:
       product.features?.references?.nodes.map(mapFeature) ?? undefined,
     sizeSpec: mapSizeSpec(

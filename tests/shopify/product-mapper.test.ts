@@ -174,6 +174,7 @@ describe("mapShopifyProductToProduct", () => {
       quantityAvailable: 4,
       swatch: "#d8b24a",
     });
+    expect(product.variantOptionName).toBe("COLOR");
     expect(product.variants[0].galleryMedia?.[0]).toMatchObject({
       kind: "image",
       src: "https://cdn.shopify.com/image.webp",
@@ -248,6 +249,60 @@ describe("mapShopifyProductToProduct", () => {
     expect(product.variants.map((variant) => variant.id)).toEqual([
       "classic-yellow-10",
       "classic-yellow-11",
+    ]);
+  });
+
+  it("maps SIZE options onto the variant switcher instead of forcing COLOR", () => {
+    const sizeVariant = {
+      sku: null,
+      availableForSale: true,
+      quantityAvailable: 10,
+      price: { amount: "2200", currencyCode: "JPY" },
+      compareAtPrice: null,
+      image: null,
+      colorCode: null,
+      swatch: null,
+      gallery: null,
+    };
+
+    const product = mapShopifyProductToProduct({
+      id: "gid://shopify/Product/3",
+      handle: "zig-stake",
+      title: "ZIG STAKE",
+      description: "",
+      productType: "アクセサリー",
+      availableForSale: true,
+      featuredImage: null,
+      media: { nodes: [] },
+      variants: {
+        nodes: [
+          {
+            ...sizeVariant,
+            id: "gid://shopify/ProductVariant/20",
+            title: "20cm",
+            selectedOptions: [{ name: "SIZE", value: "20cm" }],
+          },
+          {
+            ...sizeVariant,
+            id: "gid://shopify/ProductVariant/30",
+            title: "30cm",
+            selectedOptions: [{ name: "SIZE", value: "30cm" }],
+          },
+        ],
+      },
+      salesStatus: null,
+      features: null,
+      optionProducts: null,
+    } as Parameters<typeof mapShopifyProductToProduct>[0]);
+
+    expect(product.variantOptionName).toBe("SIZE");
+    expect(product.variants.map((variant) => variant.colorName)).toEqual([
+      "20cm",
+      "30cm",
+    ]);
+    expect(product.variants.map((variant) => variant.id)).toEqual([
+      "20cm",
+      "30cm",
     ]);
   });
 });

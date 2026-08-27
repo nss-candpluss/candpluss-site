@@ -4,6 +4,7 @@ import { ProductColorChips } from "@/components/products/ProductColorChips";
 import { ProductStatusLabel } from "@/components/products/ProductStatusLabel";
 import { useCustomer } from "@/components/commerce/CustomerProvider";
 import { isAddToCartButtonVisible } from "@/lib/products/add-to-cart-visibility";
+import { getProductVariantOptionName } from "@/lib/products/helpers";
 import { canPurchaseProduct } from "@/lib/products/purchase";
 import type { Product, ProductVariant } from "@/types/product";
 import { arrowMaskStyle } from "@/lib/maskStyle";
@@ -52,6 +53,7 @@ export function ProductDetailActionPanel({
   const { customer } = useCustomer();
   const priceAmount = product.priceLabel.replace(/^¥/, "");
   const hasMultipleVariants = product.variants.length > 1;
+  const variantOptionName = getProductVariantOptionName(product);
   const displayCode = selectedVariant?.code ?? product.code;
   const showAddToCartButton = isAddToCartButtonVisible();
   const canAddToCart =
@@ -91,11 +93,12 @@ export function ProductDetailActionPanel({
             variants={product.variants}
             selectedVariantId={selectedVariant?.id}
             onSelect={hasMultipleVariants ? onVariantChange : undefined}
+            optionName={variantOptionName}
             className="ml-[calc(6px*var(--gap-scale-x))] min-[1024px]:pt-[calc(6px*var(--gap-scale-y))] min-[1024px]:pb-[calc(6px*var(--gap-scale-y))]"
           />
           {selectedVariant && hasMultipleVariants ? (
             <p className={`shrink-0 font-ui-en text-[var(--foreground)] ${uiText(14)}`}>
-              <span className="font-semibold">COLOR</span>
+              <span className="font-semibold">{variantOptionName}</span>
               {` : ${selectedVariant.colorName}`}
             </p>
           ) : null}

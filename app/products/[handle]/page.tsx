@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { Moya500DesignDetailView } from "@/components/products/moya500-design/Moya500DesignDetailView";
+import { getProductMetaDescription } from "@/lib/products/description";
 import {
   getAllProductHandles,
   getProductByHandle,
@@ -33,7 +34,7 @@ export async function generateMetadata({
 
   return {
     title: product.title,
-    description: product.description,
+    description: getProductMetaDescription(product.description),
   };
 }
 

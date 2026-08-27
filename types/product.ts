@@ -141,6 +141,8 @@ export type Product = {
   /** ギャラリー下に縦スクロール表示する静止画像（最大5枚想定） */
   scrollImages?: ProductImage[];
   variants: ProductVariant[];
+  /** Shopify の選択肢名（COLOR / SIZE など）。未指定時は COLOR */
+  variantOptionName?: string;
   features?: ProductFeature[];
   /** Feature 画像を {colorCode}-feature-XX.webp でカラー別表示する */
   colorKeyedFeatureImages?: boolean;

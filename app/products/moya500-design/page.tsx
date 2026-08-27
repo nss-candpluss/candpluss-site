@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 
 import { Moya500DesignDetailView } from "@/components/products/moya500-design/Moya500DesignDetailView";
 import { moya500DesignProduct } from "@/data/products/moya500-design";
+import { getProductMetaDescription } from "@/lib/products/description";
 import { getProductsByHandles, resolveProductVariantId } from "@/lib/products";
 
 export const metadata: Metadata = {
   title: moya500DesignProduct.title,
-  description: moya500DesignProduct.description,
+  description: getProductMetaDescription(moya500DesignProduct.description),
   robots: {
     index: false,
     follow: false,

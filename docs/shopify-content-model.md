@@ -23,6 +23,9 @@ Create the following product metafield definitions in namespace `custom`.
 | `member_only` | `boolean` | `true` for member-only sales, `false` for public sales. Shopify Flow sets new products to `false`. Unset products cannot be purchased. |
 | `is_new` | `boolean` | Controls the optional `NEW` badge. Unset values hide the badge. |
 
+The product description may start with `{title}` to render a heading above
+the body, matching Feature item titles. The braces are not shown on the site.
+
 ## Variant fields
 
 Create the following product variant metafield definitions.

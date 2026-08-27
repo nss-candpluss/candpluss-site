@@ -20,7 +20,7 @@ import { ProductNotes } from "@/components/products/ProductNotes";
 import { SiteImage } from "@/components/ui/SiteImage";
 import { assetPath } from "@/lib/assetPath";
 import { splitFeatureNotes } from "@/lib/products/feature-notes";
-import { productDetailSectionTitleClassName } from "@/lib/typography";
+import { productDetailSectionTitleClassName, productFeatureItemTitleClassName } from "@/lib/typography";
 import type { ProductFeature } from "@/types/product";
 
 export type Moya500DesignFeature = ProductFeature & {
@@ -532,9 +532,7 @@ function Moya500DesignFeatureCard({
       )}
 
       <div className="mt-[clamp(18px,calc(22px*var(--gap-scale-y)),22px)] flex flex-col px-[calc(8px*var(--gap-scale-x))]">
-        <h4
-          className="min-w-0 font-body-ja text-[clamp(16px,calc(14.845px+0.308vw),18px)] leading-[clamp(22px,calc(26px*var(--text-scale)),26px)] font-bold text-[var(--foreground)]"
-        >
+        <h4 className={productFeatureItemTitleClassName}>
           {feature.title}
         </h4>
 

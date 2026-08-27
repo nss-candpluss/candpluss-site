@@ -22,6 +22,7 @@ import {
 } from "@/components/products/moya500-design/gallery-media";
 import { preloadMoya500Image } from "@/components/products/moya500-design/image-preload";
 import { canPurchaseProduct } from "@/lib/products/purchase";
+import { getProductVariantOptionName } from "@/lib/products/helpers";
 import {
   Moya500DesignThumbnailStrip,
   type Moya500DesignSelectMeta,
@@ -33,6 +34,7 @@ import {
 } from "@/components/products/moya500-design/slide-timing";
 import { Moya500DesignBreadcrumbs } from "@/components/products/moya500-design/Moya500DesignBreadcrumbs";
 import { ProductColorChips } from "@/components/products/ProductColorChips";
+import { ProductDetailDescription } from "@/components/products/ProductDetailDescription";
 import { ProductGalleryControls } from "@/components/products/ProductGalleryControls";
 import { ProductStatusLabel } from "@/components/products/ProductStatusLabel";
 import { arrowMaskStyle } from "@/lib/maskStyle";
@@ -160,6 +162,7 @@ export function Moya500DesignDesktopHero({
     selectedVariant?.price?.amount.toLocaleString("ja-JP") ??
     product.priceLabel.replace(/^¥/, "");
   const displayTitle = product.title.replace("（デザインテスト）", "");
+  const variantOptionName = getProductVariantOptionName(product);
   const colorChipImageResolver =
     product.handle === "moya500" || product.handle === "moya500-design"
       ? moya500DesignThumbnailSrc
@@ -612,6 +615,7 @@ export function Moya500DesignDesktopHero({
             selectedVariantId={selectedVariant?.id}
             onSelect={onVariantChange}
             onIntent={onVariantIntent}
+            optionName={variantOptionName}
             chipSizePx={60}
             selectionIndicator="underline"
             gapClassName="gap-x-[clamp(8px,calc(10px*var(--gap-scale-x)),10px)] gap-y-[clamp(8px,calc(10px*var(--gap-scale-y)),10px)]"
@@ -623,7 +627,7 @@ export function Moya500DesignDesktopHero({
             <p
               className="mt-[clamp(20px,2.8vh,32px)] font-ui-en text-[13px] leading-[13px] text-[var(--foreground)]"
             >
-              <span className="font-semibold">COLOR</span>
+              <span className="font-semibold">{variantOptionName}</span>
               {` : ${selectedVariant.colorName}`}
             </p>
           ) : null}
@@ -667,11 +671,11 @@ export function Moya500DesignDesktopHero({
           </p>
         ) : null}
 
-        <p
-          className="mt-[clamp(38px,6vh,70px)] whitespace-pre-line font-body-ja text-[clamp(14px,calc(15px*var(--text-scale)),15px)] leading-[clamp(24.5px,calc(26.25px*var(--text-scale)),26.25px)] text-[var(--foreground)]"
-        >
-          {product.description.replace(/\n{2,}/g, "\n")}
-        </p>
+        <ProductDetailDescription
+          product={product}
+          className="mt-[clamp(38px,6vh,70px)]"
+          bodyClassName="whitespace-pre-line font-body-ja text-[clamp(14px,calc(15px*var(--text-scale)),15px)] leading-[clamp(24.5px,calc(26.25px*var(--text-scale)),26.25px)] text-[var(--foreground)]"
+        />
       </div>
       </section>
 

@@ -29,3 +29,9 @@ export function getSelectedVariant(product: Product, variantId?: string | null) 
     null
   );
 }
+
+/** 詳細ページの選択肢ラベル。Shopify のオプション名を大文字で表示する */
+export function getProductVariantOptionName(product: Product): string {
+  const name = product.variantOptionName?.trim();
+  return name ? name.toUpperCase() : "COLOR";
+}

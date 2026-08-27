@@ -10,6 +10,7 @@ type ProductColorChipsProps = {
   selectedVariantId?: string;
   onSelect?: (variantId: string) => void;
   onIntent?: (variantId: string) => void;
+  optionName?: string;
   className?: string;
   chipSizePx?: number;
   selectionIndicator?: "outline" | "underline";
@@ -41,6 +42,7 @@ export function ProductColorChips({
   selectedVariantId,
   onSelect,
   onIntent,
+  optionName,
   className = "",
   chipSizePx,
   selectionIndicator = "outline",
@@ -70,7 +72,7 @@ export function ProductColorChips({
   return (
     <ul
       className={`flex flex-wrap ${gapClassName} ${className}`.trim()}
-      aria-label="Available colors"
+      aria-label={optionName ? `${optionName} options` : "Available colors"}
     >
       {variants.map((variant) => {
         const isSelected = variant.id === selectedVariantId;

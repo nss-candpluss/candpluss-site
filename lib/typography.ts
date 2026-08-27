@@ -73,6 +73,10 @@ export const sectionTitle67ClassName =
 export const productDetailSectionTitleClassName =
   "text-[clamp(46px,calc(32.13px+3.7vw),62px)] leading-[clamp(46px,calc(32.13px+3.7vw),62px)]";
 
+/** Feature 本文上タイトル / 商品説明タイトル */
+export const productFeatureItemTitleClassName =
+  "min-w-0 font-body-ja text-[clamp(16px,calc(14.845px+0.308vw),18px)] leading-[clamp(22px,calc(26px*var(--text-scale)),26px)] font-bold text-[var(--foreground)]";
+
 /** UIテキスト: font-size = line-height（Text Scale 適用） */
 export function uiText(sizePx: UiTextSizePx): string {
   return UI_TEXT_PX[sizePx];
