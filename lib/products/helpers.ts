@@ -14,6 +14,15 @@ export function resolveProductVariantId(
 /** @deprecated URL param name remains `color` for compatibility */
 export const resolveProductColorId = resolveProductVariantId;
 
+/** Next.js が日本語ハンドルをパーセントエンコードしたまま渡すことがある */
+export function normalizeProductHandle(handle: string): string {
+  try {
+    return decodeURIComponent(handle);
+  } catch {
+    return handle;
+  }
+}
+
 export function getProductDetailHref(handle: string, variantId?: string): string {
   const baseHref = `/products/${handle}`;
 

@@ -7,11 +7,13 @@ import {
 } from "@/lib/shopify/products";
 
 import type { Product, ProductCategorySlug } from "@/types/product";
+import { normalizeProductHandle } from "@/lib/products/helpers";
 
 export type { Product, ProductCategorySlug } from "@/types/product";
 export {
   getProductDetailHref,
   getSelectedVariant,
+  normalizeProductHandle,
   resolveProductColorId,
   resolveProductVariantId,
 } from "@/lib/products/helpers";
@@ -52,14 +54,15 @@ export async function getListingProducts(): Promise<Product[]> {
 }
 
 export async function getProductByHandle(handle: string): Promise<Product | null> {
+  const decodedHandle = normalizeProductHandle(handle);
   const localProduct =
-    products.find((product) => product.handle === handle) ?? null;
+    products.find((product) => product.handle === decodedHandle) ?? null;
 
   if (!usesShopifyProducts()) {
     return localProduct;
   }
 
-  return (await fetchProductByHandle(handle)) ?? localProduct;
+  return (await fetchProductByHandle(decodedHandle)) ?? localProduct;
 }
 
 export async function getProductsByHandles(handles: string[]): Promise<Product[]> {
