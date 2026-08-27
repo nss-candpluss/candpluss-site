@@ -7,7 +7,10 @@ import {
 } from "@/lib/shopify/products";
 
 import type { Product, ProductCategorySlug } from "@/types/product";
-import { normalizeProductHandle } from "@/lib/products/helpers";
+import {
+  normalizeProductHandle,
+  sortProductsForListing,
+} from "@/lib/products/helpers";
 
 export type { Product, ProductCategorySlug } from "@/types/product";
 export {
@@ -50,7 +53,9 @@ export async function getAllProducts(): Promise<Product[]> {
 
 export async function getListingProducts(): Promise<Product[]> {
   const allProducts = await getAllProducts();
-  return allProducts.filter((product) => !product.listingHidden);
+  return sortProductsForListing(
+    allProducts.filter((product) => !product.listingHidden)
+  );
 }
 
 export async function getProductByHandle(handle: string): Promise<Product | null> {

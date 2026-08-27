@@ -1,4 +1,24 @@
-import type { Product } from "@/types/product";
+import { productCategories, type Product } from "@/types/product";
+
+const LISTING_CATEGORY_ORDER = productCategories
+  .filter((category) => category.slug !== "all")
+  .map((category) => category.slug);
+
+/** 一覧はカテゴリタブと同じ順。同一カテゴリ内は入力順を保つ */
+export function sortProductsForListing<T extends { categorySlug: string }>(
+  products: T[]
+): T[] {
+  const order = new Map<string, number>(
+    LISTING_CATEGORY_ORDER.map((slug, index) => [slug, index])
+  );
+  const fallbackIndex = LISTING_CATEGORY_ORDER.length;
+
+  return [...products].sort((a, b) => {
+    const aIndex = order.get(a.categorySlug) ?? fallbackIndex;
+    const bIndex = order.get(b.categorySlug) ?? fallbackIndex;
+    return aIndex - bIndex;
+  });
+}
 
 export function resolveProductVariantId(
   product: Product,
