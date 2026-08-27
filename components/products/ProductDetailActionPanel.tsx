@@ -66,6 +66,7 @@ export function ProductDetailActionPanel({
     product,
     selectedVariant
   );
+  const canSelectVariant = product.variants.length > 1;
   const variantOptionName = getProductVariantOptionName(product);
   const displayCode = selectedVariant?.code ?? product.code;
   const showAddToCartButton = isAddToCartButtonVisible();
@@ -105,7 +106,7 @@ export function ProductDetailActionPanel({
           <ProductColorChips
             variants={product.variants}
             selectedVariantId={selectedVariant?.id}
-            onSelect={onVariantChange}
+            onSelect={canSelectVariant ? onVariantChange : undefined}
             optionName={variantOptionName}
             className="ml-[calc(6px*var(--gap-scale-x))] min-[1024px]:pt-[calc(6px*var(--gap-scale-y))] min-[1024px]:pb-[calc(6px*var(--gap-scale-y))]"
           />

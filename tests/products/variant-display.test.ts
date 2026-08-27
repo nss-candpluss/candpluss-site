@@ -11,23 +11,23 @@ function variant(colorName: string): Pick<ProductVariant, "colorName"> {
 }
 
 describe("shouldDisplayProductVariantOptions", () => {
-  it("hides Shopify Default Title products that have no real options", () => {
+  it("shows a single chip even for Shopify Default Title products", () => {
     expect(
       shouldDisplayProductVariantOptions({
         variants: [variant("Default Title")],
       })
-    ).toBe(false);
+    ).toBe(true);
   });
 
-  it("hides a single real color or size", () => {
+  it("shows a chip when there is only one real color or size", () => {
     expect(
       shouldDisplayProductVariantOptions({
         variants: [variant("Classic Yellow")],
       })
-    ).toBe(false);
+    ).toBe(true);
   });
 
-  it("shows when two or more real options exist", () => {
+  it("shows chips when two or more options exist", () => {
     expect(
       shouldDisplayProductVariantOptions({
         variants: [variant("20cm"), variant("30cm")],
@@ -42,6 +42,15 @@ describe("shouldDisplayProductVariantLabel", () => {
 
     expect(
       shouldDisplayProductVariantLabel(product, variant("Default Title"))
+    ).toBe(false);
+  });
+
+  it("hides the label when there is only one real option", () => {
+    expect(
+      shouldDisplayProductVariantLabel(
+        { variants: [variant("Classic Yellow")] },
+        variant("Classic Yellow")
+      )
     ).toBe(false);
   });
 

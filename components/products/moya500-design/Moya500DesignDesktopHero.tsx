@@ -175,6 +175,7 @@ export function Moya500DesignDesktopHero({
     product,
     selectedVariant
   );
+  const canSelectVariant = product.variants.length > 1;
   const showGalleryNavigation = shouldDisplayGalleryNavigation(items.length);
   const colorChipImageResolver =
     product.handle === "moya500" || product.handle === "moya500-design"
@@ -629,8 +630,8 @@ export function Moya500DesignDesktopHero({
           <ProductColorChips
             variants={product.variants}
             selectedVariantId={selectedVariant?.id}
-            onSelect={onVariantChange}
-            onIntent={onVariantIntent}
+            onSelect={canSelectVariant ? onVariantChange : undefined}
+            onIntent={canSelectVariant ? onVariantIntent : undefined}
             optionName={variantOptionName}
             chipSizePx={60}
             selectionIndicator="underline"

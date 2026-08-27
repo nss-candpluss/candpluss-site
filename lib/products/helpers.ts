@@ -91,23 +91,23 @@ export function isPlaceholderProductVariantName(name?: string | null): boolean {
   return !name?.trim() || PLACEHOLDER_VARIANT_NAME.test(name.trim());
 }
 
-/** カラー・サイズなど、実際に選べるバリエーションが2つ以上あるか */
+/** カラーチップは1つでも表示する */
 export function shouldDisplayProductVariantOptions(
   product: Pick<Product, "variants">
 ): boolean {
-  return (
-    product.variants.filter(
-      (variant) => !isPlaceholderProductVariantName(variant.colorName)
-    ).length > 1
-  );
+  return product.variants.length > 0;
 }
 
 export function shouldDisplayProductVariantLabel(
   product: Pick<Product, "variants">,
   selectedVariant?: Pick<ProductVariant, "colorName"> | null
 ): boolean {
+  const selectableCount = product.variants.filter(
+    (variant) => !isPlaceholderProductVariantName(variant.colorName)
+  ).length;
+
   return (
-    shouldDisplayProductVariantOptions(product) &&
+    selectableCount > 1 &&
     !isPlaceholderProductVariantName(selectedVariant?.colorName)
   );
 }
