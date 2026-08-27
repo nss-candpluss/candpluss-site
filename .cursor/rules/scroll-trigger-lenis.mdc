@@ -66,6 +66,6 @@ useLayoutEffect(() => {
 ScrollTrigger 固有の確認。共通ファイル変更時の横断確認は `.cursor/rules/cross-page-impact-check.mdc` を必ず併用する。
 
 1. `npm run dev` → `/concept`（各セクションのフェードイン）
-2. `/quality`（テキスト fade / slide 切替）
+2. `/labo`（テキスト fade / slide 切替）
 3. `/`（HomeLab・ProductLinks 等 ST 利用箇所）
 4. 切り分け: `lib/motion/smooth-scroll-config.ts` の `enabled: false` でネイティブ scroll も確認

@@ -1,7 +1,7 @@
 export const globalNavigationLinks = [
   { label: "PRODUCTS", href: "/products" },
   { label: "CONCEPT", href: "/concept" },
-  { label: "QUALITY", href: "/quality" },
+  { label: "LABO", href: "/labo" },
   { label: "SUPPORT", href: "/support" },
   { label: "MEMBERSHIP", href: "/account" },
 ] as const;

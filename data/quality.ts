@@ -1,9 +1,9 @@
 export const qualityContent = {
-  title: "QUALITY",
+  title: "LABO",
   hero: {
     image: "/images/quality/quality-hero.webp",
     title: "Built for Better.",
-    label: "QUALITY",
+    label: "LABO",
     body:
       "国内外の確かなパートナーと協働し、デザイン・設計・素材・パーツに至るまで、一つひとつの品質にこだわっています。\n常により良いものを追い求め、細部に至るまでクオリティを追求し続ける。\nそれが、C AND+Sのものづくりの信念です。",
   },

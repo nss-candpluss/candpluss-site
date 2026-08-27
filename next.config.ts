@@ -26,6 +26,15 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ["192.168.1.7"],
   ...(!isStaticExport
     ? {
+        async redirects() {
+          return [
+            {
+              source: "/quality",
+              destination: "/labo",
+              permanent: true,
+            },
+          ];
+        },
         async headers() {
           if (siteConfig.allowSearchIndexing) {
             return [];

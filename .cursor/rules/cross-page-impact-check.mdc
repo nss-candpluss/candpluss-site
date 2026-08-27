@@ -33,7 +33,7 @@ alwaysApply: true
 |--------|-------------|
 | `/` | Hero、各セクション、Header テーマ切替 |
 | `/concept` | フェード、背景パララックス、FeatureLinks |
-| `/quality` | scroll 連動、テキスト fade、画像切替 |
+| `/labo` | scroll 連動、テキスト fade、画像切替 |
 | `/products` | 一覧レイアウト、Header |
 | Legal / Support 系 | タイポ・余白・Header |
 

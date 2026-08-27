@@ -49,9 +49,9 @@ export const conceptContent = {
   ],
   featureLinks: [
     {
-      id: "quality",
-      title: "QUALITY",
-      href: "/quality",
+      id: "labo",
+      title: "LABO",
+      href: "/labo",
       image: "/images/common/link-quality.webp",
     },
     {

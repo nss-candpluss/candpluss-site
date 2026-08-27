@@ -101,9 +101,9 @@ export const homeFeatureLinks = [
     image: "/images/home/home-link-products.webp",
   },
   {
-    id: "quality",
-    title: "QUALITY",
-    href: "/quality",
+    id: "labo",
+    title: "LABO",
+    href: "/labo",
     image: "/images/home/home-link-quality.webp",
   },
 ] as const;
