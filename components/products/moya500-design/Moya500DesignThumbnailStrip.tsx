@@ -24,6 +24,7 @@ import {
   MOYA500_DESIGN_SLIDE_MS,
   moya500DesignSlideDurationMs,
 } from "@/components/products/moya500-design/slide-timing";
+import { shouldDisplayGalleryNavigation } from "@/lib/products/gallery";
 
 const VISIBLE_COUNT = 5;
 const THUMB_SIZE_PX = 70;
@@ -405,12 +406,14 @@ export const Moya500DesignThumbnailStrip = forwardRef<
     stepPx > 0
       ? stepPx * Math.min(VISIBLE_COUNT, Math.max(items.length, 1)) - gapPx
       : undefined;
+  const showGalleryNavigation = shouldDisplayGalleryNavigation(items.length);
 
   return (
     <aside
       aria-label="商品画像サムネイル"
       className="flex min-h-0 flex-col items-center justify-start px-[clamp(7px,0.8vw,14px)] py-[clamp(12px,2vh,24px)]"
     >
+      {showGalleryNavigation ? (
       <button
         type="button"
         aria-label="前の画像を表示"
@@ -419,6 +422,7 @@ export const Moya500DesignThumbnailStrip = forwardRef<
       >
         <Chevron direction="up" />
       </button>
+      ) : null}
 
       <div
         ref={viewportRef}
@@ -494,6 +498,7 @@ export const Moya500DesignThumbnailStrip = forwardRef<
         </ul>
       </div>
 
+      {showGalleryNavigation ? (
       <button
         type="button"
         aria-label="次の画像を表示"
@@ -502,6 +507,7 @@ export const Moya500DesignThumbnailStrip = forwardRef<
       >
         <Chevron direction="down" />
       </button>
+      ) : null}
     </aside>
   );
 });

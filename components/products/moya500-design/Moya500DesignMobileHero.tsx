@@ -23,6 +23,7 @@ import {
   type Moya500DesignGalleryItem,
 } from "@/components/products/moya500-design/gallery-media";
 import { preloadMoya500Image } from "@/components/products/moya500-design/image-preload";
+import { shouldDisplayGalleryNavigation } from "@/lib/products/gallery";
 import { canPurchaseProduct } from "@/lib/products/purchase";
 import {
   getProductVariantOptionName,
@@ -172,6 +173,7 @@ export function Moya500DesignMobileHero({
     product,
     selectedVariant
   );
+  const showGalleryNavigation = shouldDisplayGalleryNavigation(items.length);
   const colorChipImageResolver =
     product.handle === "moya500" || product.handle === "moya500-design"
       ? moya500DesignThumbnailSrc
@@ -611,6 +613,7 @@ export function Moya500DesignMobileHero({
             {selectedIndex + 1} / {items.length}
           </p>
 
+          {showGalleryNavigation ? (
           <ol
             aria-label="商品画像"
             className="moya500-design-mobile-dots absolute bottom-[14px] left-1/2 z-10 flex -translate-x-1/2 items-center gap-[6px]"
@@ -635,6 +638,7 @@ export function Moya500DesignMobileHero({
               </li>
             ))}
           </ol>
+          ) : null}
         </div>
 
         <Moya500DesignThumbnailStripHorizontal

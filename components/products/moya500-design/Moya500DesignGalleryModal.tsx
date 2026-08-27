@@ -15,6 +15,7 @@ import {
   MOYA500_ZOOM_OUT_CURSOR,
 } from "@/components/products/moya500-design/gallery-cursors";
 import type { Moya500DesignGalleryItem } from "@/components/products/moya500-design/gallery-media";
+import { shouldDisplayGalleryNavigation } from "@/lib/products/gallery";
 import { uiText } from "@/lib/typography";
 
 const MIN_SCALE = 1;
@@ -394,6 +395,7 @@ export function Moya500DesignGalleryModal({
 }: Moya500DesignGalleryModalProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const selectedItem = items[selectedIndex];
+  const showGalleryNavigation = shouldDisplayGalleryNavigation(items.length);
 
   useEffect(() => {
     if (!isOpen) {
@@ -407,6 +409,10 @@ export function Moya500DesignGalleryModal({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         onClose();
+      }
+
+      if (!shouldDisplayGalleryNavigation(items.length)) {
+        return;
       }
 
       if (event.key === "ArrowLeft") {
@@ -450,6 +456,7 @@ export function Moya500DesignGalleryModal({
         {selectedIndex + 1} / {items.length}
       </p>
 
+      {showGalleryNavigation ? (
       <div className="fixed bottom-[24px] left-[22px] z-20 flex items-center gap-[12px]">
           <button
             type="button"
@@ -472,6 +479,7 @@ export function Moya500DesignGalleryModal({
             <ProductGalleryChevron direction="right" />
           </button>
       </div>
+      ) : null}
 
       <button
         ref={closeButtonRef}

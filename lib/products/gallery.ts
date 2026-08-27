@@ -59,6 +59,11 @@ export function usesCarouselGallery(productHandle: string): boolean {
   return CAROUSEL_GALLERY_PRODUCT_HANDLES.has(productHandle);
 }
 
+/** ギャラリーが1枚のときはドット・サムネ矢印・拡大ナビを出さない */
+export function shouldDisplayGalleryNavigation(itemCount: number): boolean {
+  return itemCount > 1;
+}
+
 /** Variant ギャラリー内の全画像（standard / openClose 両対応） */
 export function getAllVariantGalleryImages(gallery: VariantGallery): ProductImage[] {
   if (gallery.type === "standard") {

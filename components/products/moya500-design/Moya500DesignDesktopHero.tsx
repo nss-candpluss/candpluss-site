@@ -21,6 +21,7 @@ import {
   type Moya500DesignGalleryItem,
 } from "@/components/products/moya500-design/gallery-media";
 import { preloadMoya500Image } from "@/components/products/moya500-design/image-preload";
+import { shouldDisplayGalleryNavigation } from "@/lib/products/gallery";
 import { canPurchaseProduct } from "@/lib/products/purchase";
 import {
   getProductVariantOptionName,
@@ -174,6 +175,7 @@ export function Moya500DesignDesktopHero({
     product,
     selectedVariant
   );
+  const showGalleryNavigation = shouldDisplayGalleryNavigation(items.length);
   const colorChipImageResolver =
     product.handle === "moya500" || product.handle === "moya500-design"
       ? moya500DesignThumbnailSrc
@@ -554,7 +556,7 @@ export function Moya500DesignDesktopHero({
         })}
 
         <ProductGalleryControls
-          hasImages={items.length > 1}
+          hasImages={showGalleryNavigation}
           onPrevious={() =>
             thumbnailStripRef.current?.goToIndex(
               wrapIndex(selectedIndex - 1, items.length)
@@ -573,6 +575,7 @@ export function Moya500DesignDesktopHero({
           {selectedIndex + 1} / {items.length}
         </p>
 
+        {showGalleryNavigation ? (
         <ol
           aria-label="商品画像"
           className="absolute bottom-[clamp(16px,2.2vh,26px)] left-1/2 z-10 flex -translate-x-1/2 items-center gap-[6px]"
@@ -597,6 +600,7 @@ export function Moya500DesignDesktopHero({
             </li>
           ))}
         </ol>
+        ) : null}
       </div>
 
       <div className="px-[clamp(42px,4vw,76px)] pt-[clamp(12px,2vh,26px)] pb-[clamp(28px,4vh,52px)]">
