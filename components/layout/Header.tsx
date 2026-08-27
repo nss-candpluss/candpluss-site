@@ -18,12 +18,17 @@ import {
 } from "@/lib/site-navigation-visibility";
 import { HeaderMobileMenu } from "@/components/layout/HeaderMobileMenu";
 import { hoverUnderlineActiveClassName, hoverUnderlineHoverClassName } from "@/components/ui/TextLink";
+import {
+  fallbackHeaderTheme,
+  headerThemeFromAttribute,
+  headerThemeProbeY,
+  isHeaderOnScreen,
+  isProductDetailPath,
+  type HeaderTheme,
+} from "@/lib/header-theme";
 import { maskGraphicStyle } from "@/lib/maskStyle";
 
-const HEADER_THEME_PROBE_Y = 40;
 const headerIconClassName = "size-[24px]";
-
-type HeaderTheme = "onDark" | "onLight";
 
 type HeaderMaskGraphicProps = {
   src: string;
@@ -38,10 +43,6 @@ function HeaderMaskGraphic({ src, className }: HeaderMaskGraphicProps) {
       style={maskGraphicStyle(src)}
     />
   );
-}
-
-function isProductDetailPath(pathname: string): boolean {
-  return /^\/products\/[^/]+$/.test(pathname);
 }
 
 function isGlobalNavLinkActive(pathname: string, href: string): boolean {
@@ -59,7 +60,11 @@ function resolveHeaderTheme(header: HTMLElement | null, pathname: string): Heade
     header.style.pointerEvents = "none";
   }
 
-  const target = document.elementFromPoint(window.innerWidth / 2, HEADER_THEME_PROBE_Y);
+  const rect = header?.getBoundingClientRect();
+  const probeY = rect
+    ? headerThemeProbeY(rect.top, window.innerHeight)
+    : headerThemeProbeY(0, window.innerHeight);
+  const target = document.elementFromPoint(window.innerWidth / 2, probeY);
   const section = target?.closest("[data-header-theme]");
   const theme = section?.getAttribute("data-header-theme");
 
@@ -67,7 +72,7 @@ function resolveHeaderTheme(header: HTMLElement | null, pathname: string): Heade
     header.style.pointerEvents = previousPointerEvents;
   }
 
-  return theme === "onLight" ? "onLight" : "onDark";
+  return headerThemeFromAttribute(theme, pathname);
 }
 
 export function Header() {
@@ -75,7 +80,7 @@ export function Header() {
   const { cart, openCart } = useCart();
   const { customer } = useCustomer();
   const headerRef = useRef<HTMLElement>(null);
-  const [theme, setTheme] = useState<HeaderTheme>("onDark");
+  const [theme, setTheme] = useState<HeaderTheme>(() => fallbackHeaderTheme(pathname));
   const [mobileMenuState, setMobileMenuState] = useState<{ open: boolean; pathname: string }>({
     open: false,
     pathname: "",
@@ -84,16 +89,52 @@ export function Header() {
   const [isMobileMenuMounted, setIsMobileMenuMounted] = useState(false);
 
   useEffect(() => {
+    let frameId = 0;
+
     function updateTheme() {
-      setTheme(resolveHeaderTheme(headerRef.current, pathname));
+      const header = headerRef.current;
+      const rect = header?.getBoundingClientRect();
+
+      // ヘッダーは document 先頭の absolute。画面外のときに viewport を読むと
+      // iOS のアドレスバー resize で別セクションの色に切り替わってしまう。
+      if (
+        rect &&
+        !isHeaderOnScreen(rect.top, rect.bottom, window.innerHeight)
+      ) {
+        setTheme(fallbackHeaderTheme(pathname));
+        return;
+      }
+
+      setTheme(resolveHeaderTheme(header, pathname));
     }
 
-    const frameId = window.requestAnimationFrame(updateTheme);
-    window.addEventListener("resize", updateTheme, { passive: true });
+    function scheduleThemeUpdate() {
+      if (frameId) {
+        return;
+      }
+
+      frameId = window.requestAnimationFrame(() => {
+        frameId = 0;
+        updateTheme();
+      });
+    }
+
+    updateTheme();
+    window.addEventListener("scroll", scheduleThemeUpdate, { passive: true });
+    window.addEventListener("resize", scheduleThemeUpdate, { passive: true });
+    window.addEventListener("pageshow", scheduleThemeUpdate);
+    window.addEventListener("orientationchange", scheduleThemeUpdate);
+    window.visualViewport?.addEventListener("resize", scheduleThemeUpdate);
+    window.visualViewport?.addEventListener("scroll", scheduleThemeUpdate);
 
     return () => {
       window.cancelAnimationFrame(frameId);
-      window.removeEventListener("resize", updateTheme);
+      window.removeEventListener("scroll", scheduleThemeUpdate);
+      window.removeEventListener("resize", scheduleThemeUpdate);
+      window.removeEventListener("pageshow", scheduleThemeUpdate);
+      window.removeEventListener("orientationchange", scheduleThemeUpdate);
+      window.visualViewport?.removeEventListener("resize", scheduleThemeUpdate);
+      window.visualViewport?.removeEventListener("scroll", scheduleThemeUpdate);
     };
   }, [pathname]);
 
