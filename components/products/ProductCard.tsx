@@ -13,7 +13,9 @@ import {
 import { getProductListingImage } from "@/lib/products/gallery";
 import {
   getProductDetailHref,
+  resolveProductPriceAmount,
   resolveProductVariantId,
+  shouldDisplayProductPrice,
 } from "@/lib/products/helpers";
 import type { Product } from "@/types/product";
 import { uiText } from "@/lib/typography";
@@ -50,13 +52,20 @@ export function ProductCard({
 
   const displayImage = getProductListingImage(product, selectedVariantId);
   const detailHref = getProductDetailHref(product.handle, selectedVariantId);
+  const selectedVariant =
+    product.variants.find((variant) => variant.id === selectedVariantId) ??
+    product.variants[0] ??
+    null;
+  const showPrice = shouldDisplayProductPrice(product, selectedVariant);
+  const priceAmount = resolveProductPriceAmount(product, selectedVariant).toLocaleString(
+    "ja-JP"
+  );
   const hasMultipleVariants = product.variants.length > 1;
   const showStatusLabel = hasProductStatusLabel(product.status, product.statusLabel);
-  const priceAmount = product.priceLabel.replace(/^¥/, "");
   const usesProductsListingStyles = presentation === "productsListing";
 
   return (
-    <article>
+    <article className="group">
       <Link href={detailHref} className="block">
         <div className="relative aspect-[6/5] overflow-hidden bg-[var(--color-line)]">
           {displayImage ? (
@@ -66,7 +75,7 @@ export function ProductCard({
               fill
               sizes={sizes}
               priority={priority}
-              className="object-cover object-center"
+              className="object-cover object-center transition-transform duration-300 ease-out group-hover:scale-105"
             />
           ) : null}
         </div>
@@ -151,6 +160,7 @@ export function ProductCard({
             {product.category}
           </p>
 
+          {showPrice ? (
           <p
             className={`inline-flex items-baseline gap-x-[calc(4px*var(--gap-scale-x))] gap-y-[calc(4px*var(--gap-scale-y))] text-[var(--foreground)] ${
               usesProductsListingStyles
@@ -178,6 +188,7 @@ export function ProductCard({
               税込
             </span>
           </p>
+          ) : null}
         </Link>
       </div>
     </article>

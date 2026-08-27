@@ -24,7 +24,12 @@ import {
 } from "@/components/products/moya500-design/gallery-media";
 import { preloadMoya500Image } from "@/components/products/moya500-design/image-preload";
 import { canPurchaseProduct } from "@/lib/products/purchase";
-import { getProductVariantOptionName } from "@/lib/products/helpers";
+import {
+  getProductVariantOptionName,
+  shouldDisplayProductPrice,
+  shouldDisplayProductVariantLabel,
+  shouldDisplayProductVariantOptions,
+} from "@/lib/products/helpers";
 import {
   MOYA500_MOBILE_THUMB_STRIP_HEIGHT,
   Moya500DesignThumbnailStripHorizontal,
@@ -159,8 +164,14 @@ export function Moya500DesignMobileHero({
   const priceAmount =
     selectedVariant?.price?.amount.toLocaleString("ja-JP") ??
     product.priceLabel.replace(/^¥/, "");
+  const showPrice = shouldDisplayProductPrice(product, selectedVariant);
   const displayTitle = product.title.replace("（デザインテスト）", "");
   const variantOptionName = getProductVariantOptionName(product);
+  const showVariantOptions = shouldDisplayProductVariantOptions(product);
+  const showVariantLabel = shouldDisplayProductVariantLabel(
+    product,
+    selectedVariant
+  );
   const colorChipImageResolver =
     product.handle === "moya500" || product.handle === "moya500-design"
       ? moya500DesignThumbnailSrc
@@ -655,6 +666,7 @@ export function Moya500DesignMobileHero({
           className="mt-[12px] !text-[clamp(13px,calc(14px*var(--text-scale)),14px)] !leading-[clamp(13px,calc(14px*var(--text-scale)),14px)]"
         />
 
+        {showVariantOptions ? (
         <div className="mt-[28px]">
           <ProductColorChips
             variants={product.variants}
@@ -669,7 +681,7 @@ export function Moya500DesignMobileHero({
             resolveImageSrc={colorChipImageResolver}
           />
 
-          {selectedVariant ? (
+          {showVariantLabel && selectedVariant ? (
             <p
               className="mt-[16px] font-ui-en text-[13px] leading-[13px] text-[var(--foreground)]"
             >
@@ -678,6 +690,7 @@ export function Moya500DesignMobileHero({
             </p>
           ) : null}
         </div>
+        ) : null}
 
         <button
           type="button"
@@ -704,12 +717,14 @@ export function Moya500DesignMobileHero({
             />
             ADD TO CART
           </span>
+          {showPrice ? (
           <span
             className="inline-flex items-baseline gap-[4px] font-ui-en text-[clamp(13px,calc(14px*var(--text-scale)),14px)] leading-[clamp(13px,calc(14px*var(--text-scale)),14px)]"
           >
             <span>¥{priceAmount}</span>
             <span className="font-body-ja text-[11px] leading-[11px]">税込</span>
           </span>
+          ) : null}
         </button>
         {cartError ? (
           <p role="alert" className="mt-3 font-body-ja text-xs text-[#9b1b30]">

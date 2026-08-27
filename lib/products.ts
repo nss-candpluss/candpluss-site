@@ -8,6 +8,7 @@ import {
 
 import type { Product, ProductCategorySlug } from "@/types/product";
 import {
+  keepShopifyListingProducts,
   normalizeProductHandle,
   sortProductsForListing,
 } from "@/lib/products/helpers";
@@ -41,7 +42,7 @@ function mergeShopifyProducts(shopifyProducts: Product[]) {
 
 /**
  * PRODUCT_SOURCE=shopify のときは Shopify を優先し、
- * 未移行の商品だけローカルデータを残す。
+ * 詳細などでは未移行のローカル商品も残す。
  */
 export async function getAllProducts(): Promise<Product[]> {
   if (!usesShopifyProducts()) {
@@ -52,9 +53,22 @@ export async function getAllProducts(): Promise<Product[]> {
 }
 
 export async function getListingProducts(): Promise<Product[]> {
-  const allProducts = await getAllProducts();
+  if (!usesShopifyProducts()) {
+    return sortProductsForListing(
+      products.filter((product) => !product.listingHidden)
+    );
+  }
+
+  const shopifyProducts = await fetchAllProducts();
+  const shopifyHandles = new Set(
+    shopifyProducts.map((product) => product.handle)
+  );
+
   return sortProductsForListing(
-    allProducts.filter((product) => !product.listingHidden)
+    keepShopifyListingProducts(
+      mergeShopifyProducts(shopifyProducts),
+      shopifyHandles
+    )
   );
 }
 

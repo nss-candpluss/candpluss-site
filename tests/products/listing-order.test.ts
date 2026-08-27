@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { sortProductsForListing } from "@/lib/products/helpers";
+import { sortProductsForListing, keepShopifyListingProducts } from "@/lib/products/helpers";
 
 describe("sortProductsForListing", () => {
   it("orders products by listing category: tent, option, tarp, peg, accessory", () => {
@@ -34,6 +34,25 @@ describe("sortProductsForListing", () => {
       "inner",
       "roof-sheet",
       "seam-grip",
+    ]);
+  });
+});
+
+describe("keepShopifyListingProducts", () => {
+  it("drops local-only products and hidden listings", () => {
+    const visible = keepShopifyListingProducts(
+      [
+        { handle: "moya500", listingHidden: false },
+        { handle: "local-only" },
+        { handle: "hidden-shopify", listingHidden: true },
+        { handle: "roof-sheet" },
+      ],
+      new Set(["moya500", "roof-sheet", "hidden-shopify"])
+    );
+
+    expect(visible.map((product) => product.handle)).toEqual([
+      "moya500",
+      "roof-sheet",
     ]);
   });
 });

@@ -1,4 +1,4 @@
-import { productCategories, type Product } from "@/types/product";
+import { productCategories, type Product, type ProductVariant } from "@/types/product";
 
 const LISTING_CATEGORY_ORDER = productCategories
   .filter((category) => category.slug !== "all")
@@ -18,6 +18,31 @@ export function sortProductsForListing<T extends { categorySlug: string }>(
     const bIndex = order.get(b.categorySlug) ?? fallbackIndex;
     return aIndex - bIndex;
   });
+}
+
+/** Shopify 経由の一覧では、ストアに存在する商品だけを残す */
+export function keepShopifyListingProducts<T extends { handle: string; listingHidden?: boolean }>(
+  products: T[],
+  shopifyHandles: ReadonlySet<string>
+): T[] {
+  return products.filter(
+    (product) => !product.listingHidden && shopifyHandles.has(product.handle)
+  );
+}
+
+export function resolveProductPriceAmount(
+  product: Pick<Product, "price">,
+  variant?: Pick<ProductVariant, "price"> | null
+): number {
+  return variant?.price?.amount ?? product.price;
+}
+
+/** 金額 0 のときは ¥・税込を含む価格表示を出さない */
+export function shouldDisplayProductPrice(
+  product: Pick<Product, "price">,
+  variant?: Pick<ProductVariant, "price"> | null
+): boolean {
+  return resolveProductPriceAmount(product, variant) !== 0;
 }
 
 export function resolveProductVariantId(
@@ -56,6 +81,34 @@ export function getSelectedVariant(product: Product, variantId?: string | null) 
     product.variants.find((variant) => variant.id === variantId) ??
     product.variants[0] ??
     null
+  );
+}
+
+const PLACEHOLDER_VARIANT_NAME = /^(default title|default)$/i;
+
+/** Shopify 未設定バリアント（Default Title）やローカルの DEFAULT */
+export function isPlaceholderProductVariantName(name?: string | null): boolean {
+  return !name?.trim() || PLACEHOLDER_VARIANT_NAME.test(name.trim());
+}
+
+/** カラー・サイズなど、実際に選べるバリエーションが2つ以上あるか */
+export function shouldDisplayProductVariantOptions(
+  product: Pick<Product, "variants">
+): boolean {
+  return (
+    product.variants.filter(
+      (variant) => !isPlaceholderProductVariantName(variant.colorName)
+    ).length > 1
+  );
+}
+
+export function shouldDisplayProductVariantLabel(
+  product: Pick<Product, "variants">,
+  selectedVariant?: Pick<ProductVariant, "colorName"> | null
+): boolean {
+  return (
+    shouldDisplayProductVariantOptions(product) &&
+    !isPlaceholderProductVariantName(selectedVariant?.colorName)
   );
 }
 
