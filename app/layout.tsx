@@ -6,11 +6,9 @@ import { CustomerProvider } from "@/components/commerce/CustomerProvider";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { HeroReturnHomeSync } from "@/components/layout/HeroReturnHomeSync";
-import { SiteLoader } from "@/components/layout/SiteLoader";
 import { SmoothScrollProvider } from "@/components/motion/SmoothScrollProvider";
 import "./globals.css";
 import { siteConfig } from "@/lib/site";
-import { SITE_LOADER_BOOTSTRAP } from "@/lib/site-loader";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -49,14 +47,11 @@ export default function RootLayout({
     <html
       lang="ja"
       className={`${baskervville.variable} ${inter.variable} h-full antialiased`}
-      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <script dangerouslySetInnerHTML={{ __html: SITE_LOADER_BOOTSTRAP }} />
         <CustomerProvider>
           <CartProvider>
             <SmoothScrollProvider>
-              <SiteLoader />
               <HeroReturnHomeSync />
               <Header />
               <div className="flex-1">{children}</div>
