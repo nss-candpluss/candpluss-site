@@ -19,7 +19,6 @@ import {
 import { HeaderMobileMenu } from "@/components/layout/HeaderMobileMenu";
 import { hoverUnderlineActiveClassName, hoverUnderlineHoverClassName } from "@/components/ui/TextLink";
 import { maskGraphicStyle } from "@/lib/maskStyle";
-import { uiText } from "@/lib/typography";
 
 const HEADER_THEME_PROBE_Y = 40;
 const headerIconClassName = "size-[24px]";
@@ -167,7 +166,7 @@ export function Header() {
                       <Link
                         href={link.href}
                         aria-current={isActive ? "page" : undefined}
-                        className={`${isActive ? hoverUnderlineActiveClassName : hoverUnderlineHoverClassName} ${uiText(14)}`}
+                        className={`${isActive ? hoverUnderlineActiveClassName : hoverUnderlineHoverClassName} text-[14px] leading-[14px]`}
                       >
                         {link.label}
                       </Link>
