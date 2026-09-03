@@ -366,8 +366,7 @@ export function ConceptParallaxRegion({
             } else {
               gsap.set(outroTitle, {
                 opacity: 0,
-                y: 40,
-                filter: "blur(8px)",
+                y: 96,
               });
 
               const outroTimeline = gsap.timeline({
@@ -375,7 +374,7 @@ export function ConceptParallaxRegion({
                 onComplete: () => {
                   outroRevealed = true;
                   gsap.set(outroTitle, {
-                    clearProps: "opacity,transform,filter,visibility",
+                    clearProps: "opacity,transform,visibility",
                   });
                 },
               });
@@ -384,22 +383,20 @@ export function ConceptParallaxRegion({
                 outroTitle,
                 {
                   opacity: 0,
-                  y: 40,
-                  filter: "blur(8px)",
+                  y: 96,
                 },
                 {
                   opacity: 1,
                   y: 0,
-                  filter: "blur(0px)",
-                  duration: 1.8,
-                  ease: "power3.out",
+                  duration: 1.4,
+                  ease: "power2.out",
                 }
               );
 
               ScrollTrigger.create({
                 trigger: lastSection,
                 scroller: getScrollTriggerScroller(),
-                start: "bottom 20%",
+                start: "bottom 40%",
                 once: true,
                 onEnter: () => outroTimeline.play(),
               });
@@ -411,7 +408,7 @@ export function ConceptParallaxRegion({
               const outroPinTrigger = ScrollTrigger.create({
                 trigger: lastSection,
                 scroller: getScrollTriggerScroller(),
-                start: "bottom 20%",
+                start: "bottom 40%",
                 endTrigger: outro,
                 end: "center center",
                 invalidateOnRefresh: true,

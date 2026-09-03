@@ -425,27 +425,6 @@
   --section-title-responsive-max: 67px;
 }
 
-/** QUALITY hero タイトル。1023px以下: 48–102px、1024px+: 108px × text-scale */
-.quality-hero-title {
-  font-size: clamp(
-    48px,
-    calc(48px + (100vw - 375px) / (1023px - 375px) * 54px),
-    102px
-  );
-  line-height: clamp(
-    48px,
-    calc(48px + (100vw - 375px) / (1023px - 375px) * 54px),
-    102px
-  );
-}
-
-@media (min-width: 1024px) {
-  .quality-hero-title {
-    font-size: calc(108px * var(--text-scale));
-    line-height: calc(108px * var(--text-scale));
-  }
-}
-
 /** QUALITY ページのみ: 実 viewport 高さ（--app-vh × 100） */
 html.quality-page,
 html.quality-page body {

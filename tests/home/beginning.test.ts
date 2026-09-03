@@ -17,4 +17,11 @@ describe("top hero OUR BEGINNING copy", () => {
       "What’s Your + S ?",
     ]);
   });
+
+  it("links to concept with READ MORE label", () => {
+    expect(topHeroContent.beginning.link).toEqual({
+      label: "READ MORE",
+      href: "/concept",
+    });
+  });
 });

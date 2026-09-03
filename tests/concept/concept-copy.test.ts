@@ -182,7 +182,7 @@ describe("concept page copy", () => {
       "data-concept-outro-title-character"
     );
     expect(conceptPageSource).toContain(
-      'style={{ opacity: 0, transform: "translateY(40px)" }}'
+      'style={{ opacity: 0, transform: "translateY(96px)" }}'
     );
     expect(conceptPageSource).toContain(
       'className="relative z-20 flex min-h-svh items-center bg-black"'

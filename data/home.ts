@@ -13,7 +13,7 @@ export const topHeroContent = {
       "What’s Your + S ?",
     ],
     link: {
-      label: "CONCEPT",
+      label: "READ MORE",
       href: "/concept",
     },
   },

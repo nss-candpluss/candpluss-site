@@ -2,10 +2,11 @@ export const qualityContent = {
   title: "LABO",
   hero: {
     image: "/images/quality/quality-hero.webp",
-    title: "Built for Better.",
-    label: "LABO",
+    title: "C AND+S LABO",
+    titleLogo: "/assets/logos/logo-candpluss-labo.svg",
+    label: "SEE. TOUCH. EXPERIENCE.",
     body:
-      "国内外の確かなパートナーと協働し、デザイン・設計・素材・パーツに至るまで、一つひとつの品質にこだわっています。\n常により良いものを追い求め、細部に至るまでクオリティを追求し続ける。\nそれが、C AND+Sのものづくりの信念です。",
+      "C AND+S LABOは、製品を実際に見て、触れて、\nその品質やサイズ感を確かめていただける\nブランド体験スペースです。",
   },
 } as const;
 

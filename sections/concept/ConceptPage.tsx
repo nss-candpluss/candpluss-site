@@ -101,7 +101,7 @@ function ConceptOutroTitle({ title }: { title: string }) {
         data-concept-outro-title
         aria-label={title}
         className={`${conceptTitleWrapClassName} font-heading ${conceptStoryTitleClassName}`}
-        style={{ opacity: 0, transform: "translateY(40px)" }}
+        style={{ opacity: 0, transform: "translateY(96px)" }}
       >
         {splitConceptTitleWrapUnits(title).map((unit, unitIndex) => (
           <span

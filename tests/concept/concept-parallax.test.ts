@@ -153,16 +153,19 @@ describe("Concept content parallax", () => {
     expect(parallaxSource).toContain("outroPositionLocked");
     expect(parallaxSource).toContain("outroPinTrigger.kill()");
     expect(parallaxSource).toContain("trigger: lastSection");
-    expect(parallaxSource).toContain('start: "bottom 20%"');
+    expect(parallaxSource).toContain('start: "bottom 40%"');
+    expect(parallaxSource).not.toContain('start: "bottom 20%"');
     expect(parallaxSource).toContain("endTrigger: outro");
     expect(parallaxSource).toContain('end: "center center"');
     expect(parallaxSource).not.toContain('start: "center 72%"');
     expect(parallaxSource).not.toContain(
       "onEnterBack: keepOutroTitleAtViewportCenter"
     );
-    expect(parallaxSource).toContain('filter: "blur(8px)"');
-    expect(parallaxSource).toContain('filter: "blur(0px)"');
-    expect(parallaxSource).toContain("duration: 1.8");
+    expect(parallaxSource).not.toContain('filter: "blur(8px)"');
+    expect(parallaxSource).toContain("y: 96");
+    expect(parallaxSource).toContain(
+      "{\n                  opacity: 1,\n                  y: 0,\n                  duration: 1.4,\n                  ease: \"power2.out\",\n                }"
+    );
     expect(parallaxSource).toContain("once: true");
     expect(parallaxSource).toContain("outroTimeline.play()");
     expect(parallaxSource).not.toContain("outroTimeline.pause(0)");
