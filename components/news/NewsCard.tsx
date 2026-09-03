@@ -7,6 +7,7 @@ import { bodyText, uiText } from "@/lib/typography";
 
 type NewsCardProps = {
   article: NewsArticle;
+  className?: string;
   sizes?: string;
   priority?: boolean;
   /** 本文 typography の個別上書き（font-size / line-height） */
@@ -15,12 +16,13 @@ type NewsCardProps = {
 
 export function NewsCard({
   article,
+  className = "",
   sizes = "(min-width: 768px) 33vw, 100vw",
   priority = false,
   bodyTypographyClassName,
 }: NewsCardProps) {
   return (
-    <Link href={`/news/${article.handle}`} className="group block">
+    <Link href={`/news/${article.handle}`} className={`group block ${className}`.trim()}>
       <MaskedImage
         src={article.image}
         alt=""

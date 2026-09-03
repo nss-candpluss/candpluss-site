@@ -3,9 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { ProductCard } from "@/components/products/ProductCard";
+import { SiteGrid } from "@/components/ui/SiteGrid";
 import { productCategories } from "@/data/products";
 import type { Product, ProductCategorySlug } from "@/data/products";
 import { HoverUnderlineText } from "@/components/ui/TextLink";
+import { productCardSpanClassName } from "@/lib/layout";
 import { uiText } from "@/lib/typography";
 
 type ProductsListingProps = {
@@ -89,16 +91,17 @@ export function ProductsListing({ products }: ProductsListingProps) {
         </ul>
       </nav>
 
-      <div className="mt-[calc(52px*var(--gap-scale-y))] grid grid-cols-1 gap-x-[calc(16px*var(--gap-scale-x))] gap-y-[calc(62px*var(--gap-scale-y))] min-[640px]:grid-cols-2 min-[1024px]:grid-cols-3">
+      <SiteGrid className="mt-[calc(52px*var(--gap-scale-y))] gap-x-[calc(16px*var(--gap-scale-x))] gap-y-[calc(62px*var(--gap-scale-y))]">
         {filteredProducts.map((product, index) => (
           <ProductCard
             key={product.id}
             product={product}
+            className={productCardSpanClassName}
             priority={index < 3}
             presentation="productsListing"
           />
         ))}
-      </div>
+      </SiteGrid>
     </>
   );
 }

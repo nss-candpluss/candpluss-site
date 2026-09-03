@@ -4,87 +4,13 @@ export const topHeroContent = {
   titleImage: "/images/hero/hero-title.svg",
   titleImageSp: "/images/hero/sp-hero-title.svg",
   titleAlt: "Find your soul. Touch the ground.",
-  beginningImage: "/images/hero/our-beginning.webp",
   beginning: {
-    label: "OUR BEGINNING",
-    titleLine1: "Add new value",
-    titleLine2Lead: "to the",
-    titleLine2Rest: "camping experience.",
+    title: "Camp + Something.",
     bodyLines: [
-      "C and + S は、社内のアウトドアを愛する少数のメンバーから始まりました。",
-      "",
-      "週末になると、彼らはそれぞれのテントを持ち、日本の山へ、湖へ、森へ向かいました。",
-      "春の柔らかな雨、夏の強い日差し、秋の深い冷え込み、そして冬の厳しい風と雪。",
-      "",
-      "日本の四季は、美しく、そして過酷です。",
-      "",
-      "しかし、どれだけ高価なテントを使っても、",
-      "そのすべての季節に完全に対応できるテントは存在しませんでした。",
-      "",
-      "強度は十分でも、美しさが欠けている。",
-      "美しくても、過酷な環境に耐えられない。",
-      "機能があっても、そこに佇む存在としての完成度が足りない。",
-      "",
-      "ある夜、焚き火を囲みながら、誰かが言いました。",
-      "",
-      "「日本の四季すべてに完全に対応できる、最高品質のドームテントを作ろう。」",
-      "",
-      "それは単なる製品開発ではありませんでした。",
-      "",
-      "強さ。",
-      "品質。",
-      "そして、美しさ。",
-      "",
-      "自然の中に置かれたとき、",
-      "構造として完成され、静かに存在する、美しいドームを作ること。",
-      "",
-      "妥協のない素材を選び、",
-      "妥協のない構造を設計し、",
-      "妥協のない思想で形にする。",
-      "",
-      "無数の試作と失敗を繰り返し、",
-      "日本の四季すべてに対応する強さと、",
-      "自然の中で調和する美しさを両立したドームが完成しました。",
-      "",
-      "それが、C and + S の始まりです。",
-      "",
-      "C and + S began with a small group inside the company who shared a deep love for the outdoors.",
-      "",
-      "On weekends, they traveled into the mountains, lakes, and forests of Japan.",
-      "They experienced gentle spring rain, intense summer sun, deep autumn cold, and harsh winter winds and snow.",
-      "",
-      "Japan’s four seasons are beautiful — and unforgiving.",
-      "",
-      "Yet no matter how premium the tents they used,",
-      "none were truly capable of responding completely to every season.",
-      "",
-      "Some were strong, but lacked beauty.",
-      "Some were beautiful, but lacked strength.",
-      "Some functioned, but lacked presence.",
-      "",
-      "One night, around a fire, someone said:",
-      "",
-      "“Let’s build the highest-quality dome tent — one that fully responds to all four seasons of Japan.”",
-      "",
-      "It was never just product development.",
-      "",
-      "It was about strength.",
-      "It was about quality.",
-      "And it was about beauty.",
-      "",
-      "To create a dome that exists in nature as a complete structure.",
-      "Quiet. Strong. Beautiful.",
-      "",
-      "They selected uncompromising materials.",
-      "They engineered uncompromising structures.",
-      "They followed an uncompromising philosophy.",
-      "",
-      "After countless prototypes and failures,",
-      "they created a dome that combines structural strength with visual beauty",
-      "",
-      "capable of standing through all four seasons of Japan.",
-      "",
-      "That is where C and + S began.",
+      "キャンプと、大切なものをつなぐ。",
+      "C AND+Sは、道具と空間を通して、人それぞれの大切な“Something”とキャンプをつなぎます。",
+      "自然の中で過ごす時間を、もっと心地よく、美しく、自由に。",
+      "What’s Your + S ?",
     ],
     link: {
       label: "CONCEPT",
@@ -93,18 +19,72 @@ export const topHeroContent = {
   },
 } as const;
 
-export const homeFeatureLinks = [
-  {
-    id: "products",
-    title: "ALL PRODUCTS",
+const MAIN_PRODUCT_DUMMY_IMAGE = "/images/products/_shared/placeholder.webp";
+
+export const homeMainProducts = {
+  title: "Main Products",
+  items: [
+    {
+      id: "moya500",
+      title: "MOYA500",
+      caption: "THE GRAND DOME SHELTER.",
+      href: "/products/moya500",
+      image: MAIN_PRODUCT_DUMMY_IMAGE,
+    },
+    {
+      id: "moya420",
+      title: "MOYA420",
+      caption: "THE GRAND DOME SHELTER.",
+      href: "/products/moya420",
+      image: MAIN_PRODUCT_DUMMY_IMAGE,
+    },
+    {
+      id: "nokuta",
+      title: "NOKUTA",
+      caption: "PROTECTION UNDER THE SKY.",
+      href: "/products/nokuta",
+      image: MAIN_PRODUCT_DUMMY_IMAGE,
+    },
+    {
+      id: "zig-stake",
+      title: "ZIG STAKE",
+      caption: "BUILT TO HOLD.",
+      href: "/products/zig-stake20",
+      image: MAIN_PRODUCT_DUMMY_IMAGE,
+    },
+    {
+      id: "kenju",
+      title: "KENJU",
+      caption: "STRENGTH MEETS VERSATILITY.",
+      href: "/products/kenju",
+      image: MAIN_PRODUCT_DUMMY_IMAGE,
+    },
+    {
+      id: "zig-hummer",
+      title: "ZIG HUMMER",
+      caption: "THE FORGED DRIVING TOOL",
+      href: "/products/zig-hummer",
+      image: MAIN_PRODUCT_DUMMY_IMAGE,
+    },
+  ],
+  link: {
+    label: "ALL PRODUCTS",
     href: "/products",
-    image: "/images/home/home-link-products.webp",
   },
+} as const;
+
+export const homeFeatureLinks = [
   {
     id: "labo",
     title: "LABO",
     href: "/labo",
-    image: "/images/home/home-link-quality.webp",
+    image: MAIN_PRODUCT_DUMMY_IMAGE,
+  },
+  {
+    id: "support",
+    title: "SUPPORT",
+    href: "/support",
+    image: MAIN_PRODUCT_DUMMY_IMAGE,
   },
 ] as const;
 
@@ -136,23 +116,5 @@ export const homeProductLinks = [
 ] as const;
 
 export const homeLabContent = {
-  title: "Fukuoka Lab.",
   backgroundImage: "/images/home/home-link-lab.webp",
-  link: {
-    label: "ABOUT US",
-    href: "/company",
-  },
-} as const;
-
-export const homeSupportContent = {
-  heading: "Lifetime Warranty",
-  label: "C AND+Sの製品保証",
-  body: `長く使い続けられる品質と使い心地を追求する。
-その想いは、デザイン、設計、素材の選定などの製品開発からはじまり、製品をご購入いただいた後も同じです。
-私たちC AND+Sは、修理や部品交換を通じて、お客様が製品とともに過ごす時間を支え続けます。`,
-  image: "/images/home/home-image-support.webp",
-  link: {
-    label: "SUPPORT",
-    href: "/support",
-  },
 } as const;

@@ -7,8 +7,10 @@ import {
   ContactTurnstile,
   type ContactTurnstileHandle,
 } from "@/components/contact/ContactTurnstile";
+import { SiteGrid } from "@/components/ui/SiteGrid";
 import { contactFormCopy, contactPageContent } from "@/data/contact";
 import { getContactApiUrl } from "@/lib/paths";
+import { formHalfSpanClassName } from "@/lib/layout";
 import { appendContactFormData } from "@/lib/contact/build-form-data";
 import {
   clearContactAttachments,
@@ -122,10 +124,10 @@ export function ContactConfirm() {
         <ContactTurnstile ref={turnstileRef} onTokenChange={setTurnstileToken} />
       </div>
 
-      <div className="mt-[calc(32px*var(--gap-scale-y))] grid grid-cols-1 gap-[calc(16px*var(--gap-scale-y))] min-[640px]:grid-cols-2">
+      <SiteGrid className="mt-[calc(32px*var(--gap-scale-y))] gap-[calc(16px*var(--gap-scale-y))]">
         <button
           type="button"
-          className={contactSecondaryButtonClassName}
+          className={`${contactSecondaryButtonClassName} ${formHalfSpanClassName}`}
           onClick={() => router.push("/contact")}
           disabled={isSubmitting}
         >
@@ -133,13 +135,13 @@ export function ContactConfirm() {
         </button>
         <button
           type="button"
-          className={contactPrimaryButtonClassName}
+          className={`${contactPrimaryButtonClassName} ${formHalfSpanClassName}`}
           onClick={handleSubmit}
           disabled={isSubmitting || !turnstileToken}
         >
           {isSubmitting ? buttons.submitting : buttons.submit}
         </button>
-      </div>
+      </SiteGrid>
     </>
   );
 }

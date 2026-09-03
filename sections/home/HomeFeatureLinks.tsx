@@ -2,19 +2,21 @@ import Link from "next/link";
 
 import { Container } from "@/components/ui/Container";
 import { MaskedImage } from "@/components/ui/MaskedImage";
+import { SiteGrid } from "@/components/ui/SiteGrid";
 import { TextLinkContent, textLinkLayoutClassName } from "@/components/ui/TextLink";
 import { homeFeatureLinks } from "@/data/home";
+import { twoColumnFeatureSpanClassName } from "@/lib/layout";
 
 export function HomeFeatureLinks() {
   return (
-    <section data-header-theme="onLight" className="bg-[var(--background)] pt-[var(--container-y-top)] pb-[var(--container-y-bottom)]">
+    <section data-header-theme="onLight" className="bg-white pt-[var(--container-y-top)] pb-[var(--container-y-bottom)]">
       <Container>
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-[var(--feature-links-gap)]">
+        <SiteGrid className="gap-5 md:gap-[var(--feature-links-gap)]">
           {homeFeatureLinks.map((item) => (
             <Link
               key={item.id}
               href={item.href}
-              className="group relative block"
+              className={`group relative block ${twoColumnFeatureSpanClassName}`}
             >
               <MaskedImage
                 src={item.image}
@@ -34,7 +36,7 @@ export function HomeFeatureLinks() {
               </span>
             </Link>
           ))}
-        </div>
+        </SiteGrid>
       </Container>
     </section>
   );

@@ -1,3 +1,4 @@
+import { scrollBoundLenisTo } from "@/lib/motion/setup-lenis-scroll-trigger";
 import type { ContactFormFieldErrors, ContactFormFieldKey } from "@/types/contact";
 
 export const CONTACT_FORM_VALIDATION_FIELD_ORDER = [
@@ -69,7 +70,9 @@ export function scrollToContactFormField(field: ContactFormFieldKey): void {
     return;
   }
 
-  element.scrollIntoView({ behavior: "smooth", block: "start" });
+  if (!scrollBoundLenisTo(element)) {
+    element.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   const focusTargetId = CONTACT_ERROR_FOCUS_TARGETS[field];
   const focusTarget = focusTargetId

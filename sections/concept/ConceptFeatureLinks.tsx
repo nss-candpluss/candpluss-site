@@ -2,8 +2,10 @@ import Link from "next/link";
 
 import { Container } from "@/components/ui/Container";
 import { MaskedImage } from "@/components/ui/MaskedImage";
+import { SiteGrid } from "@/components/ui/SiteGrid";
 import { TextLinkContent, textLinkLayoutClassName } from "@/components/ui/TextLink";
 import { conceptContent } from "@/data/concept";
+import { threeColumnFeatureSpanClassName } from "@/lib/layout";
 
 export function ConceptFeatureLinks() {
   return (
@@ -12,9 +14,13 @@ export function ConceptFeatureLinks() {
       className="bg-[var(--background)] pt-[var(--container-y-top)] pb-[var(--container-y-bottom)]"
     >
       <Container>
-        <div className="grid grid-cols-1 gap-x-[calc(16px*var(--gap-scale-x))] gap-y-[calc(16px*var(--gap-scale-y))] min-[768px]:grid-cols-3">
+        <SiteGrid className="gap-x-[calc(16px*var(--gap-scale-x))] gap-y-[calc(16px*var(--gap-scale-y))]">
           {conceptContent.featureLinks.map((item) => (
-            <Link key={item.id} href={item.href} className="group block">
+            <Link
+              key={item.id}
+              href={item.href}
+              className={`group block ${threeColumnFeatureSpanClassName}`}
+            >
               <div className="relative overflow-hidden">
                 <MaskedImage
                   src={item.image}
@@ -33,7 +39,7 @@ export function ConceptFeatureLinks() {
               </span>
             </Link>
           ))}
-        </div>
+        </SiteGrid>
       </Container>
     </section>
   );

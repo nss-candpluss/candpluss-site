@@ -3,7 +3,6 @@
 import { SiteImage } from "@/components/ui/SiteImage";
 import { useLayoutEffect, useRef } from "react";
 
-import { MaskedImage } from "@/components/ui/MaskedImage";
 import { TextLink } from "@/components/ui/TextLink";
 import { topHeroContent } from "@/data/home";
 import {
@@ -15,7 +14,7 @@ import {
   updateHeroScrollEndVar,
 } from "@/lib/heroScrollVisuals";
 import { assetPath } from "@/lib/assetPath";
-import { bodyText, sectionTitle67ClassName, uiText } from "@/lib/typography";
+import { bodyText, sectionTitle67ClassName } from "@/lib/typography";
 
 const HERO_LAYER_IMAGE_CLASS = "object-cover object-center";
 
@@ -175,42 +174,24 @@ export function HomeHero() {
       </div>
 
       <div className="relative z-10 -mt-[50px] px-[var(--container-x)] pb-[10vh]">
-        <div className="grid w-full items-start gap-10 min-[1024px]:grid-cols-[0.6fr_1.35fr] min-[1024px]:gap-14">
-          <MaskedImage
-            src={topHeroContent.beginningImage}
-            alt=""
-            aspectClassName="aspect-[4/3] min-[1024px]:aspect-[4/5]"
-            containerClassName="w-full"
-            sizes="(min-width: 1024px) 280px, 100vw"
-          />
-
-          <div className="text-white">
-            <h2 className={`${sectionTitle67ClassName} font-heading`}>
-              {topHeroContent.beginning.titleLine1}
-              <br />
-              {topHeroContent.beginning.titleLine2Lead}
-              <span className="hidden min-[1365px]:inline"> </span>
-              <br className="min-[1365px]:hidden" />
-              {topHeroContent.beginning.titleLine2Rest}
-            </h2>
-            <p className={`font-ui-en mt-[calc(98px*var(--gap-scale-y))] ${uiText(21)} font-bold`}>
-              {topHeroContent.beginning.label}
-            </p>
-            <p className={`font-body-ja mt-[calc(42px*var(--gap-scale-y))] ${bodyText(18)}`}>
-              {topHeroContent.beginning.bodyLines.map((line, index, lines) => (
-                <span key={`${line}-${index}`}>
-                  {line}
-                  {index < lines.length - 1 ? <br /> : null}
-                </span>
-              ))}
-            </p>
-            <TextLink
-              href={topHeroContent.beginning.link.href}
-              className="mt-[calc(60px*var(--gap-scale-y))] text-white"
-            >
-              {topHeroContent.beginning.link.label}
-            </TextLink>
-          </div>
+        <div className="text-white">
+          <h2 className={`${sectionTitle67ClassName} font-heading`}>
+            {topHeroContent.beginning.title}
+          </h2>
+          <p className={`font-body-ja mt-[calc(98px*var(--gap-scale-y))] ${bodyText(18)}`}>
+            {topHeroContent.beginning.bodyLines.map((line, index, lines) => (
+              <span key={`${line}-${index}`}>
+                {line}
+                {index < lines.length - 1 ? <br /> : null}
+              </span>
+            ))}
+          </p>
+          <TextLink
+            href={topHeroContent.beginning.link.href}
+            className="mt-[calc(60px*var(--gap-scale-y))] text-white"
+          >
+            {topHeroContent.beginning.link.label}
+          </TextLink>
         </div>
       </div>
     </section>

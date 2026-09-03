@@ -1,445 +1,225 @@
-"use client";
-
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useLayoutEffect, useRef } from "react";
+import { Container } from "@/components/ui/Container";
+import { SiteImage } from "@/components/ui/SiteImage";
+import { SiteGrid } from "@/components/ui/SiteGrid";
 
 import { conceptContent } from "@/data/concept";
-import { getConceptBackgroundMotion } from "@/data/concept-background-motion";
-import { subscribeMotionReady } from "@/lib/motion/motion-ready";
-import { getScrollTriggerScroller } from "@/lib/motion/scroll-trigger-scroller";
 import {
-  ConceptSectionContent,
-  ConceptTopContent,
-} from "@/sections/concept/ConceptContentBlock";
+  conceptTitleWrapClassName,
+  splitConceptTitleWrapUnits,
+} from "@/lib/concept-title";
+import {
+  conceptStoryContentSpanClassName,
+  conceptStoryHeadingSpanClassName,
+} from "@/lib/layout";
+import {
+  conceptHeadingEnglishGapClassName,
+  conceptHeadingNumeralClassName,
+  conceptStoryBodyClassName,
+  conceptStoryTitleClassName,
+} from "@/lib/typography";
 import { ConceptFeatureLinks } from "@/sections/concept/ConceptFeatureLinks";
-import { ConceptLayeredBackground } from "@/sections/concept/ConceptLayeredBackground";
+import { ConceptParallaxRegion } from "@/sections/concept/ConceptParallaxRegion";
+import { ConceptSectionNav } from "@/sections/concept/ConceptSectionNav";
 
-const SCROLLER = getScrollTriggerScroller();
+function ConceptStoryHeading({
+  as: Tag,
+  title,
+  className = "",
+  animateIntro = false,
+}: {
+  as: "h1" | "h2";
+  title: string;
+  className?: string;
+  animateIntro?: boolean;
+}) {
+  const separatorIndex = title.indexOf("｜");
+  const indexLabel = separatorIndex === -1 ? title : title.slice(0, separatorIndex);
+  const englishTitle = separatorIndex === -1 ? "" : title.slice(separatorIndex + 1);
 
-/** 前セクション content shell 下端が viewport 上端からこの比率に到達したら、次セクションが画面下から見え始める */
-const CONCEPT_REVEAL_BOTTOM_RATIO = 0.6;
-
-const CONCEPT_ANIMATION = {
-  enabled: true,
-  fade: true,
-  translate: false,
-  /** viewport 下端からの距離（vh）。start までは opacity 0、start〜end で 0→1 */
-  fadeRange: {
-    start: 15,
-    end: 30,
-  },
-  translateY: {
-    logo: 16,
-    heading: 20,
-    body: 24,
-  },
-} as const;
-
-type ConceptAnimationPart = keyof typeof CONCEPT_ANIMATION.translateY;
-
-const CONCEPT_ANIMATION_PARTS: Array<{
-  key: ConceptAnimationPart;
-  selector: string;
-}> = [
-  { key: "logo", selector: ".concept-section-logo" },
-  { key: "heading", selector: ".concept-section-heading" },
-  { key: "body", selector: ".concept-section-body" },
-];
-
-const CONCEPT_SECTION_COUNT = 4;
-
-const trackSpacerClassName = "shrink-0";
-
-type ConceptTrackLayout = {
-  leadingSpacer: number;
-  sectionGap: number;
-  scrollDistance: number;
-  sectionHeight: number;
-};
-
-function buildConceptTrackLayout(
-  contentHeights: number[],
-  viewportHeight: number
-): ConceptTrackLayout {
-  const [topHeight, somethingHeight, satisfyHeight, sustainableHeight] = contentHeights;
-  const sectionGap = viewportHeight * (1 - CONCEPT_REVEAL_BOTTOM_RATIO);
-  const leadingSpacer = Math.max(0, viewportHeight / 2 - topHeight / 2);
-  const scrollDistance =
-    topHeight / 2 + sectionGap * 3 + somethingHeight + satisfyHeight + sustainableHeight / 2;
-
-  return {
-    leadingSpacer,
-    sectionGap,
-    scrollDistance,
-    sectionHeight: scrollDistance + viewportHeight,
-  };
+  return (
+    <Tag className={`font-heading ${conceptStoryHeadingSpanClassName} ${className}`.trim()}>
+      <span
+        aria-label={animateIntro ? indexLabel : undefined}
+        className={`concept-heading-index inline-flex items-baseline ${conceptHeadingNumeralClassName}`}
+      >
+        <span className="concept-heading-numeral">
+          {animateIntro
+            ? Array.from(indexLabel).map((character, index) => (
+                <span
+                  key={`${character}-${index}`}
+                  aria-hidden="true"
+                  data-concept-intro-number-character
+                  className="inline-block"
+                  style={{ opacity: 0, transform: "translateY(0.6em)" }}
+                >
+                  {character}
+                </span>
+              ))
+            : indexLabel}
+        </span>
+        <span
+          aria-hidden="true"
+          data-concept-intro-rule={animateIntro ? "" : undefined}
+          className="relative top-[0.043em] ml-[0.28em] inline-block h-[0.54em] w-px shrink-0 self-baseline bg-current"
+          style={animateIntro ? { opacity: 0 } : undefined}
+        />
+      </span>
+      {englishTitle ? (
+        <span
+          aria-label={animateIntro ? englishTitle : undefined}
+          className={`block ${conceptStoryTitleClassName} ${conceptHeadingEnglishGapClassName}`}
+        >
+          <span className={conceptTitleWrapClassName}>
+            {splitConceptTitleWrapUnits(englishTitle).map((unit, unitIndex) => (
+              <span key={`${unit}-${unitIndex}`} className="inline-flex">
+                {animateIntro
+                  ? Array.from(unit).map((character, index) => (
+                      <span
+                        key={`${character}-${index}`}
+                        aria-hidden="true"
+                        data-concept-intro-title-character
+                        className="inline-block"
+                        style={{ opacity: 0 }}
+                      >
+                        {character === " " ? "\u00a0" : character}
+                      </span>
+                    ))
+                  : unit}
+              </span>
+            ))}
+          </span>
+        </span>
+      ) : null}
+    </Tag>
+  );
 }
 
-function clearElementHeight(element: HTMLElement | null) {
-  if (element) {
-    element.style.height = "";
-  }
-}
-
-function clearSectionScrollHeight(section: HTMLElement) {
-  section.style.height = "";
-}
-
-function getConceptFadeViewportPosition(offsetVh: number) {
-  return `top ${100 - offsetVh}%`;
-}
-
-function getConceptFadeScrollTriggerRange() {
-  const { start, end } = CONCEPT_ANIMATION.fadeRange;
-
-  return {
-    start: getConceptFadeViewportPosition(start),
-    end: getConceptFadeViewportPosition(end),
-  };
-}
-
-function setupConceptSectionReveal(contentShell: HTMLDivElement) {
-  if (!CONCEPT_ANIMATION.enabled || !CONCEPT_ANIMATION.fade) {
-    return;
-  }
-
-  const fadeScrollTriggerRange = getConceptFadeScrollTriggerRange();
-
-  for (const { selector } of CONCEPT_ANIMATION_PARTS) {
-    const element = contentShell.querySelector<HTMLElement>(selector);
-
-    if (!element) {
-      continue;
-    }
-
-    gsap.set(element, { opacity: 0 });
-
-    gsap.fromTo(
-      element,
-      { opacity: 0 },
-      {
-        opacity: 1,
-        ease: "none",
-        scrollTrigger: {
-          trigger: element,
-          scroller: SCROLLER,
-          start: fadeScrollTriggerRange.start,
-          end: fadeScrollTriggerRange.end,
-          scrub: true,
-          invalidateOnRefresh: true,
-        },
-      }
-    );
-  }
-}
-
-function setupConceptSectionReveals(sectionContentShells: HTMLDivElement[]) {
-  for (const contentShell of sectionContentShells) {
-    setupConceptSectionReveal(contentShell);
-  }
+function ConceptOutroTitle({ title }: { title: string }) {
+  return (
+    <div data-concept-outro-title-pin className="col-span-12">
+      <h2
+        data-concept-outro-title
+        aria-label={title}
+        className={`${conceptTitleWrapClassName} font-heading ${conceptStoryTitleClassName}`}
+        style={{ opacity: 0, transform: "translateY(40px)" }}
+      >
+        {splitConceptTitleWrapUnits(title).map((unit, unitIndex) => (
+          <span
+            key={`${unit}-${unitIndex}`}
+            className="inline-block"
+            aria-hidden="true"
+          >
+            {unit}
+          </span>
+        ))}
+      </h2>
+    </div>
+  );
 }
 
 export function ConceptPage() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const stickyViewportRef = useRef<HTMLDivElement>(null);
-  const contentTrackRef = useRef<HTMLDivElement>(null);
-  const leadingSpacerRef = useRef<HTMLDivElement>(null);
-  const sectionGapRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const topContentRef = useRef<HTMLDivElement>(null);
-  const somethingContentRef = useRef<HTMLDivElement>(null);
-  const satisfyContentRef = useRef<HTMLDivElement>(null);
-  const sustainableContentRef = useRef<HTMLDivElement>(null);
-  const skyRef = useRef<HTMLDivElement>(null);
-  const mountainBackRef = useRef<HTMLDivElement>(null);
-  const mountainMiddleRef = useRef<HTMLDivElement>(null);
-  const hillRef = useRef<HTMLDivElement>(null);
-  const grassRef = useRef<HTMLDivElement>(null);
-
-  useLayoutEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
-    const section = sectionRef.current;
-    const stickyViewport = stickyViewportRef.current;
-    const contentTrack = contentTrackRef.current;
-    const leadingSpacer = leadingSpacerRef.current;
-    const sky = skyRef.current;
-    const sustainableContent = sustainableContentRef.current;
-
-    const contentElements = [
-      topContentRef.current,
-      somethingContentRef.current,
-      satisfyContentRef.current,
-      sustainableContentRef.current,
-    ].filter((element): element is HTMLDivElement => element !== null);
-
-    if (
-      !section ||
-      !stickyViewport ||
-      !contentTrack ||
-      !leadingSpacer ||
-      !sky ||
-      !sustainableContent ||
-      contentElements.length !== CONCEPT_SECTION_COUNT
-    ) {
-      return;
-    }
-
-    let context: gsap.Context | null = null;
-    let trackLayout: ConceptTrackLayout | null = null;
-    let isTrackReady = false;
-    let setupFrameId = 0;
-    let resizeFrameId = 0;
-
-    const setupConceptScroll = () => {
-      const viewportHeight = stickyViewport.clientHeight;
-      const contentHeights = contentElements.map((element) => element.offsetHeight);
-
-      if (viewportHeight === 0 || contentHeights.some((height) => height === 0)) {
-        return false;
-      }
-
-      trackLayout = buildConceptTrackLayout(contentHeights, viewportHeight);
-
-      const backgroundMotion = getConceptBackgroundMotion();
-
-      leadingSpacer.style.height = `${trackLayout.leadingSpacer}px`;
-
-      for (let index = 0; index < CONCEPT_SECTION_COUNT - 1; index += 1) {
-        const gapElement = sectionGapRefs.current[index];
-        if (gapElement) {
-          gapElement.style.height = `${trackLayout.sectionGap}px`;
-        }
-      }
-
-      section.style.height = `${trackLayout.sectionHeight}px`;
-
-      context?.revert();
-      context = null;
-
-      const layerElements = {
-        mountainBack: mountainBackRef.current,
-        mountainMiddle: mountainMiddleRef.current,
-        hill: hillRef.current,
-        grass: grassRef.current,
-      };
-
-      gsap.set(sky, {
-        x: backgroundMotion.sky.xStart,
-        y: backgroundMotion.sky.yStart,
-        force3D: true,
-      });
-      gsap.set(contentTrack, { y: 0, force3D: true });
-
-      for (const motion of backgroundMotion.layers) {
-        const element = layerElements[motion.key];
-        if (element) {
-          gsap.set(element, { y: motion.yStart, force3D: true });
-        }
-      }
-
-      context = gsap.context(() => {
-        const contentTimeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: section,
-            scroller: SCROLLER,
-            start: "top top",
-            end: () => `+=${trackLayout?.scrollDistance ?? 0}`,
-            scrub: true,
-            invalidateOnRefresh: true,
-          },
-        });
-
-        contentTimeline.fromTo(
-          contentTrack,
-          { y: 0 },
-          {
-            y: () => -(trackLayout?.scrollDistance ?? 0),
-            ease: "none",
-            duration: 1,
-            force3D: true,
-          },
-          0
-        );
-
-        const backgroundTimeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: section,
-            scroller: SCROLLER,
-            start: "top top",
-            endTrigger: sustainableContent,
-            end: "center center",
-            scrub: true,
-            invalidateOnRefresh: true,
-          },
-        });
-
-        backgroundTimeline.fromTo(
-          sky,
-          {
-            x: backgroundMotion.sky.xStart,
-            y: backgroundMotion.sky.yStart,
-          },
-          {
-            x: backgroundMotion.sky.xEnd,
-            y: backgroundMotion.sky.yEnd,
-            ease: "none",
-            duration: 1,
-            force3D: true,
-          },
-          0
-        );
-
-        for (const motion of backgroundMotion.layers) {
-          const element = layerElements[motion.key];
-
-          if (element) {
-            backgroundTimeline.fromTo(
-              element,
-              { y: motion.yStart },
-              {
-                y: motion.yEnd,
-                ease: "none",
-                duration: 1,
-                force3D: true,
-              },
-              0
-            );
-          }
-        }
-
-        setupConceptSectionReveals(contentElements.slice(1));
-      }, section);
-
-      ScrollTrigger.refresh();
-
-      if (!isTrackReady) {
-        contentTrack.classList.remove("invisible");
-        isTrackReady = true;
-      }
-
-      return true;
-    };
-
-    const scheduleSetup = () => {
-      cancelAnimationFrame(setupFrameId);
-
-      setupFrameId = requestAnimationFrame(() => {
-        const isReady = setupConceptScroll();
-
-        if (!isReady) {
-          setupFrameId = requestAnimationFrame(() => {
-            setupConceptScroll();
-          });
-        }
-      });
-    };
-
-    const unsubscribeMotionReady = subscribeMotionReady(() => {
-      scheduleSetup();
-    });
-
-    queueMicrotask(() => {
-      scheduleSetup();
-    });
-
-    const resizeObserver = new ResizeObserver(() => {
-      scheduleSetup();
-    });
-
-    resizeObserver.observe(stickyViewport);
-    for (const element of contentElements) {
-      resizeObserver.observe(element);
-    }
-
-    const gapElements = sectionGapRefs.current;
-
-    const handleResize = () => {
-      cancelAnimationFrame(resizeFrameId);
-      resizeFrameId = requestAnimationFrame(() => {
-        scheduleSetup();
-      });
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      cancelAnimationFrame(setupFrameId);
-      cancelAnimationFrame(resizeFrameId);
-      unsubscribeMotionReady();
-      window.removeEventListener("resize", handleResize);
-      resizeObserver.disconnect();
-      context?.revert();
-      clearSectionScrollHeight(section);
-      clearElementHeight(leadingSpacer);
-      contentTrack.classList.add("invisible");
-
-      for (const gapElement of gapElements) {
-        clearElementHeight(gapElement);
-      }
-    };
-  }, []);
-
   return (
     <>
-      <section ref={sectionRef} data-header-theme="onDark" className="relative bg-[#1a2430]">
-      <div ref={stickyViewportRef} className="sticky top-0 h-svh overflow-hidden">
-        <ConceptLayeredBackground
-          skyRef={skyRef}
-          mountainBackRef={mountainBackRef}
-          mountainMiddleRef={mountainMiddleRef}
-          hillRef={hillRef}
-          grassRef={grassRef}
-        />
+      <ConceptParallaxRegion className="relative bg-black">
+        <div data-concept-story-region className="relative">
+          <ConceptSectionNav sections={conceptContent.sections} />
 
-        <div className="absolute inset-0 z-10 overflow-hidden">
-          <div ref={contentTrackRef} className="invisible will-change-transform">
-            <div ref={leadingSpacerRef} className={trackSpacerClassName} aria-hidden="true" />
-
-            <ConceptTopContent ref={topContentRef} />
-
+          <div
+            data-concept-background-stage
+            className="pointer-events-none sticky top-0 h-svh overflow-hidden"
+            aria-hidden="true"
+          >
+            {conceptContent.sections.map((section, index) => (
+              <div
+                key={section.id}
+                data-concept-background={section.id}
+                className={`absolute inset-0 origin-center ${
+                  index === 0 ? "opacity-100" : "opacity-0"
+                }`}
+              >
+                <SiteImage
+                  src={section.backgroundImage}
+                  alt=""
+                  fill
+                  priority={index === 0}
+                  sizes="100vw"
+                  className="object-cover object-center"
+                />
+              </div>
+            ))}
+            <div className="absolute inset-0 bg-black/45" />
             <div
-              ref={(element) => {
-                sectionGapRefs.current[0] = element;
-              }}
-              className={trackSpacerClassName}
-              aria-hidden="true"
-            />
-
-            <ConceptSectionContent
-              ref={somethingContentRef}
-              section={conceptContent.sections[0]}
-            />
-
-            <div
-              ref={(element) => {
-                sectionGapRefs.current[1] = element;
-              }}
-              className={trackSpacerClassName}
-              aria-hidden="true"
-            />
-
-            <ConceptSectionContent ref={satisfyContentRef} section={conceptContent.sections[1]} />
-
-            <div
-              ref={(element) => {
-                sectionGapRefs.current[2] = element;
-              }}
-              className={trackSpacerClassName}
-              aria-hidden="true"
-            />
-
-            <ConceptSectionContent
-              ref={sustainableContentRef}
-              section={conceptContent.sections[2]}
+              data-concept-intro-black
+              className="absolute inset-0 bg-black"
             />
           </div>
+
+          <div className="relative z-10 -mt-[100svh]">
+            {conceptContent.sections.map((section, index) => (
+              <section
+                key={section.id}
+                id={section.id}
+                data-concept-section
+                data-concept-index={index}
+                data-header-theme="onDark"
+                className={
+                  index === 0
+                    ? "relative min-h-svh min-[1024px]:min-h-[140svh]"
+                    : "relative flex min-h-svh items-center min-[1024px]:min-h-[140svh]"
+                }
+              >
+                <div
+                  data-concept-parallax
+                  className="w-full"
+                >
+                  <Container
+                    className={`${
+                      index === 0 ? "" : "pt-[var(--container-y-top)]"
+                    } pb-[var(--container-y-bottom)] text-white`}
+                  >
+                    <SiteGrid className="w-full text-center">
+                      {index === 0 ? (
+                        <div className="col-span-12 flex h-[50svh] w-full items-end">
+                          <ConceptStoryHeading
+                            as="h1"
+                            title={section.title}
+                            className="w-full"
+                            animateIntro
+                          />
+                        </div>
+                      ) : (
+                        <ConceptStoryHeading
+                          as="h2"
+                          title={section.title}
+                          animateIntro
+                        />
+                      )}
+                      <p
+                        data-concept-intro-body
+                        className={`${conceptStoryContentSpanClassName} mt-[var(--section-title-gap)] mx-auto w-full max-w-[880px] whitespace-pre-line font-body-ja min-[1024px]:mx-0 min-[1024px]:max-w-none ${conceptStoryBodyClassName}`}
+                        style={{ opacity: 0, transform: "translateY(32px)" }}
+                      >
+                        {section.body}
+                      </p>
+                    </SiteGrid>
+                  </Container>
+                </div>
+              </section>
+            ))}
+          </div>
         </div>
-      </div>
-
-      <div className="h-[var(--container-y-bottom)]" aria-hidden="true" />
-      </section>
-
+        <section
+          data-concept-outro
+          data-header-theme="onDark"
+          className="relative z-20 flex min-h-svh items-center bg-black"
+        >
+          <Container className="w-full text-white">
+            <SiteGrid>
+              <ConceptOutroTitle title={conceptContent.outroTitle} />
+            </SiteGrid>
+          </Container>
+        </section>
+      </ConceptParallaxRegion>
       <ConceptFeatureLinks />
     </>
   );

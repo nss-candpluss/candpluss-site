@@ -1,7 +1,12 @@
 import type { CompanyInfoBlock, CompanyInfoItem } from "@/types/company";
 import { SiteImage } from "@/components/ui/SiteImage";
+import { SiteGrid } from "@/components/ui/SiteGrid";
 import { companyContent } from "@/data/company";
 import { homeLabContent } from "@/data/home";
+import {
+  definitionLabelSpanClassName,
+  definitionValueSpanClassName,
+} from "@/lib/layout";
 import { bodyText, sectionTitle62ClassName, uiText } from "@/lib/typography";
 
 const listClassName =
@@ -18,7 +23,7 @@ const pageTitleClassName = `font-heading text-[var(--foreground)] ${sectionTitle
 const sectionTitleClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(18)}`;
 
 const tableRowClassName =
-  "flex flex-col gap-[calc(8px*var(--gap-scale-y))] border-b border-divider py-[calc(24px*var(--gap-scale-y))] first:pt-0 last:border-b-0 last:pb-0 md:grid md:grid-cols-[minmax(0,240px)_1fr] md:items-center md:gap-x-[calc(32px*var(--gap-scale-x))] md:gap-y-0";
+  "gap-y-[calc(8px*var(--gap-scale-y))] border-b border-divider py-[calc(24px*var(--gap-scale-y))] first:pt-0 last:border-b-0 last:pb-0 min-[768px]:items-center min-[768px]:gap-x-[calc(32px*var(--gap-scale-x))] min-[768px]:gap-y-0";
 
 function CompanyInfoBlockRenderer({ block }: { block: CompanyInfoBlock }) {
   switch (block.type) {
@@ -56,9 +61,11 @@ function CompanyInfoTable({ items }: { items: readonly CompanyInfoItem[] }) {
   return (
     <dl>
       {items.map((item) => (
-        <div key={item.label} className={tableRowClassName}>
-          <dt className={labelClassName}>{item.label}</dt>
-          <dd className="flex min-w-0 flex-col gap-[calc(16px*var(--gap-scale-y))]">
+        <SiteGrid key={item.label} className={tableRowClassName}>
+          <dt className={`${labelClassName} ${definitionLabelSpanClassName}`}>{item.label}</dt>
+          <dd
+            className={`flex min-w-0 flex-col gap-[calc(16px*var(--gap-scale-y))] ${definitionValueSpanClassName}`}
+          >
             {item.blocks.map((block, index) => (
               <CompanyInfoBlockRenderer
                 key={`${item.label}-${block.type}-${index}`}
@@ -66,7 +73,7 @@ function CompanyInfoTable({ items }: { items: readonly CompanyInfoItem[] }) {
               />
             ))}
           </dd>
-        </div>
+        </SiteGrid>
       ))}
     </dl>
   );

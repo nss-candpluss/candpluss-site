@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
+@source "../lib/layout.ts";
 @source "../lib/typography.ts";
+@source "../lib/concept-title.ts";
 
 :root {
   --background: #ffffff;
@@ -90,6 +92,8 @@
   --font-heading: var(--font-baskervville), "Baskerville", "Georgia",
     "Hiragino Mincho ProN", "Hiragino Mincho Pro", "BIZ UDMincho",
     "Yu Mincho", serif;
+  --concept-heading-numeral: var(--font-baskervville-sc), "Baskervville SC",
+    Georgia, "Times New Roman", Times, serif;
   --font-ui-en: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont,
     "Helvetica Neue", Arial, sans-serif;
   --font-body-ja: "Hiragino Sans", "Hiragino Kaku Gothic ProN",
@@ -120,6 +124,11 @@
 
   .font-heading {
     font-family: var(--font-heading);
+  }
+
+  .concept-heading-numeral {
+    font-family: var(--concept-heading-numeral);
+    font-weight: 400;
   }
 
   .font-ui-en {
@@ -416,7 +425,7 @@
   --section-title-responsive-max: 67px;
 }
 
-/** QUALITY / SUPPORT hero タイトル。1023px以下: 48–102px、1024px+: 108px × text-scale */
+/** QUALITY hero タイトル。1023px以下: 48–102px、1024px+: 108px × text-scale */
 .quality-hero-title {
   font-size: clamp(
     48px,
@@ -452,6 +461,12 @@ html.quality-page body {
   .quality-scroll-section .quality-slide-panel-text .quality-item-body {
     color: #fff;
   }
+}
+
+/** Support: ピン延長分にフッターを重ね、Hero より手前に出す */
+body:has([data-support-hero-background]) footer {
+  position: relative;
+  z-index: 1;
 }
 
 @starting-style {

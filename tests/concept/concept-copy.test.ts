@@ -1,0 +1,229 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+import { describe, expect, it } from "vitest";
+
+import { conceptContent } from "@/data/concept";
+import {
+  conceptTitleWrapClassName,
+  splitConceptTitleWrapUnits,
+} from "@/lib/concept-title";
+
+const conceptPageSource = readFileSync(
+  join(dirname(fileURLToPath(import.meta.url)), "../../sections/concept/ConceptPage.tsx"),
+  "utf8"
+);
+
+const conceptSectionNavSource = readFileSync(
+  join(dirname(fileURLToPath(import.meta.url)), "../../sections/concept/ConceptSectionNav.tsx"),
+  "utf8"
+);
+
+const globalsCss = readFileSync(
+  join(dirname(fileURLToPath(import.meta.url)), "../../app/globals.css"),
+  "utf8"
+);
+
+const typographySource = readFileSync(
+  join(dirname(fileURLToPath(import.meta.url)), "../../lib/typography.ts"),
+  "utf8"
+);
+
+describe("concept page copy", () => {
+  it("has nine story sections with concept backgrounds except 04 and 05", () => {
+    expect(conceptContent.sections.map((section) => section.title)).toEqual([
+      "01｜Camp + Something",
+      "02｜Our Origin",
+      "03｜Our Philosophy",
+      "04｜Material",
+      "05｜Detail",
+      "06｜Four Seasons",
+      "07｜Field Tested",
+      "08｜Our Answer",
+      "09｜Ending",
+    ]);
+    expect(conceptContent.sections.map((section) => section.backgroundImage)).toEqual([
+      "/images/concept/concept-01.webp",
+      "/images/concept/concept-02.webp",
+      "/images/concept/concept-03.webp",
+      "/images/products/_shared/placeholder.webp",
+      "/images/products/_shared/placeholder.webp",
+      "/images/concept/concept-06.webp",
+      "/images/concept/concept-07.webp",
+      "/images/concept/concept-08.webp",
+      "/images/concept/concept-09.webp",
+    ]);
+    expect(conceptContent.featureLinks.map((item) => item.title)).toEqual([
+      "ALL PRODUCTS",
+      "LABO",
+      "SUPPORT",
+    ]);
+  });
+
+  it("center-aligns the 01-09 story copy", () => {
+    expect(conceptPageSource).toContain("text-center");
+    expect(conceptPageSource).not.toContain("text-left");
+  });
+
+  it("uses ギア instead of 道具 in story body copy", () => {
+    expect(conceptContent.sections.map((section) => section.body).join("\n")).not.toContain("道具");
+    expect(conceptContent.sections[0]?.body).toContain("ギアをつくること。");
+    expect(conceptContent.sections[8]?.body).toContain("より自由に楽しむためのギアをつくること。");
+  });
+
+  it("uses number and title for in-page nav labels", () => {
+    expect(new Set(conceptContent.sections.map((section) => section.id)).size).toBe(9);
+    expect(conceptSectionNavSource).toContain("{section.title}");
+    expect(conceptSectionNavSource).not.toContain("getConceptSectionNavLabel");
+  });
+
+  it("renders a sticky in-page section nav", () => {
+    expect(conceptPageSource).toContain("ConceptSectionNav");
+    expect(conceptPageSource).toContain("id={section.id}");
+  });
+
+  it("uses a three-column desktop nav and centers story content on screen", () => {
+    expect(conceptPageSource).toContain("SiteGrid");
+    expect(conceptPageSource).toContain("conceptStoryHeadingSpanClassName");
+    expect(conceptPageSource).toContain("conceptStoryContentSpanClassName");
+    expect(conceptSectionNavSource).toContain("SiteGrid");
+    expect(conceptSectionNavSource).toContain("conceptSectionNavSpanClassName");
+    expect(conceptSectionNavSource).toContain("sticky top-0 flex h-svh items-center");
+    expect(conceptSectionNavSource).toContain('uiTextRange("14-16")');
+  });
+
+  it("sets title numerals in Baskervville SC at the thinnest weight", () => {
+    expect(conceptPageSource).toContain("concept-heading-numeral");
+    expect(globalsCss).toContain("--concept-heading-numeral: var(--font-baskervville-sc)");
+    expect(globalsCss).toMatch(/\.concept-heading-numeral \{[\s\S]*?font-weight: 400;/);
+  });
+
+  it("stacks the numeral and vertical rule above the English title", () => {
+    expect(conceptPageSource).toContain("concept-heading-index");
+    expect(conceptPageSource).toContain("title.slice(separatorIndex + 1)");
+    expect(conceptPageSource).toContain("conceptStoryHeadingSpanClassName");
+    expect(conceptPageSource).toContain('className={`block ${conceptStoryTitleClassName}');
+    expect(conceptPageSource).toContain('aria-hidden="true"');
+    expect(conceptPageSource).toContain("items-baseline");
+    expect(conceptPageSource).toContain("top-[0.043em]");
+    expect(conceptPageSource).toContain("h-[0.54em] w-px");
+    expect(conceptPageSource).toContain("conceptHeadingNumeralClassName");
+    expect(conceptPageSource).toContain("conceptStoryTitleClassName");
+    expect(conceptPageSource).toContain("conceptHeadingEnglishGapClassName");
+    expect(conceptPageSource).not.toContain("min-[1024px]:mt-0");
+    expect(typographySource).toContain("leading-[0.48em]");
+    expect(typographySource).toContain("-translate-y-[0.116em]");
+  });
+
+  it("marks every story for an accessible character reveal", () => {
+    expect(conceptPageSource).toContain("animateIntro");
+    expect(conceptPageSource).not.toContain("animateIntro={index === 0}");
+    expect(conceptPageSource).toContain("aria-label={animateIntro ? indexLabel");
+    expect(conceptPageSource).toContain("aria-label={animateIntro ? englishTitle");
+    expect(conceptPageSource).toContain("data-concept-intro-title-character");
+    expect(conceptPageSource).toContain("data-concept-intro-number-character");
+    expect(conceptPageSource).toContain("data-concept-intro-rule");
+    expect(conceptPageSource).toContain("data-concept-intro-body");
+    expect(conceptPageSource).toContain("data-concept-intro-black");
+    expect(conceptPageSource).toContain('aria-hidden="true"');
+    expect(conceptSectionNavSource).toContain("data-concept-intro-menu-item");
+    expect(
+      conceptPageSource.match(/transform: "translateY\(0\.6em\)"/g)
+    ).toHaveLength(1);
+  });
+
+  it("wraps English titles by word and keeps plus groups together", () => {
+    expect(splitConceptTitleWrapUnits("Camp + Something")).toEqual([
+      "Camp",
+      "+ Something",
+    ]);
+    expect(splitConceptTitleWrapUnits("Our Origin")).toEqual([
+      "Our",
+      "Origin",
+    ]);
+    expect(splitConceptTitleWrapUnits("What’s Your + S ?")).toEqual([
+      "What’s",
+      "Your",
+      "+ S ?",
+    ]);
+    expect(splitConceptTitleWrapUnits("Material")).toEqual(["Material"]);
+    expect(conceptTitleWrapClassName).toContain("flex-wrap justify-center");
+    expect(conceptTitleWrapClassName).toContain("gap-x-[0.3em]");
+    expect(conceptTitleWrapClassName).toContain("gap-y-[0.15em]");
+    expect(conceptPageSource).toContain("conceptTitleWrapClassName");
+    expect(conceptPageSource).toContain("splitConceptTitleWrapUnits");
+    expect(globalsCss).toContain('@source "../lib/concept-title.ts";');
+  });
+
+  it("starts the first English title at the vertical center of the viewport", () => {
+    expect(conceptPageSource).toContain("flex h-[50svh] w-full items-end");
+    expect(conceptPageSource).not.toContain('index === 0 ? "-translate-y-1/2"');
+    expect(conceptPageSource).not.toContain("pt-[50svh]");
+  });
+
+  it("ends the story with a menu-free full-screen black outro title", () => {
+    const storyRegionIndex = conceptPageSource.indexOf(
+      "data-concept-story-region"
+    );
+    const menuIndex = conceptPageSource.indexOf(
+      "<ConceptSectionNav sections={conceptContent.sections} />"
+    );
+    const outroIndex = conceptPageSource.lastIndexOf("data-concept-outro");
+
+    expect(conceptContent.outroTitle).toBe("What’s Your + S ?");
+    expect(storyRegionIndex).toBeGreaterThan(-1);
+    expect(menuIndex).toBeGreaterThan(storyRegionIndex);
+    expect(outroIndex).toBeGreaterThan(menuIndex);
+    expect(conceptPageSource).toContain("data-concept-outro");
+    expect(conceptPageSource).toContain("data-concept-outro-title");
+    expect(conceptPageSource).toContain("data-concept-outro-title-pin");
+    expect(conceptPageSource).not.toContain(
+      "data-concept-outro-title-character"
+    );
+    expect(conceptPageSource).toContain(
+      'style={{ opacity: 0, transform: "translateY(40px)" }}'
+    );
+    expect(conceptPageSource).toContain(
+      'className="relative z-20 flex min-h-svh items-center bg-black"'
+    );
+    expect(conceptPageSource).toContain(
+      "<ConceptOutroTitle title={conceptContent.outroTitle} />"
+    );
+    expect(conceptPageSource.indexOf("data-concept-outro")).toBeLessThan(
+      conceptPageSource.indexOf("<ConceptFeatureLinks />")
+    );
+    expect(conceptSectionNavSource).not.toContain("outroTitle");
+  });
+
+  it("scales numeral size 32-48px and English top gap 12-18px", () => {
+    expect(typographySource).toContain(
+      "text-[clamp(32px,calc(32px+(100vw-375px)/(1440px-375px)*16px),48px)]"
+    );
+    expect(typographySource).toContain(
+      "mt-[clamp(12px,calc(12px+(100vw-375px)/(1440px-375px)*6px),18px)]"
+    );
+  });
+
+  it("scales only the Concept English title from 46px to 92px", () => {
+    expect(typographySource).toContain(
+      "text-[clamp(46px,calc(29.8px+4.32vw),92px)]"
+    );
+    expect(typographySource).toContain(
+      "leading-[clamp(46px,calc(29.8px+4.32vw),92px)]"
+    );
+    expect(conceptPageSource).toContain("conceptStoryTitleClassName");
+    expect(conceptPageSource).not.toContain("productDetailSectionTitleClassName");
+  });
+
+  it("uses a looser line-height only for Concept story body", () => {
+    expect(conceptPageSource).toContain("conceptStoryBodyClassName");
+    expect(conceptPageSource).not.toContain("bodyText(18)");
+    expect(typographySource).toContain(
+      "text-[calc(18px*var(--text-scale))] leading-[calc(36px*var(--text-scale))]"
+    );
+    expect(typographySource).toContain(
+      "text-[calc(18px*var(--text-scale))] leading-[calc(31.5px*var(--text-scale))]"
+    );
+  });
+});

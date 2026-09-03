@@ -9,6 +9,7 @@ import {
   createAttachmentPreviews,
   type ContactAttachmentPreview,
 } from "@/components/contact/ContactImageAttachments";
+import { SiteGrid } from "@/components/ui/SiteGrid";
 import {
   contactFieldRequirements,
   contactFieldNotes,
@@ -27,6 +28,7 @@ import { getContactAttachments, setContactAttachments } from "@/lib/contact/atta
 import { writeContactFormDraft } from "@/lib/contact/form-storage";
 import { lookupAddressByPostalCode } from "@/lib/contact/postal-code";
 import { arrowMaskStyle } from "@/lib/maskStyle";
+import { formHalfSpanClassName } from "@/lib/layout";
 import { CONTACT_ERROR_SCROLL_ANCHORS, scrollToFirstContactFormError } from "@/lib/contact/scroll-to-error";
 import { useContactFormDraft } from "@/lib/contact/use-contact-form-draft";
 import { validateContactForm } from "@/lib/contact/validate-form";
@@ -208,8 +210,8 @@ export function ContactForm() {
         anchorId={CONTACT_ERROR_SCROLL_ANCHORS.lastName}
         error={getVisibleFieldError("lastName") || getVisibleFieldError("firstName")}
       >
-        <div className="grid grid-cols-1 gap-[calc(12px*var(--gap-scale-y))] min-[640px]:grid-cols-2">
-          <div>
+        <SiteGrid className="gap-[calc(12px*var(--gap-scale-y))]">
+          <div className={formHalfSpanClassName}>
             <label htmlFor="contact-last-name" className="sr-only">
               {placeholders.lastName}
             </label>
@@ -227,7 +229,7 @@ export function ContactForm() {
               aria-invalid={getFieldStatus("lastName") === "invalid"}
             />
           </div>
-          <div>
+          <div className={formHalfSpanClassName}>
             <label htmlFor="contact-first-name" className="sr-only">
               {placeholders.firstName}
             </label>
@@ -245,7 +247,7 @@ export function ContactForm() {
               aria-invalid={getFieldStatus("firstName") === "invalid"}
             />
           </div>
-        </div>
+        </SiteGrid>
       </ContactField>
 
       <ContactField

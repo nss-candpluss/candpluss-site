@@ -2,16 +2,14 @@
 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { SiteImage } from "@/components/ui/SiteImage";
 import { useLayoutEffect, useRef } from "react";
 
-import { TextLink } from "@/components/ui/TextLink";
+import { SiteImage } from "@/components/ui/SiteImage";
 import { homeLabContent } from "@/data/home";
 import {
   DESKTOP_POINTER_MEDIA_QUERY,
   matchesDesktopPointerMediaQuery,
 } from "@/lib/motion/should-enable-smooth-scroll";
-import { sectionTitle62ClassName } from "@/lib/typography";
 
 const LAB_HOLD_RATIO = 0.12;
 const LAB_ZOOM_RATIO = 0.56;
@@ -132,7 +130,7 @@ export function HomeLab() {
   }, []);
 
   return (
-    <section ref={sectionRef} data-header-theme="onDark" className="relative">
+    <section ref={sectionRef} data-header-theme="onDark" aria-label="Fukuoka Lab." className="relative">
       <div ref={stageRef} className="h-svh w-full overflow-hidden [@media(pointer:coarse)]:relative sticky top-0">
         <div
           ref={backgroundRef}
@@ -146,13 +144,6 @@ export function HomeLab() {
             className="object-cover object-center"
             onLoad={() => refreshScrollTriggerRef.current()}
           />
-        </div>
-
-        <div className="relative z-10 flex h-full flex-col justify-between pt-[var(--container-y-top)] pb-[var(--container-y-bottom)] px-[var(--container-x)] text-white">
-          <h2 className={`font-heading ${sectionTitle62ClassName}`}>{homeLabContent.title}</h2>
-          <TextLink href={homeLabContent.link.href} className="self-start">
-            {homeLabContent.link.label}
-          </TextLink>
         </div>
       </div>
     </section>

@@ -22,6 +22,7 @@ import { uiText } from "@/lib/typography";
 
 type ProductCardProps = {
   product: Product;
+  className?: string;
   sizes?: string;
   priority?: boolean;
   presentation?: "default" | "productsListing";
@@ -43,6 +44,7 @@ const listingTextGapClassName =
 
 export function ProductCard({
   product,
+  className = "",
   sizes = "(min-width: 1024px) 33vw, 100vw",
   priority = false,
   presentation = "default",
@@ -65,7 +67,7 @@ export function ProductCard({
   const usesProductsListingStyles = presentation === "productsListing";
 
   return (
-    <article className="group">
+    <article className={`group ${className}`.trim()}>
       <Link href={detailHref} className="block">
         <div className="relative aspect-[6/5] overflow-hidden bg-[var(--color-line)]">
           {displayImage ? (

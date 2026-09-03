@@ -13,6 +13,17 @@ export function matchesDesktopPointerMediaQuery(): boolean {
   return window.matchMedia(DESKTOP_POINTER_MEDIA_QUERY).matches;
 }
 
+export function isTouchDevice(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return (
+    navigator.maxTouchPoints > 0 ||
+    window.matchMedia("(pointer: coarse)").matches
+  );
+}
+
 export function shouldEnableSmoothScroll(): boolean {
   if (typeof window === "undefined") {
     return false;
@@ -26,7 +37,10 @@ export function shouldEnableSmoothScroll(): boolean {
     return false;
   }
 
-  if (SMOOTH_SCROLL.desktopOnly && !matchesDesktopPointerMediaQuery()) {
+  if (
+    SMOOTH_SCROLL.desktopOnly &&
+    (isTouchDevice() || !matchesDesktopPointerMediaQuery())
+  ) {
     return false;
   }
 

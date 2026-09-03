@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 
 import { Container } from "@/components/ui/Container";
+import { SiteGrid } from "@/components/ui/SiteGrid";
+import { fullSpanClassName } from "@/lib/layout";
 import { ContactConfirm } from "@/sections/contact/ContactConfirm";
 import { siteConfig } from "@/lib/site";
 
@@ -16,9 +18,11 @@ export default function ContactConfirmPage() {
       className="pt-[var(--product-page-title-top)] pb-[var(--container-y-bottom)]"
     >
       <Container>
-        <div className="mx-auto max-w-[980px]">
-          <ContactConfirm />
-        </div>
+        <SiteGrid>
+          <div className={`${fullSpanClassName} mx-auto w-full max-w-[980px]`}>
+            <ContactConfirm />
+          </div>
+        </SiteGrid>
       </Container>
     </main>
   );

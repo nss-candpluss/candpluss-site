@@ -6,7 +6,7 @@ import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: `${supportContent.title} | ${siteConfig.name}`,
-  description: `${siteConfig.name}のサポート・永久保証について紹介するページです。`,
+  description: `${siteConfig.name}の製品保証・修理について紹介するページです。`,
 };
 
 export default function SupportRoutePage() {

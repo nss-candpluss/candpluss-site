@@ -6,6 +6,7 @@ import Lenis from "lenis";
 import { useLayoutEffect, type ReactNode } from "react";
 
 import { notifyMotionReady } from "@/lib/motion/motion-ready";
+import { SMOOTH_SCROLL } from "@/lib/motion/smooth-scroll-config";
 import {
   bindLenisToScrollTrigger,
   unbindLenisFromScrollTrigger,
@@ -14,12 +15,10 @@ import { shouldEnableSmoothScroll } from "@/lib/motion/should-enable-smooth-scro
 
 import "lenis/dist/lenis.css";
 
-const GSAP_LAG_SMOOTHING = 500;
-const GSAP_LAG_THRESHOLD = 33;
-
 const SMOOTH_SCROLL_MEDIA_QUERIES = [
   "(prefers-reduced-motion: reduce)",
   "(pointer: fine) and (min-width: 768px)",
+  "(pointer: coarse)",
 ] as const;
 
 type SmoothScrollRuntime = {
@@ -39,7 +38,6 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
       }
 
       unbindLenisFromScrollTrigger(runtime.lenis);
-      gsap.ticker.lagSmoothing(GSAP_LAG_SMOOTHING, GSAP_LAG_THRESHOLD);
       runtime.lenis.destroy();
       runtime = null;
       ScrollTrigger.refresh();
@@ -52,11 +50,7 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const lenis = new Lenis({
-        autoRaf: false,
-        smoothWheel: true,
-        syncTouch: false,
-      });
+      const lenis = new Lenis(SMOOTH_SCROLL.options);
 
       bindLenisToScrollTrigger(lenis);
 

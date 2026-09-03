@@ -1,4 +1,15 @@
 export const footerContent = {
+  logo: {
+    src: "/assets/logos/logo-candpluss-tagline.svg",
+    href: "/",
+    label: "C AND+S",
+  },
+  navLinks: [
+    { label: "PRODUCTS", href: "/products" },
+    { label: "CONCEPT", href: "/concept" },
+    { label: "LABO", href: "/labo" },
+    { label: "SUPPORT", href: "/support" },
+  ],
   primaryLinks: [
     { label: "ショッピングガイド", href: "/shopping-guide" },
     { label: "お問い合わせ", href: "/contact" },
@@ -21,6 +32,11 @@ export const footerContent = {
       label: "Instagram",
       href: "https://www.instagram.com/c_and_plus_s?igsh=MXI0bDJ6Znp3bm81dw==",
       icon: "/assets/icons/icon-sns-instagram.svg",
+    },
+    {
+      label: "LINE",
+      href: "https://line.me/",
+      icon: "/assets/icons/icon-sns-line.svg",
     },
     {
       label: "X",

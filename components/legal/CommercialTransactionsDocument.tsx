@@ -1,5 +1,10 @@
 import type { CommercialTransactionBlock } from "@/types/legal";
+import { SiteGrid } from "@/components/ui/SiteGrid";
 import { commercialTransactionsContent } from "@/data/legal/commercialTransactions";
+import {
+  definitionLabelSpanClassName,
+  definitionValueSpanClassName,
+} from "@/lib/layout";
 import { bodyText, uiText } from "@/lib/typography";
 
 const listClassName =
@@ -45,12 +50,16 @@ export function CommercialTransactionsDocument() {
 
       <dl className="mt-[calc(52px*var(--gap-scale-y))]">
         {items.map((item) => (
-          <div
+          <SiteGrid
             key={item.label}
-            className="flex flex-col gap-[calc(8px*var(--gap-scale-y))] border-b border-divider py-[calc(24px*var(--gap-scale-y))] first:pt-0 last:border-b-0 last:pb-0 md:grid md:grid-cols-[minmax(0,240px)_1fr] md:items-center md:gap-x-[calc(32px*var(--gap-scale-x))] md:gap-y-0"
+            className="gap-y-[calc(8px*var(--gap-scale-y))] border-b border-divider py-[calc(24px*var(--gap-scale-y))] first:pt-0 last:border-b-0 last:pb-0 min-[768px]:items-center min-[768px]:gap-x-[calc(32px*var(--gap-scale-x))] min-[768px]:gap-y-0"
           >
-            <dt className={labelClassName}>{item.label}</dt>
-            <dd className="flex min-w-0 flex-col gap-[calc(16px*var(--gap-scale-y))]">
+            <dt className={`${labelClassName} ${definitionLabelSpanClassName}`}>
+              {item.label}
+            </dt>
+            <dd
+              className={`flex min-w-0 flex-col gap-[calc(16px*var(--gap-scale-y))] ${definitionValueSpanClassName}`}
+            >
               {item.blocks.map((block, index) => (
                 <CommercialTransactionBlockRenderer
                   key={`${item.label}-${block.type}-${index}`}
@@ -58,7 +67,7 @@ export function CommercialTransactionsDocument() {
                 />
               ))}
             </dd>
-          </div>
+          </SiteGrid>
         ))}
       </dl>
     </article>

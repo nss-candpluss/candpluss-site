@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Baskervville, Inter } from "next/font/google";
+import { Baskervville, Baskervville_SC, Inter, Judson } from "next/font/google";
 import { CartDialog } from "@/components/commerce/CartDialog";
 import { CartProvider } from "@/components/commerce/CartProvider";
 import { CustomerProvider } from "@/components/commerce/CustomerProvider";
@@ -17,6 +17,18 @@ const inter = Inter({
 
 const baskervville = Baskervville({
   variable: "--font-baskervville",
+  subsets: ["latin"],
+  weight: "400",
+});
+
+const baskervvilleSc = Baskervville_SC({
+  variable: "--font-baskervville-sc",
+  subsets: ["latin"],
+  weight: "400",
+});
+
+const judson = Judson({
+  variable: "--font-judson",
   subsets: ["latin"],
   weight: "400",
 });
@@ -46,7 +58,7 @@ export default function RootLayout({
   return (
     <html
       lang="ja"
-      className={`${baskervville.variable} ${inter.variable} h-full antialiased`}
+      className={`${baskervville.variable} ${baskervvilleSc.variable} ${judson.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <CustomerProvider>

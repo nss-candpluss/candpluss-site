@@ -1,11 +1,9 @@
-import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import type Lenis from "lenis";
 
 const scrollUpdateHandler = ScrollTrigger.update;
 
 let boundLenis: Lenis | null = null;
-let tickerCallback: ((time: number) => void) | null = null;
 
 export function bindLenisToScrollTrigger(lenis: Lenis) {
   if (boundLenis) {
@@ -34,12 +32,6 @@ export function bindLenisToScrollTrigger(lenis: Lenis) {
   });
 
   lenis.on("scroll", scrollUpdateHandler);
-
-  tickerCallback = (time: number) => {
-    lenis.raf(time * 1000);
-  };
-  gsap.ticker.add(tickerCallback);
-  gsap.ticker.lagSmoothing(0);
 }
 
 export function isLenisBound(): boolean {
@@ -48,6 +40,15 @@ export function isLenisBound(): boolean {
 
 export function getLenisScrollPosition(): number | null {
   return boundLenis?.scroll ?? null;
+}
+
+export function scrollBoundLenisTo(target: number | string | HTMLElement): boolean {
+  if (!boundLenis) {
+    return false;
+  }
+
+  boundLenis.scrollTo(target);
+  return true;
 }
 
 export function stopBoundLenis() {
@@ -64,11 +65,6 @@ export function unbindLenisFromScrollTrigger(lenis: Lenis) {
   }
 
   lenis.off("scroll", scrollUpdateHandler);
-
-  if (tickerCallback) {
-    gsap.ticker.remove(tickerCallback);
-    tickerCallback = null;
-  }
 
   boundLenis = null;
   ScrollTrigger.scrollerProxy(document.documentElement, {});
