@@ -31,6 +31,9 @@ describe("support guide accordions", () => {
     expect(supportGuideSource).toContain("lineLink.icon");
     expect(line?.icon).toBe("/assets/icons/icon-sns-line.svg");
     expect(supportGuideSource).toContain("target=\"_blank\"");
+    expect(supportGuideSource).toContain("px-[calc(32px*var(--gap-scale-x))]");
+    expect(supportGuideSource).toContain("py-[calc(32px*var(--layout-scale-y))]");
+    expect(supportGuideSource).toContain("min-[1025px]:py-[calc(18px*var(--gap-scale-y))]");
   });
 
   it("does not render the former warranty intro above the accordions", () => {

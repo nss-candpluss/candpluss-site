@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { NewsArticle } from "@/lib/news/types";
 
 const bodyClassName =
-  "whitespace-pre-line font-body-ja text-[calc(15px*var(--text-scale))] leading-[calc(28px*var(--text-scale))] text-[var(--foreground)]";
+  "whitespace-pre-line font-body-ja text-[clamp(14px,calc(15px*var(--text-scale)),15px)] leading-[calc(28px*var(--text-scale))] text-[var(--foreground)]";
 
 const contentLinkClassName =
   "font-semibold underline decoration-solid underline-offset-[calc(4/15*1em)]";

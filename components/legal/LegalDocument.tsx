@@ -4,7 +4,7 @@ import type { LegalClause, LegalContact, LegalDocumentContent, LegalSection } fr
 import { bodyText, uiText } from "@/lib/typography";
 
 const listClassName =
-  "mt-[calc(16px*var(--gap-scale-y))] list-disc space-y-[calc(12px*var(--gap-scale-y))] pl-[calc(20px*var(--gap-scale-x))]";
+  "mt-[calc(16px*var(--gap-scale-y))] list-none space-y-[calc(12px*var(--gap-scale-y))]";
 
 const sectionBodyClassName =
   "mt-[calc(24px*var(--gap-scale-y))] flex flex-col gap-[calc(16px*var(--gap-scale-y))]";
@@ -20,7 +20,7 @@ function LegalBulletList({ items }: { items: readonly string[] }) {
     <ul className={listClassName}>
       {items.map((item) => (
         <li key={item} className={bodyClassName}>
-          {item}
+          ・{item}
         </li>
       ))}
     </ul>

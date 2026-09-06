@@ -190,7 +190,7 @@
   }
 
   to {
-    background-color: rgba(0, 0, 0, 0.82);
+    background-color: rgba(0, 0, 0, 1);
   }
 }
 
@@ -442,8 +442,9 @@ html.quality-page body {
   }
 }
 
-/** Support: ピン延長分にフッターを重ね、Hero より手前に出す */
-body:has([data-support-hero-background]) footer {
+/** Support / Home: ピン延長分にフッターを重ね、Hero より手前に出す */
+body:has([data-support-hero-background]) footer,
+body:has([data-home-hero-background]) footer {
   position: relative;
   z-index: 1;
 }

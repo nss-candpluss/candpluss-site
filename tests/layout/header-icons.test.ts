@@ -4,10 +4,11 @@ import { headerIconLinks } from "@/data/navigation";
 import { isHeaderIconLinkVisible } from "@/lib/site-navigation-visibility";
 
 describe("header icon visibility", () => {
-  it("hides the search icon", () => {
+  it("hides the search and user icons", () => {
     expect(headerIconLinks.some((link) => link.label === "Search")).toBe(true);
+    expect(headerIconLinks.some((link) => link.label === "User")).toBe(true);
     expect(isHeaderIconLinkVisible("Search")).toBe(false);
-    expect(isHeaderIconLinkVisible("User")).toBe(true);
+    expect(isHeaderIconLinkVisible("User")).toBe(false);
     expect(isHeaderIconLinkVisible("Cart")).toBe(true);
   });
 });

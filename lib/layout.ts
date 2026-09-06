@@ -21,6 +21,23 @@ export const productCardSpanClassName =
 export const twoColumnFeatureSpanClassName =
   "col-span-12 min-[768px]:col-span-6";
 
+/** Main Products が 3 列（PC）に戻る最小件数 */
+export const MAIN_PRODUCTS_THREE_COLUMN_MIN_COUNT = 5;
+
+/** Main Products: 4件以下は 2 列、5件以上は標準 3 列 */
+export function mainProductCardSpanClassName(itemCount: number) {
+  return itemCount >= MAIN_PRODUCTS_THREE_COLUMN_MIN_COUNT
+    ? standardCardSpanClassName
+    : twoColumnFeatureSpanClassName;
+}
+
+/** Main Products: 2 列は FeatureLinks と同じ 13/10、3 列は 4/5 */
+export function mainProductCardAspectClassName(itemCount: number) {
+  return itemCount >= MAIN_PRODUCTS_THREE_COLUMN_MIN_COUNT
+    ? "aspect-[4/5]"
+    : "aspect-[13/10]";
+}
+
 /** 3 カラム FeatureLinks: 1列 → 3列（768px） */
 export const threeColumnFeatureSpanClassName =
   "col-span-12 min-[768px]:col-span-4";

@@ -571,7 +571,7 @@ export function Moya500DesignDesktopHero({
         />
 
         <p
-          className="pointer-events-none absolute top-[clamp(12px,1.5vw,28px)] left-[clamp(12px,1.5vw,28px)] z-10 bg-black/70 px-[8px] py-[4px] font-ui-en text-[13px] leading-[13px] text-white"
+          className="pointer-events-none absolute top-[clamp(12px,1.5vw,28px)] left-[clamp(12px,1.5vw,28px)] z-10 bg-black/70 px-[8px] py-[4px] font-ui-en text-[clamp(12px,calc(13px*var(--text-scale)),13px)] leading-[clamp(12px,calc(13px*var(--text-scale)),13px)] text-white"
         >
           {selectedIndex + 1} / {items.length}
         </p>
@@ -608,7 +608,7 @@ export function Moya500DesignDesktopHero({
         <Moya500DesignBreadcrumbs
           category={product.category}
           categorySlug={product.categorySlug}
-          className="font-body-ja text-[13px] leading-[13px] text-[var(--color-muted)]"
+          className="font-body-ja text-[clamp(12px,calc(13px*var(--text-scale)),13px)] leading-[clamp(12px,calc(13px*var(--text-scale)),13px)] text-[var(--color-muted)]"
         />
 
         <h1
@@ -642,7 +642,7 @@ export function Moya500DesignDesktopHero({
 
           {showVariantLabel && selectedVariant ? (
             <p
-              className="mt-[clamp(20px,2.8vh,32px)] font-ui-en text-[13px] leading-[13px] text-[var(--foreground)]"
+              className="mt-[clamp(20px,2.8vh,32px)] font-ui-en text-[clamp(12px,calc(13px*var(--text-scale)),13px)] leading-[clamp(12px,calc(13px*var(--text-scale)),13px)] text-[var(--foreground)]"
             >
               <span className="font-semibold">{variantOptionName}</span>
               {` : ${selectedVariant.colorName}`}

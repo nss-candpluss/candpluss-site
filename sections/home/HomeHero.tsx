@@ -19,14 +19,15 @@ import { bodyText, sectionTitle67ClassName } from "@/lib/typography";
 const HERO_LAYER_IMAGE_CLASS = "object-cover object-center";
 
 export function HomeHero() {
-  const sectionRef = useRef<HTMLElement>(null);
   const titleLayerRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
-    const section = sectionRef.current;
     const titleLayer = titleLayerRef.current;
     const overlay = overlayRef.current;
+    const section = titleLayer?.closest<HTMLElement>("[data-hero-section]");
+    const copy = section?.querySelector<HTMLElement>("[data-home-hero-copy]");
+    const body = section?.querySelector<HTMLElement>("[data-home-hero-body]");
 
     if (!section || !titleLayer || !overlay) {
       return;
@@ -44,6 +45,12 @@ export function HomeHero() {
 
       const resizeObserver = new ResizeObserver(syncScrollEnd);
       resizeObserver.observe(section);
+      if (copy) {
+        resizeObserver.observe(copy);
+      }
+      if (body) {
+        resizeObserver.observe(body);
+      }
       window.addEventListener("resize", syncScrollEnd);
 
       return () => {
@@ -104,6 +111,12 @@ export function HomeHero() {
     window.addEventListener("pageshow", handlePageShow);
 
     resizeObserver.observe(section);
+    if (copy) {
+      resizeObserver.observe(copy);
+    }
+    if (body) {
+      resizeObserver.observe(body);
+    }
 
     return () => {
       if (window.__heroScrollSync) {
@@ -118,13 +131,12 @@ export function HomeHero() {
   }, []);
 
   return (
-    <section
-      ref={sectionRef}
-      data-hero-section
-      data-header-theme="onDark"
-      className="relative bg-black"
-    >
-      <div className="sticky top-0 h-screen overflow-hidden">
+    <>
+      <div
+        data-home-hero-background
+        data-header-theme="onDark"
+        className="sticky top-0 z-0 h-screen overflow-hidden bg-black"
+      >
         <div className="absolute inset-0 z-0">
           <SiteImage
             src={topHeroContent.backgroundImage}
@@ -173,12 +185,19 @@ export function HomeHero() {
         />
       </div>
 
-      <div className="relative z-10 -mt-[50px] px-[var(--container-x)] pb-[10vh]">
-        <div className="text-white">
+      <section
+        data-home-hero-copy
+        data-header-theme="onDark"
+        className="relative z-10 -mt-[50px] min-h-[50svh] px-[var(--container-x)] pb-[20vh]"
+      >
+        <div className="flex flex-col items-center text-center text-white">
           <h2 className={`${sectionTitle67ClassName} font-heading`}>
             {topHeroContent.beginning.title}
           </h2>
-          <p className={`font-body-ja mt-[calc(98px*var(--gap-scale-y))] ${bodyText(18)}`}>
+          <p
+            data-home-hero-body
+            className={`font-body-ja mt-[calc(98px*var(--gap-scale-y))] ${bodyText(18)}`}
+          >
             {topHeroContent.beginning.bodyLines.map((line, index, lines) => (
               <span key={`${line}-${index}`}>
                 {line}
@@ -193,7 +212,7 @@ export function HomeHero() {
             {topHeroContent.beginning.link.label}
           </TextLink>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

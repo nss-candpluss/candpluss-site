@@ -153,7 +153,7 @@ describe("concept page copy", () => {
     expect(conceptSectionNavSource).toContain("SiteGrid");
     expect(conceptSectionNavSource).toContain("conceptSectionNavSpanClassName");
     expect(conceptSectionNavSource).toContain("sticky top-0 flex h-svh items-center");
-    expect(conceptSectionNavSource).toContain('uiTextRange("14-16")');
+    expect(conceptSectionNavSource).toContain("uiText(16)");
   });
 
   it("sets title numerals in Baskervville SC at the thinnest weight", () => {
@@ -298,10 +298,10 @@ describe("concept page copy", () => {
     expect(conceptPageSource).toContain("conceptStoryBodyClassName");
     expect(conceptPageSource).not.toContain("bodyText(18)");
     expect(typographySource).toContain(
-      "text-[calc(18px*var(--text-scale))] leading-[calc(36px*var(--text-scale))]"
+      "text-[clamp(16px,calc(18px*var(--text-scale)),18px)] leading-[calc(36px*var(--text-scale))]"
     );
     expect(typographySource).toContain(
-      "text-[calc(18px*var(--text-scale))] leading-[calc(31.5px*var(--text-scale))]"
+      "text-[clamp(16px,calc(18px*var(--text-scale)),18px)] leading-[calc(31.5px*var(--text-scale))]"
     );
   });
 });

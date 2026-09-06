@@ -18,6 +18,7 @@ import {
 } from "@/lib/site-navigation-visibility";
 import { HeaderMobileMenu } from "@/components/layout/HeaderMobileMenu";
 import { hoverUnderlineActiveClassName, hoverUnderlineHoverClassName } from "@/components/ui/TextLink";
+import { uiText } from "@/lib/typography";
 import {
   fallbackHeaderTheme,
   headerThemeFromAttribute,
@@ -207,7 +208,7 @@ export function Header() {
                       <Link
                         href={link.href}
                         aria-current={isActive ? "page" : undefined}
-                        className={`${isActive ? hoverUnderlineActiveClassName : hoverUnderlineHoverClassName} text-[14px] leading-[14px]`}
+                        className={`${isActive ? hoverUnderlineActiveClassName : hoverUnderlineHoverClassName} ${uiText(14)}`}
                       >
                         {link.label}
                       </Link>

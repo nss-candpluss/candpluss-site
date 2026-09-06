@@ -11,7 +11,7 @@ import {
 import { CONTACT_ATTACHMENT_MAX_COUNT } from "@/lib/contact/attachment-config";
 import { validateContactAttachments } from "@/lib/contact/attachment-validation";
 import { formatFileSize } from "@/lib/contact/format-file-size";
-import { bodyText } from "@/lib/typography";
+import { bodyText, uiText } from "@/lib/typography";
 import { ContactField } from "@/sections/contact/ContactField";
 
 export type ContactAttachmentPreview = {
@@ -31,7 +31,7 @@ type ContactImageAttachmentsProps = {
 const descriptionClassName = `font-body-ja whitespace-pre-line text-[var(--color-muted)] ${bodyText(14)}`;
 
 const fileInputClassName =
-  "inline-flex cursor-pointer items-center justify-center border border-[var(--foreground)] bg-white px-[calc(20px*var(--gap-scale-x))] py-[calc(12px*var(--gap-scale-y))] font-body-ja text-[calc(14px*var(--text-scale))] leading-[calc(14px*var(--text-scale))] text-[var(--foreground)] transition-opacity duration-300 hover:opacity-60";
+  `inline-flex cursor-pointer items-center justify-center border border-[var(--foreground)] bg-white px-[calc(20px*var(--gap-scale-x))] py-[calc(12px*var(--gap-scale-y))] font-body-ja ${uiText(14)} text-[var(--foreground)] transition-opacity duration-300 hover:opacity-60`;
 
 const dropZoneClassName =
   "hidden min-[640px]:flex min-[640px]:flex-col min-[640px]:items-center min-[640px]:justify-center min-[640px]:gap-[calc(12px*var(--gap-scale-y))] min-[640px]:border min-[640px]:border-dashed min-[640px]:px-[calc(24px*var(--gap-scale-x))] min-[640px]:py-[calc(32px*var(--gap-scale-y))] min-[640px]:transition-colors min-[640px]:duration-300";
@@ -49,14 +49,14 @@ const thumbnailClassName =
   "size-[calc(72px*var(--gap-scale-x))] shrink-0 overflow-hidden bg-[#f5f5f5] object-cover";
 
 const thumbnailFallbackClassName =
-  "flex size-[calc(72px*var(--gap-scale-x))] shrink-0 items-center justify-center bg-[#f5f5f5] px-[calc(8px*var(--gap-scale-x))] text-center font-body-ja text-[calc(11px*var(--text-scale))] leading-[calc(16px*var(--text-scale))] text-[var(--color-muted)]";
+  "flex size-[calc(72px*var(--gap-scale-x))] shrink-0 items-center justify-center bg-[#f5f5f5] px-[calc(8px*var(--gap-scale-x))] text-center font-body-ja text-[11px] leading-[calc(16px*var(--text-scale))] text-[var(--color-muted)]";
 
 const fileNameClassName = `font-body-ja break-all text-[var(--foreground)] ${bodyText(14)}`;
 
 const fileSizeClassName = `font-body-ja text-[var(--color-muted)] ${bodyText(14)}`;
 
 const removeButtonClassName =
-  "ml-auto inline-flex size-[calc(32px*var(--gap-scale-x))] shrink-0 cursor-pointer items-center justify-center font-body-ja text-[calc(20px*var(--text-scale))] leading-none text-[var(--foreground)] transition-opacity duration-300 hover:opacity-60";
+  "ml-auto inline-flex size-[calc(32px*var(--gap-scale-x))] shrink-0 cursor-pointer items-center justify-center font-body-ja text-[clamp(18px,calc(20px*var(--text-scale)),20px)] leading-none text-[var(--foreground)] transition-opacity duration-300 hover:opacity-60";
 
 function createPreview(file: File): ContactAttachmentPreview {
   const previewUrl = URL.createObjectURL(file);

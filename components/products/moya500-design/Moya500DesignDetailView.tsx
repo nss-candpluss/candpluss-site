@@ -28,7 +28,7 @@ import {
   resolveProductVariantId,
 } from "@/lib/products/helpers";
 import { resolveFeatureImageSrc } from "@/lib/products/image-paths";
-import { productDetailSectionTitleClassName } from "@/lib/typography";
+import { productDetailSectionTitleClassName, uiText } from "@/lib/typography";
 import type { Product, ProductFeature } from "@/types/product";
 
 type Moya500DesignDetailViewProps = {
@@ -54,10 +54,10 @@ const DESIGN_SECTION_TITLE_CLASS_NAME = productDetailSectionTitleClassName;
 
 const DESIGN_SIZE_SPEC_TYPOGRAPHY = {
   title: DESIGN_SECTION_TITLE_CLASS_NAME,
-  itemName: "text-[14px] leading-[14px]",
-  content: "text-[14px] leading-[24.5px]",
+  itemName: uiText(14),
+  content: "text-[clamp(13px,calc(14px*var(--text-scale)),14px)] leading-[24.5px]",
   note: "text-[clamp(13px,calc(14px*var(--text-scale)),14px)] leading-[clamp(22.75px,calc(24.5px*var(--text-scale)),24.5px)]",
-  download: "text-[14px] leading-[14px]",
+  download: uiText(14),
 } as const;
 
 const FEATURE_IMAGE_ROOT = "/images/products/moya500";

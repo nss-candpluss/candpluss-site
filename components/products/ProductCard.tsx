@@ -28,13 +28,11 @@ type ProductCardProps = {
   presentation?: "default" | "productsListing";
 };
 
-const listingText14ClassName =
-  "text-[clamp(13px,calc(14px*var(--text-scale)),14px)] leading-[clamp(13px,calc(14px*var(--text-scale)),14px)]";
-const listingTitleClassName =
-  "text-[clamp(15px,calc(16px*var(--text-scale)),16px)] leading-[clamp(15px,calc(16px*var(--text-scale)),16px)]";
+const listingText14ClassName = uiText(14);
+const listingTitleClassName = uiText(16);
 const listingStatusClassName =
   `flex items-center ${listingStatusRowMinHeightClassName} !text-[clamp(13px,calc(14px*var(--text-scale)),14px)] !leading-[clamp(13px,calc(14px*var(--text-scale)),14px)]`;
-const listingTaxClassName = "text-[11px] leading-[11px]";
+const listingTaxClassName = uiText(11);
 const listingImageToColorsClassName =
   "mt-[clamp(10px,calc(18px*var(--gap-scale-y)),18px)]";
 const listingColorsToTextClassName =

@@ -18,7 +18,7 @@ import {
   startBoundLenis,
   stopBoundLenis,
 } from "@/lib/motion/setup-lenis-scroll-trigger";
-import { uiTextRange } from "@/lib/typography";
+import { uiText } from "@/lib/typography";
 
 const MOTION_MS = 150;
 
@@ -158,7 +158,7 @@ function CartDialogView({ onDismiss }: { onDismiss: () => void }) {
         <div className="flex min-h-[40px] shrink-0 items-center pr-[40px]">
           <h2
             id={titleId}
-            className={`font-body-ja font-semibold ${uiTextRange("16-20")}`}
+            className={`font-body-ja font-semibold ${uiText(20)}`}
           >
             カート
           </h2>
@@ -169,7 +169,7 @@ function CartDialogView({ onDismiss }: { onDismiss: () => void }) {
           className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {isLoading && !lines.length ? (
-            <p className={`mt-[24px] font-body-ja ${uiTextRange("14-16")}`}>
+            <p className={`mt-[24px] font-body-ja ${uiText(16)}`}>
               カートを読み込んでいます。
             </p>
           ) : null}
@@ -177,14 +177,14 @@ function CartDialogView({ onDismiss }: { onDismiss: () => void }) {
           {!isLoading && !lines.length ? (
             <div className="mt-[24px]">
               <p
-                className={`font-body-ja text-[var(--color-muted)] ${uiTextRange("14-16")}`}
+                className={`font-body-ja text-[var(--color-muted)] ${uiText(16)}`}
               >
                 カートに商品はありません。
               </p>
               <Link
                 href="/products"
                 onClick={onDismiss}
-                className={`mt-[16px] inline-flex font-ui-en ${uiTextRange("14-16")}`}
+                className={`mt-[16px] inline-flex font-ui-en ${uiText(16)}`}
               >
                 VIEW PRODUCTS
               </Link>
@@ -217,7 +217,7 @@ function CartDialogView({ onDismiss }: { onDismiss: () => void }) {
                     <div className="min-w-0">
                       {category ? (
                         <p
-                          className={`font-body-ja text-[var(--color-muted)] ${uiTextRange("13-14")}`}
+                          className={`font-body-ja text-[var(--color-muted)] ${uiText(14)}`}
                         >
                           {category}
                         </p>
@@ -225,7 +225,7 @@ function CartDialogView({ onDismiss }: { onDismiss: () => void }) {
                       <Link
                         href={`/products/${line.merchandise.product.handle}`}
                         onClick={onDismiss}
-                        className={`block font-body-ja font-semibold ${uiTextRange("16-18")} ${
+                        className={`block font-body-ja font-semibold ${uiText(18)} ${
                           category ? "mt-[8px]" : ""
                         }`}
                       >
@@ -233,7 +233,7 @@ function CartDialogView({ onDismiss }: { onDismiss: () => void }) {
                       </Link>
                       {showVariant ? (
                         <p
-                          className={`font-ui-en text-[var(--color-muted)] ${uiTextRange("13-14")} ${
+                          className={`font-ui-en text-[var(--color-muted)] ${uiText(14)} ${
                             category || line.merchandise.product.title
                               ? "mt-[8px]"
                               : ""
@@ -251,13 +251,13 @@ function CartDialogView({ onDismiss }: { onDismiss: () => void }) {
                             : ""
                         }`}
                       >
-                        <span className={`font-ui-en ${uiTextRange("13-14")}`}>
+                        <span className={`font-ui-en ${uiText(14)}`}>
                           {formatMoney(
                             line.merchandise.price.amount,
                             line.merchandise.price.currencyCode
                           )}
                         </span>
-                        <span className="font-body-ja text-[11px] leading-[11px]">
+                        <span className={`font-body-ja ${uiText(11)}`}>
                           税込
                         </span>
                       </p>
@@ -286,7 +286,7 @@ function CartDialogView({ onDismiss }: { onDismiss: () => void }) {
 
         {lines.length > 0 ? (
           <div className="mt-[clamp(24px,calc(28px*var(--gap-scale-y)),28px)] shrink-0">
-            <div className="flex flex-col gap-[16px] font-body-ja font-semibold text-[16px] leading-[16px]">
+            <div className={`flex flex-col gap-[16px] font-body-ja font-semibold ${uiText(16)}`}>
               <div className="flex items-baseline justify-between gap-[8px]">
                 <span>小計</span>
                 <span className="inline-flex items-baseline justify-end gap-[4px]">
@@ -296,19 +296,19 @@ function CartDialogView({ onDismiss }: { onDismiss: () => void }) {
                       cart?.cost.subtotalAmount.currencyCode ?? "JPY"
                     )}
                   </span>
-                  <span className="font-body-ja text-[11px] leading-[11px] font-normal">
+                  <span className={`font-body-ja ${uiText(11)} font-normal`}>
                     税込
                   </span>
                 </span>
               </div>
-              <p className="text-right text-[14px] leading-[14px] font-normal">
+              <p className={`text-right ${uiText(14)} font-normal`}>
                 配送料はご購入画面で確定します
               </p>
             </div>
             {checkoutHref ? (
               <a
                 href={checkoutHref}
-                className={`mt-[20px] flex w-full items-center justify-center bg-[var(--foreground)] px-[12px] py-[16px] text-center font-body-ja font-medium text-white min-[1025px]:py-[clamp(16px,2.2vh,24px)] ${uiTextRange("14-16")}`}
+                className={`mt-[20px] flex w-full items-center justify-center bg-[var(--foreground)] px-[12px] py-[16px] text-center font-body-ja font-medium text-white min-[1025px]:py-[clamp(16px,2.2vh,24px)] ${uiText(16)}`}
               >
                 ご購入の手続き
               </a>
@@ -319,7 +319,7 @@ function CartDialogView({ onDismiss }: { onDismiss: () => void }) {
         {error ? (
           <p
             role="alert"
-            className={`mt-[12px] shrink-0 font-body-ja text-[#9b1b30] ${uiTextRange("13-14")}`}
+            className={`mt-[12px] shrink-0 font-body-ja text-[#9b1b30] ${uiText(14)}`}
           >
             {error}
           </p>

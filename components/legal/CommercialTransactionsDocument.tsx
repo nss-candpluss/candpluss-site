@@ -7,8 +7,7 @@ import {
 } from "@/lib/layout";
 import { bodyText, uiText } from "@/lib/typography";
 
-const listClassName =
-  "list-disc space-y-[calc(12px*var(--gap-scale-y))] pl-[calc(20px*var(--gap-scale-x))]";
+const listClassName = "list-none space-y-[calc(12px*var(--gap-scale-y))]";
 
 const bodyClassName = `font-body-ja text-[var(--foreground)] ${bodyText(15)}`;
 
@@ -31,7 +30,7 @@ function CommercialTransactionBlockRenderer({ block }: { block: CommercialTransa
         <ul className={listClassName}>
           {block.items.map((item) => (
             <li key={item} className={bodyClassName}>
-              {item}
+              ・{item}
             </li>
           ))}
         </ul>

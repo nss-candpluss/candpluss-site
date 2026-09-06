@@ -26,26 +26,49 @@ describe("footer nav links", () => {
   });
 
   it("separates page links from shopping guide links", () => {
+    expect(footerSource).toContain("border-t border-[var(--color-divider)]");
     expect(footerSource).toContain('aria-label="Footer page links"');
-    expect(footerSource).toContain('bg-[var(--color-divider)]');
+    expect(footerSource).not.toContain('bg-[var(--color-divider)]');
+    expect(footerSource).toContain("flex flex-col gap-6 px-[var(--container-x)] py-12 md:gap-8 md:py-16");
+    expect(footerSource).not.toContain("gap-y-6 md:gap-y-12");
     expect(footerSource.indexOf("Footer page links")).toBeLessThan(
-      footerSource.indexOf("bg-[var(--color-divider)]")
-    );
-    expect(footerSource.indexOf("bg-[var(--color-divider)]")).toBeLessThan(
       footerSource.indexOf("Footer navigation")
     );
-    expect(footerSource.indexOf("bg-[var(--color-divider)]")).toBeLessThan(
+    expect(footerSource.indexOf("Footer navigation")).toBeLessThan(
       footerSource.indexOf("Social media")
     );
     expect(footerSource.indexOf(footerContent.copyright)).toBeLessThan(
       footerSource.indexOf("Social media")
     );
-    expect(footerSource).toContain("my-[48px]");
   });
 
-  it("sizes PRODUCTS CONCEPT LABO SUPPORT between 14px and 16px", () => {
-    expect(footerSource).toContain('uiTextRange("14-16")');
+  it("stacks page, shopping, and legal links in a column below 768px", () => {
+    expect(footerSource).toContain(
+      'aria-label="Footer page links"\n          className="flex flex-col gap-y-4 md:flex-row md:flex-wrap md:gap-x-[calc(32px*var(--gap-scale-x))]"'
+    );
+    expect(footerSource).toContain(
+      'aria-label="Footer navigation"\n          className="flex flex-col gap-y-4 md:flex-row md:flex-wrap md:gap-x-[calc(32px*var(--gap-scale-x))]"'
+    );
+    expect(footerSource).toContain(
+      'aria-label="Legal links"\n          className="flex flex-col gap-y-4 md:hidden"'
+    );
+  });
+
+  it("sizes PRODUCTS CONCEPT LABO SUPPORT with uiText(16)", () => {
+    expect(footerSource).toContain("uiText(16)");
     expect(footerSource).toContain("navLinkClassName");
+  });
+
+  it("uses underline hover on page links and opacity hover on shopping and legal links", () => {
+    expect(footerSource).toContain(
+      'const navLinkClassName = `${hoverUnderlineHoverClassName} font-ui-en ${uiText(16)} font-medium text-[var(--foreground)]`'
+    );
+    expect(footerSource).toContain(
+      'const primaryLinkClassName = `font-body-ja ${uiText(14)} text-[var(--foreground)] transition-opacity duration-300 hover:opacity-60`'
+    );
+    expect(footerSource).toContain(
+      'const legalLinkClassName = `font-body-ja ${uiText(13)} text-[var(--foreground)] transition-opacity duration-300 hover:opacity-60`'
+    );
   });
 
   it("renders SNS icons at 28px", () => {

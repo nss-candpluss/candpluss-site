@@ -8,7 +8,7 @@ import { CartRemoveButton } from "@/components/commerce/CartRemoveButton";
 import { useCart } from "@/components/commerce/CartProvider";
 import { useCustomer } from "@/components/commerce/CustomerProvider";
 import { shopifyCheckoutUrl } from "@/lib/commerce/checkout-url";
-import { uiTextRange } from "@/lib/typography";
+import { uiText } from "@/lib/typography";
 
 function formatMoney(amount: string, currencyCode: string) {
   return new Intl.NumberFormat("ja-JP", {
@@ -67,13 +67,13 @@ export default function CartPage() {
                 <div className="min-w-0">
                   <Link
                     href={`/products/${line.merchandise.product.handle}`}
-                    className={`block font-body-ja font-semibold ${uiTextRange("16-18")}`}
+                    className={`block font-body-ja font-semibold ${uiText(18)}`}
                   >
                     {line.merchandise.product.title}
                   </Link>
                   {line.merchandise.title !== "Default Title" ? (
                     <p
-                      className={`mt-2 font-ui-en text-[var(--color-muted)] ${uiTextRange("13-14")}`}
+                      className={`mt-2 font-ui-en text-[var(--color-muted)] ${uiText(14)}`}
                     >
                       {line.merchandise.title}
                     </p>

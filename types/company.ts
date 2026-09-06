@@ -10,8 +10,5 @@ export type CompanyInfoItem = {
 
 export type CompanyContent = {
   title: string;
-  labTitle: string;
-  labItems: readonly CompanyInfoItem[];
-  tableTitle: string;
   items: readonly CompanyInfoItem[];
 };

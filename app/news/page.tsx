@@ -29,7 +29,7 @@ export default async function NewsPage() {
               article={article}
               className={standardCardSpanClassName}
               priority={index === 0}
-              bodyTypographyClassName="text-[calc(15px*var(--text-scale))] leading-[calc(23px*var(--text-scale))]"
+              bodyTypographyClassName="text-[clamp(14px,calc(15px*var(--text-scale)),15px)] leading-[calc(23px*var(--text-scale))]"
             />
           ))}
         </SiteGrid>

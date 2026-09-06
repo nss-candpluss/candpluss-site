@@ -5,7 +5,7 @@
 export const siteNavigationVisibility = {
   membership: false,
   headerSearch: false,
-  headerUser: true,
+  headerUser: false,
   headerCart: true,
   contact: true,
   snsFacebook: false,

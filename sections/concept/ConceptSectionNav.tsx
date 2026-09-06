@@ -6,7 +6,7 @@ import { Container } from "@/components/ui/Container";
 import { SiteGrid } from "@/components/ui/SiteGrid";
 import { conceptSectionNavSpanClassName } from "@/lib/layout";
 import { isLenisBound } from "@/lib/motion/setup-lenis-scroll-trigger";
-import { uiTextRange } from "@/lib/typography";
+import { uiText } from "@/lib/typography";
 
 type ConceptSectionNavItem = {
   id: string;
@@ -95,7 +95,7 @@ export function ConceptSectionNav({ sections }: ConceptSectionNavProps) {
                         href={`#${section.id}`}
                         aria-current={isActive ? "location" : undefined}
                         onClick={(event) => handleClick(event, section.id)}
-                        className={`whitespace-nowrap font-ui-en font-medium text-white ${uiTextRange("14-16")} transition-opacity duration-200 ${
+                        className={`whitespace-nowrap font-ui-en font-medium text-white ${uiText(16)} transition-opacity duration-200 ${
                           isActive ? "opacity-100" : "opacity-45 hover:opacity-100"
                         }`}
                       >

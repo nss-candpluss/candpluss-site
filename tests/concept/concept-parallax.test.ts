@@ -17,12 +17,12 @@ const parallaxSource = readFileSync(
 );
 
 describe("Concept content parallax", () => {
-  it("renders a sticky background stage behind 140svh desktop sections", () => {
+  it("keeps an lvh background stage behind svh-positioned content", () => {
     expect(conceptPageSource).toContain("ConceptParallaxRegion");
     expect(conceptPageSource).toContain("data-concept-background-stage");
     expect(conceptPageSource).toContain("data-concept-background={section.id}");
-    expect(conceptPageSource).toContain("sticky top-0 h-svh overflow-hidden");
-    expect(conceptPageSource).toContain("-mt-[100svh]");
+    expect(conceptPageSource).toContain("sticky top-0 h-lvh overflow-hidden");
+    expect(conceptPageSource).toContain("-mt-[100lvh]");
     expect(conceptPageSource).toContain("min-[1025px]:min-h-[140svh]");
     expect(conceptPageSource).toContain("flex h-[50svh] w-full items-end");
     expect(conceptPageSource).toContain("data-concept-section");

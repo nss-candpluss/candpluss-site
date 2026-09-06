@@ -1,4 +1,5 @@
 import type { OpenCloseGroupId } from "@/types/product";
+import { uiText } from "@/lib/typography";
 
 const GROUPS = ["open", "close"] as const satisfies readonly OpenCloseGroupId[];
 
@@ -33,7 +34,7 @@ export function ProductGalleryOpenClose({
             type="button"
             aria-pressed={isActive}
             onClick={() => onChange(groupId)}
-            className={`relative z-10 min-w-[72px] px-[16px] py-[8px] text-[14px] leading-[14px] font-ui-en ${
+            className={`relative z-10 min-w-[72px] px-[16px] py-[8px] ${uiText(14)} font-ui-en ${
               isActive ? "text-white" : "text-[var(--color-muted)]"
             }`}
           >

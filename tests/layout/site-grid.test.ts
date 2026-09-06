@@ -10,8 +10,11 @@ import {
   conceptStoryHeadingSpanClassName,
   definitionLabelSpanClassName,
   definitionValueSpanClassName,
+  MAIN_PRODUCTS_THREE_COLUMN_MIN_COUNT,
   formHalfSpanClassName,
   fullSpanClassName,
+  mainProductCardAspectClassName,
+  mainProductCardSpanClassName,
   productCardSpanClassName,
   siteGridClassName,
   standardCardSpanClassName,
@@ -50,6 +53,14 @@ describe("12 column site grid", () => {
     expect(threeColumnFeatureSpanClassName).toContain(
       "col-span-12 min-[768px]:col-span-4"
     );
+  });
+
+  it("uses two columns for Main Products until there are five items", () => {
+    expect(MAIN_PRODUCTS_THREE_COLUMN_MIN_COUNT).toBe(5);
+    expect(mainProductCardSpanClassName(4)).toBe(twoColumnFeatureSpanClassName);
+    expect(mainProductCardSpanClassName(5)).toBe(standardCardSpanClassName);
+    expect(mainProductCardAspectClassName(4)).toBe("aspect-[13/10]");
+    expect(mainProductCardAspectClassName(5)).toBe("aspect-[4/5]");
   });
 
   it("defines form and definition-list spans", () => {

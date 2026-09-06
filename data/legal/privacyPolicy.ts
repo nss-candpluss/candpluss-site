@@ -81,7 +81,7 @@ export const privacyPolicyContent = {
       intro:
         "個人情報の取扱いに関するお問い合わせ、開示・訂正・利用停止等のご請求は、以下までご連絡ください。",
       contact: {
-        company: "株式会社NSS（ブランド名：Cand+S）",
+        company: "株式会社NSS（ブランド名：C AND+S）",
         email: "info@candpluss.camp",
       },
       closing: [

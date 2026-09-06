@@ -2,30 +2,6 @@ import type { CompanyContent } from "@/types/company";
 
 export const companyContent = {
   title: "ABOUT US",
-  labTitle: "Fukuoka Lab.",
-  labItems: [
-    {
-      label: "所在地",
-      blocks: [{ type: "paragraph", text: "〒816-0902 福岡県大野城市乙金1-10-40 1F（）" }],
-    },
-    {
-      label: "営業時間",
-      blocks: [{ type: "paragraph", text: "9:00～17:00" }],
-    },
-    {
-      label: "電話番号",
-      blocks: [{ type: "paragraph", text: "092-235-6529" }],
-    },
-    {
-      label: "定休日",
-      blocks: [{ type: "paragraph", text: "土、日、祝日" }],
-    },
-    {
-      label: "駐車場",
-      blocks: [{ type: "paragraph", text: "あり" }],
-    },
-  ],
-  tableTitle: "会社情報",
   items: [
     {
       label: "会社名",

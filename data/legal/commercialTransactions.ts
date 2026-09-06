@@ -5,7 +5,7 @@ export const commercialTransactionsContent = {
   items: [
     {
       label: "販売業者",
-      blocks: [{ type: "paragraph", text: "株式会社NSS（ブランド名：Cand+S）" }],
+      blocks: [{ type: "paragraph", text: "株式会社NSS（ブランド名：C AND+S）" }],
     },
     {
       label: "運営責任者",

@@ -15,7 +15,7 @@ export default function CompanyPage() {
   return (
     <main
       data-header-theme="onLight"
-      className="pt-[var(--product-page-title-top)] pb-[var(--container-y-bottom)]"
+      className="bg-[var(--background)] pt-[var(--product-page-title-top)] pb-[var(--container-y-bottom)]"
     >
       <Container>
         <SiteGrid>

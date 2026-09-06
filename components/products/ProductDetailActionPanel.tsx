@@ -96,7 +96,7 @@ export function ProductDetailActionPanel({
       </div>
 
       <p
-        className="mt-[12px] font-body-ja text-[calc(14px*var(--text-scale))] leading-[calc(14px*var(--text-scale))] text-[var(--color-muted)] min-[1025px]:mt-[calc(20px*var(--gap-scale-y))] min-[1025px]:text-[calc(15px*var(--text-scale))] min-[1025px]:leading-[calc(15px*var(--text-scale))]"
+        className={`mt-[12px] font-body-ja ${uiText(14)} text-[var(--color-muted)] min-[1025px]:mt-[calc(20px*var(--gap-scale-y))] min-[1025px]:text-[clamp(14px,calc(15px*var(--text-scale)),15px)] min-[1025px]:leading-[clamp(14px,calc(15px*var(--text-scale)),15px)]`}
       >
         {product.category}
       </p>

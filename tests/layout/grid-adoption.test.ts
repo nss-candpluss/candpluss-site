@@ -12,16 +12,22 @@ function source(path: string): string {
 
 describe("12 column grid adoption", () => {
   it("uses standard card spans for Home and News listings", () => {
-    for (const path of [
-      "sections/home/HomeMainProducts.tsx",
-      "sections/home/HomeNews.tsx",
-      "app/news/page.tsx",
-    ]) {
+    for (const path of ["sections/home/HomeNews.tsx", "app/news/page.tsx"]) {
       const fileSource = source(path);
 
       expect(fileSource).toContain("SiteGrid");
       expect(fileSource).toContain("standardCardSpanClassName");
     }
+  });
+
+  it("switches Main Products between two- and three-column spans by item count", () => {
+    const fileSource = source("sections/home/HomeMainProducts.tsx");
+
+    expect(fileSource).toContain("SiteGrid");
+    expect(fileSource).toContain("mainProductCardSpanClassName");
+    expect(fileSource).toContain("mainProductCardAspectClassName");
+    expect(fileSource).toContain("gap-y-[calc(62px*var(--gap-scale-y))]");
+    expect(fileSource).toContain("min-[768px]:gap-y-[calc(32px*var(--gap-scale))]");
   });
 
   it("keeps the Products listing breakpoints and breakout navigation", () => {

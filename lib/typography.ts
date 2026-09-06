@@ -1,17 +1,29 @@
 /**
  * Tailwind は動的テンプレートリテラル内のクラスを検出できないため、
  * 使用するサイズはリテラル文字列として列挙する。
+ *
+ * 11–20px の font-size 下限:
+ * - 11px → 固定 11px
+ * - 12px → 最小 11px
+ * - 13px → 最小 12px
+ * - 14px → 最小 13px
+ * - 15px → 最小 14px
+ * - 16px → 最小 15px
+ * - 18px → 最小 16px
+ * - 20px → 最小 18px
+ * line-height の比率（UI は 1:1、本文は ×1.75）は変えない。
  */
 
 const UI_TEXT_PX = {
   10: "text-[calc(10px*var(--text-scale))] leading-[calc(10px*var(--text-scale))]",
-  11: "text-[calc(11px*var(--text-scale))] leading-[calc(11px*var(--text-scale))]",
-  13: "text-[calc(13px*var(--text-scale))] leading-[calc(13px*var(--text-scale))]",
-  14: "text-[calc(14px*var(--text-scale))] leading-[calc(14px*var(--text-scale))]",
-  15: "text-[calc(15px*var(--text-scale))] leading-[calc(15px*var(--text-scale))]",
-  16: "text-[calc(16px*var(--text-scale))] leading-[calc(16px*var(--text-scale))]",
-  18: "text-[calc(18px*var(--text-scale))] leading-[calc(18px*var(--text-scale))]",
-  20: "text-[calc(20px*var(--text-scale))] leading-[calc(20px*var(--text-scale))]",
+  11: "text-[11px] leading-[11px]",
+  12: "text-[clamp(11px,calc(12px*var(--text-scale)),12px)] leading-[clamp(11px,calc(12px*var(--text-scale)),12px)]",
+  13: "text-[clamp(12px,calc(13px*var(--text-scale)),13px)] leading-[clamp(12px,calc(13px*var(--text-scale)),13px)]",
+  14: "text-[clamp(13px,calc(14px*var(--text-scale)),14px)] leading-[clamp(13px,calc(14px*var(--text-scale)),14px)]",
+  15: "text-[clamp(14px,calc(15px*var(--text-scale)),15px)] leading-[clamp(14px,calc(15px*var(--text-scale)),15px)]",
+  16: "text-[clamp(15px,calc(16px*var(--text-scale)),16px)] leading-[clamp(15px,calc(16px*var(--text-scale)),16px)]",
+  18: "text-[clamp(16px,calc(18px*var(--text-scale)),18px)] leading-[clamp(16px,calc(18px*var(--text-scale)),18px)]",
+  20: "text-[clamp(18px,calc(20px*var(--text-scale)),20px)] leading-[clamp(18px,calc(20px*var(--text-scale)),20px)]",
   21: "text-[calc(21px*var(--text-scale))] leading-[calc(21px*var(--text-scale))]",
   24: "text-[calc(24px*var(--text-scale))] leading-[calc(24px*var(--text-scale))]",
   30: "text-[calc(30px*var(--text-scale))] leading-[calc(30px*var(--text-scale))]",
@@ -28,24 +40,28 @@ const UI_TEXT_REM = {
 } as const;
 
 const UI_TEXT_RANGE_PX = {
+  "11-12":
+    "text-[clamp(11px,calc(12px*var(--text-scale)),12px)] leading-[clamp(11px,calc(12px*var(--text-scale)),12px)]",
+  "12-13":
+    "text-[clamp(12px,calc(13px*var(--text-scale)),13px)] leading-[clamp(12px,calc(13px*var(--text-scale)),13px)]",
   "13-14":
     "text-[clamp(13px,calc(14px*var(--text-scale)),14px)] leading-[clamp(13px,calc(14px*var(--text-scale)),14px)]",
-  "13-15":
-    "text-[clamp(13px,calc(15px*var(--text-scale)),15px)] leading-[clamp(13px,calc(15px*var(--text-scale)),15px)]",
-  "14-16":
-    "text-[clamp(14px,calc(16px*var(--text-scale)),16px)] leading-[clamp(14px,calc(16px*var(--text-scale)),16px)]",
+  "14-15":
+    "text-[clamp(14px,calc(15px*var(--text-scale)),15px)] leading-[clamp(14px,calc(15px*var(--text-scale)),15px)]",
+  "15-16":
+    "text-[clamp(15px,calc(16px*var(--text-scale)),16px)] leading-[clamp(15px,calc(16px*var(--text-scale)),16px)]",
   "16-18":
     "text-[clamp(16px,calc(18px*var(--text-scale)),18px)] leading-[clamp(16px,calc(18px*var(--text-scale)),18px)]",
-  "16-20":
-    "text-[clamp(16px,calc(20px*var(--text-scale)),20px)] leading-[clamp(16px,calc(20px*var(--text-scale)),20px)]",
+  "18-20":
+    "text-[clamp(18px,calc(20px*var(--text-scale)),20px)] leading-[clamp(18px,calc(20px*var(--text-scale)),20px)]",
 } as const;
 
 const BODY_TEXT_PX = {
-  14: "text-[calc(14px*var(--text-scale))] leading-[calc(24.5px*var(--text-scale))]",
-  15: "text-[calc(15px*var(--text-scale))] leading-[calc(26.25px*var(--text-scale))]",
-  16: "text-[calc(16px*var(--text-scale))] leading-[calc(28px*var(--text-scale))]",
-  18: "text-[calc(18px*var(--text-scale))] leading-[calc(31.5px*var(--text-scale))]",
-  20: "text-[calc(20px*var(--text-scale))] leading-[calc(35px*var(--text-scale))]",
+  14: "text-[clamp(13px,calc(14px*var(--text-scale)),14px)] leading-[calc(24.5px*var(--text-scale))]",
+  15: "text-[clamp(14px,calc(15px*var(--text-scale)),15px)] leading-[calc(26.25px*var(--text-scale))]",
+  16: "text-[clamp(15px,calc(16px*var(--text-scale)),16px)] leading-[calc(28px*var(--text-scale))]",
+  18: "text-[clamp(16px,calc(18px*var(--text-scale)),18px)] leading-[calc(31.5px*var(--text-scale))]",
+  20: "text-[clamp(18px,calc(20px*var(--text-scale)),20px)] leading-[calc(35px*var(--text-scale))]",
 } as const;
 
 /** iOS Safari は計算後 16px 未満の入力欄をフォーカスするとズームするため、下限を 16px にする */
@@ -86,7 +102,7 @@ export const conceptStoryTitleClassName =
 
 /** Concept 本文: 18px / 36px（共通本文 18/31.5 より行間を少し広げる） */
 export const conceptStoryBodyClassName =
-  "text-[calc(18px*var(--text-scale))] leading-[calc(36px*var(--text-scale))]";
+  "text-[clamp(16px,calc(18px*var(--text-scale)),18px)] leading-[calc(36px*var(--text-scale))]";
 
 /** 商品詳細セクション見出し（Feature / Size & Spec / Options）: 最大 62px、最小 46px */
 export const productDetailSectionTitleClassName =
@@ -94,9 +110,9 @@ export const productDetailSectionTitleClassName =
 
 /** Feature 本文上タイトル / 商品説明タイトル */
 export const productFeatureItemTitleClassName =
-  "min-w-0 font-body-ja text-[clamp(16px,calc(14.845px+0.308vw),18px)] leading-[clamp(22px,calc(26px*var(--text-scale)),26px)] font-bold text-[var(--foreground)]";
+  "min-w-0 font-body-ja text-[clamp(16px,calc(18px*var(--text-scale)),18px)] leading-[clamp(22px,calc(26px*var(--text-scale)),26px)] font-bold text-[var(--foreground)]";
 
-/** UIテキスト: font-size = line-height（Text Scale 適用） */
+/** UIテキスト: font-size = line-height（Text Scale 適用、11–20px は下限あり） */
 export function uiText(sizePx: UiTextSizePx): string {
   return UI_TEXT_PX[sizePx];
 }
@@ -111,7 +127,7 @@ export function uiTextRem(sizeRem: UiTextSizeRem): string {
   return UI_TEXT_REM[sizeRem];
 }
 
-/** 本文: line-height = font-size × 1.75（20:35 比率、Text Scale 適用） */
+/** 本文: line-height = font-size × 1.75（20:35 比率、Text Scale 適用。font-size のみ 11–20px 下限） */
 export function bodyText(sizePx: BodyTextSizePx): string {
   return BODY_TEXT_PX[sizePx];
 }

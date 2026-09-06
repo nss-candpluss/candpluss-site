@@ -41,7 +41,7 @@ export function ProductFeatureCard({
 
         {body ? (
           <p
-            className="mt-[calc(15px*var(--gap-scale-y))] whitespace-pre-line font-body-ja text-[calc(15px*var(--text-scale))] leading-[calc(23px*var(--text-scale))] text-[var(--foreground)]"
+            className="mt-[calc(15px*var(--gap-scale-y))] whitespace-pre-line font-body-ja text-[clamp(14px,calc(15px*var(--text-scale)),15px)] leading-[calc(23px*var(--text-scale))] text-[var(--foreground)]"
           >
             {body}
           </p>

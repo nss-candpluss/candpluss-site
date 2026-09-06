@@ -112,7 +112,7 @@ export function SupportHero() {
     <>
       <div
         data-support-hero-background
-        className="pointer-events-none sticky top-0 z-0 h-svh overflow-hidden"
+        className="pointer-events-none sticky top-0 z-0 h-lvh overflow-hidden"
         aria-hidden="true"
       >
         <div
@@ -141,7 +141,7 @@ export function SupportHero() {
         ref={copyRef}
         data-support-hero-copy
         data-header-theme="onDark"
-        className="relative z-10 -mt-[100svh] text-white"
+        className="relative z-10 -mt-[100lvh] text-white"
       >
         <div className="mx-auto w-full max-w-[1050px] px-[var(--container-x)] pb-[var(--container-y-bottom)] text-center">
           <div className="flex h-[50svh] w-full items-end">

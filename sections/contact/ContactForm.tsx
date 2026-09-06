@@ -455,7 +455,7 @@ export function ContactForm() {
             aria-required="true"
             aria-invalid={getFieldStatus("privacyAccepted") === "invalid"}
           />
-          <span className="font-body-ja text-[calc(15px*var(--text-scale))] leading-[calc(26px*var(--text-scale))] text-[var(--foreground)]">
+          <span className="font-body-ja text-[clamp(14px,calc(15px*var(--text-scale)),15px)] leading-[calc(26px*var(--text-scale))] text-[var(--foreground)]">
             <Link
               href={contactPageContent.privacyPolicyHref}
               className="underline decoration-solid underline-offset-[calc(4/15*1em)]"

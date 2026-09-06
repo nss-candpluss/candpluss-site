@@ -4,7 +4,7 @@ import {
   writeHeroScrollSnapshot,
 } from "@/lib/heroScrollRestore";
 
-export const OVERLAY_ALPHA = 0.82;
+export const OVERLAY_ALPHA = 1;
 export const TITLE_OPACITY_END = 0.32;
 
 export const TITLE_BASE_OFFSET_Y = {
@@ -27,9 +27,41 @@ export function supportsHeroScrollCss() {
   );
 }
 
+function getOffsetTopWithin(element: HTMLElement, ancestor: HTMLElement) {
+  let top = 0;
+  let node: HTMLElement | null = element;
+
+  while (node && node !== ancestor) {
+    top += node.offsetTop;
+    const parent: Element | null = node.offsetParent;
+    node = parent instanceof HTMLElement ? parent : null;
+  }
+
+  return top;
+}
+
+/** Hero フェードは本文の半分が画面上端を越えるまで。被さり領域全体では測らない */
+export function getHeroScrollDistance(section: HTMLElement) {
+  const body = section.querySelector<HTMLElement>("[data-home-hero-body]");
+
+  if (body) {
+    return Math.max(
+      getOffsetTopWithin(body, section) + body.offsetHeight / 2,
+      0
+    );
+  }
+
+  const copy = section.querySelector<HTMLElement>("[data-home-hero-copy]");
+
+  if (copy) {
+    return Math.max(copy.offsetTop + copy.offsetHeight - window.innerHeight, 0);
+  }
+
+  return Math.max(section.offsetHeight - window.innerHeight, 0);
+}
+
 export function updateHeroScrollEndVar(section: HTMLElement) {
-  const scrollDistance = Math.max(section.offsetHeight - window.innerHeight, 0);
-  section.style.setProperty("--hero-scroll-end", `${scrollDistance}px`);
+  section.style.setProperty("--hero-scroll-end", `${getHeroScrollDistance(section)}px`);
 }
 
 export function getTitleScrollValues() {
@@ -56,8 +88,7 @@ export function getHeroScrollProgress(
     0
   );
 
-  const viewportHeight = window.innerHeight;
-  const scrollDistance = section.offsetHeight - viewportHeight;
+  const scrollDistance = getHeroScrollDistance(section);
 
   if (scrollDistance <= 0) {
     return 0;

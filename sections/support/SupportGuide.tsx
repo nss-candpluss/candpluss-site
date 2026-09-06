@@ -16,7 +16,7 @@ import { SupportAccordion } from "@/sections/support/SupportAccordion";
 
 const contactButtonArrowStyle = arrowMaskStyle;
 
-const contactButtonClassName = `font-body-ja inline-flex w-full items-center justify-center gap-x-[calc(8px*var(--gap-scale-x))] gap-y-[calc(8px*var(--gap-scale-y))] font-semibold text-white ${uiText(16)} bg-[var(--foreground)] px-[calc(24px*var(--gap-scale-x))] py-[calc(20px*var(--gap-scale-y))]`;
+const contactButtonClassName = `font-body-ja inline-flex w-full items-center justify-center gap-x-[calc(8px*var(--gap-scale-x))] gap-y-[calc(8px*var(--gap-scale-y))] font-semibold text-white ${uiText(16)} bg-[var(--foreground)] px-[calc(32px*var(--gap-scale-x))] py-[calc(32px*var(--layout-scale-y))] min-[1025px]:py-[calc(18px*var(--gap-scale-y))]`;
 
 const lineLink = footerContent.socialLinks.find((link) => link.label === "LINE");
 

@@ -55,16 +55,17 @@ describe("support hero copy", () => {
     expect(supportHeroSource).not.toContain("flex h-svh flex-col items-center justify-center");
   });
 
-  it("pins the background while the hero copy scrolls", () => {
+  it("pins an lvh background while the svh-positioned hero copy scrolls", () => {
     expect(supportHeroSource).toContain('data-support-hero-background');
-    expect(supportHeroSource).toContain("sticky top-0 z-0 h-svh overflow-hidden");
-    expect(supportHeroSource).toContain("-mt-[100svh]");
+    expect(supportHeroSource).toContain("sticky top-0 z-0 h-lvh overflow-hidden");
+    expect(supportHeroSource).toContain("-mt-[100lvh]");
+    expect(supportHeroSource).toContain("flex h-[50svh] w-full items-end");
   });
 
   it("lets the next section cover the pinned hero from below without a footer gap", () => {
     expect(supportPageSource).toContain("<SupportStickyRegion>");
-    expect(supportHeroSource).toContain("sticky top-0 z-0 h-svh overflow-hidden");
-    expect(supportHeroSource).toContain("relative z-10 -mt-[100svh]");
+    expect(supportHeroSource).toContain("sticky top-0 z-0 h-lvh overflow-hidden");
+    expect(supportHeroSource).toContain("relative z-10 -mt-[100lvh]");
     expect(supportStickyRegionSource).toContain("paddingBottom");
     expect(supportStickyRegionSource).toContain("marginBottom");
     expect(supportStickyRegionSource).toContain("[data-support-guide]");

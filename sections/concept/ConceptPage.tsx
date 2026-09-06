@@ -139,7 +139,7 @@ export function ConceptPage() {
 
           <div
             data-concept-background-stage
-            className="pointer-events-none sticky top-0 h-svh overflow-hidden"
+            className="pointer-events-none sticky top-0 h-lvh overflow-hidden"
             aria-hidden="true"
           >
             {conceptContent.sections.map((section, index) => (
@@ -167,7 +167,7 @@ export function ConceptPage() {
             />
           </div>
 
-          <div className="relative z-10 -mt-[100svh]">
+          <div className="relative z-10 -mt-[100lvh]">
             {conceptContent.sections.map((section, index) => (
               <section
                 key={section.id}
