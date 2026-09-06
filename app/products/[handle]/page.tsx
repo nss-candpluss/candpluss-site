@@ -58,7 +58,7 @@ export default async function ProductDetailPage({
   return (
     <main
       data-header-theme="onLight"
-      className="pb-[var(--container-y-bottom)] min-[1024px]:pt-0"
+      className="pb-[var(--container-y-bottom)] min-[1025px]:pt-0"
     >
       <Moya500DesignDetailView
         product={product}

@@ -403,7 +403,7 @@ function Moya500DesignFeatureImageGallery({
           src={backdropImage}
           alt=""
           fill
-          sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+          sizes="(min-width: 1025px) 33vw, (min-width: 768px) 50vw, 100vw"
           priority={priority}
           aria-hidden="true"
           className="pointer-events-none object-cover object-center"
@@ -431,7 +431,7 @@ function Moya500DesignFeatureImageGallery({
               src={layer.image}
               alt=""
               fill
-              sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+              sizes="(min-width: 1025px) 33vw, (min-width: 768px) 50vw, 100vw"
               priority={priority && selectedIndex === 0}
               className="object-cover object-center"
             />
@@ -648,7 +648,7 @@ export function Moya500DesignFeatureSection({
                 </h3>
               ) : null}
 
-              <div className={`${group.title ? "mt-[clamp(32px,calc(48px*var(--gap-scale-y)),48px)]" : ""} grid grid-cols-1 gap-x-[calc(52px*var(--gap-scale-x))] gap-y-[clamp(32px,calc(62px*var(--gap-scale-y)),62px)] md:grid-cols-2 min-[1024px]:grid-cols-3`}>
+              <div className={`${group.title ? "mt-[clamp(32px,calc(48px*var(--gap-scale-y)),48px)]" : ""} grid grid-cols-1 gap-x-[calc(52px*var(--gap-scale-x))] gap-y-[clamp(32px,calc(62px*var(--gap-scale-y)),62px)] md:grid-cols-2`}>
                 {group.features.map((feature) => (
                   <Moya500DesignFeatureCard
                     key={feature.id}
@@ -665,7 +665,7 @@ export function Moya500DesignFeatureSection({
           ))}
         </div>
       ) : (
-        <div className="mt-[calc(98px*var(--gap-scale-y))] grid grid-cols-1 gap-x-[calc(52px*var(--gap-scale-x))] gap-y-[clamp(32px,calc(62px*var(--gap-scale-y)),62px)] md:grid-cols-2 min-[1024px]:grid-cols-3">
+        <div className="mt-[calc(98px*var(--gap-scale-y))] grid grid-cols-1 gap-x-[calc(52px*var(--gap-scale-x))] gap-y-[clamp(32px,calc(62px*var(--gap-scale-y)),62px)] md:grid-cols-2">
           {features.map((feature, index) => (
             <Moya500DesignFeatureCard
               key={feature.id}

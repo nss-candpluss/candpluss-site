@@ -24,7 +24,7 @@ type ProductDetailActionPanelProps = {
 };
 
 const actionPanelTopSpacingClassName =
-  "mt-[20px] min-[1024px]:mt-[calc(52px*var(--gap-scale-y))]";
+  "mt-[20px] min-[1025px]:mt-[calc(52px*var(--gap-scale-y))]";
 
 function ProductPriceLabel({
   priceAmount,
@@ -84,8 +84,8 @@ export function ProductDetailActionPanel({
         size={15}
       />
 
-      <div className="mt-[12px] flex flex-wrap items-center justify-between gap-x-[calc(16px*var(--gap-scale-x))] gap-y-[calc(16px*var(--gap-scale-y))] min-[1024px]:mt-[calc(20px*var(--gap-scale-y))]">
-        <h1 className="font-body-ja text-[calc(22px*var(--text-scale))] leading-[calc(36px*var(--text-scale))] font-semibold text-[var(--foreground)] min-[1024px]:text-[calc(30px*var(--text-scale))]">
+      <div className="mt-[12px] flex flex-wrap items-center justify-between gap-x-[calc(16px*var(--gap-scale-x))] gap-y-[calc(16px*var(--gap-scale-y))] min-[1025px]:mt-[calc(20px*var(--gap-scale-y))]">
+        <h1 className="font-body-ja text-[calc(22px*var(--text-scale))] leading-[calc(36px*var(--text-scale))] font-semibold text-[var(--foreground)] min-[1025px]:text-[calc(30px*var(--text-scale))]">
           {product.title}
         </h1>
         {displayCode ? (
@@ -96,19 +96,19 @@ export function ProductDetailActionPanel({
       </div>
 
       <p
-        className="mt-[12px] font-body-ja text-[calc(14px*var(--text-scale))] leading-[calc(14px*var(--text-scale))] text-[var(--color-muted)] min-[1024px]:mt-[calc(20px*var(--gap-scale-y))] min-[1024px]:text-[calc(15px*var(--text-scale))] min-[1024px]:leading-[calc(15px*var(--text-scale))]"
+        className="mt-[12px] font-body-ja text-[calc(14px*var(--text-scale))] leading-[calc(14px*var(--text-scale))] text-[var(--color-muted)] min-[1025px]:mt-[calc(20px*var(--gap-scale-y))] min-[1025px]:text-[calc(15px*var(--text-scale))] min-[1025px]:leading-[calc(15px*var(--text-scale))]"
       >
         {product.category}
       </p>
 
       {showVariantOptions ? (
-        <div className="mt-[16px] flex flex-wrap items-center gap-x-[calc(32px*var(--gap-scale-x))] gap-y-[12px] min-[1024px]:mt-[calc(24px*var(--gap-scale-y))] min-[1024px]:flex-col min-[1024px]:items-stretch min-[1024px]:gap-x-0 min-[1024px]:gap-y-[calc(22px*var(--gap-scale-y))]">
+        <div className="mt-[16px] flex flex-wrap items-center gap-x-[calc(32px*var(--gap-scale-x))] gap-y-[12px] min-[1025px]:mt-[calc(24px*var(--gap-scale-y))] min-[1025px]:flex-col min-[1025px]:items-stretch min-[1025px]:gap-x-0 min-[1025px]:gap-y-[calc(22px*var(--gap-scale-y))]">
           <ProductColorChips
             variants={product.variants}
             selectedVariantId={selectedVariant?.id}
             onSelect={canSelectVariant ? onVariantChange : undefined}
             optionName={variantOptionName}
-            className="ml-[calc(6px*var(--gap-scale-x))] min-[1024px]:pt-[calc(6px*var(--gap-scale-y))] min-[1024px]:pb-[calc(6px*var(--gap-scale-y))]"
+            className="ml-[calc(6px*var(--gap-scale-x))] min-[1025px]:pt-[calc(6px*var(--gap-scale-y))] min-[1025px]:pb-[calc(6px*var(--gap-scale-y))]"
           />
           {showVariantLabel && selectedVariant ? (
             <p className={`shrink-0 font-ui-en text-[var(--foreground)] ${uiText(14)}`}>
@@ -126,7 +126,7 @@ export function ProductDetailActionPanel({
           data-color-code={selectedColorCode}
           data-shopify-variant-id={selectedVariant?.shopifyVariantId ?? ""}
           disabled={!canAddToCart}
-          className={`${actionPanelTopSpacingClassName} flex w-full items-center justify-between px-[calc(32px*var(--gap-scale-x))] py-[calc(32px*var(--layout-scale-y))] text-white disabled:cursor-not-allowed min-[1024px]:py-[calc(18px*var(--gap-scale-y))] ${
+          className={`${actionPanelTopSpacingClassName} flex w-full items-center justify-between px-[calc(32px*var(--gap-scale-x))] py-[calc(32px*var(--layout-scale-y))] text-white disabled:cursor-not-allowed min-[1025px]:py-[calc(18px*var(--gap-scale-y))] ${
             canAddToCart
               ? "bg-[var(--foreground)]"
               : "bg-[#C6C6C6]"

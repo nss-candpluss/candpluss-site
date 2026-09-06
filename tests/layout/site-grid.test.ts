@@ -39,10 +39,10 @@ describe("12 column site grid", () => {
 
   it("defines responsive listing and feature spans", () => {
     expect(standardCardSpanClassName).toContain(
-      "col-span-12 min-[768px]:col-span-6 min-[1024px]:col-span-4"
+      "col-span-12 min-[768px]:col-span-6 min-[1025px]:col-span-4"
     );
     expect(productCardSpanClassName).toContain(
-      "col-span-12 min-[640px]:col-span-6 min-[1024px]:col-span-4"
+      "col-span-12 min-[640px]:col-span-6 min-[1025px]:col-span-4"
     );
     expect(twoColumnFeatureSpanClassName).toContain(
       "col-span-12 min-[768px]:col-span-6"

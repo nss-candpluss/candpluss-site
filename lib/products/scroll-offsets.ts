@@ -16,7 +16,7 @@ export function getProductDetailPanelOffset(): number {
     return 0;
   }
 
-  if (window.matchMedia("(min-width: 1024px)").matches) {
+  if (window.matchMedia("(min-width: 1025px)").matches) {
     return 0;
   }
 

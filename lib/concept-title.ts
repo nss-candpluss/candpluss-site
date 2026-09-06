@@ -2,7 +2,17 @@
 export const conceptTitleWrapClassName =
   "flex w-full flex-wrap justify-center gap-x-[0.3em] gap-y-[0.15em]";
 
+const PREFERRED_CONCEPT_TITLE_WRAP_UNITS: Record<string, string[]> = {
+  "Camp + Something": ["Camp +", "Something"],
+};
+
 export function splitConceptTitleWrapUnits(title: string): string[] {
+  const preferredUnits = PREFERRED_CONCEPT_TITLE_WRAP_UNITS[title];
+
+  if (preferredUnits) {
+    return preferredUnits;
+  }
+
   const plusSeparated = title.split(" + ");
 
   if (plusSeparated.length === 1) {

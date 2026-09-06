@@ -2,7 +2,7 @@
 
 import { useEffect, type RefObject } from "react";
 
-const MOBILE_PANEL_MEDIA_QUERY = "(max-width: 1023px)";
+const MOBILE_PANEL_MEDIA_QUERY = "(max-width: 1024px)";
 
 function clearPanelHeight(): void {
   document.documentElement.style.setProperty("--product-detail-panel-height", "0px");

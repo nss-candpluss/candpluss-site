@@ -9,13 +9,13 @@ export const siteGridClassName = "grid grid-cols-12";
 /** 1 カラム（全幅） */
 export const fullSpanClassName = "col-span-12";
 
-/** 標準カード: 1列 → 2列（768px）→ 3列（1024px） */
+/** 標準カード: 1列 → 2列（768px）→ 3列（1025px） */
 export const standardCardSpanClassName =
-  "col-span-12 min-[768px]:col-span-6 min-[1024px]:col-span-4";
+  "col-span-12 min-[768px]:col-span-6 min-[1025px]:col-span-4";
 
-/** 商品一覧: 1列 → 2列（640px）→ 3列（1024px） */
+/** 商品一覧: 1列 → 2列（640px）→ 3列（1025px） */
 export const productCardSpanClassName =
-  "col-span-12 min-[640px]:col-span-6 min-[1024px]:col-span-4";
+  "col-span-12 min-[640px]:col-span-6 min-[1025px]:col-span-4";
 
 /** 2 カラム FeatureLinks: 1列 → 2列（768px） */
 export const twoColumnFeatureSpanClassName =

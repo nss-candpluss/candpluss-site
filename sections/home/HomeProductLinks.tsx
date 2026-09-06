@@ -13,8 +13,8 @@ const HORIZONTAL_HOLD_RATIO = 0.22;
 const HORIZONTAL_SCROLL_RATIO = 0.56;
 const HORIZONTAL_END_HOLD_RATIO = 0.22;
 
-/** PC 向けピン留め横スクロール（1024px 以上・fine pointer） */
-const PRODUCT_LINKS_PINNED_SCROLL_QUERY = "(pointer: fine) and (min-width: 1024px)";
+/** PC 向けピン留め横スクロール（1025px 以上・fine pointer） */
+const PRODUCT_LINKS_PINNED_SCROLL_QUERY = "(pointer: fine) and (min-width: 1025px)";
 
 function matchesProductLinksPinnedScrollQuery(): boolean {
   if (typeof window === "undefined") {
@@ -173,24 +173,24 @@ export function HomeProductLinks() {
     >
       <div
         ref={stageRef}
-        className="w-full bg-[#f5f5f5] pt-[var(--container-y-top)] pb-[var(--container-y-bottom)] min-[1024px]:sticky min-[1024px]:top-0 min-[1024px]:h-svh min-[1024px]:py-0"
+        className="w-full bg-[#f5f5f5] pt-[var(--container-y-top)] pb-[var(--container-y-bottom)] min-[1025px]:sticky min-[1025px]:top-0 min-[1025px]:h-svh min-[1025px]:py-0"
       >
-        <div className="home-product-links-scroll relative w-full min-[1024px]:absolute min-[1024px]:inset-x-0 min-[1024px]:top-[calc((100svh-67svh)/2)] min-[1024px]:h-[67svh]">
+        <div className="home-product-links-scroll relative w-full min-[1025px]:absolute min-[1025px]:inset-x-0 min-[1025px]:top-[calc((100svh-67svh)/2)] min-[1025px]:h-[67svh]">
           <div
             ref={trackRef}
-            className="flex w-max items-center gap-[var(--product-links-gap)] pl-0 pr-[var(--container-x)] min-[1024px]:h-full min-[1024px]:px-[var(--container-x)] [@media(pointer:fine)_and_(min-width:1024px)]:will-change-transform"
+            className="flex w-max items-center gap-[var(--product-links-gap)] pl-0 pr-[var(--container-x)] min-[1025px]:h-full min-[1025px]:px-[var(--container-x)] [@media(pointer:fine)_and_(min-width:1025px)]:will-change-transform"
           >
             {homeProductLinks.map((item) => (
               <Link
                 key={item.id}
                 href={item.href}
-                className="home-product-links-card group relative block aspect-[226/301] w-[70vw] shrink-0 overflow-hidden min-[1024px]:h-full min-[1024px]:w-auto"
+                className="home-product-links-card group relative block aspect-[226/301] w-[70vw] shrink-0 overflow-hidden min-[1025px]:h-full min-[1025px]:w-auto"
               >
                 <MaskedImage
                   src={item.image}
                   alt=""
                   aspectClassName="h-full w-full"
-                  sizes="(min-width: 1024px) 30vw, 70vw"
+                  sizes="(min-width: 1025px) 30vw, 70vw"
                   onLoad={() => refreshScrollTriggerRef.current()}
                 />
                 <div
@@ -198,7 +198,7 @@ export function HomeProductLinks() {
                   aria-hidden="true"
                 />
                 <span
-                  className={`absolute bottom-5 right-5 text-white min-[1024px]:bottom-8 min-[1024px]:right-8 ${textLinkLayoutClassName}`}
+                  className={`absolute bottom-5 right-5 text-white min-[1025px]:bottom-8 min-[1025px]:right-8 ${textLinkLayoutClassName}`}
                 >
                   <TextLinkContent>{item.title}</TextLinkContent>
                 </span>

@@ -30,8 +30,8 @@ export function QualitySlidePanel({
   textContentRefs,
 }: QualitySlidePanelProps) {
   return (
-    <div className="quality-slide-panel relative h-full min-h-0 max-[1024px]:isolate min-[1024px]:grid min-[1024px]:grid-cols-2">
-      <div className="quality-slide-panel-text relative max-[1024px]:absolute max-[1024px]:inset-0 max-[1024px]:z-10 max-[1024px]:overflow-hidden min-[1024px]:h-full min-[1024px]:min-h-0 min-[1024px]:overflow-hidden min-[1024px]:text-[var(--foreground)]">
+    <div className="quality-slide-panel relative h-full min-h-0 max-[1025px]:isolate min-[1025px]:grid min-[1025px]:grid-cols-2">
+      <div className="quality-slide-panel-text relative max-[1025px]:absolute max-[1025px]:inset-0 max-[1025px]:z-10 max-[1025px]:overflow-hidden min-[1025px]:h-full min-[1025px]:min-h-0 min-[1025px]:overflow-hidden min-[1025px]:text-[var(--foreground)]">
         <QualitySlideTextFlow
           slides={slides}
           textClipRef={textClipRef}
@@ -55,11 +55,11 @@ export function QualitySlidePanel({
         </div>
       </div>
 
-      <div className="quality-slide-panel-image max-[1024px]:absolute max-[1024px]:inset-0 max-[1024px]:z-0 min-[1024px]:relative min-[1024px]:min-h-0 min-[1024px]:overflow-hidden min-[1024px]:bg-[var(--color-line)]">
+      <div className="quality-slide-panel-image max-[1025px]:absolute max-[1025px]:inset-0 max-[1025px]:z-0 min-[1025px]:relative min-[1025px]:min-h-0 min-[1025px]:overflow-hidden min-[1025px]:bg-[var(--color-line)]">
         <QualityTrackImage
           src={currentImageSlide.image}
           alt={currentImageSlide.imageAlt}
-          sizes="(min-width: 1024px) 50vw, 100vw"
+          sizes="(min-width: 1025px) 50vw, 100vw"
         />
       </div>
     </div>

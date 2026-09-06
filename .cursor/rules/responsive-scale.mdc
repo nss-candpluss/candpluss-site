@@ -101,8 +101,14 @@ gap-[var(--header-nav-gap)]  /* = 52px * gap-scale */
 | 項目 | ルール |
 |------|--------|
 | 高さ | `h-[var(--header-height)]`（390px→70px、1920px+→100px） |
-| SP左右padding | `px-6`（24px固定、1023px以下） |
-| PC左右padding | `min-[1024px]:px-[var(--container-x)]` |
+| SP左右padding | `px-6`（24px固定、1024px以下） |
+| PC左右padding | `min-[1025px]:px-[var(--container-x)]` |
+
+SP / PC 切替の対:
+
+- PC: `min-[1025px]:` / `(min-width: 1025px)`
+- SP（CSS / matchMedia）: `(max-width: 1024px)`
+- SP（Tailwind `max-*`）: `max-[1025px]:`（v4 は `not (min-width: 1025px)` になるため、1024px を含む）
 
 ## 個別管理（共通スケール非適用）
 

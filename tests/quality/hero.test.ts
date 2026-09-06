@@ -30,7 +30,8 @@ describe("quality / labo hero copy", () => {
     expect(qualityHeroSource).toContain("max-w-[1050px]");
     expect(qualityHeroSource).toContain("mt-[calc(32px*var(--gap-scale-y))]");
     expect(qualityHeroSource).toContain("mt-[var(--section-title-gap)]");
-    expect(qualityHeroSource).toContain("uiText(21)");
+    expect(qualityHeroSource).toContain("uiText(18)");
+    expect(qualityHeroSource).toContain("opacity-[0.65]");
     expect(qualityHeroSource).toContain("bodyText(18)");
     expect(qualityHeroSource).toContain('hero.body.split("\\n\\n")');
     expect(qualityHeroSource).not.toContain("quality-hero-title");

@@ -31,7 +31,7 @@ export function HomeMainProducts() {
                   src={item.image}
                   alt=""
                   aspectClassName="aspect-[4/5]"
-                  sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                  sizes="(min-width: 1025px) 33vw, (min-width: 768px) 50vw, 100vw"
                   imageClassName="transition-transform duration-300 ease-out group-hover:scale-105"
                 />
                 <div

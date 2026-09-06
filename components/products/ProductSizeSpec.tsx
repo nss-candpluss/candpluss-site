@@ -109,7 +109,7 @@ export function ProductSizeSpecSection({
         <>
           <h2 className={titleClassName}>Size &amp; Spec</h2>
 
-          <div className="mt-[calc(98px*var(--gap-scale-y))] grid grid-cols-1 items-start gap-x-[calc(72px*var(--gap-scale-x))] gap-y-[calc(72px*var(--gap-scale-y))] min-[1024px]:grid-cols-2">
+          <div className="mt-[calc(98px*var(--gap-scale-y))] grid grid-cols-1 items-start gap-x-[calc(72px*var(--gap-scale-x))] gap-y-[calc(72px*var(--gap-scale-y))] min-[1025px]:grid-cols-2">
             <ProductSizeSpecContent sizeSpec={sizeSpec} typography={typography} />
 
             <div className="w-full self-start bg-white px-[calc(144px*var(--gap-scale-x))] py-[calc(92px*var(--gap-scale-y))]">
@@ -118,7 +118,7 @@ export function ProductSizeSpecSection({
                 alt={sizeSpec.drawingImage!.alt}
                 width={0}
                 height={0}
-                sizes="(min-width: 1024px) 40vw, 100vw"
+                sizes="(min-width: 1025px) 40vw, 100vw"
                 unoptimized
                 className="block h-auto w-full"
                 style={{ width: "100%", height: "auto" }}

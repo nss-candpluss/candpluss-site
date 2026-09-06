@@ -16,7 +16,7 @@ export async function HomeNews() {
           News &amp; Topics
         </h2>
 
-        <SiteGrid className="mt-[calc(98px*var(--layout-scale-y))] gap-x-[calc(16px*var(--gap-scale-x))] gap-y-[calc(62px*var(--gap-scale-y))] min-[1024px]:gap-y-[calc(16px*var(--gap-scale-y))]">
+        <SiteGrid className="mt-[calc(98px*var(--layout-scale-y))] gap-x-[calc(16px*var(--gap-scale-x))] gap-y-[calc(62px*var(--gap-scale-y))] min-[1025px]:gap-y-[calc(16px*var(--gap-scale-y))]">
           {articles.map((article, index) => (
             <NewsCard
               key={article.id}

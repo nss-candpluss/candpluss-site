@@ -16,13 +16,13 @@ export function ProductDetailScrollImages({
       {images.map((image, index) => (
         <div
           key={image.src}
-          className="relative aspect-square w-full overflow-hidden bg-[var(--color-line)] min-[1024px]:aspect-auto min-[1024px]:h-[100svh]"
+          className="relative aspect-square w-full overflow-hidden bg-[var(--color-line)] min-[1025px]:aspect-auto min-[1025px]:h-[100svh]"
         >
           <SiteImage
             src={image.src}
             alt={image.alt}
             fill
-            sizes="(min-width: 1024px) 60vw, 100vw"
+            sizes="(min-width: 1025px) 60vw, 100vw"
             priority={priority && index === 0}
             className="object-cover object-center"
           />

@@ -39,6 +39,6 @@ export function QualityItemContent({ subtitle, body }: QualityItemContentProps) 
 export const qualitySectionTitleHeaderClassName =
   "quality-section-title-header px-[var(--container-x)] pt-[var(--container-y-top)] pb-[calc(12px*var(--text-scale))] text-[var(--foreground)]";
 
-/** 1023px 以下: サブタイトル・本文エリアの左右余白（大見出し Materials / Design は除く） */
+/** 1024px 以下: サブタイトル・本文エリアの左右余白（大見出し Materials / Design は除く） */
 export const qualityItemContentPaddingClassName =
-  "px-[10vw] min-[1024px]:px-[var(--container-x)]";
+  "px-[10vw] min-[1025px]:px-[var(--container-x)]";

@@ -12,7 +12,7 @@ alwaysApply: false
 
 - セクション見出し「Size & Spec」はコンテナ左端
 - 2カラム: 左 = スペック本文、右 = 寸法図（白背景ボックス内）
-- PC: `min-[1024px]:grid-cols-2`
+- PC: `min-[1025px]:grid-cols-2`
 - 取扱説明書 PDF 等の `downloads` はセクション下部・左揃え
 
 ## 寸法図なし（`drawingImage` 未設定）

@@ -96,6 +96,7 @@ export function ConceptParallaxRegion({
             section
           ),
           rule: section.querySelector<HTMLElement>("[data-concept-intro-rule]"),
+          label: section.querySelector<HTMLElement>("[data-concept-intro-label]"),
           body: section.querySelector<HTMLElement>("[data-concept-intro-body]"),
         });
         const outroTitle =
@@ -134,6 +135,7 @@ export function ConceptParallaxRegion({
               ...targets.titleCharacters,
               ...targets.numberCharacters,
               targets.rule,
+              targets.label,
               targets.body,
             ].filter(Boolean),
             { clearProps: "opacity,transform,filter,visibility" }
@@ -160,6 +162,7 @@ export function ConceptParallaxRegion({
           });
           gsap.set(targets.numberCharacters, { opacity: 0, y: "0.6em" });
           gsap.set(targets.rule, { opacity: 0, x: getRuleStartX });
+          gsap.set(targets.label, { opacity: 0 });
           gsap.set(targets.body, { opacity: 0, y: 32 });
         };
 
@@ -204,10 +207,16 @@ export function ConceptParallaxRegion({
               },
               ">"
             )
+            .addLabel("copyStart", ">+0.12")
+            .to(
+              targets.label,
+              { opacity: 0.65, duration: 0.7, ease: "sine.out" },
+              "copyStart"
+            )
             .to(
               targets.body,
               { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
-              ">+0.12"
+              "copyStart+=0.25"
             );
 
           return timeline;
@@ -243,7 +252,7 @@ export function ConceptParallaxRegion({
           }
           outroRevealed = true;
         } else {
-          const visibleMenuItems = window.matchMedia("(min-width: 1024px)").matches
+          const visibleMenuItems = window.matchMedia("(min-width: 1025px)").matches
             ? introMenuItems
             : [];
 
@@ -315,10 +324,16 @@ export function ConceptParallaxRegion({
                 },
                 ">"
               )
+              .addLabel("copyStart", ">+0.12")
+              .to(
+                firstStoryTargets.label,
+                { opacity: 0.65, duration: 0.7, ease: "sine.out" },
+                "copyStart"
+              )
               .to(
                 firstStoryTargets.body,
                 { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
-                ">+0.12"
+                "copyStart+=0.25"
               );
 
             if (visibleMenuItems.length > 0) {

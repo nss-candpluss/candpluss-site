@@ -26,7 +26,7 @@ export function ProductOptions({
         Options
       </h2>
 
-      <div className="mt-[calc(98px*var(--gap-scale-y))] grid grid-cols-1 gap-x-[calc(16px*var(--gap-scale-x))] gap-y-[calc(46px*var(--gap-scale-y))] min-[640px]:grid-cols-2 min-[1024px]:grid-cols-3">
+      <div className="mt-[calc(98px*var(--gap-scale-y))] grid grid-cols-1 gap-x-[calc(16px*var(--gap-scale-x))] gap-y-[calc(46px*var(--gap-scale-y))] min-[640px]:grid-cols-2 min-[1025px]:grid-cols-3">
         {products.map((product) => (
           <ProductCard
             key={product.id}

@@ -86,7 +86,7 @@ export function CompanyDocument() {
     <>
       <h1 className={pageTitleClassName}>{title}</h1>
 
-      <div className="relative mt-[calc(98px*var(--layout-scale-y))] -mx-[var(--container-x)] aspect-[16/9] w-[calc(100%+2*var(--container-x))] overflow-hidden min-[1024px]:aspect-[2/1]">
+      <div className="relative mt-[calc(98px*var(--layout-scale-y))] -mx-[var(--container-x)] aspect-[16/9] w-[calc(100%+2*var(--container-x))] overflow-hidden min-[1025px]:aspect-[2/1]">
         <SiteImage
           src={homeLabContent.backgroundImage}
           alt=""

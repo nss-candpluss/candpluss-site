@@ -13,7 +13,7 @@ export const conceptContent = {
       id: "camp-something",
       title: "01｜Camp + Something",
       backgroundImage: conceptBackground("01"),
-      label: "CAMP + SOMETHING.",
+      label: "CONNECTING TO WHAT MATTERS.",
       body: `キャンプと大切なものをつなぐ。
 「C」はCamp。
 「S」はSomething。
@@ -62,7 +62,7 @@ C AND+Sはアウトドアを愛する少数のメンバーから始まりまし�
 美しい一方で、季節によって大きく表情を変える日本の自然。
 
 そのフィールドで実際に過ごし、数多くのアウトドアギアを使う中で、私たちはひとつの問いに辿り着きます。
-「日本の厳しい四季に向き合い、そのすべてを楽しめるテントをつくれないだろうか。」
+「日本の厳しい四季に向き合い、そのすべてを楽しめるテントをつくれないだろうか」
 
 強さだけではない。
 軽さだけでもない。

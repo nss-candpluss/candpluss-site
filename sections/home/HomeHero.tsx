@@ -145,13 +145,13 @@ export function HomeHero() {
           <img
             src={assetPath(topHeroContent.titleImageSp)}
             alt={topHeroContent.titleAlt}
-            className="h-auto w-[88vw] max-w-none object-contain md:w-[94vw] min-[1024px]:hidden"
+            className="h-auto w-[88vw] max-w-none object-contain md:w-[94vw] min-[1025px]:hidden"
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={assetPath(topHeroContent.titleImage)}
             alt={topHeroContent.titleAlt}
-            className="hidden h-auto w-[88vw] max-w-none object-contain md:w-[94vw] min-[1024px]:block"
+            className="hidden h-auto w-[88vw] max-w-none object-contain md:w-[94vw] min-[1025px]:block"
           />
         </div>
 

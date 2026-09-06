@@ -157,10 +157,10 @@ export function ProductDetailView({
     <>
       <div
         className={
-          isDocked ? undefined : "max-[1023px]:pb-[var(--product-detail-panel-height)]"
+          isDocked ? undefined : "max-[1025px]:pb-[var(--product-detail-panel-height)]"
         }
       >
-        <div className="grid grid-cols-1 gap-x-[calc(32px*var(--gap-scale-x))] gap-y-[calc(32px*var(--gap-scale-y))] min-[1024px]:grid-cols-[221fr_149fr] min-[1024px]:items-start min-[1024px]:gap-x-[calc(80px*var(--gap-scale-x))] gap-y-[calc(80px*var(--gap-scale-y))]">
+        <div className="grid grid-cols-1 gap-x-[calc(32px*var(--gap-scale-x))] gap-y-[calc(32px*var(--gap-scale-y))] min-[1025px]:grid-cols-[221fr_149fr] min-[1025px]:items-start min-[1025px]:gap-x-[calc(80px*var(--gap-scale-x))] gap-y-[calc(80px*var(--gap-scale-y))]">
           <div
             id="photo"
             className="flex flex-col gap-[calc(8px*var(--gap-scale-y))] scroll-mt-[var(--header-height)]"
@@ -187,7 +187,7 @@ export function ProductDetailView({
 
             <div
               ref={dockPanelRef}
-              className={`${mobileActionPanelClassName} min-[1024px]:hidden ${
+              className={`${mobileActionPanelClassName} min-[1025px]:hidden ${
                 isDocked ? "visible" : "invisible pointer-events-none"
               }`}
               aria-hidden={!isDocked}
@@ -197,16 +197,16 @@ export function ProductDetailView({
 
             <ProductDetailDescription
               product={product}
-              className="px-[var(--container-x)] pt-[calc(32px*var(--gap-scale-y))] pb-[calc(32px*var(--gap-scale-y))] min-[1024px]:hidden"
+              className="px-[var(--container-x)] pt-[calc(32px*var(--gap-scale-y))] pb-[calc(32px*var(--gap-scale-y))] min-[1025px]:hidden"
             />
 
             <ProductDetailNav
               tabs={visibleTabs}
-              className="mt-[calc(72px*var(--gap-scale-y))] px-[var(--container-x)] pb-[max(calc(144px*var(--layout-scale-y)),env(safe-area-inset-bottom))] min-[1024px]:hidden"
+              className="mt-[calc(72px*var(--gap-scale-y))] px-[var(--container-x)] pb-[max(calc(144px*var(--layout-scale-y)),env(safe-area-inset-bottom))] min-[1025px]:hidden"
             />
           </div>
 
-          <div className="relative hidden min-[1024px]:sticky min-[1024px]:top-0 min-[1024px]:flex min-[1024px]:h-[100svh] min-[1024px]:flex-col min-[1024px]:px-0 min-[1024px]:pr-[var(--container-x)] min-[1024px]:pt-[var(--container-y-top)]">
+          <div className="relative hidden min-[1025px]:sticky min-[1025px]:top-0 min-[1025px]:flex min-[1025px]:h-[100svh] min-[1025px]:flex-col min-[1025px]:px-0 min-[1025px]:pr-[var(--container-x)] min-[1025px]:pt-[var(--container-y-top)]">
             <ProductDetailInfo
               product={product}
               selectedVariant={selectedVariant}
@@ -216,7 +216,7 @@ export function ProductDetailView({
 
             <ProductDetailNav
               tabs={visibleTabs}
-              className="min-[1024px]:absolute min-[1024px]:bottom-[10vh] min-[1024px]:left-0 min-[1024px]:right-0 min-[1024px]:pr-[var(--container-x)]"
+              className="min-[1025px]:absolute min-[1025px]:bottom-[10vh] min-[1025px]:left-0 min-[1025px]:right-0 min-[1025px]:pr-[var(--container-x)]"
             />
           </div>
         </div>
@@ -237,7 +237,7 @@ export function ProductDetailView({
 
       <div
         ref={fixedPanelRef}
-        className={`fixed inset-x-0 bottom-0 z-30 ${mobileActionPanelClassName} min-[1024px]:hidden ${
+        className={`fixed inset-x-0 bottom-0 z-30 ${mobileActionPanelClassName} min-[1025px]:hidden ${
           isDocked ? "pointer-events-none opacity-0" : ""
         }`}
         aria-hidden={isDocked}

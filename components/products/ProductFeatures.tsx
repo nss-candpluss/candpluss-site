@@ -28,7 +28,7 @@ export function ProductFeatures({
     >
       <h2 className={`font-heading text-[var(--foreground)] ${productDetailSectionTitleClassName}`}>Feature</h2>
 
-      <div className="mt-[calc(98px*var(--gap-scale-y))] grid grid-cols-1 gap-x-[calc(52px*var(--gap-scale-x))] gap-y-[calc(62px*var(--gap-scale-y))] md:grid-cols-2 min-[1024px]:grid-cols-3">
+      <div className="mt-[calc(98px*var(--gap-scale-y))] grid grid-cols-1 gap-x-[calc(52px*var(--gap-scale-x))] gap-y-[calc(62px*var(--gap-scale-y))] md:grid-cols-2">
         {features.map((feature, index) => (
           <ProductFeatureCard
             key={feature.id}

@@ -23,7 +23,7 @@ describe("Concept content parallax", () => {
     expect(conceptPageSource).toContain("data-concept-background={section.id}");
     expect(conceptPageSource).toContain("sticky top-0 h-svh overflow-hidden");
     expect(conceptPageSource).toContain("-mt-[100svh]");
-    expect(conceptPageSource).toContain("min-[1024px]:min-h-[140svh]");
+    expect(conceptPageSource).toContain("min-[1025px]:min-h-[140svh]");
     expect(conceptPageSource).toContain("flex h-[50svh] w-full items-end");
     expect(conceptPageSource).toContain("data-concept-section");
     expect(conceptPageSource).toContain("data-concept-parallax");
@@ -68,7 +68,7 @@ describe("Concept content parallax", () => {
   });
 
   it("fades and offsets foreground copy with the background zoom", () => {
-    expect(parallaxSource).not.toContain('"(pointer: fine) and (min-width: 1024px)"');
+    expect(parallaxSource).not.toContain('"(pointer: fine) and (min-width: 1025px)"');
     expect(parallaxSource).toContain('end: "bottom 10%"');
     expect(parallaxSource).toContain("getParallaxDistance");
     expect(parallaxSource).toContain("opacity: 0");
@@ -83,6 +83,7 @@ describe("Concept content parallax", () => {
     const numberStep = parallaxSource.indexOf(
       "firstStoryTargets.numberCharacters"
     );
+    const labelStep = parallaxSource.indexOf("firstStoryTargets.label");
     const bodyStep = parallaxSource.indexOf("firstStoryTargets.body");
     const menuStep = parallaxSource.indexOf(
       "introTimeline.to(\n                visibleMenuItems"
@@ -91,7 +92,8 @@ describe("Concept content parallax", () => {
     expect(titleStep).toBeGreaterThan(-1);
     expect(backgroundStep).toBeGreaterThan(titleStep);
     expect(numberStep).toBeGreaterThan(backgroundStep);
-    expect(bodyStep).toBeGreaterThan(numberStep);
+    expect(labelStep).toBeGreaterThan(numberStep);
+    expect(bodyStep).toBeGreaterThan(labelStep);
     expect(menuStep).toBeGreaterThan(bodyStep);
     expect(parallaxSource).toContain("NUMBER_REVEAL_DELAY = 0.3");
     expect(parallaxSource).toContain('addLabel("titleStart")');
@@ -101,6 +103,14 @@ describe("Concept content parallax", () => {
     expect(parallaxSource).toContain('">"');
     expect(parallaxSource).toContain("setStoryInitialState");
     expect(parallaxSource).toContain("{ x: 0, duration: 0.65");
+    expect(parallaxSource).toContain('addLabel("copyStart", ">+0.12")');
+    expect(parallaxSource).toContain('"copyStart+=0.25"');
+    expect(parallaxSource).toContain(
+      'gsap.set(targets.label, { opacity: 0 })'
+    );
+    expect(parallaxSource).toContain(
+      '{ opacity: 0.65, duration: 0.7, ease: "sine.out" }'
+    );
     expect(parallaxSource).toContain("let introCompleted = false");
     expect(parallaxSource).not.toContain("sessionStorage");
   });
@@ -195,6 +205,6 @@ describe("Concept content parallax", () => {
     expect(parallaxSource).toContain('clearProps: "transform,opacity"');
     expect(parallaxSource).toContain("revealStoryImmediately");
     expect(parallaxSource).toContain("if (reducedMotion.matches)");
-    expect(parallaxSource).toContain('window.matchMedia("(min-width: 1024px)")');
+    expect(parallaxSource).toContain('window.matchMedia("(min-width: 1025px)")');
   });
 });

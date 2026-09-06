@@ -32,14 +32,14 @@ export function ProductGallery({
 }: ProductGalleryProps) {
   return (
     <div
-      className="relative aspect-square w-full overflow-hidden bg-[var(--color-line)] min-[1024px]:aspect-auto min-[1024px]:h-[100svh]"
+      className="relative aspect-square w-full overflow-hidden bg-[var(--color-line)] min-[1025px]:aspect-auto min-[1025px]:h-[100svh]"
     >
       {displayedImage ? (
         <SiteImage
           src={displayedImage.src}
           alt={displayedImage.alt}
           fill
-          sizes="(min-width: 1024px) 60vw, 100vw"
+          sizes="(min-width: 1025px) 60vw, 100vw"
           priority={isInitialPriority}
           className="absolute inset-0 object-cover object-center"
         />

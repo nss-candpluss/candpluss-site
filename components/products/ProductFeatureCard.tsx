@@ -34,7 +34,7 @@ export function ProductFeatureCard({
         </div>
       ) : null}
 
-      <div className="mt-[calc(28px*var(--gap-scale-y))] flex flex-col px-[calc(8px*var(--gap-scale-x))] min-[1024px]:mt-[calc(22px*var(--gap-scale-y))]">
+      <div className="mt-[calc(28px*var(--gap-scale-y))] flex flex-col px-[calc(8px*var(--gap-scale-x))] min-[1025px]:mt-[calc(22px*var(--gap-scale-y))]">
         <h3 className={productFeatureItemTitleClassName}>
           {feature.title}
         </h3>

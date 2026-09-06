@@ -373,14 +373,14 @@
   scroll-snap-type: x mandatory;
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 1024px) {
   .home-product-links-scroll {
     padding-left: var(--container-x);
     scroll-padding-left: var(--container-x);
   }
 }
 
-@media (pointer: fine) and (min-width: 1024px) {
+@media (pointer: fine) and (min-width: 1025px) {
   .home-product-links-scroll {
     overflow: hidden;
     scroll-snap-type: none;
@@ -391,7 +391,7 @@
   scroll-snap-align: start;
 }
 
-@media (pointer: fine) and (min-width: 1024px) {
+@media (pointer: fine) and (min-width: 1025px) {
   .home-product-links-card {
     scroll-snap-align: none;
   }
@@ -431,8 +431,8 @@ html.quality-page body {
   height: calc(var(--app-vh) * 100);
 }
 
-/** QUALITY スクロールエリア: 1023px 以下は画像上に白テキスト */
-@media (max-width: 1023px) {
+/** QUALITY スクロールエリア: 1024px 以下は画像上に白テキスト */
+@media (max-width: 1024px) {
   .quality-scroll-section .quality-slide-panel-text,
   .quality-scroll-section .quality-slide-panel-text .quality-section-title-header,
   .quality-scroll-section .quality-slide-panel-text .quality-section-title,

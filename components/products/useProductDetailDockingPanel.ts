@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type RefObject } from "react";
 
-const MOBILE_PANEL_MEDIA_QUERY = "(max-width: 1023px)";
+const MOBILE_PANEL_MEDIA_QUERY = "(max-width: 1024px)";
 const DOCK_ENTER_PX = 2;
 const DOCK_EXIT_PX = 12;
 

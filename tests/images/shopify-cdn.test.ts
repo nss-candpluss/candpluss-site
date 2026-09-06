@@ -33,7 +33,7 @@ describe("shopify-cdn", () => {
 
   it("uses a larger width for listing and hero sizes", () => {
     expect(
-      shopifyDeliveryWidth({ sizes: "(min-width: 1024px) 33vw, 100vw" })
+      shopifyDeliveryWidth({ sizes: "(min-width: 1025px) 33vw, 100vw" })
     ).toBe(1400);
     expect(shopifyDeliveryWidth({ sizes: "(min-width: 1025px) 56vw" })).toBe(2400);
   });

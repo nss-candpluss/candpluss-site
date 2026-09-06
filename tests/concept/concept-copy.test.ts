@@ -75,6 +75,12 @@ describe("concept page copy", () => {
     );
     expect(conceptContent.sections[0]?.body).toContain("WHAT’S YOUR + S ?");
     expect(conceptContent.sections[1]?.body).toContain("すべてはフィールドから始まった。");
+    expect(conceptContent.sections[1]?.body).toContain(
+      "「日本の厳しい四季に向き合い、そのすべてを楽しめるテントをつくれないだろうか」"
+    );
+    expect(conceptContent.sections[1]?.body).not.toContain(
+      "「日本の厳しい四季に向き合い、そのすべてを楽しめるテントをつくれないだろうか。」"
+    );
     expect(conceptContent.sections[2]?.body).toContain("美しさには理由がある。");
     expect(conceptContent.sections[3]?.body).toContain("素材に妥協しない。");
     expect(conceptContent.sections[4]?.body).toContain("小さなパーツにも理由がある。");
@@ -95,7 +101,7 @@ describe("concept page copy", () => {
 
   it("uses Support hero small-title spec for the English lead line", () => {
     expect(conceptContent.sections.map((section) => section.label)).toEqual([
-      "CAMP + SOMETHING.",
+      "CONNECTING TO WHAT MATTERS.",
       "IT STARTED IN THE FIELD.",
       "BEAUTY HAS A REASON.",
       "NO COMPROMISE IN MATERIALS.",
@@ -107,7 +113,8 @@ describe("concept page copy", () => {
     ]);
     expect(conceptPageSource).toContain("section.label");
     expect(conceptPageSource).toContain("font-ui-en font-medium");
-    expect(conceptPageSource).toContain("uiText(21)");
+    expect(conceptPageSource).toContain("opacity-[0.65]");
+    expect(conceptPageSource).toContain("uiText(18)");
     expect(conceptPageSource).toContain("mt-[calc(32px*var(--gap-scale-y))]");
     expect(conceptContent.sections[0]?.body.startsWith("キャンプと大切なものをつなぐ。")).toBe(
       true
@@ -167,7 +174,7 @@ describe("concept page copy", () => {
     expect(conceptPageSource).toContain("conceptHeadingNumeralClassName");
     expect(conceptPageSource).toContain("conceptStoryTitleClassName");
     expect(conceptPageSource).toContain("conceptHeadingEnglishGapClassName");
-    expect(conceptPageSource).not.toContain("min-[1024px]:mt-0");
+    expect(conceptPageSource).not.toContain("min-[1025px]:mt-0");
     expect(typographySource).toContain("leading-[0.48em]");
     expect(typographySource).toContain("-translate-y-[0.116em]");
   });
@@ -180,6 +187,7 @@ describe("concept page copy", () => {
     expect(conceptPageSource).toContain("data-concept-intro-title-character");
     expect(conceptPageSource).toContain("data-concept-intro-number-character");
     expect(conceptPageSource).toContain("data-concept-intro-rule");
+    expect(conceptPageSource).toContain("data-concept-intro-label");
     expect(conceptPageSource).toContain("data-concept-intro-body");
     expect(conceptPageSource).toContain("data-concept-intro-black");
     expect(conceptPageSource).toContain('aria-hidden="true"');
@@ -191,8 +199,8 @@ describe("concept page copy", () => {
 
   it("wraps English titles by word and keeps plus groups together", () => {
     expect(splitConceptTitleWrapUnits("Camp + Something")).toEqual([
-      "Camp",
-      "+ Something",
+      "Camp +",
+      "Something",
     ]);
     expect(splitConceptTitleWrapUnits("Our Origin")).toEqual([
       "Our",

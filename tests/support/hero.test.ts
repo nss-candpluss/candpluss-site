@@ -30,9 +30,15 @@ describe("support hero copy", () => {
     expect(supportContent.hero.label).toBe("BUILT TO LAST.");
     expect(supportContent.hero.body).toContain("長く使い続けるために。");
     expect(supportContent.hero.body).toContain(
-      "初期不良に関する保証基準に基づき無償で対応します。"
+      "C AND+Sは、フィールドで長く使い続けられる製品であることを、ものづくりの大切な基準のひとつと考えています。"
     );
-    expect(supportContent.hero.body).toContain("MADE FOR THE FIELD.");
+    expect(supportContent.hero.body).toContain(
+      "しかし、アウトドアギアは自然の中で実際に使われる道具です。"
+    );
+    expect(supportContent.hero.body).toContain(
+      "その時間まで含めて、C AND+Sの製品でありたいと考えています。"
+    );
+    expect(supportContent.hero.body).toContain("BUILT TO LAST.\nMADE FOR THE FIELD.");
     expect(supportContent.hero.body).not.toContain("Lifetime Warranty");
   });
 
@@ -42,6 +48,8 @@ describe("support hero copy", () => {
     expect(supportHeroSource).not.toContain("quality-hero-title");
     expect(supportHeroSource).toContain("mt-[calc(32px*var(--gap-scale-y))]");
     expect(supportHeroSource).toContain("mt-[var(--section-title-gap)]");
+    expect(supportHeroSource).toContain("uiText(18)");
+    expect(supportHeroSource).toContain("opacity-[0.65]");
     expect(supportHeroSource).not.toContain('className="h-[50svh]"');
     expect(supportHeroSource).not.toContain("pt-[50svh]");
     expect(supportHeroSource).not.toContain("flex h-svh flex-col items-center justify-center");
@@ -86,5 +94,8 @@ describe("support hero copy", () => {
     expect(supportHeroSource).toContain('hero.body.split("\\n\\n")');
     expect(supportHeroSource).toContain("gap-y-[calc(15.75px*var(--text-scale))]");
     expect(supportContent.hero.body.split("\n\n")[0]).toBe("長く使い続けるために。");
+    expect(supportContent.hero.body.split("\n\n").at(-1)).toBe(
+      "BUILT TO LAST.\nMADE FOR THE FIELD."
+    );
   });
 });

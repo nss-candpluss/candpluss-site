@@ -150,7 +150,7 @@ export function SupportHero() {
             </h1>
           </div>
           <p
-            className={`mt-[calc(32px*var(--gap-scale-y))] font-ui-en font-medium ${uiText(21)}`}
+            className={`mt-[calc(32px*var(--gap-scale-y))] font-ui-en font-medium opacity-[0.65] ${uiText(18)}`}
           >
             {hero.label}
           </p>

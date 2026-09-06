@@ -74,7 +74,7 @@ export function ConceptSectionNav({ sections }: ConceptSectionNavProps) {
   return (
     <nav
       aria-label="Concept sections"
-      className="pointer-events-none absolute inset-0 z-20 hidden min-[1024px]:block"
+      className="pointer-events-none absolute inset-0 z-20 hidden min-[1025px]:block"
     >
       <Container className="h-full">
         <SiteGrid className="h-full">

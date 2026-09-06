@@ -177,8 +177,8 @@ export function ConceptPage() {
                 data-header-theme="onDark"
                 className={
                   index === 0
-                    ? "relative min-h-svh min-[1024px]:min-h-[140svh]"
-                    : "relative flex min-h-svh items-center min-[1024px]:min-h-[140svh]"
+                    ? "relative min-h-svh min-[1025px]:min-h-[140svh]"
+                    : "relative flex min-h-svh items-center min-[1025px]:min-h-[140svh]"
                 }
               >
                 <div
@@ -208,17 +208,19 @@ export function ConceptPage() {
                         />
                       )}
                       <div
-                        data-concept-intro-body
-                        className={`${conceptStoryContentSpanClassName} mt-[calc(32px*var(--gap-scale-y))] mx-auto w-full max-w-[880px] min-[1024px]:mx-0 min-[1024px]:max-w-none`}
-                        style={{ opacity: 0, transform: "translateY(32px)" }}
+                        className={`${conceptStoryContentSpanClassName} mt-[calc(32px*var(--gap-scale-y))] mx-auto w-full max-w-[880px] min-[1025px]:mx-0 min-[1025px]:max-w-none`}
                       >
                         <p
-                          className={`whitespace-pre-line font-ui-en font-medium ${uiText(21)}`}
+                          data-concept-intro-label
+                          className={`whitespace-pre-line font-ui-en font-medium opacity-[0.65] ${uiText(18)}`}
+                          style={{ opacity: 0 }}
                         >
                           {section.label}
                         </p>
                         <div
+                          data-concept-intro-body
                           className={`mt-[var(--section-title-gap)] flex flex-col gap-y-[calc(18px*var(--text-scale))]`}
+                          style={{ opacity: 0, transform: "translateY(32px)" }}
                         >
                           {section.body.split("\n\n").map((paragraph, paragraphIndex) => (
                             <p

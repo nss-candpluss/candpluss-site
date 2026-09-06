@@ -61,7 +61,7 @@ export function ProductsListing({ products }: ProductsListingProps) {
         aria-label="Product categories"
         className="-mx-[var(--container-x)] mt-[calc(98px*var(--layout-scale-y))] overflow-x-auto px-[var(--container-x)]"
       >
-        <ul className="flex w-max min-w-full gap-x-[clamp(16px,calc(38px*var(--gap-scale-x)),38px)] gap-y-[calc(32px*var(--gap-scale-y))] pb-[calc(4/14*1em+1px)] text-[calc(16px*var(--text-scale))] min-[1024px]:flex-wrap">
+        <ul className="flex w-max min-w-full gap-x-[clamp(16px,calc(38px*var(--gap-scale-x)),38px)] gap-y-[calc(32px*var(--gap-scale-y))] pb-[calc(4/14*1em+1px)] text-[calc(16px*var(--text-scale))] min-[1025px]:flex-wrap">
           {productCategories.map((category) => {
             const isActive = category.slug === activeCategory;
 

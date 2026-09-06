@@ -45,7 +45,7 @@ const listingTextGapClassName =
 export function ProductCard({
   product,
   className = "",
-  sizes = "(min-width: 1024px) 33vw, 100vw",
+  sizes = "(min-width: 1025px) 33vw, 100vw",
   priority = false,
   presentation = "default",
 }: ProductCardProps) {

@@ -14,7 +14,7 @@ export function ProductGalleryOpenClose({
   const activeIndex = activeGroupId === "open" ? 0 : 1;
 
   return (
-    <div className="absolute bottom-[3vh] left-1/2 z-10 grid -translate-x-1/2 grid-cols-2 rounded-full bg-white/90 px-[5px] py-[5px] min-[1024px]:bottom-[6vh]">
+    <div className="absolute bottom-[3vh] left-1/2 z-10 grid -translate-x-1/2 grid-cols-2 rounded-full bg-white/90 px-[5px] py-[5px] min-[1025px]:bottom-[6vh]">
       <span
         aria-hidden="true"
         className="pointer-events-none absolute top-[5px] bottom-[5px] left-[5px] w-[calc((100%-10px)/2)] rounded-full bg-[var(--foreground)] transition-transform duration-300 ease-out"
