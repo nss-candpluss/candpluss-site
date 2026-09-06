@@ -68,8 +68,64 @@ describe("concept page copy", () => {
 
   it("uses ギア instead of 道具 in story body copy", () => {
     expect(conceptContent.sections.map((section) => section.body).join("\n")).not.toContain("道具");
+    expect(conceptContent.sections[0]?.body).toContain("キャンプと大切なものをつなぐ。");
     expect(conceptContent.sections[0]?.body).toContain("ギアをつくること。");
+    expect(conceptContent.sections[0]?.body).toContain(
+      "それが「C AND+S」という名前に込めた想いです。"
+    );
+    expect(conceptContent.sections[0]?.body).toContain("WHAT’S YOUR + S ?");
+    expect(conceptContent.sections[1]?.body).toContain("すべてはフィールドから始まった。");
+    expect(conceptContent.sections[2]?.body).toContain("美しさには理由がある。");
+    expect(conceptContent.sections[3]?.body).toContain("素材に妥協しない。");
+    expect(conceptContent.sections[4]?.body).toContain("小さなパーツにも理由がある。");
+    expect(conceptContent.sections[5]?.body).toContain(
+      "私たちはひとつの季節だけのためにギアをつくらない。"
+    );
+    expect(conceptContent.sections[6]?.body).toContain("答えはフィールドにある。");
+    expect(conceptContent.sections[7]?.body).toContain(
+      "ただのテントではなく「場所」なのかもしれない。"
+    );
+    expect(conceptContent.sections[7]?.body).toContain("テントをつくることのその先にあるもの。");
     expect(conceptContent.sections[8]?.body).toContain("より自由に楽しむためのギアをつくること。");
+    expect(conceptContent.sections[8]?.body).toContain(
+      "あなたにとってキャンプとつながる大切なものは何ですか。"
+    );
+    expect(conceptContent.sections[8]?.body).not.toContain("FIND YOUR SOUL.");
+  });
+
+  it("uses Support hero small-title spec for the English lead line", () => {
+    expect(conceptContent.sections.map((section) => section.label)).toEqual([
+      "CAMP + SOMETHING.",
+      "IT STARTED IN THE FIELD.",
+      "BEAUTY HAS A REASON.",
+      "NO COMPROMISE IN MATERIALS.",
+      "EVERY DETAIL MATTERS.",
+      "DESIGNED FOR JAPAN.",
+      "BUILT IN THE FIELD.",
+      "MORE THAN A TENT.",
+      "FIND YOUR SOUL. TOUCH THE GROUND.",
+    ]);
+    expect(conceptPageSource).toContain("section.label");
+    expect(conceptPageSource).toContain("font-ui-en font-medium");
+    expect(conceptPageSource).toContain("uiText(21)");
+    expect(conceptPageSource).toContain("mt-[calc(32px*var(--gap-scale-y))]");
+    expect(conceptContent.sections[0]?.body.startsWith("キャンプと大切なものをつなぐ。")).toBe(
+      true
+    );
+    expect(conceptContent.sections[1]?.body.startsWith("IT STARTED IN THE FIELD.")).toBe(
+      false
+    );
+  });
+
+  it("uses Support hero paragraph gaps for blank lines in story body", () => {
+    expect(conceptPageSource).toContain('section.body.split("\\n\\n")');
+    expect(conceptPageSource).toContain("gap-y-[calc(18px*var(--text-scale))]");
+    expect(conceptContent.sections[0]?.body.split("\n\n")[3]).toBe(
+      "ギアをつくること。\n空間をつくること。\nその先にある、時間や体験まで考えること。"
+    );
+    expect(conceptContent.sections[1]?.body.split("\n\n")[0]).toBe(
+      "すべてはフィールドから始まった。"
+    );
   });
 
   it("uses number and title for in-page nav labels", () => {
@@ -172,6 +228,15 @@ describe("concept page copy", () => {
     const outroIndex = conceptPageSource.lastIndexOf("data-concept-outro");
 
     expect(conceptContent.outroTitle).toBe("What’s Your + S ?");
+    expect(conceptContent.outroLogo).toBe("/assets/logos/logo-candpluss-tagline.svg");
+    expect(conceptPageSource).toContain("data-concept-outro-logo");
+    expect(conceptPageSource).toContain("maskGraphicStyle(conceptContent.outroLogo)");
+    expect(conceptPageSource).toContain("mt-[calc(72px*var(--gap-scale-y))]");
+    expect(conceptPageSource).toContain(
+      "h-[calc(48px*var(--text-scale))] w-[calc(195px*var(--text-scale))]"
+    );
+    expect(conceptPageSource).not.toContain("opacity-[0.12]");
+    expect(conceptPageSource).not.toContain("-translate-x-1/2 -translate-y-1/2");
     expect(storyRegionIndex).toBeGreaterThan(-1);
     expect(menuIndex).toBeGreaterThan(storyRegionIndex);
     expect(outroIndex).toBeGreaterThan(menuIndex);
@@ -184,6 +249,11 @@ describe("concept page copy", () => {
     expect(conceptPageSource).toContain(
       'style={{ opacity: 0, transform: "translateY(96px)" }}'
     );
+    expect(conceptPageSource).toContain("data-concept-outro-logo");
+    expect(conceptPageSource).toContain(
+      "...maskGraphicStyle(conceptContent.outroLogo)"
+    );
+    expect(conceptPageSource).not.toContain('transform: "translateY(32px)",');
     expect(conceptPageSource).toContain(
       'className="relative z-20 flex min-h-svh items-center bg-black"'
     );

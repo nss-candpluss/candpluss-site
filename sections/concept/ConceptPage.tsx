@@ -7,6 +7,7 @@ import {
   conceptTitleWrapClassName,
   splitConceptTitleWrapUnits,
 } from "@/lib/concept-title";
+import { maskGraphicStyle } from "@/lib/maskStyle";
 import {
   conceptStoryContentSpanClassName,
   conceptStoryHeadingSpanClassName,
@@ -16,6 +17,7 @@ import {
   conceptHeadingNumeralClassName,
   conceptStoryBodyClassName,
   conceptStoryTitleClassName,
+  uiText,
 } from "@/lib/typography";
 import { ConceptFeatureLinks } from "@/sections/concept/ConceptFeatureLinks";
 import { ConceptParallaxRegion } from "@/sections/concept/ConceptParallaxRegion";
@@ -97,22 +99,33 @@ function ConceptStoryHeading({
 function ConceptOutroTitle({ title }: { title: string }) {
   return (
     <div data-concept-outro-title-pin className="col-span-12">
-      <h2
-        data-concept-outro-title
-        aria-label={title}
-        className={`${conceptTitleWrapClassName} font-heading ${conceptStoryTitleClassName}`}
-        style={{ opacity: 0, transform: "translateY(96px)" }}
-      >
-        {splitConceptTitleWrapUnits(title).map((unit, unitIndex) => (
-          <span
-            key={`${unit}-${unitIndex}`}
-            className="inline-block"
-            aria-hidden="true"
-          >
-            {unit}
-          </span>
-        ))}
-      </h2>
+      <div className="flex flex-col items-center">
+        <h2
+          data-concept-outro-title
+          aria-label={title}
+          className={`${conceptTitleWrapClassName} font-heading ${conceptStoryTitleClassName}`}
+          style={{ opacity: 0, transform: "translateY(96px)" }}
+        >
+          {splitConceptTitleWrapUnits(title).map((unit, unitIndex) => (
+            <span
+              key={`${unit}-${unitIndex}`}
+              className="inline-block"
+              aria-hidden="true"
+            >
+              {unit}
+            </span>
+          ))}
+        </h2>
+        <span
+          data-concept-outro-logo
+          aria-hidden="true"
+          className="mt-[calc(72px*var(--gap-scale-y))] block h-[calc(48px*var(--text-scale))] w-[calc(195px*var(--text-scale))] bg-white"
+          style={{
+            opacity: 0,
+            ...maskGraphicStyle(conceptContent.outroLogo),
+          }}
+        />
+      </div>
     </div>
   );
 }
@@ -194,13 +207,29 @@ export function ConceptPage() {
                           animateIntro
                         />
                       )}
-                      <p
+                      <div
                         data-concept-intro-body
-                        className={`${conceptStoryContentSpanClassName} mt-[var(--section-title-gap)] mx-auto w-full max-w-[880px] whitespace-pre-line font-body-ja min-[1024px]:mx-0 min-[1024px]:max-w-none ${conceptStoryBodyClassName}`}
+                        className={`${conceptStoryContentSpanClassName} mt-[calc(32px*var(--gap-scale-y))] mx-auto w-full max-w-[880px] min-[1024px]:mx-0 min-[1024px]:max-w-none`}
                         style={{ opacity: 0, transform: "translateY(32px)" }}
                       >
-                        {section.body}
-                      </p>
+                        <p
+                          className={`whitespace-pre-line font-ui-en font-medium ${uiText(21)}`}
+                        >
+                          {section.label}
+                        </p>
+                        <div
+                          className={`mt-[var(--section-title-gap)] flex flex-col gap-y-[calc(18px*var(--text-scale))]`}
+                        >
+                          {section.body.split("\n\n").map((paragraph, paragraphIndex) => (
+                            <p
+                              key={`${section.id}-${paragraphIndex}`}
+                              className={`whitespace-pre-line font-body-ja ${conceptStoryBodyClassName}`}
+                            >
+                              {paragraph}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
                     </SiteGrid>
                   </Container>
                 </div>

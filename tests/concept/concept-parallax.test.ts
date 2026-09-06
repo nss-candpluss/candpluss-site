@@ -148,6 +148,15 @@ describe("Concept content parallax", () => {
     expect(parallaxSource).not.toContain(
       '"[data-concept-outro-title-character]"'
     );
+    expect(parallaxSource).toContain('"[data-concept-outro-logo]"');
+    expect(parallaxSource).toContain("outroTitleLogo");
+    expect(parallaxSource).toContain(
+      "outroTitleLogo,\n                  {\n                    opacity: 0,"
+    );
+    expect(parallaxSource).toContain(
+      "opacity: 1,\n                    duration: 0.5,\n                    ease: \"sine.out\","
+    );
+    expect(parallaxSource).toContain("ease: \"sine.out\",\n                  },\n                  \"-=0.2\"");
     expect(parallaxSource).toContain("keepOutroTitleAtViewportCenter");
     expect(parallaxSource).toContain("lockOutroTitlePosition");
     expect(parallaxSource).toContain("outroPositionLocked");
@@ -164,7 +173,7 @@ describe("Concept content parallax", () => {
     expect(parallaxSource).not.toContain('filter: "blur(8px)"');
     expect(parallaxSource).toContain("y: 96");
     expect(parallaxSource).toContain(
-      "{\n                  opacity: 1,\n                  y: 0,\n                  duration: 1.4,\n                  ease: \"power2.out\",\n                }"
+      "{\n                    opacity: 1,\n                    y: 0,\n                    duration: 1.4,\n                    ease: \"power2.out\",\n                  }"
     );
     expect(parallaxSource).toContain("once: true");
     expect(parallaxSource).toContain("outroTimeline.play()");

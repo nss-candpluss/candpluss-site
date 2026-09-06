@@ -105,6 +105,9 @@ export function ConceptParallaxRegion({
           outro?.querySelector<HTMLElement>(
             "[data-concept-outro-title-pin]"
           ) ?? null;
+        const outroTitleLogo =
+          outro?.querySelector<HTMLElement>("[data-concept-outro-logo]") ??
+          null;
         const lastSection = sections[sections.length - 1];
 
         const keepOutroTitleAtViewportCenter = () => {
@@ -228,6 +231,11 @@ export function ConceptParallaxRegion({
           if (outroTitle) {
             gsap.set(outroTitle, {
               clearProps: "opacity,transform,filter,visibility",
+            });
+          }
+          if (outroTitleLogo) {
+            gsap.set(outroTitleLogo, {
+              clearProps: "opacity,transform,visibility",
             });
           }
           if (outroTitlePin) {
@@ -358,15 +366,21 @@ export function ConceptParallaxRegion({
             });
           });
 
-          if (outro && outroTitle && outroTitlePin && lastSection) {
+          if (outro && outroTitle && outroTitleLogo && outroTitlePin && lastSection) {
             if (outroRevealed) {
               gsap.set(outroTitle, {
                 clearProps: "opacity,transform,filter,visibility",
+              });
+              gsap.set(outroTitleLogo, {
+                clearProps: "opacity,transform,visibility",
               });
             } else {
               gsap.set(outroTitle, {
                 opacity: 0,
                 y: 96,
+              });
+              gsap.set(outroTitleLogo, {
+                opacity: 0,
               });
 
               const outroTimeline = gsap.timeline({
@@ -376,22 +390,38 @@ export function ConceptParallaxRegion({
                   gsap.set(outroTitle, {
                     clearProps: "opacity,transform,visibility",
                   });
+                  gsap.set(outroTitleLogo, {
+                    clearProps: "opacity,transform,visibility",
+                  });
                 },
               });
 
-              outroTimeline.fromTo(
-                outroTitle,
-                {
-                  opacity: 0,
-                  y: 96,
-                },
-                {
-                  opacity: 1,
-                  y: 0,
-                  duration: 1.4,
-                  ease: "power2.out",
-                }
-              );
+              outroTimeline
+                .fromTo(
+                  outroTitle,
+                  {
+                    opacity: 0,
+                    y: 96,
+                  },
+                  {
+                    opacity: 1,
+                    y: 0,
+                    duration: 1.4,
+                    ease: "power2.out",
+                  }
+                )
+                .fromTo(
+                  outroTitleLogo,
+                  {
+                    opacity: 0,
+                  },
+                  {
+                    opacity: 1,
+                    duration: 0.5,
+                    ease: "sine.out",
+                  },
+                  "-=0.2"
+                );
 
               ScrollTrigger.create({
                 trigger: lastSection,
