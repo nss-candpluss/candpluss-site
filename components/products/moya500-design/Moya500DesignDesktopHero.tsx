@@ -17,7 +17,6 @@ import { Moya500DesignGalleryModal } from "@/components/products/moya500-design/
 import { MOYA500_ZOOM_IN_CURSOR } from "@/components/products/moya500-design/gallery-cursors";
 import {
   galleryItemKey,
-  moya500DesignThumbnailSrc,
   type Moya500DesignGalleryItem,
 } from "@/components/products/moya500-design/gallery-media";
 import { preloadMoya500Image } from "@/components/products/moya500-design/image-preload";
@@ -177,10 +176,6 @@ export function Moya500DesignDesktopHero({
   );
   const canSelectVariant = product.variants.length > 1;
   const showGalleryNavigation = shouldDisplayGalleryNavigation(items.length);
-  const colorChipImageResolver =
-    product.handle === "moya500" || product.handle === "moya500-design"
-      ? moya500DesignThumbnailSrc
-      : undefined;
   const isMainSliding = slideLayers.some((layer) => layer.role !== "settled");
   const canAddToCart = Boolean(selectedVariant?.shopifyVariantId) &&
     selectedVariant?.availableForSale !== false &&
@@ -637,7 +632,6 @@ export function Moya500DesignDesktopHero({
             selectionIndicator="underline"
             gapClassName="gap-x-[clamp(8px,calc(10px*var(--gap-scale-x)),10px)] gap-y-[clamp(8px,calc(10px*var(--gap-scale-y)),10px)]"
             dimUnselected={false}
-            resolveImageSrc={colorChipImageResolver}
           />
 
           {showVariantLabel && selectedVariant ? (
