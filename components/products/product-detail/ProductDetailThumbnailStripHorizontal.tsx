@@ -3,13 +3,13 @@
 import { useEffect, useRef } from "react";
 
 import {
-  Moya500DesignGalleryMedia,
-  Moya500DesignVideoThumbBadge,
-} from "@/components/products/moya500-design/Moya500DesignGalleryMedia";
+  ProductDetailGalleryMedia,
+  ProductDetailVideoThumbBadge,
+} from "@/components/products/product-detail/ProductDetailGalleryMedia";
 import {
   galleryItemKey,
-  type Moya500DesignGalleryItem,
-} from "@/components/products/moya500-design/gallery-media";
+  type ProductDetailGalleryItem,
+} from "@/components/products/product-detail/gallery-items";
 
 /** PC版と同じ画像サイズ。1024px以下でもこれを超えない */
 const THUMB_IMAGE_MAX_PX = 70;
@@ -26,19 +26,19 @@ const THUMB_VISIBLE_GAPS = 5;
 const THUMB_FIT_SLOT_WIDTH = `calc((100vw - 2 * var(--container-x) - ${THUMB_VISIBLE_GAPS} * ${THUMB_GAP}) / ${THUMB_VISIBLE_COUNT})`;
 const THUMB_SLOT_WIDTH = `min(${THUMB_SLOT_MAX_PX}px, ${THUMB_FIT_SLOT_WIDTH})`;
 const THUMB_STRIP_PAD_Y_PX = 10;
-export const MOYA500_MOBILE_THUMB_STRIP_HEIGHT = `calc(${THUMB_STRIP_PAD_Y_PX * 2}px + ${THUMB_SLOT_WIDTH})`;
+export const PRODUCT_DETAIL_MOBILE_THUMB_STRIP_HEIGHT = `calc(${THUMB_STRIP_PAD_Y_PX * 2}px + ${THUMB_SLOT_WIDTH})`;
 
-type Moya500DesignThumbnailStripHorizontalProps = {
-  items: Moya500DesignGalleryItem[];
+type ProductDetailThumbnailStripHorizontalProps = {
+  items: ProductDetailGalleryItem[];
   selectedIndex: number;
   onSelect: (index: number) => void;
 };
 
-export function Moya500DesignThumbnailStripHorizontal({
+export function ProductDetailThumbnailStripHorizontal({
   items,
   selectedIndex,
   onSelect,
-}: Moya500DesignThumbnailStripHorizontalProps) {
+}: ProductDetailThumbnailStripHorizontalProps) {
   const listRef = useRef<HTMLUListElement>(null);
   const selectedRef = useRef<HTMLButtonElement>(null);
 
@@ -95,7 +95,7 @@ export function Moya500DesignThumbnailStripHorizontal({
                   className="absolute block overflow-hidden"
                   style={{ inset: THUMB_IMAGE_INSET_PX }}
                 >
-                  <Moya500DesignGalleryMedia
+                  <ProductDetailGalleryMedia
                     item={item}
                     mode="preview"
                     sizes={`min(${THUMB_IMAGE_MAX_PX}px, 18vw)`}
@@ -104,7 +104,7 @@ export function Moya500DesignThumbnailStripHorizontal({
                     useThumbnail
                   />
                   {item.kind === "video" ? (
-                    <Moya500DesignVideoThumbBadge />
+                    <ProductDetailVideoThumbBadge />
                   ) : null}
                 </span>
                 {isSelected ? (

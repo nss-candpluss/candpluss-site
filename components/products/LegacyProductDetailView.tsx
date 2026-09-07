@@ -28,7 +28,7 @@ import {
 } from "@/lib/products/helpers";
 import type { OpenCloseGroupId, Product, ProductVariant } from "@/types/product";
 
-type ProductDetailViewProps = {
+type LegacyProductDetailViewProps = {
   product: Product;
   initialVariantId: string;
   optionProducts: Product[];
@@ -61,12 +61,12 @@ function ActionPanelContent({
   );
 }
 
-export function ProductDetailView({
+export function LegacyProductDetailView({
   product,
   initialVariantId,
   optionProducts,
   priority = false,
-}: ProductDetailViewProps) {
+}: LegacyProductDetailViewProps) {
   const searchParams = useSearchParams();
   const variantIdFromUrl = searchParams.get("color");
   const resolvedInitialVariantId = resolveProductVariantId(

@@ -28,7 +28,7 @@ export function isConstrainedGalleryConnection() {
   );
 }
 
-export function preloadMoya500Image(src: string): Promise<boolean> {
+export function preloadProductDetailImage(src: string): Promise<boolean> {
   const resolvedSrc = assetPath(src);
   const cached = preloadCache.get(resolvedSrc);
   if (cached) {
@@ -60,7 +60,7 @@ export function preloadMoya500Image(src: string): Promise<boolean> {
   return request;
 }
 
-export function isMoya500ImagePreloaded(src: string) {
+export function isProductDetailImagePreloaded(src: string) {
   return loadedImageSources.has(assetPath(src));
 }
 

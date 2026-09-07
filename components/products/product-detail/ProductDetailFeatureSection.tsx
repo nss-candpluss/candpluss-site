@@ -9,11 +9,11 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 
-import { preloadMoya500Image } from "@/components/products/moya500-design/image-preload";
+import { preloadProductDetailImage } from "@/components/products/product-detail/image-preload";
 import {
-  MOYA500_DESIGN_SLIDE_MS,
-  moya500DesignSlideDurationMs,
-} from "@/components/products/moya500-design/slide-timing";
+  PRODUCT_DETAIL_SLIDE_MS,
+  productDetailSlideDurationMs,
+} from "@/components/products/product-detail/slide-timing";
 import { ProductFeatureLinks } from "@/components/products/ProductFeatureLinks";
 import { ProductGalleryChevron } from "@/components/products/ProductGalleryControls";
 import { ProductNotes } from "@/components/products/ProductNotes";
@@ -23,7 +23,7 @@ import { splitFeatureNotes } from "@/lib/products/feature-notes";
 import { productDetailSectionTitleClassName, productFeatureItemTitleClassName } from "@/lib/typography";
 import type { ProductFeature } from "@/types/product";
 
-export type Moya500DesignFeature = ProductFeature & {
+export type ProductDetailFeature = ProductFeature & {
   images?: string[];
   mediaSlots?: (string | null)[];
   video?: {
@@ -36,10 +36,10 @@ export type Moya500DesignFeature = ProductFeature & {
   }>;
 };
 
-type Moya500DesignFeatureSectionProps = {
+type ProductDetailFeatureSectionProps = {
   id: string;
   title: "Material" | "Feature";
-  features: Moya500DesignFeature[];
+  features: ProductDetailFeature[];
   priorityFirst?: boolean;
   hasBottomPadding?: boolean;
 };
@@ -77,19 +77,19 @@ function featureSlideClassName(layer: FeatureSlideLayer) {
 
   if (layer.role === "incoming") {
     return layer.enterFrom === "left"
-      ? "moya500-design-feature-in-left"
-      : "moya500-design-feature-in-right";
+      ? "product-detail-feature-in-left"
+      : "product-detail-feature-in-right";
   }
 
   return layer.enterFrom === "left"
-    ? "moya500-design-feature-out-right"
-    : "moya500-design-feature-out-left";
+    ? "product-detail-feature-out-right"
+    : "product-detail-feature-out-left";
 }
 
-function Moya500DesignFeatureVideo({
+function ProductDetailFeatureVideo({
   video,
 }: {
-  video: NonNullable<Moya500DesignFeature["video"]>;
+  video: NonNullable<ProductDetailFeature["video"]>;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoSrc = assetPath(video.src);
@@ -183,7 +183,7 @@ function Moya500DesignFeatureVideo({
   );
 }
 
-function Moya500DesignFeatureImageGallery({
+function ProductDetailFeatureImageGallery({
   images,
   priority,
 }: {
@@ -200,7 +200,7 @@ function Moya500DesignFeatureImageGallery({
     },
   ]);
   const [backdropImage, setBackdropImage] = useState(images[0]);
-  const [slideMs, setSlideMs] = useState(MOYA500_DESIGN_SLIDE_MS);
+  const [slideMs, setSlideMs] = useState(PRODUCT_DETAIL_SLIDE_MS);
   const slideSeqRef = useRef(0);
   const selectionRequestRef = useRef(0);
   const swipeRef = useRef<{
@@ -214,7 +214,7 @@ function Moya500DesignFeatureImageGallery({
   useEffect(() => {
     images.forEach((image) => {
       if (image) {
-        void preloadMoya500Image(image);
+        void preloadProductDetailImage(image);
       }
     });
   }, [images]);
@@ -238,11 +238,11 @@ function Moya500DesignFeatureImageGallery({
       const navigation =
         navigationOverride ??
         resolveFeatureNavigation(selectedIndex, nextIndex, images.length);
-      const durationMs = moya500DesignSlideDurationMs(navigation.steps);
+      const durationMs = productDetailSlideDurationMs(navigation.steps);
       const requestId = ++selectionRequestRef.current;
 
       const preloadNextImage = nextImage
-        ? preloadMoya500Image(nextImage)
+        ? preloadProductDetailImage(nextImage)
         : Promise.resolve(true);
 
       void preloadNextImage.then(() => {
@@ -488,11 +488,11 @@ function Moya500DesignFeatureImageGallery({
   );
 }
 
-function Moya500DesignFeatureCard({
+function ProductDetailFeatureCard({
   feature,
   priority,
 }: {
-  feature: Moya500DesignFeature;
+  feature: ProductDetailFeature;
   priority: boolean;
 }) {
   const { body, notes } = splitFeatureNotes(feature.body);
@@ -501,15 +501,15 @@ function Moya500DesignFeatureCard({
     <article className="block">
       {feature.video ? (
         <div className="relative aspect-[13/10] overflow-hidden bg-black">
-          <Moya500DesignFeatureVideo video={feature.video} />
+          <ProductDetailFeatureVideo video={feature.video} />
         </div>
       ) : feature.mediaSlots?.length ? (
-        <Moya500DesignFeatureImageGallery
+        <ProductDetailFeatureImageGallery
           images={feature.mediaSlots}
           priority={priority}
         />
       ) : feature.images?.length ? (
-        <Moya500DesignFeatureImageGallery
+        <ProductDetailFeatureImageGallery
           images={feature.images}
           priority={priority}
         />
@@ -553,13 +553,13 @@ function Moya500DesignFeatureCard({
   );
 }
 
-export function Moya500DesignFeatureSection({
+export function ProductDetailFeatureSection({
   id,
   title,
   features,
   priorityFirst = false,
   hasBottomPadding = true,
-}: Moya500DesignFeatureSectionProps) {
+}: ProductDetailFeatureSectionProps) {
   if (!features.length) {
     return null;
   }
@@ -568,7 +568,7 @@ export function Moya500DesignFeatureSection({
   const groupedFeatures = features.reduce<
     Array<{
       title: string;
-      features: Moya500DesignFeature[];
+      features: ProductDetailFeature[];
     }>
   >((groups, feature) => {
     const groupTitle = feature.group?.trim() ?? "";
@@ -591,40 +591,40 @@ export function Moya500DesignFeatureSection({
       }`}
     >
       <style>{`
-        @keyframes moya500-design-feature-in-left {
+        @keyframes product-detail-feature-in-left {
           from { transform: translate3d(-100%, 0, 0); }
           to { transform: translate3d(0, 0, 0); }
         }
-        @keyframes moya500-design-feature-in-right {
+        @keyframes product-detail-feature-in-right {
           from { transform: translate3d(100%, 0, 0); }
           to { transform: translate3d(0, 0, 0); }
         }
-        @keyframes moya500-design-feature-out-left {
+        @keyframes product-detail-feature-out-left {
           from { transform: translate3d(0, 0, 0); }
           to { transform: translate3d(-100%, 0, 0); }
         }
-        @keyframes moya500-design-feature-out-right {
+        @keyframes product-detail-feature-out-right {
           from { transform: translate3d(0, 0, 0); }
           to { transform: translate3d(100%, 0, 0); }
         }
-        .moya500-design-feature-in-left,
-        .moya500-design-feature-in-right,
-        .moya500-design-feature-out-left,
-        .moya500-design-feature-out-right {
+        .product-detail-feature-in-left,
+        .product-detail-feature-in-right,
+        .product-detail-feature-out-left,
+        .product-detail-feature-out-right {
           animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
           animation-fill-mode: both;
         }
-        .moya500-design-feature-in-left {
-          animation-name: moya500-design-feature-in-left;
+        .product-detail-feature-in-left {
+          animation-name: product-detail-feature-in-left;
         }
-        .moya500-design-feature-in-right {
-          animation-name: moya500-design-feature-in-right;
+        .product-detail-feature-in-right {
+          animation-name: product-detail-feature-in-right;
         }
-        .moya500-design-feature-out-left {
-          animation-name: moya500-design-feature-out-left;
+        .product-detail-feature-out-left {
+          animation-name: product-detail-feature-out-left;
         }
-        .moya500-design-feature-out-right {
-          animation-name: moya500-design-feature-out-right;
+        .product-detail-feature-out-right {
+          animation-name: product-detail-feature-out-right;
         }
       `}</style>
 
@@ -650,7 +650,7 @@ export function Moya500DesignFeatureSection({
 
               <div className={`${group.title ? "mt-[clamp(32px,calc(48px*var(--gap-scale-y)),48px)]" : ""} grid grid-cols-1 gap-x-[calc(52px*var(--gap-scale-x))] gap-y-[clamp(32px,calc(62px*var(--gap-scale-y)),62px)] md:grid-cols-2`}>
                 {group.features.map((feature) => (
-                  <Moya500DesignFeatureCard
+                  <ProductDetailFeatureCard
                     key={feature.id}
                     feature={feature}
                     priority={
@@ -667,7 +667,7 @@ export function Moya500DesignFeatureSection({
       ) : (
         <div className="mt-[calc(98px*var(--gap-scale-y))] grid grid-cols-1 gap-x-[calc(52px*var(--gap-scale-x))] gap-y-[clamp(32px,calc(62px*var(--gap-scale-y)),62px)] md:grid-cols-2">
           {features.map((feature, index) => (
-            <Moya500DesignFeatureCard
+            <ProductDetailFeatureCard
               key={feature.id}
               feature={feature}
               priority={priorityFirst && index === 0}

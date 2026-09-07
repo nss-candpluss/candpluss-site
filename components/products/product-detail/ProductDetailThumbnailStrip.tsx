@@ -13,17 +13,17 @@ import {
 } from "react";
 
 import {
-  Moya500DesignGalleryMedia,
-  Moya500DesignVideoThumbBadge,
-} from "@/components/products/moya500-design/Moya500DesignGalleryMedia";
+  ProductDetailGalleryMedia,
+  ProductDetailVideoThumbBadge,
+} from "@/components/products/product-detail/ProductDetailGalleryMedia";
 import {
   galleryItemKey,
-  type Moya500DesignGalleryItem,
-} from "@/components/products/moya500-design/gallery-media";
+  type ProductDetailGalleryItem,
+} from "@/components/products/product-detail/gallery-items";
 import {
-  MOYA500_DESIGN_SLIDE_MS,
-  moya500DesignSlideDurationMs,
-} from "@/components/products/moya500-design/slide-timing";
+  PRODUCT_DETAIL_SLIDE_MS,
+  productDetailSlideDurationMs,
+} from "@/components/products/product-detail/slide-timing";
 import { shouldDisplayGalleryNavigation } from "@/lib/products/gallery";
 
 const VISIBLE_COUNT = 5;
@@ -34,19 +34,19 @@ const THUMB_BORDER_PX = 1;
 const THUMB_SLOT_PX =
   THUMB_SIZE_PX + (THUMB_PADDING_PX + THUMB_BORDER_PX) * 2;
 
-export type Moya500DesignSelectMeta = {
+export type ProductDetailSelectMeta = {
   durationMs: number;
   steps: number;
 };
 
-export type Moya500DesignThumbnailStripHandle = {
+export type ProductDetailThumbnailStripHandle = {
   goToIndex: (index: number) => void;
 };
 
-type Moya500DesignThumbnailStripProps = {
-  items: Moya500DesignGalleryItem[];
+type ProductDetailThumbnailStripProps = {
+  items: ProductDetailGalleryItem[];
   selectedIndex: number;
-  onSelect: (index: number, meta: Moya500DesignSelectMeta) => void;
+  onSelect: (index: number, meta: ProductDetailSelectMeta) => void;
 };
 
 function Chevron({ direction }: { direction: "up" | "down" }) {
@@ -78,10 +78,10 @@ function scrollForSelection(selectedIndex: number, length: number) {
   return clamp(selectedIndex, 0, maxScroll);
 }
 
-export const Moya500DesignThumbnailStrip = forwardRef<
-  Moya500DesignThumbnailStripHandle,
-  Moya500DesignThumbnailStripProps
->(function Moya500DesignThumbnailStrip(
+export const ProductDetailThumbnailStrip = forwardRef<
+  ProductDetailThumbnailStripHandle,
+  ProductDetailThumbnailStripProps
+>(function ProductDetailThumbnailStrip(
   { items, selectedIndex, onSelect },
   ref
 ) {
@@ -109,7 +109,7 @@ export const Moya500DesignThumbnailStrip = forwardRef<
   const [isAnimating, setIsAnimating] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [disableTransition, setDisableTransition] = useState(false);
-  const [transitionMs, setTransitionMs] = useState(MOYA500_DESIGN_SLIDE_MS);
+  const [transitionMs, setTransitionMs] = useState(PRODUCT_DETAIL_SLIDE_MS);
 
   useEffect(() => {
     selectedIndexRef.current = selectedIndex;
@@ -155,7 +155,7 @@ export const Moya500DesignThumbnailStrip = forwardRef<
     animatingRef.current = false;
     setIsAnimating(false);
     setDisableTransition(false);
-    setTransitionMs(MOYA500_DESIGN_SLIDE_MS);
+    setTransitionMs(PRODUCT_DETAIL_SLIDE_MS);
   }, []);
 
   const runOffsetTransition = useCallback(
@@ -203,7 +203,7 @@ export const Moya500DesignThumbnailStrip = forwardRef<
 
       // 選択もスクロールも変わらないが、ドラッグ途中位置からの復帰だけ必要な場合
       if (nextIndex === currentIndex && Math.abs(offsetDelta) > 0.5 && stepPx) {
-        const durationMs = moya500DesignSlideDurationMs(1);
+        const durationMs = productDetailSlideDurationMs(1);
         runOffsetTransition(fromOffset, toOffset, durationMs);
         return;
       }
@@ -214,7 +214,7 @@ export const Moya500DesignThumbnailStrip = forwardRef<
 
       const motionSteps =
         scrollSteps !== 0 ? scrollSteps : selectSteps !== 0 ? selectSteps : 0;
-      const durationMs = moya500DesignSlideDurationMs(
+      const durationMs = productDetailSlideDurationMs(
         motionSteps === 0 ? 1 : motionSteps
       );
       const stepsMeta =
@@ -479,7 +479,7 @@ export const Moya500DesignThumbnailStrip = forwardRef<
                     className="relative block shrink-0 overflow-hidden"
                     style={{ width: THUMB_SIZE_PX, height: THUMB_SIZE_PX }}
                   >
-                    <Moya500DesignGalleryMedia
+                    <ProductDetailGalleryMedia
                       item={item}
                       mode="preview"
                       sizes={`${THUMB_SIZE_PX}px`}
@@ -488,7 +488,7 @@ export const Moya500DesignThumbnailStrip = forwardRef<
                       useThumbnail
                     />
                     {item.kind === "video" ? (
-                      <Moya500DesignVideoThumbBadge />
+                      <ProductDetailVideoThumbBadge />
                     ) : null}
                   </span>
                 </button>

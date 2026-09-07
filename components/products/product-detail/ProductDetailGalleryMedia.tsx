@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import type { Moya500DesignGalleryItem } from "@/components/products/moya500-design/gallery-media";
-import { isMoya500ImagePreloaded } from "@/components/products/moya500-design/image-preload";
+import type { ProductDetailGalleryItem } from "@/components/products/product-detail/gallery-items";
+import { isProductDetailImagePreloaded } from "@/components/products/product-detail/image-preload";
 import { SiteImage } from "@/components/ui/SiteImage";
 import { assetPath } from "@/lib/assetPath";
 
-type Moya500DesignGalleryMediaProps = {
-  item: Moya500DesignGalleryItem;
+type ProductDetailGalleryMediaProps = {
+  item: ProductDetailGalleryItem;
   /** playback: 再生 / preview: 1コマ目表示のみ（再生しない） */
   mode?: "preview" | "playback";
   priority?: boolean;
@@ -21,7 +21,7 @@ type Moya500DesignGalleryMediaProps = {
 
 function pauseOtherGalleryVideos(current: HTMLVideoElement) {
   document
-    .querySelectorAll<HTMLVideoElement>("video[data-moya500-gallery-video]")
+    .querySelectorAll<HTMLVideoElement>("video[data-product-detail-gallery-video]")
     .forEach((node) => {
       if (node !== current && !node.paused) {
         node.pause();
@@ -30,7 +30,7 @@ function pauseOtherGalleryVideos(current: HTMLVideoElement) {
 }
 
 /** サムネ・再生準備中の下敷き用。動画と同じ先頭フレーム画像を使う */
-function Moya500DesignVideoPoster({
+function ProductDetailVideoPoster({
   posterSrc,
   className,
 }: {
@@ -43,19 +43,20 @@ function Moya500DesignVideoPoster({
       alt=""
       fill
       sizes="100vw"
+      shopifyOriginal
       draggable={false}
       className={className}
     />
   );
 }
 
-function Moya500DesignVideoMedia({
+function ProductDetailVideoMedia({
   item,
   mode,
   className,
   useThumbnail,
 }: {
-  item: Extract<Moya500DesignGalleryItem, { kind: "video" }>;
+  item: Extract<ProductDetailGalleryItem, { kind: "video" }>;
   mode: "preview" | "playback";
   className: string;
   useThumbnail: boolean;
@@ -118,7 +119,7 @@ function Moya500DesignVideoMedia({
 
   if (mode === "preview") {
     return (
-      <Moya500DesignVideoPoster
+      <ProductDetailVideoPoster
         posterSrc={posterSrc}
         className={className}
       />
@@ -128,7 +129,7 @@ function Moya500DesignVideoMedia({
   return (
     <>
       {/* 動画と同じ先頭フレームを下に敷き、iOS の切替を隠す */}
-      <Moya500DesignVideoPoster
+      <ProductDetailVideoPoster
         posterSrc={posterSrc}
         className={className}
       />
@@ -146,13 +147,13 @@ function Moya500DesignVideoMedia({
         preload="auto"
         controls={false}
         draggable={false}
-        data-moya500-gallery-video
+        data-product-detail-gallery-video
       />
     </>
   );
 }
 
-function Moya500DesignImageMedia({
+function ProductDetailImageMedia({
   item,
   priority,
   sizes,
@@ -161,7 +162,7 @@ function Moya500DesignImageMedia({
   useThumbnail,
   onImageLoad,
 }: {
-  item: Extract<Moya500DesignGalleryItem, { kind: "image" }>;
+  item: Extract<ProductDetailGalleryItem, { kind: "image" }>;
   priority: boolean;
   sizes: string;
   alt?: string;
@@ -170,7 +171,7 @@ function Moya500DesignImageMedia({
   onImageLoad?: (image: HTMLImageElement) => void;
 }) {
   const [isFullImageVisible, setIsFullImageVisible] = useState(
-    useThumbnail || isMoya500ImagePreloaded(item.src)
+    useThumbnail || isProductDetailImagePreloaded(item.src)
   );
 
   if (useThumbnail) {
@@ -204,6 +205,7 @@ function Moya500DesignImageMedia({
         alt={alt ?? item.alt}
         fill
         sizes={sizes}
+        shopifyOriginal
         priority={priority}
         draggable={false}
         className={`${className} transition-opacity duration-200 ${
@@ -218,7 +220,7 @@ function Moya500DesignImageMedia({
   );
 }
 
-export function Moya500DesignGalleryMedia({
+export function ProductDetailGalleryMedia({
   item,
   mode = "preview",
   priority = false,
@@ -227,10 +229,10 @@ export function Moya500DesignGalleryMedia({
   className = "pointer-events-none object-cover object-center",
   useThumbnail = false,
   onImageLoad,
-}: Moya500DesignGalleryMediaProps) {
+}: ProductDetailGalleryMediaProps) {
   if (item.kind === "video") {
     return (
-      <Moya500DesignVideoMedia
+      <ProductDetailVideoMedia
         key={item.id}
         item={item}
         mode={mode}
@@ -241,7 +243,7 @@ export function Moya500DesignGalleryMedia({
   }
 
   return (
-    <Moya500DesignImageMedia
+    <ProductDetailImageMedia
       key={item.id}
       item={item}
       priority={priority}
@@ -254,7 +256,7 @@ export function Moya500DesignGalleryMedia({
   );
 }
 
-export function Moya500DesignVideoThumbBadge() {
+export function ProductDetailVideoThumbBadge() {
   return (
     <span
       aria-hidden="true"

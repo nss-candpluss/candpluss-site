@@ -9,6 +9,11 @@ import {
 
 const PRODUCT_IMAGE_QUALITY = 90;
 
+type SiteImageProps = ImageProps & {
+  /** Shopify CDN のリサイズを使わず、登録済みの元画像を配信する */
+  shopifyOriginal?: boolean;
+};
+
 function resolveImageSrc(src: ImageProps["src"]): ImageProps["src"] {
   if (typeof src === "string") {
     return assetPath(src);
@@ -17,10 +22,20 @@ function resolveImageSrc(src: ImageProps["src"]): ImageProps["src"] {
   return src;
 }
 
-export function SiteImage({ src, quality, unoptimized, ...props }: ImageProps) {
+export function SiteImage({
+  src,
+  quality,
+  unoptimized,
+  shopifyOriginal = false,
+  ...props
+}: SiteImageProps) {
   const resolvedSrc = resolveImageSrc(src);
 
   if (typeof resolvedSrc === "string" && isShopifyCdnUrl(resolvedSrc)) {
+    if (shopifyOriginal) {
+      return <NextImage src={resolvedSrc} unoptimized {...props} />;
+    }
+
     const deliveryWidth = shopifyDeliveryWidth({
       width: props.width,
       sizes: props.sizes,

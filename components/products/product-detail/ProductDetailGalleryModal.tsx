@@ -9,12 +9,12 @@ import {
 } from "react";
 
 import { ProductGalleryChevron } from "@/components/products/ProductGalleryControls";
-import { Moya500DesignGalleryMedia } from "@/components/products/moya500-design/Moya500DesignGalleryMedia";
+import { ProductDetailGalleryMedia } from "@/components/products/product-detail/ProductDetailGalleryMedia";
 import {
-  MOYA500_ZOOM_IN_CURSOR,
-  MOYA500_ZOOM_OUT_CURSOR,
-} from "@/components/products/moya500-design/gallery-cursors";
-import type { Moya500DesignGalleryItem } from "@/components/products/moya500-design/gallery-media";
+  PRODUCT_DETAIL_ZOOM_IN_CURSOR,
+  PRODUCT_DETAIL_ZOOM_OUT_CURSOR,
+} from "@/components/products/product-detail/gallery-cursors";
+import type { ProductDetailGalleryItem } from "@/components/products/product-detail/gallery-items";
 import { shouldDisplayGalleryNavigation } from "@/lib/products/gallery";
 import { uiText } from "@/lib/typography";
 
@@ -22,9 +22,9 @@ const MIN_SCALE = 1;
 const CLICK_ZOOM_SCALE = 1.8;
 const MAX_PINCH_SCALE = 3;
 
-type Moya500DesignGalleryModalProps = {
+type ProductDetailGalleryModalProps = {
   isOpen: boolean;
-  items: Moya500DesignGalleryItem[];
+  items: ProductDetailGalleryItem[];
   selectedIndex: number;
   onSelect: (index: number) => void;
   onClose: () => void;
@@ -38,7 +38,7 @@ function wrapIndex(index: number, length: number) {
   return ((index % length) + length) % length;
 }
 
-function ZoomableMedia({ item }: { item: Moya500DesignGalleryItem }) {
+function ZoomableMedia({ item }: { item: ProductDetailGalleryItem }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const pointersRef = useRef(new Map<number, { x: number; y: number }>());
   const dragRef = useRef<{
@@ -67,7 +67,7 @@ function ZoomableMedia({ item }: { item: Moya500DesignGalleryItem }) {
     height: number | string;
   }>({ width: "100%", height: "100%" });
   const zoomCursor =
-    scale > MIN_SCALE ? MOYA500_ZOOM_OUT_CURSOR : MOYA500_ZOOM_IN_CURSOR;
+    scale > MIN_SCALE ? PRODUCT_DETAIL_ZOOM_OUT_CURSOR : PRODUCT_DETAIL_ZOOM_IN_CURSOR;
 
   const getPanBounds = (nextScale: number) => {
     const stage = stageRef.current;
@@ -346,7 +346,7 @@ function ZoomableMedia({ item }: { item: Moya500DesignGalleryItem }) {
             transition: isDragging ? "none" : "transform 220ms ease-out",
           }}
         >
-          <Moya500DesignGalleryMedia
+          <ProductDetailGalleryMedia
             item={item}
             mode="playback"
             sizes="100vw"
@@ -386,13 +386,13 @@ function ZoomableMedia({ item }: { item: Moya500DesignGalleryItem }) {
   );
 }
 
-export function Moya500DesignGalleryModal({
+export function ProductDetailGalleryModal({
   isOpen,
   items,
   selectedIndex,
   onSelect,
   onClose,
-}: Moya500DesignGalleryModalProps) {
+}: ProductDetailGalleryModalProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const selectedItem = items[selectedIndex];
   const showGalleryNavigation = shouldDisplayGalleryNavigation(items.length);

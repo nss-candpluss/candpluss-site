@@ -2,17 +2,17 @@ import Link from "next/link";
 
 import { productCategories } from "@/types/product";
 
-type Moya500DesignBreadcrumbsProps = {
+type ProductDetailBreadcrumbsProps = {
   category: string;
   categorySlug: string;
   className?: string;
 };
 
-export function Moya500DesignBreadcrumbs({
+export function ProductDetailBreadcrumbs({
   category,
   categorySlug,
   className = "",
-}: Moya500DesignBreadcrumbsProps) {
+}: ProductDetailBreadcrumbsProps) {
   const matchedCategory = productCategories.find(
     (item) => item.slug === categorySlug && item.slug !== "all"
   );

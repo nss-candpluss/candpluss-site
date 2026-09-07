@@ -5,21 +5,23 @@ import {
   useEffect,
   useRef,
   useState,
+  type CSSProperties,
   type AnimationEvent as ReactAnimationEvent,
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
+  type TransitionEvent as ReactTransitionEvent,
 } from "react";
 
 import { useCart } from "@/components/commerce/CartProvider";
 import { useCustomer } from "@/components/commerce/CustomerProvider";
-import { Moya500DesignGalleryMedia } from "@/components/products/moya500-design/Moya500DesignGalleryMedia";
-import { Moya500DesignGalleryModal } from "@/components/products/moya500-design/Moya500DesignGalleryModal";
-import { MOYA500_ZOOM_IN_CURSOR } from "@/components/products/moya500-design/gallery-cursors";
+import { ProductDetailGalleryMedia } from "@/components/products/product-detail/ProductDetailGalleryMedia";
+import { ProductDetailGalleryModal } from "@/components/products/product-detail/ProductDetailGalleryModal";
+import { PRODUCT_DETAIL_ZOOM_IN_CURSOR } from "@/components/products/product-detail/gallery-cursors";
 import {
   galleryItemKey,
-  type Moya500DesignGalleryItem,
-} from "@/components/products/moya500-design/gallery-media";
-import { preloadMoya500Image } from "@/components/products/moya500-design/image-preload";
+  type ProductDetailGalleryItem,
+} from "@/components/products/product-detail/gallery-items";
+import { preloadProductDetailImage } from "@/components/products/product-detail/image-preload";
 import { shouldDisplayGalleryNavigation } from "@/lib/products/gallery";
 import { canPurchaseProduct } from "@/lib/products/purchase";
 import {
@@ -29,24 +31,22 @@ import {
   shouldDisplayProductVariantOptions,
 } from "@/lib/products/helpers";
 import {
-  Moya500DesignThumbnailStrip,
-  type Moya500DesignSelectMeta,
-  type Moya500DesignThumbnailStripHandle,
-} from "@/components/products/moya500-design/Moya500DesignThumbnailStrip";
+  PRODUCT_DETAIL_MOBILE_THUMB_STRIP_HEIGHT,
+  ProductDetailThumbnailStripHorizontal,
+} from "@/components/products/product-detail/ProductDetailThumbnailStripHorizontal";
 import {
-  MOYA500_DESIGN_SLIDE_MS,
-  moya500DesignSlideDurationMs,
-} from "@/components/products/moya500-design/slide-timing";
-import { Moya500DesignBreadcrumbs } from "@/components/products/moya500-design/Moya500DesignBreadcrumbs";
+  PRODUCT_DETAIL_SLIDE_MS,
+  productDetailSlideDurationMs,
+} from "@/components/products/product-detail/slide-timing";
+import { ProductDetailBreadcrumbs } from "@/components/products/product-detail/ProductDetailBreadcrumbs";
 import { ProductColorChips } from "@/components/products/ProductColorChips";
 import { ProductDetailDescription } from "@/components/products/ProductDetailDescription";
-import { ProductGalleryControls } from "@/components/products/ProductGalleryControls";
 import { ProductStatusLabel } from "@/components/products/ProductStatusLabel";
 import { arrowMaskStyle } from "@/lib/maskStyle";
 import type { Product, ProductVariant } from "@/types/product";
 
-type Moya500DesignDesktopHeroProps = {
-  items: Moya500DesignGalleryItem[];
+type ProductDetailMobileHeroProps = {
+  items: ProductDetailGalleryItem[];
   product: Product;
   selectedVariant: ProductVariant | null;
   selectedColorCode: string;
@@ -54,12 +54,11 @@ type Moya500DesignDesktopHeroProps = {
   onVariantIntent: (variantId: string) => void;
 };
 
-/** 1個前 → 左から / 1個後 → 右から */
 type MainSlideEnterFrom = "left" | "right";
 
 type MainSlideLayer = {
   key: string;
-  item: Moya500DesignGalleryItem;
+  item: ProductDetailGalleryItem;
   role: "incoming" | "outgoing" | "settled";
   enterFrom: MainSlideEnterFrom;
 };
@@ -80,7 +79,6 @@ function resolveNavigation(
   const forward = wrapIndex(toIndex - fromIndex, length);
   const backward = wrapIndex(fromIndex - toIndex, length);
 
-  // 1個前（戻る）は左から、1個後（進む）は右から
   if (forward <= backward) {
     return { enterFrom: "right", steps: forward };
   }
@@ -95,23 +93,23 @@ function mainSlideClassName(layer: MainSlideLayer) {
 
   if (layer.role === "incoming") {
     return layer.enterFrom === "left"
-      ? "moya500-design-main-in-left"
-      : "moya500-design-main-in-right";
+      ? "product-detail-mobile-main-in-left"
+      : "product-detail-mobile-main-in-right";
   }
 
   return layer.enterFrom === "left"
-    ? "moya500-design-main-out-right"
-    : "moya500-design-main-out-left";
+    ? "product-detail-mobile-main-out-right"
+    : "product-detail-mobile-main-out-left";
 }
 
-export function Moya500DesignDesktopHero({
+export function ProductDetailMobileHero({
   items,
   product,
   selectedVariant,
   selectedColorCode,
   onVariantChange,
   onVariantIntent,
-}: Moya500DesignDesktopHeroProps) {
+}: ProductDetailMobileHeroProps) {
   const { addLine, error: cartError, isLoading: isCartLoading } = useCart();
   const { customer } = useCustomer();
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -129,15 +127,15 @@ export function Moya500DesignDesktopHero({
         ]
       : [];
   });
-  const [mainSlideMs, setMainSlideMs] = useState(MOYA500_DESIGN_SLIDE_MS);
+  const [mainSlideMs, setMainSlideMs] = useState(PRODUCT_DETAIL_SLIDE_MS);
   const [mainDragOffsetX, setMainDragOffsetX] = useState(0);
   const [isMainDragging, setIsMainDragging] = useState(false);
   const [mainDragSnapBack, setMainDragSnapBack] = useState(false);
   const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
   const slideSeqRef = useRef(0);
   const selectionRequestRef = useRef(0);
-  const thumbnailStripRef = useRef<Moya500DesignThumbnailStripHandle>(null);
   const mainViewportRef = useRef<HTMLDivElement>(null);
+  const pendingCommitIndexRef = useRef<number | null>(null);
   const suppressModalClickRef = useRef(false);
 
   useEffect(() => {
@@ -148,7 +146,7 @@ export function Moya500DesignDesktopHero({
     [0, -1, 1, -2, 2].forEach((offset) => {
       const item = items[wrapIndex(selectedIndex + offset, items.length)];
       if (item?.kind === "image") {
-        void preloadMoya500Image(item.src);
+        void preloadProductDetailImage(item.src);
       }
     });
   }, [items, selectedIndex]);
@@ -180,16 +178,42 @@ export function Moya500DesignDesktopHero({
   const canAddToCart = Boolean(selectedVariant?.shopifyVariantId) &&
     selectedVariant?.availableForSale !== false &&
     canPurchaseProduct(product, Boolean(customer));
-  const showMainDragPeek =
-    !isMainSliding &&
-    (isMainDragging || mainDragSnapBack || mainDragOffsetX !== 0);
-  const mainDragTransition = mainDragSnapBack
-    ? `transform ${MOYA500_DESIGN_SLIDE_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`
-    : "none";
+  // 隣画像は常時待機（ドラッグ開始フレームで背景が覗かないようにする）
+  const showMainDragPeek = !isMainSliding;
+  const mainDragTransition =
+    mainDragSnapBack && !isMainDragging
+      ? `transform ${PRODUCT_DETAIL_SLIDE_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`
+      : "none";
+
+  const settleToIndex = useCallback(
+    (index: number) => {
+      const nextIndex = wrapIndex(index, items.length);
+      const nextItem = items[nextIndex];
+
+      if (!nextItem) {
+        return;
+      }
+
+      slideSeqRef.current += 1;
+      setMainDragSnapBack(false);
+      setIsMainDragging(false);
+      setMainDragOffsetX(0);
+      setSelectedIndex(nextIndex);
+      setSlideLayers([
+        {
+          key: `settled-${slideSeqRef.current}-${galleryItemKey(nextItem)}`,
+          item: nextItem,
+          role: "settled",
+          enterFrom: "right",
+        },
+      ]);
+    },
+    [items]
+  );
 
   const selectImage = useCallback(
-    (index: number, meta?: Moya500DesignSelectMeta) => {
-      if (!items.length) {
+    (index: number) => {
+      if (!items.length || pendingCommitIndexRef.current != null) {
         return;
       }
 
@@ -208,14 +232,12 @@ export function Moya500DesignDesktopHero({
       }
 
       const navigation = resolveNavigation(selectedIndex, nextIndex, items.length);
-      const enterFrom = navigation.enterFrom;
-      const steps = meta?.steps ?? navigation.steps;
-      const durationMs = meta?.durationMs ?? moya500DesignSlideDurationMs(steps);
+      const durationMs = productDetailSlideDurationMs(navigation.steps);
       const nextMediaSource =
         nextItem.kind === "image" ? nextItem.src : nextItem.poster;
       const requestId = ++selectionRequestRef.current;
 
-      void preloadMoya500Image(nextMediaSource).then(() => {
+      void preloadProductDetailImage(nextMediaSource).then(() => {
         if (requestId !== selectionRequestRef.current) {
           return;
         }
@@ -224,19 +246,21 @@ export function Moya500DesignDesktopHero({
         const seq = slideSeqRef.current;
 
         setMainSlideMs(durationMs);
+        setMainDragOffsetX(0);
+        setMainDragSnapBack(false);
         setSelectedIndex(nextIndex);
         setSlideLayers([
           {
             key: `out-${seq}-${galleryItemKey(currentItem)}`,
             item: currentItem,
             role: "outgoing",
-            enterFrom,
+            enterFrom: navigation.enterFrom,
           },
           {
             key: `in-${seq}-${galleryItemKey(nextItem)}`,
             item: nextItem,
             role: "incoming",
-            enterFrom,
+            enterFrom: navigation.enterFrom,
           },
         ]);
       });
@@ -275,6 +299,8 @@ export function Moya500DesignDesktopHero({
     if (
       isMainSliding ||
       isMainDragging ||
+      mainDragSnapBack ||
+      pendingCommitIndexRef.current != null ||
       event.button !== 0 ||
       !items.length
     ) {
@@ -312,6 +338,7 @@ export function Moya500DesignDesktopHero({
         return;
       }
 
+      // 縦優先 → ページスクロールに任せてドラッグ解除
       if (Math.abs(deltaY) >= Math.abs(deltaX)) {
         mainDragRef.current = null;
         return;
@@ -358,7 +385,7 @@ export function Moya500DesignDesktopHero({
     setIsMainDragging(false);
 
     if (!shouldStep) {
-      // 離した位置から元位置へ戻す
+      // 閾値未満は離した位置から中央へ戻す（隣画像も一緒に動く）
       setMainDragSnapBack(true);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -368,16 +395,39 @@ export function Moya500DesignDesktopHero({
       return;
     }
 
-    setMainDragOffsetX(0);
-    setMainDragSnapBack(false);
-
-    // 左へスワイプ → 次へ / 右へスワイプ → 前へ（サムネと同時連動）
+    // 確定時は一度中央に戻さず、画面外までスライドしてから切り替える（背景色のチラつき防止）
     const nextIndex =
       deltaX < 0
         ? wrapIndex(selectedIndex + 1, items.length)
         : wrapIndex(selectedIndex - 1, items.length);
 
-    thumbnailStripRef.current?.goToIndex(nextIndex);
+    pendingCommitIndexRef.current = nextIndex;
+    setMainDragSnapBack(true);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setMainDragOffsetX(deltaX < 0 ? -width : width);
+      });
+    });
+  };
+
+  const handleDragTransitionEnd = (
+    event: ReactTransitionEvent<HTMLDivElement>
+  ) => {
+    if (event.propertyName !== "transform") {
+      return;
+    }
+
+    const pendingIndex = pendingCommitIndexRef.current;
+
+    if (pendingIndex != null) {
+      pendingCommitIndexRef.current = null;
+      settleToIndex(pendingIndex);
+      return;
+    }
+
+    if (mainDragSnapBack) {
+      setMainDragSnapBack(false);
+    }
   };
 
   const handleMainClick = (event: ReactMouseEvent<HTMLDivElement>) => {
@@ -395,219 +445,215 @@ export function Moya500DesignDesktopHero({
 
   return (
     <>
-      <section className="hidden min-[1025px]:grid min-[1025px]:min-h-[100svh] min-[1025px]:grid-cols-[auto_minmax(0,3fr)_minmax(360px,2fr)] min-[1025px]:pt-[var(--header-height)]">
+      <section
+        className="min-[1025px]:hidden"
+        style={
+          {
+            "--product-detail-mobile-thumb-strip-height": PRODUCT_DETAIL_MOBILE_THUMB_STRIP_HEIGHT,
+          } as CSSProperties
+        }
+      >
       <style>{`
-        @keyframes moya500-design-main-in-left {
+        @keyframes product-detail-mobile-main-in-left {
           from { transform: translate3d(-100%, 0, 0); }
           to { transform: translate3d(0, 0, 0); }
         }
-        @keyframes moya500-design-main-in-right {
+        @keyframes product-detail-mobile-main-in-right {
           from { transform: translate3d(100%, 0, 0); }
           to { transform: translate3d(0, 0, 0); }
         }
-        @keyframes moya500-design-main-out-left {
+        @keyframes product-detail-mobile-main-out-left {
           from { transform: translate3d(0, 0, 0); }
           to { transform: translate3d(-100%, 0, 0); }
         }
-        @keyframes moya500-design-main-out-right {
+        @keyframes product-detail-mobile-main-out-right {
           from { transform: translate3d(0, 0, 0); }
           to { transform: translate3d(100%, 0, 0); }
         }
-        .moya500-design-main-in-left,
-        .moya500-design-main-in-right,
-        .moya500-design-main-out-left,
-        .moya500-design-main-out-right {
+        .product-detail-mobile-main-in-left,
+        .product-detail-mobile-main-in-right,
+        .product-detail-mobile-main-out-left,
+        .product-detail-mobile-main-out-right {
           animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
           animation-fill-mode: both;
         }
-        .moya500-design-main-in-left {
-          animation-name: moya500-design-main-in-left;
+        .product-detail-mobile-main-in-left {
+          animation-name: product-detail-mobile-main-in-left;
         }
-        .moya500-design-main-in-right {
-          animation-name: moya500-design-main-in-right;
+        .product-detail-mobile-main-in-right {
+          animation-name: product-detail-mobile-main-in-right;
         }
-        .moya500-design-main-out-left {
-          animation-name: moya500-design-main-out-left;
+        .product-detail-mobile-main-out-left {
+          animation-name: product-detail-mobile-main-out-left;
         }
-        .moya500-design-main-out-right {
-          animation-name: moya500-design-main-out-right;
+        .product-detail-mobile-main-out-right {
+          animation-name: product-detail-mobile-main-out-right;
+        }
+        @media (pointer: coarse) {
+          .product-detail-mobile-dots {
+            display: none;
+          }
         }
       `}</style>
 
-      <div className="relative h-[calc(100svh-var(--header-height))] self-start [&>aside]:h-full">
-        <Moya500DesignThumbnailStrip
-          ref={thumbnailStripRef}
+      {/* 1. 画像エリア：1画面にヘッダー＋メイン＋サムネ＋パンくず＋商品名の半分 */}
+      <div
+        id="photo"
+        className="pt-[var(--header-height)] scroll-mt-[var(--header-height)]"
+      >
+        <div
+          ref={mainViewportRef}
+          className={`relative w-full touch-pan-y overflow-hidden bg-[#eef1f3] ${
+            isMainDragging ? "touch-none" : ""
+          }`}
+          style={{
+            cursor: isMainDragging ? "grabbing" : PRODUCT_DETAIL_ZOOM_IN_CURSOR,
+            height:
+              "calc(100svh - var(--header-height) - var(--product-detail-mobile-thumb-strip-height) - 8px - 13px - 16px - clamp(13px, calc(15px * var(--text-scale)), 15px))",
+          }}
+          onPointerDown={handleMainPointerDown}
+          onPointerMove={handleMainPointerMove}
+          onPointerUp={endMainDrag}
+          onPointerCancel={endMainDrag}
+          onClick={handleMainClick}
+        >
+          {showMainDragPeek && prevDragItem ? (
+            <div
+              aria-hidden="true"
+              className="absolute inset-0"
+              style={{
+                transform: `translate3d(calc(-100% + ${mainDragOffsetX}px), 0, 0)`,
+                transition: mainDragTransition,
+              }}
+            >
+              <ProductDetailGalleryMedia
+                item={prevDragItem}
+                mode="preview"
+                sizes="100vw"
+                alt=""
+              />
+            </div>
+          ) : null}
+
+          {showMainDragPeek && nextDragItem ? (
+            <div
+              aria-hidden="true"
+              className="absolute inset-0"
+              style={{
+                transform: `translate3d(calc(100% + ${mainDragOffsetX}px), 0, 0)`,
+                transition: mainDragTransition,
+              }}
+            >
+              <ProductDetailGalleryMedia
+                item={nextDragItem}
+                mode="preview"
+                sizes="100vw"
+                alt=""
+              />
+            </div>
+          ) : null}
+
+          {(slideLayers.length
+            ? slideLayers
+            : selectedItem
+              ? [
+                  {
+                    key: `settled-${galleryItemKey(selectedItem)}`,
+                    item: selectedItem,
+                    role: "settled" as const,
+                    enterFrom: "right" as const,
+                  },
+                ]
+              : []
+          ).map((layer) => {
+            const settledDragStyle =
+              layer.role === "settled" && showMainDragPeek
+                ? {
+                    transform: `translate3d(${mainDragOffsetX}px, 0, 0)`,
+                    transition: mainDragTransition,
+                  }
+                : undefined;
+
+            return (
+              <div
+                key={layer.key}
+                className={`absolute inset-0 ${mainSlideClassName(layer)}`}
+                style={
+                  layer.role === "settled"
+                    ? settledDragStyle
+                    : { animationDuration: `${mainSlideMs}ms` }
+                }
+                onAnimationEnd={
+                  layer.role === "incoming"
+                    ? (event) => handleIncomingAnimationEnd(event, layer.key)
+                    : undefined
+                }
+                onTransitionEnd={
+                  layer.role === "settled" ? handleDragTransitionEnd : undefined
+                }
+              >
+                <ProductDetailGalleryMedia
+                  item={layer.item}
+                  mode={layer.role === "outgoing" ? "preview" : "playback"}
+                  sizes="100vw"
+                  priority={layer.role !== "outgoing"}
+                  alt={layer.item.alt}
+                />
+              </div>
+            );
+          })}
+
+          <p
+            className="pointer-events-none absolute top-[12px] left-[12px] z-10 bg-black/70 px-[8px] py-[4px] font-ui-en text-[clamp(12px,calc(13px*var(--text-scale)),13px)] leading-[clamp(12px,calc(13px*var(--text-scale)),13px)] text-white"
+          >
+            {selectedIndex + 1} / {items.length}
+          </p>
+
+          {showGalleryNavigation ? (
+          <ol
+            aria-label="商品画像"
+            className="product-detail-mobile-dots absolute bottom-[14px] left-1/2 z-10 flex -translate-x-1/2 items-center gap-[6px]"
+          >
+            {items.map((item, index) => (
+              <li key={galleryItemKey(item)} className="flex items-center">
+                <button
+                  type="button"
+                  aria-label={
+                    item.kind === "video"
+                      ? `${index + 1}枚目の動画を表示`
+                      : `${index + 1}枚目の画像を表示`
+                  }
+                  aria-current={index === selectedIndex ? "true" : undefined}
+                  onClick={() => selectImage(index)}
+                  className={`block rounded-full opacity-70 transition-[width,height,background-color] ${
+                    index === selectedIndex
+                      ? "size-[11px] bg-white"
+                      : "size-[8px] bg-[#ccc]"
+                  }`}
+                />
+              </li>
+            ))}
+          </ol>
+          ) : null}
+        </div>
+
+        <ProductDetailThumbnailStripHorizontal
           items={items}
           selectedIndex={selectedIndex}
           onSelect={selectImage}
         />
       </div>
 
-      <div
-        ref={mainViewportRef}
-        className={`relative h-[calc(100svh-var(--header-height))] self-start touch-pan-y overflow-hidden bg-[#eef1f3] ${
-          isMainDragging ? "touch-none" : ""
-        }`}
-        style={{
-          cursor: isMainDragging ? "grabbing" : MOYA500_ZOOM_IN_CURSOR,
-        }}
-        onPointerDown={handleMainPointerDown}
-        onPointerMove={handleMainPointerMove}
-        onPointerUp={endMainDrag}
-        onPointerCancel={endMainDrag}
-        onClick={handleMainClick}
-      >
-        {showMainDragPeek && prevDragItem ? (
-          <div
-            aria-hidden="true"
-            className="absolute inset-0"
-            style={{
-              transform: `translate3d(calc(-100% + ${mainDragOffsetX}px), 0, 0)`,
-              transition: mainDragTransition,
-            }}
-          >
-            <Moya500DesignGalleryMedia
-              item={prevDragItem}
-              mode="preview"
-              sizes="(min-width: 1025px) 56vw"
-              alt=""
-            />
-          </div>
-        ) : null}
-
-        {showMainDragPeek && nextDragItem ? (
-          <div
-            aria-hidden="true"
-            className="absolute inset-0"
-            style={{
-              transform: `translate3d(calc(100% + ${mainDragOffsetX}px), 0, 0)`,
-              transition: mainDragTransition,
-            }}
-          >
-            <Moya500DesignGalleryMedia
-              item={nextDragItem}
-              mode="preview"
-              sizes="(min-width: 1025px) 56vw"
-              alt=""
-            />
-          </div>
-        ) : null}
-
-        {(slideLayers.length
-          ? slideLayers
-          : selectedItem
-            ? [
-                {
-                  key: `settled-${galleryItemKey(selectedItem)}`,
-                  item: selectedItem,
-                  role: "settled" as const,
-                  enterFrom: "right" as const,
-                },
-              ]
-            : []
-        ).map((layer) => {
-          const settledDragStyle =
-            layer.role === "settled" && showMainDragPeek
-              ? {
-                  transform: `translate3d(${mainDragOffsetX}px, 0, 0)`,
-                  transition: mainDragTransition,
-                }
-              : undefined;
-
-          return (
-            <div
-              key={layer.key}
-              className={`absolute inset-0 ${mainSlideClassName(layer)}`}
-              style={
-                layer.role === "settled"
-                  ? settledDragStyle
-                  : { animationDuration: `${mainSlideMs}ms` }
-              }
-              onAnimationEnd={
-                layer.role === "incoming"
-                  ? (event) => handleIncomingAnimationEnd(event, layer.key)
-                  : undefined
-              }
-              onTransitionEnd={
-                layer.role === "settled" && mainDragSnapBack
-                  ? (event) => {
-                      if (event.propertyName !== "transform") {
-                        return;
-                      }
-
-                      setMainDragSnapBack(false);
-                    }
-                  : undefined
-              }
-            >
-              <Moya500DesignGalleryMedia
-                item={layer.item}
-                mode={layer.role === "outgoing" ? "preview" : "playback"}
-                sizes="(min-width: 1025px) 56vw"
-                priority={layer.role !== "outgoing"}
-                alt={layer.item.alt}
-              />
-            </div>
-          );
-        })}
-
-        <ProductGalleryControls
-          hasImages={showGalleryNavigation}
-          onPrevious={() =>
-            thumbnailStripRef.current?.goToIndex(
-              wrapIndex(selectedIndex - 1, items.length)
-            )
-          }
-          onNext={() =>
-            thumbnailStripRef.current?.goToIndex(
-              wrapIndex(selectedIndex + 1, items.length)
-            )
-          }
-        />
-
-        <p
-          className="pointer-events-none absolute top-[clamp(12px,1.5vw,28px)] left-[clamp(12px,1.5vw,28px)] z-10 bg-black/70 px-[8px] py-[4px] font-ui-en text-[clamp(12px,calc(13px*var(--text-scale)),13px)] leading-[clamp(12px,calc(13px*var(--text-scale)),13px)] text-white"
-        >
-          {selectedIndex + 1} / {items.length}
-        </p>
-
-        {showGalleryNavigation ? (
-        <ol
-          aria-label="商品画像"
-          className="absolute bottom-[clamp(16px,2.2vh,26px)] left-1/2 z-10 flex -translate-x-1/2 items-center gap-[6px]"
-        >
-          {items.map((item, index) => (
-            <li key={galleryItemKey(item)} className="flex items-center">
-              <button
-                type="button"
-                aria-label={
-                  item.kind === "video"
-                    ? `${index + 1}枚目の動画を表示`
-                    : `${index + 1}枚目の画像を表示`
-                }
-                aria-current={index === selectedIndex ? "true" : undefined}
-                onClick={() => thumbnailStripRef.current?.goToIndex(index)}
-                className={`block rounded-full opacity-70 transition-[width,height,background-color] ${
-                  index === selectedIndex
-                    ? "size-[11px] bg-white"
-                    : "size-[8px] bg-[#ccc]"
-                }`}
-              />
-            </li>
-          ))}
-        </ol>
-        ) : null}
-      </div>
-
-      <div className="px-[clamp(42px,4vw,76px)] pt-[clamp(12px,2vh,26px)] pb-[clamp(28px,4vh,52px)]">
-        <Moya500DesignBreadcrumbs
+      {/* 2. テキストエリア */}
+      <div className="px-[var(--container-x)] pt-[8px] pb-[32px]">
+        <ProductDetailBreadcrumbs
           category={product.category}
           categorySlug={product.categorySlug}
           className="font-body-ja text-[clamp(12px,calc(13px*var(--text-scale)),13px)] leading-[clamp(12px,calc(13px*var(--text-scale)),13px)] text-[var(--color-muted)]"
         />
 
         <h1
-          className="mt-[clamp(16px,2.5vh,30px)] font-ui-en text-[clamp(26px,calc(30px*var(--text-scale)),30px)] leading-[clamp(26px,calc(30px*var(--text-scale)),30px)] font-semibold text-[var(--foreground)]"
+          className="mt-[16px] font-ui-en text-[clamp(26px,calc(30px*var(--text-scale)),30px)] leading-[clamp(26px,calc(30px*var(--text-scale)),30px)] font-semibold text-[var(--foreground)]"
         >
           {displayTitle}
         </h1>
@@ -616,12 +662,12 @@ export function Moya500DesignDesktopHero({
           status={product.status}
           label={product.statusLabel}
           color={product.statusColor}
-          size={14}
-          className="mt-[clamp(12px,1.8vh,20px)] !text-[clamp(13px,calc(14px*var(--text-scale)),14px)] !leading-[clamp(13px,calc(14px*var(--text-scale)),14px)]"
+          size={13}
+          className="mt-[12px] !text-[clamp(13px,calc(14px*var(--text-scale)),14px)] !leading-[clamp(13px,calc(14px*var(--text-scale)),14px)]"
         />
 
         {showVariantOptions ? (
-        <div className="mt-[clamp(34px,5vh,58px)]">
+        <div className="mt-[28px]">
           <ProductColorChips
             variants={product.variants}
             selectedVariantId={selectedVariant?.id}
@@ -636,7 +682,7 @@ export function Moya500DesignDesktopHero({
 
           {showVariantLabel && selectedVariant ? (
             <p
-              className="mt-[clamp(20px,2.8vh,32px)] font-ui-en text-[clamp(12px,calc(13px*var(--text-scale)),13px)] leading-[clamp(12px,calc(13px*var(--text-scale)),13px)] text-[var(--foreground)]"
+              className="mt-[16px] font-ui-en text-[clamp(12px,calc(13px*var(--text-scale)),13px)] leading-[clamp(12px,calc(13px*var(--text-scale)),13px)] text-[var(--foreground)]"
             >
               <span className="font-semibold">{variantOptionName}</span>
               {` : ${selectedVariant.colorName}`}
@@ -656,7 +702,7 @@ export function Moya500DesignDesktopHero({
               void addLine(selectedVariant.shopifyVariantId);
             }
           }}
-          className={`mt-[clamp(32px,5vh,58px)] flex w-full items-center justify-between px-[clamp(22px,2.2vw,36px)] py-[clamp(16px,2.2vh,24px)] text-white disabled:cursor-not-allowed ${
+          className={`mt-[28px] flex w-full items-center justify-between px-[20px] py-[16px] text-white disabled:cursor-not-allowed ${
             canAddToCart ? "bg-[var(--foreground)]" : "bg-[#C6C6C6]"
           }`}
         >
@@ -665,7 +711,7 @@ export function Moya500DesignDesktopHero({
           >
             <span
               aria-hidden="true"
-              className="size-[calc(24/18*1em)] shrink-0 bg-current"
+              className="size-[calc(22/18*1em)] shrink-0 bg-current"
               style={arrowMaskStyle}
             />
             ADD TO CART
@@ -687,17 +733,17 @@ export function Moya500DesignDesktopHero({
 
         <ProductDetailDescription
           product={product}
-          className="mt-[clamp(38px,6vh,70px)]"
+          className="mt-[32px]"
           bodyClassName="whitespace-pre-line font-body-ja text-[clamp(14px,calc(15px*var(--text-scale)),15px)] leading-[clamp(24.5px,calc(26.25px*var(--text-scale)),26.25px)] text-[var(--foreground)]"
         />
       </div>
       </section>
 
-      <Moya500DesignGalleryModal
+      <ProductDetailGalleryModal
         isOpen={isGalleryModalOpen}
         items={items}
         selectedIndex={selectedIndex}
-        onSelect={(index) => thumbnailStripRef.current?.goToIndex(index)}
+        onSelect={selectImage}
         onClose={() => setIsGalleryModalOpen(false)}
       />
     </>

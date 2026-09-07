@@ -11,7 +11,7 @@ import {
 describe("isProductDetailPath", () => {
   it("matches a single product handle and ignores listing or nested paths", () => {
     expect(isProductDetailPath("/products/moya500")).toBe(true);
-    expect(isProductDetailPath("/products/moya500-design")).toBe(true);
+    expect(isProductDetailPath("/products/gearaid-seam-grip")).toBe(true);
     expect(isProductDetailPath("/products")).toBe(false);
     expect(isProductDetailPath("/products/moya500/reviews")).toBe(false);
   });

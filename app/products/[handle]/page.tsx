@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { Moya500DesignDetailView } from "@/components/products/moya500-design/Moya500DesignDetailView";
+import { ProductDetailView } from "@/components/products/product-detail/ProductDetailView";
 import { getProductMetaDescription } from "@/lib/products/description";
 import {
   getAllProductHandles,
@@ -60,7 +60,7 @@ export default async function ProductDetailPage({
       data-header-theme="onLight"
       className="pb-[var(--container-y-bottom)] min-[1025px]:pt-0"
     >
-      <Moya500DesignDetailView
+      <ProductDetailView
         product={product}
         initialVariantId={initialVariantId}
         optionProducts={optionProducts}
