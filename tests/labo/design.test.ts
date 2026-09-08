@@ -16,6 +16,7 @@ describe("labo design section", () => {
     expect(laboDesignContent.title).toBe("LABOではデザイン・開発を行っています");
     expect(laboDesignContent.label).toBe("DESIGN & DEVELOPMENT");
     expect(laboDesignContent.body).toContain("製品を生み出す拠点でもあります");
+    expect(laboDesignContent.image).toBe("/images/labo/labo-skech-image.jpg");
   });
 
   it("matches the about two-column layout on a dark background", () => {

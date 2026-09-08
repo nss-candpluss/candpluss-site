@@ -58,7 +58,7 @@ export const laboDesignContent = {
   label: "DESIGN & DEVELOPMENT",
   body:
     "C AND+S LABOでは、製品を生み出す拠点でもあります。実際に使い、検証し、改善を重ねることで、美しさと機能を両立した製品を生み出しています。",
-  image: "/images/labo/labo-design-01.webp",
+  image: "/images/labo/labo-skech-image.jpg",
 } as const;
 
 export const laboVisitContent = {
