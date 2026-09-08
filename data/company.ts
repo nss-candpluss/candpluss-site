@@ -1,7 +1,7 @@
 import type { CompanyContent } from "@/types/company";
 
 export const companyContent = {
-  title: "ABOUT US",
+  title: "COMPANY",
   items: [
     {
       label: "会社名",

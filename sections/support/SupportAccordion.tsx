@@ -57,7 +57,7 @@ function SupportAccordionPanel({
   onToggle,
 }: SupportAccordionPanelProps) {
   return (
-    <div className={`border-b pb-[calc(32px*var(--gap-scale-y))] ${dividerClassName}`}>
+    <div className={`border-b pb-[max(18px,calc(32px*var(--gap-scale-y)))] ${dividerClassName}`}>
       <h3>
         <button
           id={buttonId}
@@ -65,7 +65,7 @@ function SupportAccordionPanel({
           aria-expanded={isOpen}
           aria-controls={panelId}
           onClick={onToggle}
-          className="flex w-full cursor-pointer items-center justify-between gap-x-[calc(16px*var(--gap-scale-x))] gap-y-[calc(16px*var(--gap-scale-y))] pt-[calc(32px*var(--gap-scale-y))] text-left"
+          className="flex w-full cursor-pointer items-center justify-between gap-x-[calc(16px*var(--gap-scale-x))] gap-y-[calc(16px*var(--gap-scale-y))] pt-[max(18px,calc(32px*var(--gap-scale-y)))] text-left"
         >
           <span className={accordionTitleClassName}>{title}</span>
           <SupportAccordionToggle isOpen={isOpen} />
@@ -81,9 +81,16 @@ function SupportAccordionPanel({
       >
         <div className="min-h-0 overflow-hidden">
           <div
-            className={`pt-[calc(32px*var(--gap-scale-y))] ${accordionContentTransitionClassName} ${isOpen ? "opacity-100" : "opacity-0"}`}
+            className={`space-y-[calc(16px*var(--gap-scale-y))] pt-[calc(32px*var(--gap-scale-y))] ${accordionContentTransitionClassName} ${isOpen ? "opacity-100" : "opacity-0"}`}
           >
-            <p className={`${accordionBodyClassName} whitespace-pre-line`}>{body}</p>
+            {body.split("\n\n").map((paragraph) => (
+              <p
+                key={paragraph}
+                className={`${accordionBodyClassName} whitespace-pre-line`}
+              >
+                {paragraph}
+              </p>
+            ))}
           </div>
         </div>
       </div>

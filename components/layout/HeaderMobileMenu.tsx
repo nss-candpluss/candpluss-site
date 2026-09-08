@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { createPortal } from "react-dom";
 
+import { SiteNavLink } from "@/components/layout/SiteNavLink";
 import { footerContent } from "@/data/footer";
 import {
   headerMenuCloseButton,
@@ -89,9 +89,9 @@ export function HeaderMobileMenu({ id, isOpen, onClose, onExited }: HeaderMobile
                   .filter((link) => link.label !== "MEMBERSHIP" || isMembershipLinkVisible())
                   .map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} onClick={onClose} className={primaryLinkClassName}>
+                    <SiteNavLink href={link.href} onClick={onClose} className={primaryLinkClassName}>
                       {link.label}
-                    </Link>
+                    </SiteNavLink>
                   </li>
                 ))}
               </ul>
@@ -104,9 +104,9 @@ export function HeaderMobileMenu({ id, isOpen, onClose, onExited }: HeaderMobile
                     .filter((link) => link.href !== "/contact" || isContactLinkVisible())
                     .map((link) => (
                     <li key={link.href}>
-                      <Link href={link.href} onClick={onClose} className={secondaryLinkClassName}>
+                      <SiteNavLink href={link.href} onClick={onClose} className={secondaryLinkClassName}>
                         {link.label}
-                      </Link>
+                      </SiteNavLink>
                     </li>
                   ))}
                 </ul>

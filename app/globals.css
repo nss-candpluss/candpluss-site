@@ -255,6 +255,37 @@
   transform: translate3d(0, 0, 0);
 }
 
+.header-scroll {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate3d(0, -100%, 0);
+  will-change: transform, opacity;
+  transition:
+    opacity 300ms ease,
+    transform 0ms linear 300ms,
+    visibility 0s linear 300ms;
+}
+
+.header-scroll.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate3d(0, 0, 0);
+  transition:
+    transform 300ms ease,
+    opacity 0ms linear,
+    visibility 0s linear 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header-scroll,
+  .header-scroll.is-visible {
+    transform: none;
+    transition: none;
+  }
+}
+
 .added-to-cart-overlay {
   opacity: 0;
 }
@@ -423,23 +454,6 @@
 
 .home-beginning-title {
   --section-title-responsive-max: 67px;
-}
-
-/** QUALITY ページのみ: 実 viewport 高さ（--app-vh × 100） */
-html.quality-page,
-html.quality-page body {
-  height: calc(var(--app-vh) * 100);
-}
-
-/** QUALITY スクロールエリア: 1024px 以下は画像上に白テキスト */
-@media (max-width: 1024px) {
-  .quality-scroll-section .quality-slide-panel-text,
-  .quality-scroll-section .quality-slide-panel-text .quality-section-title-header,
-  .quality-scroll-section .quality-slide-panel-text .quality-section-title,
-  .quality-scroll-section .quality-slide-panel-text .quality-item-subtitle,
-  .quality-scroll-section .quality-slide-panel-text .quality-item-body {
-    color: #fff;
-  }
 }
 
 /** Support / Home: ピン延長分にフッターを重ね、Hero より手前に出す */

@@ -1,28 +1,27 @@
 import type { CommercialTransactionBlock } from "@/types/legal";
-import { SiteGrid } from "@/components/ui/SiteGrid";
 import { commercialTransactionsContent } from "@/data/legal/commercialTransactions";
-import {
-  definitionLabelSpanClassName,
-  definitionValueSpanClassName,
-} from "@/lib/layout";
 import { bodyText, uiText } from "@/lib/typography";
 
-const listClassName = "list-none space-y-[calc(12px*var(--gap-scale-y))]";
+const listClassName =
+  "mt-[calc(16px*var(--gap-scale-y))] list-none space-y-[calc(12px*var(--gap-scale-y))]";
+
+const sectionBodyClassName =
+  "mt-[calc(24px*var(--gap-scale-y))] space-y-[calc(16px*var(--gap-scale-y))]";
+
+const pageTitleClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(18)}`;
+
+const sectionHeadingClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(16)}`;
 
 const bodyClassName = `font-body-ja text-[var(--foreground)] ${bodyText(15)}`;
 
 const noteClassName = `font-body-ja text-[var(--foreground)] ${bodyText(14)}`;
 
-const labelClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(16)}`;
-
 const subheadingClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(15)}`;
-
-const titleClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(18)}`;
 
 function CommercialTransactionBlockRenderer({ block }: { block: CommercialTransactionBlock }) {
   switch (block.type) {
     case "paragraph":
-      return <p className={bodyClassName}>{block.text}</p>;
+      return <p className={`${bodyClassName} whitespace-pre-line`}>{block.text}</p>;
     case "subheading":
       return <p className={subheadingClassName}>{block.text}</p>;
     case "bullets":
@@ -45,30 +44,25 @@ export function CommercialTransactionsDocument() {
 
   return (
     <article className="mx-auto w-full max-w-[980px]">
-      <h1 className={titleClassName}>{title}</h1>
+      <div className="space-y-[calc(52px*var(--gap-scale-y))]">
+        <section>
+          <h1 className={pageTitleClassName}>{title}</h1>
+        </section>
 
-      <dl className="mt-[calc(52px*var(--gap-scale-y))]">
         {items.map((item) => (
-          <SiteGrid
-            key={item.label}
-            className="gap-y-[calc(8px*var(--gap-scale-y))] border-b border-divider py-[calc(24px*var(--gap-scale-y))] first:pt-0 last:border-b-0 last:pb-0 min-[768px]:items-center min-[768px]:gap-x-[calc(32px*var(--gap-scale-x))] min-[768px]:gap-y-0"
-          >
-            <dt className={`${labelClassName} ${definitionLabelSpanClassName}`}>
-              {item.label}
-            </dt>
-            <dd
-              className={`flex min-w-0 flex-col gap-[calc(16px*var(--gap-scale-y))] ${definitionValueSpanClassName}`}
-            >
+          <section key={item.label}>
+            <h2 className={sectionHeadingClassName}>{item.label}</h2>
+            <div className={sectionBodyClassName}>
               {item.blocks.map((block, index) => (
                 <CommercialTransactionBlockRenderer
                   key={`${item.label}-${block.type}-${index}`}
                   block={block}
                 />
               ))}
-            </dd>
-          </SiteGrid>
+            </div>
+          </section>
         ))}
-      </dl>
+      </div>
     </article>
   );
 }

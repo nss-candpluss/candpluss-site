@@ -10,13 +10,17 @@ import {
   isContactLinkVisible,
   isSocialLinkVisible,
 } from "@/lib/site-navigation-visibility";
-import { uiText } from "@/lib/typography";
+import { bodyText, uiText } from "@/lib/typography";
 
 import { SupportAccordion } from "@/sections/support/SupportAccordion";
 
 const contactButtonArrowStyle = arrowMaskStyle;
 
 const contactButtonClassName = `font-body-ja inline-flex w-full items-center justify-center gap-x-[calc(8px*var(--gap-scale-x))] gap-y-[calc(8px*var(--gap-scale-y))] font-semibold text-white ${uiText(16)} bg-[var(--foreground)] px-[calc(32px*var(--gap-scale-x))] py-[calc(32px*var(--layout-scale-y))] min-[1025px]:py-[calc(18px*var(--gap-scale-y))]`;
+
+const phoneHeadingClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(16)}`;
+const phoneNumberClassName = `font-body-ja font-bold text-[var(--foreground)] ${uiText(24)}`;
+const phoneBodyClassName = `font-body-ja text-[var(--foreground)] ${bodyText(15)}`;
 
 const lineLink = footerContent.socialLinks.find((link) => link.label === "LINE");
 
@@ -70,6 +74,21 @@ export function SupportGuide() {
               ) : null}
             </SiteGrid>
           ) : null}
+
+          <section className="mt-[calc(60px*var(--gap-scale))]">
+            <h2 className={phoneHeadingClassName}>{guide.phoneSection.title}</h2>
+            <p className={`mt-[calc(24px*var(--gap-scale))] ${phoneNumberClassName}`}>
+              <a href={`tel:${guide.phoneSection.phoneNumber}`}>
+                {guide.phoneSection.phoneNumber}
+              </a>
+            </p>
+            <p className={`mt-[calc(16px*var(--gap-scale))] ${phoneBodyClassName}`}>
+              {guide.phoneSection.hours}
+            </p>
+            <p className={`mt-[calc(8px*var(--gap-scale-y))] ${phoneBodyClassName}`}>
+              {guide.phoneSection.note}
+            </p>
+          </section>
         </div>
       </Container>
     </section>

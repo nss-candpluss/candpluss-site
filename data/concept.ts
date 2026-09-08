@@ -284,7 +284,7 @@ Duraflexのパーツ。
       id: "labo",
       title: "LABO",
       href: "/labo",
-      image: "/images/common/link-quality.webp",
+      image: "/images/common/link-labo.webp",
     },
     {
       id: "support",

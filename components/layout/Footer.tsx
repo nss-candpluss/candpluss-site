@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { SiteNavLink } from "@/components/layout/SiteNavLink";
 import { hoverUnderlineHoverClassName } from "@/components/ui/TextLink";
 import { footerContent } from "@/data/footer";
 import { isContactLinkVisible, isSocialLinkVisible } from "@/lib/site-navigation-visibility";
@@ -26,7 +25,7 @@ export function Footer() {
       className="border-t border-[var(--color-divider)] bg-white text-[var(--foreground)]"
     >
       <div className="flex flex-col gap-6 px-[var(--container-x)] py-12 md:gap-8 md:py-16">
-        <Link
+        <SiteNavLink
           href={footerContent.logo.href}
           aria-label={footerContent.logo.label}
           className="inline-flex w-fit items-center"
@@ -36,16 +35,16 @@ export function Footer() {
             className="block h-[calc(32px*var(--text-scale))] w-[calc(130px*var(--text-scale))] shrink-0 bg-current"
             style={maskGraphicStyle(footerContent.logo.src)}
           />
-        </Link>
+        </SiteNavLink>
 
         <nav
           aria-label="Footer page links"
           className="flex flex-col gap-y-4 md:flex-row md:flex-wrap md:gap-x-[calc(32px*var(--gap-scale-x))]"
         >
           {footerContent.navLinks.map((link) => (
-            <Link key={link.href} href={link.href} className={navLinkClassName}>
+            <SiteNavLink key={link.href} href={link.href} className={navLinkClassName}>
               {link.label}
-            </Link>
+            </SiteNavLink>
           ))}
         </nav>
 
@@ -56,9 +55,9 @@ export function Footer() {
           {footerContent.primaryLinks
             .filter((link) => link.href !== "/contact" || isContactLinkVisible())
             .map((link) => (
-            <Link key={link.href} href={link.href} className={primaryLinkClassName}>
+            <SiteNavLink key={link.href} href={link.href} className={primaryLinkClassName}>
               {link.label}
-            </Link>
+            </SiteNavLink>
           ))}
         </nav>
 
@@ -67,9 +66,9 @@ export function Footer() {
           className="flex flex-col gap-y-4 md:hidden"
         >
           {footerContent.legalLinks.map((link) => (
-            <Link key={link.href} href={link.href} className={legalLinkClassName}>
+            <SiteNavLink key={link.href} href={link.href} className={legalLinkClassName}>
               {link.label}
-            </Link>
+            </SiteNavLink>
           ))}
         </nav>
 
@@ -79,9 +78,9 @@ export function Footer() {
               {footerContent.copyright} {currentYear}
             </p>
             {footerContent.legalLinks.map((link) => (
-              <Link key={link.href} href={link.href} className={legalLinkClassName}>
+              <SiteNavLink key={link.href} href={link.href} className={legalLinkClassName}>
                 {link.label}
-              </Link>
+              </SiteNavLink>
             ))}
           </div>
 

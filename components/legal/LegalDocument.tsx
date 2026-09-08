@@ -7,7 +7,7 @@ const listClassName =
   "mt-[calc(16px*var(--gap-scale-y))] list-none space-y-[calc(12px*var(--gap-scale-y))]";
 
 const sectionBodyClassName =
-  "mt-[calc(24px*var(--gap-scale-y))] flex flex-col gap-[calc(16px*var(--gap-scale-y))]";
+  "mt-[calc(24px*var(--gap-scale-y))] space-y-[calc(16px*var(--gap-scale-y))]";
 
 const pageTitleClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(18)}`;
 
@@ -58,7 +58,7 @@ function LegalClauseBlock({ clause }: { clause: LegalClause }) {
 
 function LegalContactBlock({ contact }: { contact: LegalContact }) {
   return (
-    <div className="flex flex-col gap-[calc(8px*var(--gap-scale-y))]">
+    <div className="space-y-[calc(8px*var(--gap-scale-y))]">
       {contact.address ? <p className={bodyClassName}>{contact.address}</p> : null}
       <p className={bodyClassName}>{contact.company}</p>
       {contact.phone ? <p className={bodyClassName}>電話番号：{contact.phone}</p> : null}
@@ -73,7 +73,7 @@ function LegalSectionBlock({ section }: { section: LegalSection }) {
     <LegalSectionLayout title={section.title} titleAs="h2">
       {section.intro ? <p className={bodyClassName}>{section.intro}</p> : null}
 
-      {section.body ? <p className={bodyClassName}>{section.body}</p> : null}
+      {section.body ? <p className={`${bodyClassName} whitespace-pre-line`}>{section.body}</p> : null}
 
       {section.bullets?.length ? <LegalBulletList items={section.bullets} /> : null}
 
@@ -99,7 +99,7 @@ type LegalDocumentProps = {
 export function LegalDocument({ content }: LegalDocumentProps) {
   return (
     <article className="mx-auto w-full max-w-[980px]">
-      <div className="flex flex-col gap-[calc(52px*var(--gap-scale-y))]">
+      <div className="space-y-[calc(52px*var(--gap-scale-y))]">
         <LegalSectionLayout title={content.title} titleAs="h1">
           {content.lead ? <p className={bodyClassName}>{content.lead}</p> : null}
         </LegalSectionLayout>
@@ -109,13 +109,11 @@ export function LegalDocument({ content }: LegalDocumentProps) {
         ))}
 
         {content.contact ? (
-          <div className="flex flex-col gap-[calc(16px*var(--gap-scale-y))]">
+          <div className="space-y-[calc(16px*var(--gap-scale-y))]">
             {content.contact.intro ? <p className={bodyClassName}>{content.contact.intro}</p> : null}
             <LegalContactBlock contact={content.contact} />
           </div>
         ) : null}
-
-        <p className={bodyClassName}>{content.updatedAt}</p>
       </div>
     </article>
   );

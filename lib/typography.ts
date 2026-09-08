@@ -100,6 +100,12 @@ export const conceptHeadingEnglishGapClassName =
 export const conceptStoryTitleClassName =
   "text-[clamp(46px,calc(29.8px+4.32vw),92px)] leading-[clamp(46px,calc(29.8px+4.32vw),92px)]";
 
+/**
+ * Baskervville の大文字実寸（capHeight 710 / unitsPerEm 1000）。
+ * 見出し SVG を Support タイトルのインク高に合わせるときに使う。
+ */
+export const baskervvilleCapHeightEm = 0.71;
+
 /** Concept 本文: 18px / 36px（共通本文 18/31.5 より行間を少し広げる） */
 export const conceptStoryBodyClassName =
   "text-[clamp(16px,calc(18px*var(--text-scale)),18px)] leading-[calc(36px*var(--text-scale))]";

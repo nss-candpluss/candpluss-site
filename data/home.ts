@@ -70,37 +70,10 @@ export const homeFeatureLinks = [
     id: "support",
     title: "SUPPORT",
     href: "/support",
-    image: MAIN_PRODUCT_DUMMY_IMAGE,
-  },
-] as const;
-
-export const homeProductLinks = [
-  {
-    id: "moya500",
-    title: "MOYA500",
-    href: "/products/moya500",
-    image: "/images/home/home-link-moya500.webp",
-  },
-  {
-    id: "nokuta",
-    title: "NOKUTA",
-    href: "/products/nokuta",
-    image: "/images/home/home-link-nokuta.webp",
-  },
-  {
-    id: "zigstake",
-    title: "ZIG STAKE20",
-    href: "/products/zig-stake20",
-    image: "/images/home/home-link-zigstake20.webp",
-  },
-  {
-    id: "inner-mesh",
-    title: "MOYA500 MESH INNER",
-    href: "/products/moya500-mesh-inner-tent",
-    image: "/images/home/home-link-inner-mesh.webp",
+    image: "/images/common/link-support.webp",
   },
 ] as const;
 
 export const homeLabContent = {
-  backgroundImage: "/images/home/home-link-lab.webp",
+  backgroundImage: "/images/home/home-link-labo.webp",
 } as const;

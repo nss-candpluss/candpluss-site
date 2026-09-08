@@ -2,7 +2,6 @@ import type { LegalDocumentContent } from "@/types/legal";
 
 export const privacyPolicyContent = {
   title: "プライバシーポリシー（個人情報保護方針）",
-  updatedAt: "2026年7月7日",
   lead:
     "当社は、お客様の個人情報の重要性を認識し、適切に保護・管理するために以下の通りプライバシーポリシーを定めます。",
   sections: [
@@ -70,7 +69,7 @@ export const privacyPolicyContent = {
     },
     {
       title: "7. Cookie等の利用",
-      body: "当社は、サービスの利便性向上および利用状況の分析のため、Cookie等の技術を使用しています。別途定める「Cookieポリシー」をご確認ください。",
+      body: "当社は、サービスの利便性向上および利用状況の分析のため、Cookie等の技術を使用しています。\n別途定める「Cookieポリシー」をご確認ください。",
     },
     {
       title: "8. 個人情報の開示・訂正・利用停止",
@@ -78,16 +77,7 @@ export const privacyPolicyContent = {
     },
     {
       title: "9. お問い合わせ窓口",
-      intro:
-        "個人情報の取扱いに関するお問い合わせ、開示・訂正・利用停止等のご請求は、以下までご連絡ください。",
-      contact: {
-        company: "株式会社NSS（ブランド名：C AND+S）",
-        email: "info@candpluss.camp",
-      },
-      closing: [
-        "個人情報お問い合わせ窓口",
-        "受付時間：9:00〜17:00（土日祝日を除く）",
-      ],
+      body: "個人情報の取扱いに関するお問い合わせ、開示・訂正・利用停止等のご請求は、以下までご連絡ください。\n株式会社NSS（ブランド名：C AND+S）\n個人情報お問い合わせ窓口\nメールアドレス：info@candpluss.camp\n受付時間：9:00〜17:00（土日祝日を除く）",
     },
     {
       title: "10. ポリシーの変更",

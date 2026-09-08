@@ -2,7 +2,6 @@ import type {
   OpenCloseGallery,
   ProductImage,
   StandardGallery,
-  VariantGallery,
 } from "@/types/product";
 import { buildColoredPhotoImages, buildPhotoImages, PRODUCT_IMAGE_PLACEHOLDER, productImagePath } from "@/lib/products/image-paths";
 
@@ -33,23 +32,6 @@ function buildImagePath(handle: string, filename: string): string {
 
 function buildImageAlt(title: string, colorName: string, angle: string): string {
   return `${title} ${colorName} ${angle}`;
-}
-
-export function buildStandardGallery({
-  handle,
-  title,
-  colorCode,
-  colorName,
-}: BuildGalleryOptions): StandardGallery {
-  const images: ProductImage[] = CAMERA_ANGLES.map((angle) => ({
-    src: buildImagePath(handle, `${colorCode}-${angle}.webp`),
-    alt: buildImageAlt(title, colorName, angle),
-  }));
-
-  return {
-    type: "standard",
-    images,
-  };
 }
 
 export function buildNokutaStandardGallery({
@@ -96,27 +78,6 @@ export function buildOpenCloseGallery({
       },
     ],
   };
-}
-
-export function buildSimpleStandardGallery(handle: string, title: string): StandardGallery {
-  const images: ProductImage[] = CAMERA_ANGLES.map((angle) => ({
-    src: buildImagePath(handle, `${angle}.webp`),
-    alt: `${title} ${angle}`,
-  }));
-
-  return {
-    type: "standard",
-    images,
-  };
-}
-
-export function buildColoredStandardGallery(
-  handle: string,
-  title: string,
-  colorCode: string,
-  colorName: string
-): VariantGallery {
-  return buildStandardGallery({ handle, title, colorCode, colorName });
 }
 
 export function buildPhotoImageGallery(

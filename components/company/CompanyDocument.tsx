@@ -16,7 +16,7 @@ const linkClassName = `underline decoration-solid underline-offset-[calc(4/15*1e
 const pageTitleClassName = `font-heading text-[var(--foreground)] ${sectionTitle62ClassName}`;
 
 const tableRowClassName =
-  "gap-y-[calc(8px*var(--gap-scale-y))] border-b border-divider py-[calc(24px*var(--gap-scale-y))] first:pt-0 last:border-b-0 last:pb-0 min-[768px]:items-center min-[768px]:gap-x-[calc(32px*var(--gap-scale-x))] min-[768px]:gap-y-0";
+  "gap-y-[12px] border-b border-divider py-[24px] first:pt-0 last:border-b-0 last:pb-0 min-[768px]:items-center min-[768px]:gap-x-[calc(32px*var(--gap-scale-x))] min-[768px]:gap-y-0 min-[768px]:py-[calc(24px*var(--gap-scale-y))]";
 
 function CompanyInfoBlockRenderer({ block }: { block: CompanyInfoBlock }) {
   switch (block.type) {

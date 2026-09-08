@@ -1,32 +1,31 @@
 import Link from "next/link";
+import { Fragment } from "react";
 
 import { shoppingGuideContent } from "@/data/shoppingGuide";
-import type { ShoppingGuideBlock } from "@/types/shoppingGuide";
+import type { ShoppingGuideBlock, ShoppingGuideContent } from "@/types/shoppingGuide";
 import { hoverUnderlineHoverClassName } from "@/components/ui/TextLink";
 import { bodyText, uiText } from "@/lib/typography";
 
-const listClassName = "list-none space-y-[calc(12px*var(--gap-scale-y))]";
+const listClassName =
+  "mt-[calc(16px*var(--gap-scale-y))] list-none space-y-[calc(12px*var(--gap-scale-y))]";
 
-const bodyClassName = `font-body-ja text-[var(--foreground)] ${bodyText(15)}`;
+const sectionBodyClassName =
+  "mt-[calc(24px*var(--gap-scale-y))] space-y-[calc(16px*var(--gap-scale-y))]";
 
-const noteClassName = `font-body-ja text-[var(--foreground)] ${bodyText(14)}`;
+const pageTitleClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(18)}`;
 
 const sectionHeadingClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(16)}`;
 
-const subsectionHeadingClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(15)}`;
-
-const subheadingClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(15)}`;
-
-const titleClassName = `font-heading text-[var(--foreground)] ${uiText(16)}`;
+const bodyClassName = `font-body-ja text-[var(--foreground)] ${bodyText(15)}`;
 
 const linkClassName = `${hoverUnderlineHoverClassName} ${bodyClassName}`;
 
 function ShoppingGuideBlockRenderer({ block }: { block: ShoppingGuideBlock }) {
   switch (block.type) {
     case "paragraph":
-      return <p className={bodyClassName}>{block.text}</p>;
     case "subheading":
-      return <p className={subheadingClassName}>{block.text}</p>;
+    case "note":
+      return <p className={`${bodyClassName} whitespace-pre-line`}>{block.text}</p>;
     case "bullets":
       return (
         <ul className={listClassName}>
@@ -37,8 +36,6 @@ function ShoppingGuideBlockRenderer({ block }: { block: ShoppingGuideBlock }) {
           ))}
         </ul>
       );
-    case "note":
-      return <p className={noteClassName}>{block.text}</p>;
     case "link":
       if (block.external) {
         return (
@@ -66,34 +63,31 @@ function ShoppingGuideBlockRenderer({ block }: { block: ShoppingGuideBlock }) {
 }
 
 export function ShoppingGuideDocument() {
-  const { title, sections } = shoppingGuideContent;
+  const { title, sections }: ShoppingGuideContent = shoppingGuideContent;
 
   return (
     <article className="mx-auto w-full max-w-[980px]">
-      <h1 className={titleClassName}>{title}</h1>
+      <div className="space-y-[calc(52px*var(--gap-scale-y))]">
+        <section>
+          <h1 className={pageTitleClassName}>{title}</h1>
+        </section>
 
-      <div className="mt-[calc(52px*var(--gap-scale-y))] flex flex-col gap-[calc(52px*var(--gap-scale-y))]">
         {sections.map((section) => (
           <section key={section.title}>
             <h2 className={sectionHeadingClassName}>{section.title}</h2>
-
-            <div className="mt-[calc(24px*var(--gap-scale-y))] flex flex-col gap-[calc(32px*var(--gap-scale-y))]">
+            <div className={sectionBodyClassName}>
               {section.subsections.map((subsection, subsectionIndex) => (
-                <div
-                  key={`${section.title}-${subsectionIndex}`}
-                  className="flex flex-col gap-[calc(16px*var(--gap-scale-y))]"
-                >
-                  {"heading" in subsection && subsection.heading ? (
-                    <h3 className={subsectionHeadingClassName}>{subsection.heading}</h3>
+                <Fragment key={`${section.title}-${subsectionIndex}`}>
+                  {subsection.heading ? (
+                    <p className={`${bodyClassName} whitespace-pre-line`}>{subsection.heading}</p>
                   ) : null}
-
                   {subsection.blocks.map((block, index) => (
                     <ShoppingGuideBlockRenderer
                       key={`${section.title}-${subsectionIndex}-${block.type}-${index}`}
                       block={block}
                     />
                   ))}
-                </div>
+                </Fragment>
               ))}
             </div>
           </section>

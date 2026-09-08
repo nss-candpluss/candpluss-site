@@ -2,7 +2,7 @@
 
 import { maskGraphicStyle } from "@/lib/maskStyle";
 
-const DELETE_ICON_SRC = "/assets/icons/icon_delete.svg";
+const DELETE_ICON_SRC = "/assets/icons/icon-delete.svg";
 
 type CartRemoveButtonProps = {
   disabled?: boolean;

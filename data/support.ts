@@ -32,5 +32,11 @@ export const supportContent = {
       label: "お問い合わせフォーム",
       href: "/contact",
     },
+    phoneSection: {
+      title: "お電話でのお問い合わせ",
+      phoneNumber: "0120-64-8175",
+      hours: "受付時間 9:00 ～ 17:00",
+      note: "※土日、祝日のお問い合わせは、LINEまたはお問い合わせフォームよりお問い合わせください。",
+    },
   },
 } as const;

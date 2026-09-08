@@ -12,7 +12,40 @@ const supportGuideSource = readFileSync(
   "utf8"
 );
 
+const supportAccordionSource = readFileSync(
+  join(
+    dirname(fileURLToPath(import.meta.url)),
+    "../../sections/support/SupportAccordion.tsx"
+  ),
+  "utf8"
+);
+
 describe("support guide accordions", () => {
+  it("uses the same empty-line spacing as legal body blocks", () => {
+    expect(supportAccordionSource).toContain('body.split("\\n\\n")');
+    expect(supportAccordionSource).toContain(
+      "space-y-[calc(16px*var(--gap-scale-y))]"
+    );
+    expect(supportAccordionSource).not.toContain(
+      "gap-[calc(16px*var(--gap-scale-y))]"
+    );
+  });
+
+  it("keeps at least 18px between accordion titles and dividers", () => {
+    expect(supportAccordionSource).toContain(
+      "pt-[max(18px,calc(32px*var(--gap-scale-y)))]"
+    );
+    expect(supportAccordionSource).toContain(
+      "pb-[max(18px,calc(32px*var(--gap-scale-y)))]"
+    );
+    expect(supportAccordionSource).not.toContain(
+      "pt-[calc(32px*var(--gap-scale-y))] text-left"
+    );
+    expect(supportAccordionSource).not.toContain(
+      "border-b pb-[calc(32px*var(--gap-scale-y))]"
+    );
+  });
+
   it("splits contact actions into LINE and form buttons", () => {
     const line = footerContent.socialLinks.find((link) => link.label === "LINE");
 
@@ -34,6 +67,22 @@ describe("support guide accordions", () => {
     expect(supportGuideSource).toContain("px-[calc(32px*var(--gap-scale-x))]");
     expect(supportGuideSource).toContain("py-[calc(32px*var(--layout-scale-y))]");
     expect(supportGuideSource).toContain("min-[1025px]:py-[calc(18px*var(--gap-scale-y))]");
+  });
+
+  it("shows phone contact details below the LINE and form buttons", () => {
+    expect(supportContent.guide.phoneSection).toEqual({
+      title: "お電話でのお問い合わせ",
+      phoneNumber: "0120-64-8175",
+      hours: "受付時間 9:00 ～ 17:00",
+      note: "※土日、祝日のお問い合わせは、LINEまたはお問い合わせフォームよりお問い合わせください。",
+    });
+    expect(supportGuideSource).toContain("guide.phoneSection.title");
+    expect(supportGuideSource).toContain("tel:${guide.phoneSection.phoneNumber}");
+    expect(supportGuideSource).toContain("mt-[calc(60px*var(--gap-scale))]");
+    expect(supportGuideSource).toContain("font-bold");
+    expect(supportGuideSource).toContain("uiText(24)");
+    expect(supportGuideSource).toContain("mt-[calc(24px*var(--gap-scale))]");
+    expect(supportGuideSource).toContain("mt-[calc(16px*var(--gap-scale))]");
   });
 
   it("does not render the former warranty intro above the accordions", () => {

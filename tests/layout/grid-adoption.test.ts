@@ -44,15 +44,10 @@ describe("12 column grid adoption", () => {
       "twoColumnFeatureSpanClassName"
     );
 
-    for (const path of [
-      "sections/concept/ConceptFeatureLinks.tsx",
-      "sections/quality/QualityFeatureLinks.tsx",
-    ]) {
-      const fileSource = source(path);
-
-      expect(fileSource).toContain("SiteGrid");
-      expect(fileSource).toContain("threeColumnFeatureSpanClassName");
-    }
+    expect(source("sections/concept/ConceptFeatureLinks.tsx")).toContain("SiteGrid");
+    expect(source("sections/concept/ConceptFeatureLinks.tsx")).toContain(
+      "threeColumnFeatureSpanClassName"
+    );
   });
 
   it("connects Legal, Contact, and Company pages to full-span grid shells", () => {
@@ -78,14 +73,12 @@ describe("12 column grid adoption", () => {
       "formHalfSpanClassName"
     );
 
-    for (const path of [
-      "components/company/CompanyDocument.tsx",
-      "components/legal/CommercialTransactionsDocument.tsx",
-    ]) {
-      const fileSource = source(path);
+    const companySource = source("components/company/CompanyDocument.tsx");
 
-      expect(fileSource).toContain("definitionLabelSpanClassName");
-      expect(fileSource).toContain("definitionValueSpanClassName");
-    }
+    expect(companySource).toContain("definitionLabelSpanClassName");
+    expect(companySource).toContain("definitionValueSpanClassName");
+    expect(source("components/legal/CommercialTransactionsDocument.tsx")).not.toContain(
+      "definitionLabelSpanClassName"
+    );
   });
 });

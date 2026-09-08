@@ -13,8 +13,8 @@ function source(path: string): string {
 }
 
 describe("company document", () => {
-  it("keeps ABOUT US and company information only", () => {
-    expect(companyContent.title).toBe("ABOUT US");
+  it("keeps COMPANY and company information only", () => {
+    expect(companyContent.title).toBe("COMPANY");
     expect(companyContent.items.map((item) => item.label)).toEqual([
       "会社名",
       "本社所在地",
@@ -42,6 +42,17 @@ describe("company document", () => {
     expect(documentSource).not.toContain("bg-[#f5f5f5]");
     expect(documentSource).not.toContain("Fukuoka Lab");
     expect(pageSource).toContain("bg-[var(--background)]");
+  });
+
+  it("uses a 24px divider inset and 12px title-to-body gap on small screens", () => {
+    const documentSource = source("components/company/CompanyDocument.tsx");
+
+    expect(documentSource).toContain("gap-y-[12px]");
+    expect(documentSource).toContain("py-[24px]");
+    expect(documentSource).toContain("min-[768px]:gap-y-0");
+    expect(documentSource).toContain("min-[768px]:py-[calc(24px*var(--gap-scale-y))]");
+    expect(documentSource).not.toContain("gap-y-[16px]");
+    expect(documentSource).not.toContain("py-[42px]");
   });
 
   it("renders trading banks with a nakaguro prefix instead of disc bullets", () => {

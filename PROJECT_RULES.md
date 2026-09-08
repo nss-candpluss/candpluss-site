@@ -74,7 +74,7 @@ public/
     ├── home/       … TOP 導線・セクション用
     ├── products/   … 商品画像
     ├── concept/    … Concept ページ用
-    ├── quality/    … Quality ページ用
+    ├── labo/       … LABO ページ用
     └── support/    … Support ページ用
 
 ■ 運用ルール
@@ -105,9 +105,9 @@ public/
 | TOP Hero タイトル SVG | `hero-title.svg` |
 | TOP Hero OUR BEGINNING | `our-beginning.webp` |
 | TOP 導線カード（Products） | `home-link-products.webp` |
-| TOP 導線カード（Quality） | `home-link-quality.webp` |
+| TOP 導線カード（LABO） | `home-link-labo.webp` |
 | 商品ギャラリー | `product-moya500-gallery-01.webp` |
-| Quality セクション | `quality-material-section.webp` |
+| LABO セクション | `labo-materials-01.webp` |
 
 ■ フォーマット
 

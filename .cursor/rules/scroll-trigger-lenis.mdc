@@ -59,7 +59,7 @@ useLayoutEffect(() => {
 
 - `scrollTrigger: { ... }` に `scroller` なしで Lenis 有効環境を前提にする
 - `lib/motion/setup-lenis-scroll-trigger.ts` / `motion-ready.ts` / `SmoothScrollProvider.tsx` を変更したまま関連ページを未確認で完了にする
-- 1 ページ（例: Quality）だけ直して他ページの ST 初期化順を無視する
+- 1 ページ（例: Labo）だけ直して他ページの ST 初期化順を無視する
 
 ## 確認手順（ScrollTrigger 利用ページ）
 
@@ -67,5 +67,5 @@ ScrollTrigger 固有の確認。共通ファイル変更時の横断確認は `.
 
 1. `npm run dev` → `/concept`（各セクションのフェードイン）
 2. `/labo`（テキスト fade / slide 切替）
-3. `/`（HomeLab・ProductLinks 等 ST 利用箇所）
+3. `/`（HomeLab・HomeMainProducts 等 ST 利用箇所）
 4. 切り分け: `lib/motion/smooth-scroll-config.ts` の `enabled: false` でネイティブ scroll も確認

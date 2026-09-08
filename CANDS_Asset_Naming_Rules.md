@@ -70,6 +70,8 @@ news/
 
 products/
 
+labo/
+
 support/
 
 ---
@@ -155,8 +157,6 @@ home-support.webp
 home-link-labo.webp
 
 home-products-link.webp
-
-home-quality-link.webp
 
 home-link-moya500.webp
 

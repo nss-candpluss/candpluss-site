@@ -24,7 +24,6 @@ export type LegalContact = {
 
 export type LegalDocumentContent = {
   title: string;
-  updatedAt: string;
   lead: string;
   sections: readonly LegalSection[];
   contact?: LegalContact;
