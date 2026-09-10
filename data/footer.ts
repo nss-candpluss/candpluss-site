@@ -45,7 +45,7 @@ export const footerContent = {
     },
     {
       label: "YouTube",
-      href: "https://www.youtube.com/",
+      href: "https://www.youtube.com/@CANDPLUSS",
       icon: "/assets/icons/icon-sns-youtube.svg",
     },
     {

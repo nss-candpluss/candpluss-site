@@ -89,13 +89,13 @@ describe("footer nav links", () => {
     expect(mobileMenuSource).toContain("footerContent.socialLinks");
   });
 
-  it("shows Instagram, LINE, and YouTube with a dummy YouTube URL", () => {
+  it("shows Instagram, LINE, and YouTube with the official YouTube URL", () => {
     const youtube = footerContent.socialLinks.find((link) => link.label === "YouTube");
 
     expect(isSocialLinkVisible("Instagram")).toBe(true);
     expect(isSocialLinkVisible("LINE")).toBe(true);
     expect(isSocialLinkVisible("YouTube")).toBe(true);
-    expect(youtube?.href).toBe("https://www.youtube.com/");
+    expect(youtube?.href).toBe("https://www.youtube.com/@CANDPLUSS");
     expect(youtube?.icon).toBe("/assets/icons/icon-sns-youtube.svg");
   });
 });
