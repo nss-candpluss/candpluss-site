@@ -172,7 +172,7 @@ export function buildAutoReplySupportContactMail(
       "C AND+S",
       "",
       "URL：https://candpluss.camp/",
-      "E-mail：info@candpluss.camp",
+      "E-mail：support@candpluss.camp",
       "TEL：0120-64-8175",
       "────────────────────────────",
       "",

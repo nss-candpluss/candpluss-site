@@ -228,7 +228,7 @@ describe("contact form", () => {
     expect(emptyErrors.category).toBe("お問い合わせ種別を選択してください。");
   });
 
-  it("omits attachment copy from contact mail", () => {
+  it("builds contact mail with the current footer and no attachment copy", () => {
     const data = {
       ...createEmptyContactFormData(),
       category: "product" as const,
@@ -247,7 +247,11 @@ describe("contact form", () => {
     };
 
     expect(buildAdminContactMail(context).text).not.toContain("添付画像");
-    expect(buildAutoReplyContactMail(context).text).not.toContain("添付画像");
+
+    const autoReplyText = buildAutoReplyContactMail(context).text;
+    expect(autoReplyText).not.toContain("添付画像");
+    expect(autoReplyText).toContain("E-mail：contact@candpluss.camp");
+    expect(autoReplyText).toContain("TEL：0120-64-8175");
   });
 
   it("accepts multipart contact payloads without attachments", () => {

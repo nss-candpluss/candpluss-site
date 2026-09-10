@@ -26,6 +26,7 @@ import {
 import { sanitizeSupportAttachmentFilename } from "@/lib/support-contact/attachment-filename";
 import { buildSupportContactConfirmRows } from "@/lib/support-contact/display";
 import { SUPPORT_CONTACT_FORM_STORAGE_KEY } from "@/lib/support-contact/form-storage";
+import { buildAutoReplySupportContactMail } from "@/lib/support-contact/mail";
 import { supportContactApiBodySchema } from "@/lib/support-contact/schema";
 import {
   normalizeSupportSerialNumbers,
@@ -722,6 +723,30 @@ describe("support warranty contact form", () => {
     expect(parsed.serialNumber).toBe("ABC123");
     expect(parsed.phone).toBe("090-1234-5678");
     expect(parsed.postalCode).toBe("123-4567");
+  });
+
+  it("builds the support auto-reply mail with the current contact footer", () => {
+    const data = {
+      ...createEmptySupportContactFormData(),
+      category: "repair" as const,
+      serialNumber: "ABC123",
+      lastName: "山田",
+      firstName: "太郎",
+      email: "taro@example.com",
+      emailConfirm: "taro@example.com",
+      message: "修理を希望します。",
+      privacyAccepted: true,
+    };
+    const text = buildAutoReplySupportContactMail({
+      ticketNumber: "SPR-20260909-7K9M2P4R8T6W",
+      receivedAt: new Date("2026-09-09T00:00:00+09:00"),
+      ipAddress: "127.0.0.1",
+      data,
+      attachmentCount: 0,
+    }).text;
+
+    expect(text).toContain("E-mail：support@candpluss.camp");
+    expect(text).toContain("TEL：0120-64-8175");
   });
 
   it("rejects attachments whose contents are not a supported image", async () => {
