@@ -66,6 +66,9 @@ describe("support warranty contact form", () => {
       guideSource.indexOf("guide.lineButton.label")
     );
     expect(guideSource.indexOf("guide.lineButton.label")).toBeLessThan(
+      guideSource.indexOf("id={supportContactPageContent.sectionId}")
+    );
+    expect(guideSource.indexOf("id={supportContactPageContent.sectionId}")).toBeLessThan(
       guideSource.indexOf("{supportContactPageContent.title}")
     );
     expect(guideSource.indexOf("{supportContactPageContent.title}")).toBeLessThan(
@@ -78,7 +81,7 @@ describe("support warranty contact form", () => {
     );
   });
 
-  it("exposes a stable Product Support hash for QR landings", () => {
+  it("exposes a stable warranty form hash for QR landings", () => {
     const pageSource = source("sections/support/SupportPage.tsx");
     const hashScrollSource = source("sections/support/SupportHashScroll.tsx");
     const scrollSource = source("lib/support-contact/scroll-to-section.ts");

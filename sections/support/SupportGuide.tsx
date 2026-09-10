@@ -48,10 +48,9 @@ export function SupportGuide() {
       </section>
 
       <section
-        id={supportContactPageContent.sectionId}
         data-header-theme="onLight"
         data-support-contact
-        className={`scroll-mt-[var(--header-height)] ${supportContactSectionClassName}`}
+        className={supportContactSectionClassName}
       >
         <Container>
           <div className="mx-auto w-full max-w-[1050px]">
@@ -107,7 +106,10 @@ export function SupportGuide() {
               </a>
             ) : null}
 
-            <div className={supportLineButtonAreaGapClassName}>
+            <div
+              id={supportContactPageContent.sectionId}
+              className={`scroll-mt-[var(--header-height)] ${supportLineButtonAreaGapClassName}`}
+            >
               <h3 className={supportContactTitleClassName}>
                 {supportContactPageContent.title}
               </h3>

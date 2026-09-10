@@ -36,10 +36,10 @@ export function getSupportContactApiUrl(): string {
   return withBasePath("/api/support-contact");
 }
 
-/** `/support` 内 Product Support セクション。QR 着地用ハッシュ */
+/** `/support` 内の初期不良・修理専用フォーム。QR 着地用ハッシュ */
 export const SUPPORT_PRODUCT_SUPPORT_SECTION_ID = "product-support";
 
-/** Product Support へのパス（basePath 付き、例: `/support#product-support`） */
+/** 初期不良・修理専用フォームへのパス（basePath 付き、例: `/support#product-support`） */
 export function getSupportProductSupportPath(): string {
   return `${withBasePath("/support")}#${SUPPORT_PRODUCT_SUPPORT_SECTION_ID}`;
 }
