@@ -2,6 +2,7 @@ import { SiteImage } from "@/components/ui/SiteImage";
 import { ProductNotes } from "@/components/products/ProductNotes";
 
 import type { ProductSizeSpec } from "@/types/product";
+import { arrowMaskStyle, maskGraphicStyle } from "@/lib/maskStyle";
 import { bodyText, productDetailSectionTitleClassName, uiText } from "@/lib/typography";
 
 type ProductSizeSpecProps = {
@@ -11,9 +12,40 @@ type ProductSizeSpecProps = {
     itemName?: string;
     content?: string;
     note?: string;
-    download?: string;
   };
 };
+
+const youtubeMaskStyle = maskGraphicStyle(
+  "/assets/icons/icon-sns-youtube.svg"
+);
+
+function ProductSizeSpecLink({
+  href,
+  label,
+  iconStyle,
+}: {
+  href: string;
+  label: string;
+  iconStyle: ReturnType<typeof maskGraphicStyle>;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`inline-flex items-center gap-[calc(8px*var(--gap-scale-x))] font-body-ja font-semibold text-[var(--foreground)] ${uiText(15)}`}
+    >
+      <span
+        aria-hidden="true"
+        className="size-[calc(24px*var(--text-scale))] shrink-0 bg-current"
+        style={iconStyle}
+      />
+      <span className="underline decoration-1 underline-offset-[1px]">
+        {label}
+      </span>
+    </a>
+  );
+}
 
 function ProductSizeSpecContent({
   sizeSpec,
@@ -82,21 +114,39 @@ export function ProductSizeSpecSection({
   const titleClassName = `font-heading text-[var(--foreground)] ${
     typography?.title ?? productDetailSectionTitleClassName
   }`;
-  const downloadClassName = typography?.download ?? uiText(14);
 
-  const downloadsList =
-    sizeSpec.downloads?.length ? (
+  const resourceLinks =
+    sizeSpec.manualHref ||
+    sizeSpec.setupVideoHref ||
+    sizeSpec.teardownVideoHref ? (
       <ul className="mt-[calc(40px*var(--gap-scale-y))] flex flex-col gap-[calc(12px*var(--gap-scale-y))]">
-        {sizeSpec.downloads.map((download) => (
-          <li key={download.href}>
-            <a
-              href={download.href}
-              className={`font-body-ja text-[var(--foreground)] underline decoration-1 underline-offset-[calc(4px*var(--text-scale))] ${downloadClassName}`}
-            >
-              {download.label}
-            </a>
+        {sizeSpec.manualHref ? (
+          <li>
+            <ProductSizeSpecLink
+              href={sizeSpec.manualHref}
+              label="取扱説明書DL"
+              iconStyle={arrowMaskStyle}
+            />
           </li>
-        ))}
+        ) : null}
+        {sizeSpec.setupVideoHref ? (
+          <li>
+            <ProductSizeSpecLink
+              href={sizeSpec.setupVideoHref}
+              label="設営動画"
+              iconStyle={youtubeMaskStyle}
+            />
+          </li>
+        ) : null}
+        {sizeSpec.teardownVideoHref ? (
+          <li>
+            <ProductSizeSpecLink
+              href={sizeSpec.teardownVideoHref}
+              label="撤収動画"
+              iconStyle={youtubeMaskStyle}
+            />
+          </li>
+        ) : null}
       </ul>
     ) : null;
 
@@ -126,7 +176,7 @@ export function ProductSizeSpecSection({
             </div>
           </div>
 
-          {downloadsList}
+          {resourceLinks}
         </>
       ) : (
         <div className={centeredContentClassName}>
@@ -136,7 +186,7 @@ export function ProductSizeSpecSection({
             <ProductSizeSpecContent sizeSpec={sizeSpec} typography={typography} />
           </div>
 
-          {downloadsList}
+          {resourceLinks}
         </div>
       )}
     </section>

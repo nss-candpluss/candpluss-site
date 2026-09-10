@@ -17,6 +17,7 @@ const phoneNumberClassName = `font-ui-en font-bold text-[var(--foreground)] ${ui
 const phoneBodyClassName = `font-body-ja text-[var(--foreground)] ${bodyText(15)}`;
 const supportIntroNoteClassName =
   "font-body-ja text-[clamp(12px,calc(13px*var(--text-scale)),13px)] leading-[1.3] text-[var(--foreground)]";
+const supportAccordionNoteClassName = "mt-[calc(42px*var(--gap-scale))]";
 const supportIntroNoteFirstClassName = "mt-[calc(24px*var(--gap-scale))]";
 const supportIntroNoteFollowingClassName =
   "mt-[clamp(8px,calc(12px*var(--gap-scale-y)),12px)]";
@@ -43,6 +44,11 @@ export function SupportGuide() {
         <Container>
           <div className="mx-auto w-full max-w-[1050px]">
             <SupportAccordion items={guide.accordions} />
+            <p
+              className={`${supportIntroNoteClassName} ${supportAccordionNoteClassName}`}
+            >
+              {guide.accordionNote}
+            </p>
           </div>
         </Container>
       </section>

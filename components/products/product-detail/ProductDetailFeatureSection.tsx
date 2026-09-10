@@ -7,6 +7,7 @@ import {
   useState,
   type AnimationEvent as ReactAnimationEvent,
   type PointerEvent as ReactPointerEvent,
+  type TransitionEvent as ReactTransitionEvent,
 } from "react";
 
 import { preloadProductDetailImage } from "@/components/products/product-detail/image-preload";
@@ -201,15 +202,29 @@ function ProductDetailFeatureImageGallery({
   ]);
   const [backdropImage, setBackdropImage] = useState(images[0]);
   const [slideMs, setSlideMs] = useState(PRODUCT_DETAIL_SLIDE_MS);
+  const [dragOffsetX, setDragOffsetX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragSnapBack, setDragSnapBack] = useState(false);
   const slideSeqRef = useRef(0);
   const selectionRequestRef = useRef(0);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const pendingCommitIndexRef = useRef<number | null>(null);
   const swipeRef = useRef<{
     pointerId: number;
     startX: number;
     startY: number;
     axis: "x" | "y" | null;
+    moved: boolean;
   } | null>(null);
   const hasMultipleImages = images.length > 1;
+  const isSliding = slideLayers.some((layer) => layer.role !== "settled");
+  const previousImage = images[wrapIndex(selectedIndex - 1, images.length)];
+  const nextImage = images[wrapIndex(selectedIndex + 1, images.length)];
+  const showDragPeek = hasMultipleImages && !isSliding;
+  const dragTransition =
+    dragSnapBack && !isDragging
+      ? `transform ${PRODUCT_DETAIL_SLIDE_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`
+      : "none";
 
   useEffect(() => {
     images.forEach((image) => {
@@ -219,6 +234,30 @@ function ProductDetailFeatureImageGallery({
     });
   }, [images]);
 
+  const settleToIndex = useCallback(
+    (index: number) => {
+      const nextIndex = wrapIndex(index, images.length);
+      const nextImage = images[nextIndex];
+
+      slideSeqRef.current += 1;
+      selectionRequestRef.current += 1;
+      setDragSnapBack(false);
+      setIsDragging(false);
+      setDragOffsetX(0);
+      setBackdropImage(nextImage);
+      setSelectedIndex(nextIndex);
+      setSlideLayers([
+        {
+          key: `settled-${slideSeqRef.current}-${nextImage ?? "placeholder"}`,
+          image: nextImage,
+          role: "settled",
+          enterFrom: "right",
+        },
+      ]);
+    },
+    [images]
+  );
+
   const selectImage = useCallback(
     (
       index: number,
@@ -227,6 +266,10 @@ function ProductDetailFeatureImageGallery({
         steps: number;
       }
     ) => {
+      if (!images.length || pendingCommitIndexRef.current != null) {
+        return;
+      }
+
       const nextIndex = wrapIndex(index, images.length);
       if (nextIndex === selectedIndex) {
         return;
@@ -321,7 +364,12 @@ function ProductDetailFeatureImageGallery({
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (
       event.pointerType !== "touch" ||
-      slideLayers.some((layer) => layer.role !== "settled")
+      !hasMultipleImages ||
+      isSliding ||
+      isDragging ||
+      dragSnapBack ||
+      pendingCommitIndexRef.current != null ||
+      (event.target as Element | null)?.closest?.("button, a")
     ) {
       return;
     }
@@ -331,7 +379,9 @@ function ProductDetailFeatureImageGallery({
       startX: event.clientX,
       startY: event.clientY,
       axis: null,
+      moved: false,
     };
+    setDragSnapBack(false);
   };
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -343,15 +393,25 @@ function ProductDetailFeatureImageGallery({
     const deltaX = event.clientX - swipe.startX;
     const deltaY = event.clientY - swipe.startY;
 
-    if (!swipe.axis && Math.max(Math.abs(deltaX), Math.abs(deltaY)) >= 8) {
-      swipe.axis = Math.abs(deltaX) > Math.abs(deltaY) ? "x" : "y";
-      if (swipe.axis === "x") {
-        event.currentTarget.setPointerCapture(event.pointerId);
+    if (swipe.axis === null) {
+      if (Math.abs(deltaX) < 8 && Math.abs(deltaY) < 8) {
+        return;
       }
+
+      if (Math.abs(deltaY) >= Math.abs(deltaX)) {
+        swipeRef.current = null;
+        return;
+      }
+
+      swipe.axis = "x";
+      swipe.moved = true;
+      setIsDragging(true);
+      event.currentTarget.setPointerCapture(event.pointerId);
     }
 
     if (swipe.axis === "x") {
       event.preventDefault();
+      setDragOffsetX(deltaX);
     }
   };
 
@@ -361,21 +421,48 @@ function ProductDetailFeatureImageGallery({
       return;
     }
 
-    swipeRef.current = null;
     const deltaX = event.clientX - swipe.startX;
-    const deltaY = event.clientY - swipe.startY;
+    const wasHorizontalDrag = swipe.axis === "x" && swipe.moved;
+    swipeRef.current = null;
 
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
 
-    if (
-      swipe.axis === "x" &&
-      Math.abs(deltaX) >= 40 &&
-      Math.abs(deltaX) > Math.abs(deltaY)
-    ) {
-      selectRelativeImage(deltaX < 0 ? 1 : -1);
+    if (!wasHorizontalDrag) {
+      setIsDragging(false);
+      setDragOffsetX(0);
+      return;
     }
+
+    const width = viewportRef.current?.clientWidth ?? 0;
+    const threshold = Math.max(48, width * 0.12);
+    const shouldStep = Math.abs(deltaX) >= threshold;
+
+    setIsDragging(false);
+
+    if (!shouldStep && Math.abs(deltaX) < 1) {
+      setDragOffsetX(0);
+      setDragSnapBack(false);
+      return;
+    }
+
+    setDragSnapBack(true);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (!shouldStep) {
+          setDragOffsetX(0);
+          return;
+        }
+
+        pendingCommitIndexRef.current = wrapIndex(
+          selectedIndex + (deltaX < 0 ? 1 : -1),
+          images.length
+        );
+        setDragOffsetX(deltaX < 0 ? -width : width);
+      });
+    });
   };
 
   const handlePointerCancel = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -388,10 +475,44 @@ function ProductDetailFeatureImageGallery({
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
+    setIsDragging(false);
+
+    if (Math.abs(dragOffsetX) < 1) {
+      setDragOffsetX(0);
+      setDragSnapBack(false);
+      return;
+    }
+
+    setDragSnapBack(true);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setDragOffsetX(0);
+      });
+    });
+  };
+
+  const handleDragTransitionEnd = (
+    event: ReactTransitionEvent<HTMLDivElement>
+  ) => {
+    if (event.propertyName !== "transform") {
+      return;
+    }
+
+    const pendingIndex = pendingCommitIndexRef.current;
+    if (pendingIndex != null) {
+      pendingCommitIndexRef.current = null;
+      settleToIndex(pendingIndex);
+      return;
+    }
+
+    if (dragSnapBack) {
+      setDragSnapBack(false);
+    }
   };
 
   return (
     <div
+      ref={viewportRef}
       className="relative aspect-[13/10] touch-pan-y overflow-hidden bg-[var(--color-line)]"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
@@ -410,20 +531,70 @@ function ProductDetailFeatureImageGallery({
         />
       ) : null}
 
+      {showDragPeek ? (
+        <>
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-[var(--color-line)]"
+            style={{
+              transform: `translate3d(calc(-100% + ${dragOffsetX}px), 0, 0)`,
+              transition: dragTransition,
+            }}
+          >
+            {previousImage ? (
+              <SiteImage
+                src={previousImage}
+                alt=""
+                fill
+                sizes="(min-width: 1025px) 33vw, (min-width: 768px) 50vw, 100vw"
+                className="object-cover object-center"
+              />
+            ) : null}
+          </div>
+
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-[var(--color-line)]"
+            style={{
+              transform: `translate3d(calc(100% + ${dragOffsetX}px), 0, 0)`,
+              transition: dragTransition,
+            }}
+          >
+            {nextImage ? (
+              <SiteImage
+                src={nextImage}
+                alt=""
+                fill
+                sizes="(min-width: 1025px) 33vw, (min-width: 768px) 50vw, 100vw"
+                className="object-cover object-center"
+              />
+            ) : null}
+          </div>
+        </>
+      ) : null}
+
       {slideLayers.map((layer) => (
         <div
           key={layer.key}
           aria-hidden={layer.role === "outgoing"}
-          className={`absolute inset-0 ${featureSlideClassName(layer)}`}
+          className={`absolute inset-0 bg-[var(--color-line)] ${featureSlideClassName(layer)}`}
           style={
             layer.role === "settled"
-              ? undefined
+              ? showDragPeek
+                ? {
+                    transform: `translate3d(${dragOffsetX}px, 0, 0)`,
+                    transition: dragTransition,
+                  }
+                : undefined
               : { animationDuration: `${slideMs}ms` }
           }
           onAnimationEnd={
             layer.role === "incoming"
               ? (event) => handleIncomingAnimationEnd(event, layer)
               : undefined
+          }
+          onTransitionEnd={
+            layer.role === "settled" ? handleDragTransitionEnd : undefined
           }
         >
           {layer.image ? (

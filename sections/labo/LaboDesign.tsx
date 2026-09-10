@@ -1,42 +1,136 @@
+"use client";
+
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useLayoutEffect, useRef } from "react";
+
 import { SiteImage } from "@/components/ui/SiteImage";
 import { Container } from "@/components/ui/Container";
 import { laboDesignContent } from "@/data/labo";
-import { bodyText, sectionTitle62ClassName, uiText } from "@/lib/typography";
+import { subscribeMotionReady } from "@/lib/motion/motion-ready";
+import { getScrollTriggerScroller } from "@/lib/motion/scroll-trigger-scroller";
+import { bodyText, uiText } from "@/lib/typography";
+
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+const BACKGROUND_END_SCALE = 1.1;
 
 export function LaboDesign() {
-  const { title, label, body, image } = laboDesignContent;
+  const sectionRef = useRef<HTMLElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
+  const { number, titleLead, titleWrapSegments, label, body, image } =
+    laboDesignContent;
+
+  useLayoutEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const section = sectionRef.current;
+    const backgroundImage = imageRef.current;
+
+    if (!section || !backgroundImage) {
+      return;
+    }
+
+    const reducedMotion = window.matchMedia(REDUCED_MOTION_QUERY);
+    let context: gsap.Context | null = null;
+    let setupFrameId = 0;
+
+    const setup = () => {
+      context?.revert();
+      context = null;
+
+      context = gsap.context(() => {
+        gsap.set(backgroundImage, { scale: 1 });
+
+        if (reducedMotion.matches) {
+          return;
+        }
+
+        gsap.to(backgroundImage, {
+          scale: BACKGROUND_END_SCALE,
+          transformOrigin: "center center",
+          ease: "none",
+          force3D: true,
+          scrollTrigger: {
+            trigger: section,
+            scroller: getScrollTriggerScroller(),
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+            invalidateOnRefresh: true,
+          },
+        });
+      }, section);
+
+      ScrollTrigger.refresh();
+    };
+
+    const scheduleSetup = () => {
+      cancelAnimationFrame(setupFrameId);
+      setupFrameId = requestAnimationFrame(setup);
+    };
+
+    const unsubscribeMotionReady = subscribeMotionReady(scheduleSetup);
+    reducedMotion.addEventListener("change", scheduleSetup);
+    queueMicrotask(scheduleSetup);
+
+    return () => {
+      cancelAnimationFrame(setupFrameId);
+      reducedMotion.removeEventListener("change", scheduleSetup);
+      unsubscribeMotionReady();
+      context?.revert();
+    };
+  }, []);
 
   return (
     <section
+      ref={sectionRef}
       data-header-theme="onDark"
       data-labo-design
-      className="bg-black pt-[var(--container-y-top)] pb-[var(--container-y-bottom)] text-white"
+      className="relative isolate overflow-hidden bg-black pt-[var(--container-y-top)] pb-[clamp(82px,calc(82px+(100vw-390px)/(1920px-390px)*102px),184px)] text-white"
     >
-      <Container>
-        <div className="grid grid-cols-1 gap-y-0 min-[1025px]:grid-cols-2 min-[1025px]:grid-rows-[auto_1fr] min-[1025px]:items-stretch min-[1025px]:gap-x-[calc(52px*var(--gap-scale-x))]">
-          <div className="order-1 min-[1025px]:col-start-1 min-[1025px]:row-start-1">
-            <p className={`font-ui-en font-medium opacity-[0.65] ${uiText(18)}`}>
-              {label}
-            </p>
-            <h2
-              className={`mt-[calc(32px*var(--gap-scale-y))] font-heading ${sectionTitle62ClassName}`}
-            >
-              {title}
-            </h2>
-          </div>
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-y-0 left-0 z-0 h-full aspect-[3/2] overflow-hidden min-[1025px]:left-auto min-[1025px]:right-0"
+      >
+        <div
+          ref={imageRef}
+          data-labo-design-background-image
+          className="absolute inset-0 will-change-transform"
+        >
+          <SiteImage
+            src={image}
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover object-left min-[1025px]:object-right"
+          />
+        </div>
+      </div>
 
-          <figure className="relative order-2 mt-[calc(98px*var(--layout-scale-y))] aspect-[13/10] overflow-hidden min-[1025px]:col-start-2 min-[1025px]:row-start-1 min-[1025px]:row-span-2 min-[1025px]:mt-0">
-            <SiteImage
-              src={image}
-              alt=""
-              fill
-              sizes="(min-width: 1025px) 50vw, 100vw"
-              className="object-cover object-center"
-            />
-          </figure>
-
+      <Container className="relative z-10">
+        <div className="w-full min-[1025px]:max-w-[720px]">
+          <h2 className={`font-heading ${uiText(48)}`}>
+            <span className="concept-heading-numeral mb-[clamp(16px,calc(20px*var(--gap-scale-y)),20px)] block">
+              {number}
+            </span>
+            <span className="flex flex-col gap-y-[0.2em]">
+              <span className="whitespace-nowrap">{titleLead}</span>
+              <span className="flex flex-wrap gap-x-0 gap-y-[0.2em]">
+                {titleWrapSegments.map((segment) => (
+                  <span key={segment} className="whitespace-nowrap">
+                    {segment}
+                  </span>
+                ))}
+              </span>
+            </span>
+          </h2>
           <p
-            className={`order-3 mt-[calc(42px*var(--gap-scale-y))] font-body-ja min-[1025px]:col-start-1 min-[1025px]:row-start-2 ${bodyText(16)}`}
+            className={`mt-[clamp(10px,calc(16px*var(--gap-scale-y)),16px)] font-ui-en font-medium opacity-[0.65] ${uiText(18)}`}
+          >
+            {label}
+          </p>
+          <p
+            className={`mt-[clamp(38px,calc(72px*var(--gap-scale-y)),72px)] font-body-ja ${bodyText(16)}`}
           >
             {body}
           </p>

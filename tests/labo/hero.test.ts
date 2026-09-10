@@ -12,6 +12,11 @@ const laboHeroSource = readFileSync(
   "utf8"
 );
 
+const laboPageSource = readFileSync(
+  join(dirname(fileURLToPath(import.meta.url)), "../../sections/labo/LaboPage.tsx"),
+  "utf8"
+);
+
 describe("labo hero copy", () => {
   it("uses the labo logo, subtitle, and experience-space body", () => {
     expect(laboContent.hero.title).toBe("C AND+S LABO");
@@ -42,14 +47,35 @@ describe("labo hero copy", () => {
     expect(laboHeroSource).not.toContain("flex h-full items-center");
   });
 
-  it("covers the large viewport while keeping the title positioned by svh", () => {
+  it("pins and pans the background while keeping the title positioned by svh", () => {
     expect(laboHeroSource).toContain("hero.titleLogo");
     expect(laboHeroSource).toContain("brightness-0 invert");
+    expect(laboHeroSource).toContain('"use client"');
+    expect(laboHeroSource).toContain("data-labo-hero-background");
+    expect(laboHeroSource).toContain("sticky top-0 z-0 h-lvh overflow-hidden");
+    expect(laboHeroSource).toContain("-mt-[100lvh]");
     expect(laboHeroSource).toContain("min-h-lvh");
     expect(laboHeroSource).toContain("flex h-[50svh] w-full items-end");
-    expect(laboHeroSource).not.toContain("subscribeMotionReady");
-    expect(laboHeroSource).not.toContain("ScrollTrigger");
-    expect(laboHeroSource).not.toContain("BACKGROUND_SCALE");
-    expect(laboHeroSource).not.toContain("sticky top-0");
+    expect(laboHeroSource).toContain("subscribeMotionReady");
+    expect(laboHeroSource).toContain("getScrollTriggerScroller");
+    expect(laboHeroSource).toContain("BACKGROUND_SCALE = 1.25");
+    expect(laboHeroSource).toContain("getPanDistance");
+    expect(laboHeroSource).toContain("data-labo-hero-overlay");
+    expect(laboHeroSource).toContain("OVERLAY_END_OPACITY = 1");
+    expect(laboHeroSource).toContain("scrub: true");
+    expect(laboHeroSource).toContain('end: "bottom top"');
+    expect(laboHeroSource).toContain('"(prefers-reduced-motion: reduce)"');
+    expect(laboHeroSource).toContain("reducedMotion.matches");
+  });
+
+  it("lets the LABO content cover the sticky hero", () => {
+    expect(laboPageSource).toContain("data-labo-content");
+    expect(laboPageSource).toContain('className="relative z-20"');
+    expect(laboPageSource.indexOf("<LaboHero />")).toBeLessThan(
+      laboPageSource.indexOf("data-labo-content")
+    );
+    expect(laboPageSource.indexOf("data-labo-content")).toBeLessThan(
+      laboPageSource.indexOf("<LaboAbout />")
+    );
   });
 });

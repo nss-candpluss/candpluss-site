@@ -1,16 +1,18 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { safeAccountReturnTo } from "@/lib/commerce/account-login";
+import { createPageMetadata } from "@/lib/site-metadata";
 import { siteConfig } from "@/lib/site";
 import { getCustomerTokenSession } from "@/lib/shopify/customer-session";
 import { bodyText, inputText, uiText } from "@/lib/typography";
 
-export const metadata: Metadata = {
-  title: `ログインまたはアカウント作成 | ${siteConfig.name}`,
+export const metadata = createPageMetadata({
+  title: "ログインまたはアカウント作成",
   description: `${siteConfig.name}のログイン・アカウント作成ページです。`,
-};
+  path: "/account/login",
+  index: false,
+});
 
 type AccountLoginPageProps = {
   searchParams: Promise<{

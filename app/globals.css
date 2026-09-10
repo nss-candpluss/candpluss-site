@@ -9,7 +9,7 @@
   --foreground: #191919;
   --color-muted: #676767;
   --color-new: #b86e00;
-  --color-line: #ded9cf;
+  --color-line: #ECEEF0;
   --color-divider: #e5e5e5;
   --color-surface: #fffdf8;
   /* Text Scale: 375px → 88%, 1440px+ → 100% */
@@ -450,10 +450,6 @@
 
 .section-title-62 {
   --section-title-responsive-max: 62px;
-}
-
-.home-beginning-title {
-  --section-title-responsive-max: 67px;
 }
 
 /** Support / Home: ピン延長分にフッターを重ね、Hero より手前に出す */

@@ -2,7 +2,16 @@ import { redirect } from "next/navigation";
 
 import { fetchCustomerAccount } from "@/lib/shopify/customer-account";
 import { getCustomerTokenSession } from "@/lib/shopify/customer-session";
+import { createPageMetadata } from "@/lib/site-metadata";
+import { siteConfig } from "@/lib/site";
 import { inputText } from "@/lib/typography";
+
+export const metadata = createPageMetadata({
+  title: "アカウント",
+  description: `${siteConfig.name}のアカウントページです。`,
+  path: "/account",
+  index: false,
+});
 
 function formatMoney(amount: string, currencyCode: string) {
   return new Intl.NumberFormat("ja-JP", {

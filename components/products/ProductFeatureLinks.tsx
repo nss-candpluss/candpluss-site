@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { HoverUnderlineText } from "@/components/ui/TextLink";
 import { arrowMaskStyle } from "@/lib/maskStyle";
 import { uiText } from "@/lib/typography";
 
@@ -21,7 +20,9 @@ function FeatureLinkContent({ label }: { label: string }) {
         className="my-auto size-[calc(20px*var(--text-scale))] shrink-0 bg-current"
         style={arrowMaskStyle}
       />
-      <HoverUnderlineText variant="groupHover">{label}</HoverUnderlineText>
+      <span className="underline decoration-1 underline-offset-[1px]">
+        {label}
+      </span>
     </>
   );
 }
@@ -38,7 +39,7 @@ export function ProductFeatureLinks({ links }: ProductFeatureLinksProps) {
       {links.map((link, index) => (
         <li key={`${link.href ?? "pending"}-${link.label}-${index}`}>
           {link.href ? (
-            <Link href={link.href} className={`group ${featureLinkClassName}`}>
+            <Link href={link.href} className={featureLinkClassName}>
               <FeatureLinkContent label={link.label} />
             </Link>
           ) : (

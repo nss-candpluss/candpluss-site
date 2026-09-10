@@ -7,13 +7,15 @@ import { LaboVisit } from "@/sections/labo/LaboVisit";
 
 export function LaboPage() {
   return (
-    <>
+    <div className="relative">
       <LaboHero />
-      <LaboAbout />
-      <LaboActivities />
-      <LaboDesign />
-      <LaboVisit />
-      <LaboAccess />
-    </>
+      <div data-labo-content className="relative z-20">
+        <LaboAbout />
+        <LaboActivities />
+        <LaboDesign />
+        <LaboVisit />
+        <LaboAccess />
+      </div>
+    </div>
   );
 }

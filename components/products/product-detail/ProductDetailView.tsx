@@ -42,7 +42,6 @@ const PRODUCT_DETAIL_SIZE_SPEC_TYPOGRAPHY = {
   itemName: uiText(14),
   content: "text-[clamp(13px,calc(14px*var(--text-scale)),14px)] leading-[24.5px]",
   note: "text-[clamp(13px,calc(14px*var(--text-scale)),14px)] leading-[clamp(22.75px,calc(24.5px*var(--text-scale)),24.5px)]",
-  download: uiText(14),
 } as const;
 
 function buildProductFeatures(

@@ -113,6 +113,15 @@ const PRODUCT_FRAGMENT = `
   downloads: metafield(namespace: "custom", key: "downloads") {
     references(first: 100) { nodes { ${FILE_REFERENCE_FRAGMENT} } }
   }
+  manualPdf: metafield(namespace: "custom", key: "manual_pdf") {
+    reference { ${FILE_REFERENCE_FRAGMENT} }
+  }
+  setupVideoUrl: metafield(namespace: "custom", key: "setup_video_url") {
+    value
+  }
+  teardownVideoUrl: metafield(namespace: "custom", key: "teardown_video_url") {
+    value
+  }
   optionProducts: metafield(namespace: "custom", key: "option_products") {
     references(first: 100) { nodes { ... on Product { id handle } } }
   }
@@ -201,6 +210,9 @@ type ShopifyProduct = {
   isNew?: { value?: string | null } | null;
   category?: { reference?: ShopifyMetaobject | null } | null;
   downloads?: { references?: { nodes: ShopifyMediaNode[] } | null } | null;
+  manualPdf?: { reference?: ShopifyMediaNode | null } | null;
+  setupVideoUrl?: { value?: string | null } | null;
+  teardownVideoUrl?: { value?: string | null } | null;
   optionProducts?: { references?: { nodes: ShopifyProductRef[] } | null } | null;
 };
 
@@ -479,29 +491,44 @@ function mapFeature(metaobject: ShopifyMetaobject, index: number): ProductFeatur
   };
 }
 
-function mapDownloads(nodes: ShopifyMediaNode[]) {
-  return nodes.flatMap((node) =>
-    node.url
-      ? [
-          {
-            label:
-              decodeURIComponent(node.url.split("/").pop()?.split("?")[0] || "") ||
-              "Download",
-            href: node.url,
-          },
-        ]
-      : []
-  );
+function pdfHref(node?: ShopifyMediaNode | null) {
+  if (
+    !node?.url ||
+    (node.mimeType !== "application/pdf" && !/\.pdf(?:$|[?#])/i.test(node.url))
+  ) {
+    return undefined;
+  }
+
+  return node.url;
+}
+
+function youtubeHref(value?: string | null) {
+  const href = value?.trim();
+  if (!href) {
+    return undefined;
+  }
+
+  try {
+    const url = new URL(href);
+    const hostname = url.hostname.toLowerCase();
+    const isYouTube =
+      hostname === "youtu.be" ||
+      hostname === "youtube.com" ||
+      hostname.endsWith(".youtube.com");
+
+    return url.protocol === "https:" && isYouTube ? url.toString() : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function mapSizeSpec(
   metaobject?: ShopifyMetaobject | null,
+  productManual?: ShopifyMediaNode | null,
+  productSetupVideoUrl?: string | null,
+  productTeardownVideoUrl?: string | null,
   productDownloads: ShopifyMediaNode[] = []
 ): ProductSizeSpec | undefined {
-  if (!metaobject && !productDownloads.length) {
-    return undefined;
-  }
-
   const fields = fieldMap(metaobject);
   const groups = (fields.get("groups")?.references?.nodes ?? []).filter(
     (node): node is ShopifyMetaobject => "fields" in node
@@ -511,10 +538,19 @@ function mapSizeSpec(
     "Size drawing"
   );
   const notes = parseJsonValue<string[]>(fields.get("notes")?.value, []);
-  const downloads = mapDownloads([
+  const legacyDownloads = [
     ...((fields.get("downloads")?.references?.nodes ?? []) as ShopifyMediaNode[]),
     ...productDownloads,
-  ]);
+  ];
+  const manualHref =
+    pdfHref(productManual) ??
+    legacyDownloads.map(pdfHref).find((href): href is string => Boolean(href));
+  const setupVideoHref = youtubeHref(productSetupVideoUrl);
+  const teardownVideoHref = youtubeHref(productTeardownVideoUrl);
+
+  if (!metaobject && !manualHref && !setupVideoHref && !teardownVideoHref) {
+    return undefined;
+  }
 
   return {
     specGroups: groups.map((group) => {
@@ -529,7 +565,9 @@ function mapSizeSpec(
       drawing?.kind === "image"
         ? { src: drawing.src, alt: drawing.alt }
         : undefined,
-    downloads: downloads.length ? downloads : undefined,
+    manualHref,
+    setupVideoHref,
+    teardownVideoHref,
   };
 }
 
@@ -679,6 +717,9 @@ export function mapShopifyProductToProduct(product: ShopifyProduct): Product {
       product.features?.references?.nodes.map(mapFeature) ?? undefined,
     sizeSpec: mapSizeSpec(
       product.sizeSpec?.reference,
+      product.manualPdf?.reference,
+      product.setupVideoUrl?.value,
+      product.teardownVideoUrl?.value,
       product.downloads?.references?.nodes ?? []
     ),
     options:

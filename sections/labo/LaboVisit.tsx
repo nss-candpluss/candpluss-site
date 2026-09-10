@@ -10,14 +10,15 @@ import {
   isContactLinkVisible,
   isSocialLinkVisible,
 } from "@/lib/site-navigation-visibility";
-import { bodyText, sectionTitle62ClassName, uiText } from "@/lib/typography";
+import { bodyText, uiText } from "@/lib/typography";
 
 const contactButtonClassName = `font-body-ja inline-flex w-full items-center justify-center gap-x-[calc(8px*var(--gap-scale-x))] gap-y-[calc(8px*var(--gap-scale-y))] font-semibold text-white ${uiText(16)} bg-[var(--foreground)] px-[calc(32px*var(--gap-scale-x))] py-[calc(32px*var(--layout-scale-y))] min-[1025px]:py-[calc(18px*var(--gap-scale-y))]`;
 
 const lineLink = footerContent.socialLinks.find((link) => link.label === "LINE");
 
 export function LaboVisit() {
-  const { title, label, body, notes, lineButton, contactButton } = laboVisitContent;
+  const { number, titleWrapSegments, label, body, notes, lineButton, contactButton } =
+    laboVisitContent;
   const showLine = Boolean(lineLink) && isSocialLinkVisible("LINE");
   const showForm = isContactLinkVisible();
   const buttonSpanClassName =
@@ -31,23 +32,31 @@ export function LaboVisit() {
     >
       <Container>
         <div>
-          <p className={`font-ui-en font-medium opacity-[0.65] ${uiText(18)}`}>
+          <h2 className={`font-heading ${uiText(48)}`}>
+            <span className="concept-heading-numeral mb-[clamp(16px,calc(20px*var(--gap-scale-y)),20px)] block">
+              {number}
+            </span>
+            <span className="flex flex-wrap gap-x-0 gap-y-[0.2em]">
+              {titleWrapSegments.map((segment) => (
+                <span key={segment} className="whitespace-nowrap">
+                  {segment}
+                </span>
+              ))}
+            </span>
+          </h2>
+          <p
+            className={`mt-[clamp(10px,calc(16px*var(--gap-scale-y)),16px)] font-ui-en font-medium opacity-[0.65] ${uiText(18)}`}
+          >
             {label}
           </p>
-          <h2
-            className={`mt-[calc(32px*var(--gap-scale-y))] font-heading ${sectionTitle62ClassName}`}
+          <p
+            className={`mt-[clamp(38px,calc(72px*var(--gap-scale-y)),72px)] font-body-ja ${bodyText(16)}`}
           >
-            {title}
-          </h2>
+            {body}
+          </p>
         </div>
 
-        <p
-          className={`mt-[calc(98px*var(--layout-scale-y))] font-body-ja ${bodyText(16)}`}
-        >
-          {body}
-        </p>
-
-        <ul className="mt-[calc(42px*var(--gap-scale-y))] flex flex-col gap-[calc(12px*var(--gap-scale-y))]">
+        <ul className="mt-[calc(20px*var(--gap-scale-y))] flex flex-col gap-0">
           {notes.map((note) => (
             <li
               key={note}

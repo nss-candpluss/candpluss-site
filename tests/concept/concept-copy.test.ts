@@ -251,6 +251,10 @@ describe("concept page copy", () => {
     expect(conceptPageSource).toContain("data-concept-outro");
     expect(conceptPageSource).toContain("data-concept-outro-title");
     expect(conceptPageSource).toContain("data-concept-outro-title-pin");
+    expect(conceptPageSource).toContain("AutoFitSingleLineHeading");
+    expect(conceptPageSource).toContain(
+      "<AutoFitSingleLineHeading\n          data-concept-outro-title"
+    );
     expect(conceptPageSource).not.toContain(
       "data-concept-outro-title-character"
     );

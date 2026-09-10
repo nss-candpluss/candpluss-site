@@ -28,6 +28,7 @@ const UI_TEXT_PX = {
   24: "text-[calc(24px*var(--text-scale))] leading-[calc(24px*var(--text-scale))]",
   30: "text-[calc(30px*var(--text-scale))] leading-[calc(30px*var(--text-scale))]",
   32: "text-[calc(32px*var(--text-scale))] leading-[calc(32px*var(--text-scale))]",
+  48: "text-[clamp(38px,calc(48px*var(--text-scale)),48px)] leading-[clamp(38px,calc(48px*var(--text-scale)),48px)]",
   62: "text-[calc(62px*var(--text-scale))] leading-[calc(62px*var(--text-scale))]",
   67: "text-[calc(67px*var(--text-scale))] leading-[calc(67px*var(--text-scale))]",
   72: "text-[calc(72px*var(--text-scale))] leading-[calc(72px*var(--text-scale))]",
@@ -80,10 +81,6 @@ export type InputTextSizePx = keyof typeof INPUT_TEXT_PX;
 /** 62px セクション見出し: 430px以下 36–42px、431px+ は 62px × text-scale */
 export const sectionTitle62ClassName =
   "section-title-responsive section-title-62";
-
-/** 67px 見出し（beginning）: 430px以下 36–42px、431px+ は 67px × text-scale */
-export const sectionTitle67ClassName =
-  "section-title-responsive home-beginning-title";
 
 /** Concept 見出し数字: 375px → 32px、1440px+ → 48px（32px未満にしない）
  *  line-height は Baskervville SC の数字インク高（約 0.48em）。

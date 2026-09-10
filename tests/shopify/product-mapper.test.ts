@@ -131,6 +131,30 @@ describe("mapShopifyProductToProduct", () => {
         },
       },
       sizeSpec: null,
+      manualPdf: {
+        reference: {
+          id: "gid://shopify/GenericFile/manual",
+          url: "https://cdn.shopify.com/files/manual.pdf",
+          mimeType: "application/pdf",
+        },
+      },
+      setupVideoUrl: {
+        value: "https://www.youtube.com/watch?v=setup-video",
+      },
+      teardownVideoUrl: {
+        value: "https://youtu.be/teardown-video",
+      },
+      downloads: {
+        references: {
+          nodes: [
+            {
+              id: "gid://shopify/GenericFile/legacy-manual",
+              url: "https://cdn.shopify.com/files/legacy-manual.pdf",
+              mimeType: "application/pdf",
+            },
+          ],
+        },
+      },
       memberOnly: { value: "true" },
       isNew: { value: "true" },
       category: {
@@ -201,6 +225,11 @@ describe("mapShopifyProductToProduct", () => {
       group: "TEST01",
       title: "Custom group",
     });
+    expect(product.sizeSpec).toMatchObject({
+      manualHref: "https://cdn.shopify.com/files/manual.pdf",
+      setupVideoHref: "https://www.youtube.com/watch?v=setup-video",
+      teardownVideoHref: "https://youtu.be/teardown-video",
+    });
     expect(mapStorefrontHref("/products/zig-stake20")).toBe(
       "/products/zig-stake20"
     );
@@ -209,6 +238,55 @@ describe("mapShopifyProductToProduct", () => {
         "https://candpluss.camp/test/products/moya500-inner-tent/?color=default"
       )
     ).toBe("/products/moya500-inner-tent");
+  });
+
+  it("uses the first legacy PDF when the dedicated manual field is empty", () => {
+    const product = mapShopifyProductToProduct({
+      id: "gid://shopify/Product/legacy-download",
+      handle: "legacy-download",
+      title: "Legacy download",
+      description: "",
+      productType: "アクセサリー",
+      availableForSale: true,
+      featuredImage: null,
+      media: { nodes: [] },
+      variants: { nodes: [] },
+      salesStatus: null,
+      features: null,
+      sizeSpec: {
+        reference: {
+          id: "gid://shopify/Metaobject/size-spec",
+          type: "product_size_spec",
+          fields: [
+            {
+              key: "downloads",
+              type: "list.file_reference",
+              references: {
+                nodes: [
+                  {
+                    id: "gid://shopify/GenericFile/text",
+                    url: "https://cdn.shopify.com/files/readme.txt",
+                    mimeType: "text/plain",
+                  },
+                  {
+                    id: "gid://shopify/GenericFile/manual",
+                    url: "https://cdn.shopify.com/files/legacy-manual.pdf",
+                    mimeType: "application/pdf",
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      setupVideoUrl: { value: "https://example.com/not-youtube" },
+      optionProducts: null,
+    } as Parameters<typeof mapShopifyProductToProduct>[0]);
+
+    expect(product.sizeSpec?.manualHref).toBe(
+      "https://cdn.shopify.com/files/legacy-manual.pdf"
+    );
+    expect(product.sizeSpec?.setupVideoHref).toBeUndefined();
   });
 
   it("keeps variant ids unique when Shopify colors collide", () => {

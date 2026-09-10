@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000"><metadata><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"><rdf:Description><dc:creator>RealFaviconGenerator</dc:creator><dc:source>https://realfavicongenerator.net</dc:source></rdf:Description></rdf:RDF></metadata><style>
+    #light-icon {
+      display: inline;
+    }
+    #dark-icon {
+      display: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      #light-icon {
+        display: none;
+      }
+      #dark-icon {
+        display: inline;
+      }
+    }
+  </style><g id="light-icon"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000"><g clip-path="url(#SvgjsClipPath1071)"><rect width="1000" height="1000" fill="#000000"></rect><g transform="matrix(1.3671875,0,0,1.3671875,150,150)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"><g id="a" data-name="レイヤー 1">
+    <rect width="512" height="512"></rect>
+  </g><g id="b" data-name="logo">
+    <path d="M256,156.1176c61.3862,0,80.7118,53.31,80.7118,53.31l46.7775-26.3267s-40.302-77.1009-127.4893-77.1009c-85.2993,0-152.1091,65.8907-152.1091,150.0082,0,73.728,56.8963,149.9918,152.1091,149.9918,90.0541,0,127.3088-77.224,127.3088-77.224l-46.6544-26.22s-18.2257,53.3346-80.6543,53.3346c-58.1355,0-101.9832-42.9451-101.9832-99.8824,0-38.6202,27.689-99.8906,101.9832-99.8906Z" fill="#fff"></path>
+  </g></svg></g></g><defs><clipPath id="SvgjsClipPath1071"><rect width="1000" height="1000" x="0" y="0" rx="500" ry="500"></rect></clipPath></defs></svg></g><g id="dark-icon"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000"><g clip-path="url(#SvgjsClipPath1072)"><rect width="1000" height="1000" fill="#ffffff"></rect><g transform="matrix(1.3671875,0,0,1.3671875,150,150)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"><g id="a" data-name="レイヤー 1">
+    <rect width="512" height="512" fill="#fff"></rect>
+  </g><g id="b" data-name="logo">
+    <path d="M256,156.1176c61.3862,0,80.7118,53.31,80.7118,53.31l46.7775-26.3267s-40.302-77.1009-127.4893-77.1009c-85.2993,0-152.1091,65.8907-152.1091,150.0082,0,73.728,56.8963,149.9918,152.1091,149.9918,90.0541,0,127.3088-77.224,127.3088-77.224l-46.6544-26.22s-18.2257,53.3346-80.6543,53.3346c-58.1355,0-101.9832-42.9451-101.9832-99.8824,0-38.6202,27.689-99.8906,101.9832-99.8906Z"></path>
+  </g></svg></g></g><defs><clipPath id="SvgjsClipPath1072"><rect width="1000" height="1000" x="0" y="0" rx="500" ry="500"></rect></clipPath></defs></svg></g></svg>

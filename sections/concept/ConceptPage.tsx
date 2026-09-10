@@ -1,4 +1,5 @@
 import { Container } from "@/components/ui/Container";
+import { AutoFitSingleLineHeading } from "@/components/ui/AutoFitSingleLineHeading";
 import { SiteImage } from "@/components/ui/SiteImage";
 import { SiteGrid } from "@/components/ui/SiteGrid";
 
@@ -99,23 +100,14 @@ function ConceptStoryHeading({
 function ConceptOutroTitle({ title }: { title: string }) {
   return (
     <div data-concept-outro-title-pin className="col-span-12">
-      <div className="flex flex-col items-center">
-        <h2
+      <div className="flex w-full flex-col items-center">
+        <AutoFitSingleLineHeading
           data-concept-outro-title
-          aria-label={title}
-          className={`${conceptTitleWrapClassName} font-heading ${conceptStoryTitleClassName}`}
+          className={`font-heading ${conceptStoryTitleClassName}`}
           style={{ opacity: 0, transform: "translateY(96px)" }}
         >
-          {splitConceptTitleWrapUnits(title).map((unit, unitIndex) => (
-            <span
-              key={`${unit}-${unitIndex}`}
-              className="inline-block"
-              aria-hidden="true"
-            >
-              {unit}
-            </span>
-          ))}
-        </h2>
+          {title}
+        </AutoFitSingleLineHeading>
         <span
           data-concept-outro-logo
           aria-hidden="true"

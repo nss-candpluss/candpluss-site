@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
-
 import { Container } from "@/components/ui/Container";
 import { SiteGrid } from "@/components/ui/SiteGrid";
 import { fullSpanClassName } from "@/lib/layout";
 import { SupportContactThanks } from "@/sections/support/SupportContactThanks";
+import { createPageMetadata } from "@/lib/site-metadata";
 import { siteConfig } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: `お問合せありがとうございます | ${siteConfig.name}`,
+export const metadata = createPageMetadata({
+  title: "お問合せありがとうございます",
   description: `${siteConfig.name}製品保証・修理お問い合わせ完了ページです。`,
-};
+  path: "/support/thanks",
+  index: false,
+});
 
 export default function SupportContactThanksPage() {
   return (

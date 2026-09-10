@@ -32,7 +32,7 @@ function source(path: string): string {
 }
 
 describe("contact form", () => {
-  it("uses three dropdown categories without photo attachments", () => {
+  it("uses four dropdown categories without photo attachments", () => {
     const formSource = source("sections/contact/ContactForm.tsx");
     const confirmSource = source("sections/contact/ContactConfirm.tsx");
     const schemaSource = source("lib/contact/contact-schema.ts");
@@ -40,6 +40,7 @@ describe("contact form", () => {
 
     expect(CONTACT_CATEGORIES).toEqual([
       { label: "製品に関するお問い合わせ", value: "product" },
+      { label: "Laboのご予約", value: "labo-reservation" },
       { label: "卸売について", value: "wholesale" },
       { label: "その他ご質問・ご意見", value: "other" },
     ]);

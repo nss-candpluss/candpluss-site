@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { JsonLd } from "@/components/layout/JsonLd";
 import { MaskedImage } from "@/components/ui/MaskedImage";
 import { Container } from "@/components/ui/Container";
 import { NewsArticleContent } from "@/components/news/NewsArticleContent";
@@ -12,6 +13,12 @@ import {
 } from "@/lib/news/articles";
 import { formatNewsDate } from "@/lib/news/format";
 import { resolveArticleExcerpt } from "@/lib/news/excerpt";
+import {
+  buildBreadcrumbJsonLd,
+  buildNewsArticleJsonLd,
+  pageBreadcrumb,
+} from "@/lib/json-ld";
+import { createPageMetadata } from "@/lib/site-metadata";
 import { uiText } from "@/lib/typography";
 
 type NewsDetailPageProps = {
@@ -36,10 +43,13 @@ export async function generateMetadata({
     return {};
   }
 
-  return {
+  return createPageMetadata({
     title: article.title,
     description: resolveArticleExcerpt(article),
-  };
+    path: `/news/${handle}`,
+    image: article.image,
+    ogType: "article",
+  });
 }
 
 export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
@@ -58,6 +68,17 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
       className="pt-[var(--product-page-title-top)] pb-[var(--container-y-bottom)]"
     >
       <Container>
+        <JsonLd
+          data={[
+            buildNewsArticleJsonLd(article),
+            buildBreadcrumbJsonLd(
+              pageBreadcrumb([
+                { name: "News & Topics", path: "/news" },
+                { name: article.title, path: `/news/${article.handle}` },
+              ])
+            ),
+          ]}
+        />
         <article className="mx-auto max-w-[980px]">
           <p className={`font-ui-en text-[var(--color-muted)] ${uiText(14)}`}>
             <span>{article.tag}</span>

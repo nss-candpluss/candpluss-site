@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ProductDetailView } from "@/components/products/product-detail/ProductDetailView";
+import { JsonLd } from "@/components/layout/JsonLd";
+import { getProductListingImage } from "@/lib/products/gallery";
 import { getProductMetaDescription } from "@/lib/products/description";
 import {
   getAllProductHandles,
@@ -9,6 +11,12 @@ import {
   getProductsByHandles,
   resolveProductVariantId,
 } from "@/lib/products";
+import {
+  buildBreadcrumbJsonLd,
+  buildProductPageJsonLd,
+  pageBreadcrumb,
+} from "@/lib/json-ld";
+import { createPageMetadata } from "@/lib/site-metadata";
 
 type ProductDetailPageProps = {
   params: Promise<{
@@ -32,10 +40,12 @@ export async function generateMetadata({
     return {};
   }
 
-  return {
+  return createPageMetadata({
     title: product.title,
     description: getProductMetaDescription(product.description),
-  };
+    path: `/products/${handle}`,
+    image: getProductListingImage(product)?.src,
+  });
 }
 
 export default async function ProductDetailPage({
@@ -60,6 +70,17 @@ export default async function ProductDetailPage({
       data-header-theme="onLight"
       className="pb-[var(--container-y-bottom)] min-[1025px]:pt-0"
     >
+      <JsonLd
+        data={[
+          buildProductPageJsonLd(product),
+          buildBreadcrumbJsonLd(
+            pageBreadcrumb([
+              { name: "Products", path: "/products" },
+              { name: product.title, path: `/products/${product.handle}` },
+            ])
+          ),
+        ]}
+      />
       <ProductDetailView
         product={product}
         initialVariantId={initialVariantId}

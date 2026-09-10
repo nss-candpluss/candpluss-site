@@ -104,11 +104,6 @@ export type ProductSizeSpecGroup = {
   value: string;
 };
 
-export type ProductDownload = {
-  label: string;
-  href: string;
-};
-
 export type ProductSizeSpec = {
   /** ラベル / 値の2列レイアウト（旧形式） */
   specs?: ProductSizeSpecItem[];
@@ -116,7 +111,12 @@ export type ProductSizeSpec = {
   specGroups?: ProductSizeSpecGroup[];
   notes?: string[];
   drawingImage?: ProductImage;
-  downloads?: ProductDownload[];
+  /** Shopifyへアップロードした取扱説明書PDF */
+  manualHref?: string;
+  /** Shopifyの商品メタフィールドで設定したYouTube設営動画 */
+  setupVideoHref?: string;
+  /** Shopifyの商品メタフィールドで設定したYouTube撤収動画 */
+  teardownVideoHref?: string;
 };
 
 export type Product = {

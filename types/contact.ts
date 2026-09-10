@@ -4,6 +4,10 @@ export const CONTACT_CATEGORIES = [
     value: "product",
   },
   {
+    label: "Laboのご予約",
+    value: "labo-reservation",
+  },
+  {
     label: "卸売について",
     value: "wholesale",
   },

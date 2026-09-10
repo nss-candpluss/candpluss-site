@@ -11,6 +11,14 @@ const homeHeroSource = readFileSync(
   "utf8"
 );
 
+const autoFitHeadingSource = readFileSync(
+  join(
+    dirname(fileURLToPath(import.meta.url)),
+    "../../components/ui/AutoFitSingleLineHeading.tsx"
+  ),
+  "utf8"
+);
+
 describe("top hero OUR BEGINNING copy", () => {
   it("uses the current beginning title and has no mid-label", () => {
     expect(topHeroContent.beginning.title).toBe("Camp + Something.");
@@ -37,15 +45,40 @@ describe("top hero OUR BEGINNING copy", () => {
   it("keeps enough hero scroll for the beginning title to reach mid-viewport", () => {
     expect(homeHeroSource).toContain("min-h-[50svh]");
     expect(homeHeroSource).toContain("-mt-[50px]");
-    expect(homeHeroSource).toContain("pb-[20vh]");
+    expect(homeHeroSource).toContain("pb-[var(--container-y-bottom)]");
   });
 
   it("centers the beginning copy", () => {
-    expect(homeHeroSource).toContain("flex flex-col items-center text-center text-white");
+    expect(homeHeroSource).toContain("flex w-full flex-col items-center text-center text-white");
   });
 
   it("keeps the beginning copy above the pinned hero visual", () => {
     expect(homeHeroSource).toContain('data-home-hero-copy');
     expect(homeHeroSource).toContain("relative z-10");
+  });
+
+  it("uses Concept story body type and label-to-body gap", () => {
+    expect(homeHeroSource).toContain("conceptStoryBodyClassName");
+    expect(homeHeroSource).toContain("mt-[var(--section-title-gap)]");
+    expect(homeHeroSource).not.toContain("bodyText(18)");
+    expect(homeHeroSource).not.toContain("mt-[calc(98px*var(--gap-scale-y))]");
+  });
+
+  it("uses Concept English title size and container-y-bottom below READ MORE", () => {
+    expect(homeHeroSource).toContain("conceptStoryTitleClassName");
+    expect(homeHeroSource).not.toContain("sectionTitle67ClassName");
+    expect(homeHeroSource).not.toContain("pb-[20vh]");
+  });
+
+  it("keeps the title on one line and fits it to the content area", () => {
+    expect(homeHeroSource).toContain("data-home-beginning-title");
+    expect(homeHeroSource).toContain("AutoFitSingleLineHeading");
+    expect(autoFitHeadingSource).toContain("max-w-full whitespace-nowrap");
+    expect(autoFitHeadingSource).toContain("const availableWidth = area.clientWidth");
+    expect(autoFitHeadingSource).toContain("const naturalWidth = heading.scrollWidth");
+    expect(autoFitHeadingSource).toContain("availableWidth / naturalWidth");
+    expect(autoFitHeadingSource).toContain(
+      'document.fonts.addEventListener("loadingdone", fitHeading)'
+    );
   });
 });

@@ -3,6 +3,7 @@
 import { SiteImage } from "@/components/ui/SiteImage";
 import { useLayoutEffect, useRef } from "react";
 
+import { AutoFitSingleLineHeading } from "@/components/ui/AutoFitSingleLineHeading";
 import { TextLink } from "@/components/ui/TextLink";
 import { topHeroContent } from "@/data/home";
 import {
@@ -14,7 +15,7 @@ import {
   updateHeroScrollEndVar,
 } from "@/lib/heroScrollVisuals";
 import { assetPath } from "@/lib/assetPath";
-import { bodyText, sectionTitle67ClassName } from "@/lib/typography";
+import { conceptStoryBodyClassName, conceptStoryTitleClassName } from "@/lib/typography";
 
 const HERO_LAYER_IMAGE_CLASS = "object-cover object-center";
 
@@ -188,15 +189,18 @@ export function HomeHero() {
       <section
         data-home-hero-copy
         data-header-theme="onDark"
-        className="relative z-10 -mt-[50px] min-h-[50svh] px-[var(--container-x)] pb-[20vh]"
+        className="relative z-10 -mt-[50px] min-h-[50svh] px-[var(--container-x)] pb-[var(--container-y-bottom)]"
       >
-        <div className="flex flex-col items-center text-center text-white">
-          <h2 className={`${sectionTitle67ClassName} font-heading`}>
+        <div className="flex w-full flex-col items-center text-center text-white">
+          <AutoFitSingleLineHeading
+            data-home-beginning-title
+            className={`${conceptStoryTitleClassName} font-heading`}
+          >
             {topHeroContent.beginning.title}
-          </h2>
+          </AutoFitSingleLineHeading>
           <p
             data-home-hero-body
-            className={`font-body-ja mt-[calc(98px*var(--gap-scale-y))] ${bodyText(18)}`}
+            className={`font-body-ja mt-[var(--section-title-gap)] ${conceptStoryBodyClassName}`}
           >
             {topHeroContent.beginning.bodyLines.map((line, index, lines) => (
               <span key={`${line}-${index}`}>

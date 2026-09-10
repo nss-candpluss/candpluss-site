@@ -110,19 +110,14 @@ const MOYA500_SIZE_SPEC: ProductSizeSpec = {
     "※ご使用前に取扱説明書を必ずよくお読みいただき、正しく安全に設営・ご使用ください。",
   ],
   drawingImage: drawingImage("moya500", "MOYA500 drawing"),
-  downloads: [
-    {
-      label: "取扱説明書PDF",
-      href: "/documents/products/moya500/manual.pdf",
-    },
-  ],
+  manualHref: "/documents/products/moya500/manual.pdf",
 };
 
 /** 図面非表示用（一時）。復活時は MOYA500_SIZE_SPEC をそのまま指定する */
 const MOYA500_SIZE_SPEC_WITHOUT_DRAWING: ProductSizeSpec = {
   specGroups: MOYA500_SIZE_SPEC.specGroups,
   notes: MOYA500_SIZE_SPEC.notes,
-  downloads: MOYA500_SIZE_SPEC.downloads,
+  manualHref: MOYA500_SIZE_SPEC.manualHref,
 };
 
 const GEARAID_SEAM_GRIP_SIZE_SPEC: ProductSizeSpec = {

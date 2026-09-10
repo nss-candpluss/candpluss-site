@@ -102,8 +102,8 @@ describe("support guide accordions", () => {
     expect(supportContent.guide.phoneSection).toEqual({
       title: "お電話でのお問い合わせ",
       phoneNumber: "0120-64-8175",
-      hours: "受付時間：平日 09:00〜17:00",
-      hoursEmphasis: "平日 09:00〜17:00",
+      hours: "受付時間：平日 10:00〜17:00",
+      hoursEmphasis: "平日 10:00〜17:00",
       note: "※土日、祝日、年末年始のお問い合わせは、「LINE」または「初期不良・修理 専用フォーム」よりお問い合わせください。",
     });
     expect(supportGuideSource).toContain(
@@ -173,6 +173,18 @@ describe("support guide accordions", () => {
       "損傷・破損による修理について",
       "修理に関する注意点",
     ]);
+    expect(supportContent.guide.accordionNote).toBe(
+      "※初期不良による交換および修理をご依頼の際は、必ず上記「初期不良に関する保証基準」「損傷・破損による修理について」「修理に関する注意点」をお読みいただいてから、ご依頼いただきますようお願い致します。"
+    );
+    expect(supportGuideSource).toContain(
+      'const supportAccordionNoteClassName = "mt-[calc(42px*var(--gap-scale))]"'
+    );
+    expect(supportGuideSource.indexOf("<SupportAccordion")).toBeLessThan(
+      supportGuideSource.indexOf("guide.accordionNote")
+    );
+    expect(supportGuideSource.indexOf("guide.accordionNote")).toBeLessThan(
+      supportGuideSource.indexOf("data-support-contact")
+    );
   });
 
   it("uses the current initial defect warranty copy", () => {

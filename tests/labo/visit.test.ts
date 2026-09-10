@@ -14,7 +14,9 @@ const laboVisitSource = readFileSync(
 
 describe("labo visit reservation", () => {
   it("uses the visit copy, notes, and reservation button labels", () => {
+    expect(laboVisitContent.number).toBe("04.");
     expect(laboVisitContent.title).toBe("LABO見学予約");
+    expect(laboVisitContent.titleWrapSegments).toEqual(["LABO", "見学予約"]);
     expect(laboVisitContent.label).toBe("VISIT THE LABO");
     expect(laboVisitContent.body).toContain("見学は事前予約制です");
     expect(laboVisitContent.notes).toHaveLength(3);
@@ -24,6 +26,40 @@ describe("labo visit reservation", () => {
       "お問い合わせフォームよりご予約"
     );
     expect(laboVisitContent.contactButton.href).toBe("/contact");
+  });
+
+  it("matches the design section heading type and spacing", () => {
+    expect(laboVisitSource).toContain("titleWrapSegments");
+    expect(laboVisitSource).toContain("gap-y-[0.2em]");
+    expect(laboVisitSource).toContain("whitespace-nowrap");
+    expect(laboVisitSource).toContain("uiText(48)");
+    expect(laboVisitSource).toContain("concept-heading-numeral");
+    expect(laboVisitSource).toContain(
+      "mb-[clamp(16px,calc(20px*var(--gap-scale-y)),20px)]"
+    );
+    expect(laboVisitSource).toContain("uiText(18)");
+    expect(laboVisitSource).toContain(
+      "mt-[clamp(10px,calc(16px*var(--gap-scale-y)),16px)]"
+    );
+    expect(laboVisitSource).toContain("bodyText(16)");
+    expect(laboVisitSource).toContain(
+      "mt-[clamp(38px,calc(72px*var(--gap-scale-y)),72px)]"
+    );
+    expect(laboVisitSource).not.toContain("sectionTitle62ClassName");
+    expect(laboVisitSource).not.toContain(
+      "mt-[calc(32px*var(--gap-scale-y))]"
+    );
+    expect(laboVisitSource).not.toContain(
+      "mt-[calc(98px*var(--layout-scale-y))]"
+    );
+    expect(laboVisitSource).toContain("mt-[calc(20px*var(--gap-scale-y))]");
+    expect(laboVisitSource).toContain("gap-0");
+    expect(laboVisitSource).not.toContain(
+      "mt-[calc(42px*var(--gap-scale-y))]"
+    );
+    expect(laboVisitSource).not.toContain(
+      "gap-[calc(12px*var(--gap-scale-y))]"
+    );
   });
 
   it("uses Support-style LINE and form buttons", () => {

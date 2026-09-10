@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
-
 import { Container } from "@/components/ui/Container";
 import { SiteGrid } from "@/components/ui/SiteGrid";
 import { fullSpanClassName } from "@/lib/layout";
 import { ContactThanks } from "@/sections/contact/ContactThanks";
+import { createPageMetadata } from "@/lib/site-metadata";
 import { siteConfig } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: `お問合せありがとうございます | ${siteConfig.name}`,
+export const metadata = createPageMetadata({
+  title: "お問合せありがとうございます",
   description: `${siteConfig.name}お問い合わせ完了ページです。`,
-};
+  path: "/contact/thanks",
+  index: false,
+});
 
 export default function ContactThanksPage() {
   return (
