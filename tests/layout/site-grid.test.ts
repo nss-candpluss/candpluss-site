@@ -11,6 +11,7 @@ import {
   definitionLabelSpanClassName,
   definitionValueSpanClassName,
   MAIN_PRODUCTS_THREE_COLUMN_MIN_COUNT,
+  formActionHalfSpanClassName,
   formHalfSpanClassName,
   fullSpanClassName,
   mainProductCardAspectClassName,
@@ -67,6 +68,7 @@ describe("12 column site grid", () => {
     expect(formHalfSpanClassName).toContain(
       "col-span-12 min-[640px]:col-span-6"
     );
+    expect(formActionHalfSpanClassName).toBe("col-span-6");
     expect(definitionLabelSpanClassName).toContain(
       "col-span-12 min-[768px]:col-span-3"
     );

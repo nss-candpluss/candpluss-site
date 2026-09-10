@@ -7,10 +7,11 @@ import {
   CONTACT_FORM_STORAGE_KEY,
   normalizeContactFormData,
 } from "@/lib/contact/form-storage";
+import { parseExpiringDraft } from "@/lib/contact/draft-expiration";
 import type { ContactFormData } from "@/types/contact";
 
 let cachedStorageValue: string | null | undefined;
-let cachedSnapshot: ContactFormData | null = null;
+let cachedSnapshot: ContactFormData | null | undefined = null;
 
 function subscribe(onStoreChange: () => void) {
   if (typeof window === "undefined") {
@@ -31,7 +32,7 @@ function subscribe(onStoreChange: () => void) {
   };
 }
 
-function getSnapshot(): ContactFormData | null {
+function getSnapshot(): ContactFormData | null | undefined {
   if (typeof window === "undefined") {
     return null;
   }
@@ -49,19 +50,21 @@ function getSnapshot(): ContactFormData | null {
     return null;
   }
 
-  try {
-    cachedSnapshot = normalizeContactFormData(JSON.parse(raw));
-  } catch {
+  cachedSnapshot = parseExpiringDraft(raw, normalizeContactFormData);
+
+  if (!cachedSnapshot) {
+    window.sessionStorage.removeItem(CONTACT_FORM_STORAGE_KEY);
+    cachedStorageValue = null;
     cachedSnapshot = null;
   }
 
   return cachedSnapshot;
 }
 
-function getServerSnapshot(): ContactFormData | null {
-  return null;
+function getServerSnapshot(): ContactFormData | null | undefined {
+  return undefined;
 }
 
-export function useContactFormDraft(): ContactFormData | null {
+export function useContactFormDraft(): ContactFormData | null | undefined {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

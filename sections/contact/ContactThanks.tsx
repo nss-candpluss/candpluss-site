@@ -39,13 +39,6 @@ export function ContactThanks() {
           </span>
         ))}
         <span className={thanksBodyNoteClassName}>{contactPageContent.thanksBodyAutoReplyNote}</span>
-        <br />
-        {contactPageContent.thanksBodyOutro.map((line, index) => (
-          <span key={line}>
-            {index > 0 ? <br /> : null}
-            {line}
-          </span>
-        ))}
       </p>
 
       <div className="mt-[calc(72px*var(--gap-scale-y))] mx-auto max-w-[480px]">

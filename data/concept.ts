@@ -1,6 +1,4 @@
-const DUMMY_BACKGROUND = "/images/products/_shared/placeholder.webp";
-
-function conceptBackground(index: "01" | "02" | "03" | "06" | "07" | "08" | "09") {
+function conceptBackground(index: "01" | "02" | "03" | "04" | "05" | "06" | "07" | "08" | "09") {
   return `/images/concept/concept-${index}.webp`;
 }
 
@@ -101,7 +99,7 @@ FUNCTION × BEAUTY.
     {
       id: "material",
       title: "04｜Material",
-      backgroundImage: DUMMY_BACKGROUND,
+      backgroundImage: conceptBackground("04"),
       label: "NO COMPROMISE IN MATERIALS.",
       body: `素材に妥協しない。
 
@@ -133,7 +131,7 @@ Duraflexのパーツ。
     {
       id: "detail",
       title: "05｜Detail",
-      backgroundImage: DUMMY_BACKGROUND,
+      backgroundImage: conceptBackground("05"),
       label: "EVERY DETAIL MATTERS.",
       body: `小さなパーツにも理由がある。
 

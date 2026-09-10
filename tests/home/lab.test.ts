@@ -13,7 +13,7 @@ const homeLabSource = readFileSync(
 
 describe("home lab image", () => {
   it("renders a static full-viewport image without pin or scroll animation", () => {
-    expect(homeLabContent.backgroundImage).toBe("/images/home/home-link-labo.webp");
+    expect(homeLabContent.backgroundImage).toBe("/images/home/home-image.webp");
     expect(homeLabSource).toContain("h-svh");
     expect(homeLabSource).not.toContain("sticky");
     expect(homeLabSource).not.toContain("gsap");

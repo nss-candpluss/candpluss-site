@@ -13,8 +13,8 @@ function source(path: string): string {
 }
 
 describe("company document", () => {
-  it("keeps COMPANY and company information only", () => {
-    expect(companyContent.title).toBe("COMPANY");
+  it("keeps Company and company information only", () => {
+    expect(companyContent.title).toBe("Company");
     expect(companyContent.items.map((item) => item.label)).toEqual([
       "会社名",
       "本社所在地",

@@ -3,6 +3,10 @@ import {
   isContactCategory,
   type ContactFormData,
 } from "@/types/contact";
+import {
+  parseExpiringDraft,
+  serializeExpiringDraft,
+} from "@/lib/contact/draft-expiration";
 
 export const CONTACT_FORM_STORAGE_KEY = "candpluss:contact-form";
 export const CONTACT_DRAFT_CHANGED_EVENT = "candpluss:contact-draft-changed";
@@ -46,11 +50,13 @@ export function readContactFormDraft(): ContactFormData | null {
     return null;
   }
 
-  try {
-    return normalizeContactFormData(JSON.parse(raw));
-  } catch {
-    return null;
+  const draft = parseExpiringDraft(raw, normalizeContactFormData);
+
+  if (!draft) {
+    window.sessionStorage.removeItem(CONTACT_FORM_STORAGE_KEY);
   }
+
+  return draft;
 }
 
 export function writeContactFormDraft(data: ContactFormData): void {
@@ -58,7 +64,10 @@ export function writeContactFormDraft(data: ContactFormData): void {
     return;
   }
 
-  window.sessionStorage.setItem(CONTACT_FORM_STORAGE_KEY, JSON.stringify(data));
+  window.sessionStorage.setItem(
+    CONTACT_FORM_STORAGE_KEY,
+    serializeExpiringDraft(data)
+  );
   window.dispatchEvent(new Event(CONTACT_DRAFT_CHANGED_EVENT));
 }
 

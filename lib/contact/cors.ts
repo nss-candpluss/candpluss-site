@@ -8,10 +8,27 @@ function getAllowedOrigins(): string[] {
   return configured && configured.length > 0 ? configured : DEFAULT_ALLOWED_ORIGINS;
 }
 
+export const CONTACT_CORS_REJECTION_MESSAGE =
+  "許可されていない送信元からのリクエストです。";
+
+export function isContactOriginAllowed(request: Request): boolean {
+  const origin = request.headers.get("origin");
+
+  if (!origin) {
+    return true;
+  }
+
+  if (origin === new URL(request.url).origin) {
+    return true;
+  }
+
+  return getAllowedOrigins().includes(origin);
+}
+
 export function getContactCorsHeaders(request: Request): HeadersInit {
   const origin = request.headers.get("origin");
 
-  if (!origin || !getAllowedOrigins().includes(origin)) {
+  if (!origin || !isContactOriginAllowed(request)) {
     return {};
   }
 

@@ -17,7 +17,6 @@ import {
 } from "@/data/navigation";
 import { newsItems } from "@/data/news";
 import { products } from "@/data/products";
-import { supportContent } from "@/data/support";
 import {
   isContactLinkVisible,
   isHeaderIconLinkVisible,
@@ -33,6 +32,8 @@ const staticRoutes = new Set([
   "/labo",
   "/quality",
   "/support",
+  "/support/confirm",
+  "/support/thanks",
   "/news",
   "/cart",
   "/account",
@@ -48,8 +49,10 @@ const staticRoutes = new Set([
   "/legal/cookie-policy",
 ]);
 
-const productHandles = new Set(products.map((product) => product.handle));
-const newsHandles = new Set(newsItems.map((item) => item.handle));
+const productHandles = new Set<string>(
+  products.map((product) => product.handle)
+);
+const newsHandles = new Set<string>(newsItems.map((item) => item.handle));
 
 /** 未確定のため現状維持。公開前に解消する。 */
 const pendingInternalHrefs = new Set([
@@ -123,10 +126,12 @@ describe("internal page links", () => {
       ...homeFeatureLinks.map((item) => item.href),
       ...conceptContent.featureLinks.map((item) => item.href),
       laboVisitContent.contactButton.href,
-      supportContent.guide.contactButton.href,
       contactPageContent.privacyPolicyHref,
+      contactPageContent.termsHref,
       ...newsItems.flatMap((item) =>
-        item.contentLink?.href.startsWith("/") ? [item.contentLink.href] : []
+        "contentLink" in item && item.contentLink.href.startsWith("/")
+          ? [item.contentLink.href]
+          : []
       ),
     ];
 

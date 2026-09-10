@@ -2,31 +2,30 @@ import type { ContactFormFieldKey } from "@/types/contact";
 
 export const contactPageContent = {
   title: "Contact",
-  confirmTitle: "Confirm",
-  thanksTitle: "お問合せいただきありがとうございます",
+  confirmTitle: "入力内容確認",
+  confirmIntroParagraphs: [
+    "入力内容をご確認いただき、問題がなければ「送信する」ボタンを押してください。",
+  ],
+  thanksTitle: "お問い合わせが完了しました",
   thanksBodyIntro: [
-    "お問い合わせ内容を受け付けました。",
-    "ご入力いただいたメールアドレス宛に、自動返信メールをお送りしております。",
+    "お問い合わせありがとうございます。",
+    "担当者が内容を確認のうえ、順次対応させていただきます。",
+    "システムによる自動返信にて、受付完了メールを送信しております。",
+    "万が一、担当者からの連絡が届かない場合は、お手数ですが再度お問い合わせいただくか、お電話にてご一報ください。",
   ],
   thanksBodyAutoReplyNote:
     "※自動返信メールが届かない場合は、迷惑メールフォルダをご確認いただくか、入力されたメールアドレスに誤りがないかをご確認ください。",
-  thanksBodyOutro: [
-    "担当者が内容を確認のうえ、順次ご連絡させていただきます。",
-    "通常2〜3営業日以内にご返信いたしますので、今しばらくお待ちください。",
-    "万が一、担当者からの連絡が届かない場合は、お手数ですがお問い合わせフォームより再度ご連絡いただくか、お電話にてお問い合わせくださいますようお願いいたします。",
-  ],
-  phoneSection: {
-    heading: "■お電話でのお問い合わせ先",
-    phoneNumber: "092-235-6529",
-    hours: "月曜〜金曜（土日祝祭日を除く） 9時〜17時",
-  },
+  formTitle: "お問合せフォーム",
   introParagraphs: [
     "お問い合わせ内容を下記項目にご入力ください。",
-    "修理をご希望の方は、お問い合わせ内容に修理の詳細についてご記載いただき、郵便番号・ご住所・電話番号も必ずご入力いただきますようお願いいたします。",
-    "初期設定で「パソコンからのメールを受信拒否」している場合は設定を変更してください。ドメイン指定をされている場合は、弊社からのメールが受信できるように「@candpluss.camp」を受信可能なドメインに指定してください。",
+  ],
+  introNotes: [
+    "※ 初期設定で「パソコンからのメールを受信拒否」している場合は設定を変更してください。ドメイン指定をされている場合は、弊社からのメールが受信できるように「@candpluss.camp」を受信可能なドメインに指定してください。",
+    "※ （*）の項目は必須項目です。",
   ],
   mailDomainNote: "@candpluss.camp",
   privacyPolicyHref: "/legal/privacy-policy",
+  termsHref: "/legal/terms",
 } as const;
 
 export const contactFormCopy = {
@@ -54,15 +53,16 @@ export const contactFormCopy = {
     emailConfirm: "",
     phone: "",
     postalCode: "",
-    prefecture: "都道府県を選択してください",
+    prefecture: "都道府県を選択",
     addressLine1: "市区町村・番地",
     addressLine2: "建物名・部屋番号",
     message: "",
   },
   privacy: {
-    labelBeforeLink: "",
-    linkLabel: "プライバシーポリシー",
-    labelAfterLink: "に同意する",
+    privacyLinkLabel: "プライバシーポリシー",
+    separator: "・",
+    termsLinkLabel: "利用規約",
+    labelAfterLinks: " に同意する。",
   },
   buttons: {
     toConfirm: "確認画面へ",
@@ -84,7 +84,10 @@ export const contactFormCopy = {
 export const contactFieldNotes = {
   email: "※有効なメールアドレスを入力してください。",
   postalCode: "※ハイフンは不要です。",
-  message: "※2000文字以内。",
+  phone:
+    "※お電話でのご連絡を希望の方は、電話番号を入力してください。",
+  address:
+    "※郵便番号を入力すると、市区町村までの住所が自動で入力されます。",
   attachments: "※JPEG・PNG・HEIC形式。最大3枚（1枚10MBまで、合計30MBまで）。",
 } as const;
 

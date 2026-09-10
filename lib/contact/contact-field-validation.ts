@@ -10,6 +10,8 @@ export const CONTACT_FIELD_MAX_LENGTH = {
 } as const;
 
 export const CONTACT_PHONE_MIN_DIGITS = 9;
+export const CONTACT_PHONE_MAX_DIGITS = 11;
+export const CONTACT_PHONE_MAX_INPUT_LENGTH = 13;
 export const CONTACT_MESSAGE_MAX_URL_COUNT = 3;
 export const CONTACT_MESSAGE_MAX_REPEAT_LENGTH = 5;
 
@@ -86,7 +88,10 @@ export function validateContactPhone(phone: string): string | null {
 
   const digitCount = trimmed.replace(/\D/g, "").length;
 
-  if (digitCount < CONTACT_PHONE_MIN_DIGITS) {
+  if (
+    digitCount < CONTACT_PHONE_MIN_DIGITS ||
+    digitCount > CONTACT_PHONE_MAX_DIGITS
+  ) {
     return contactValidationFormatMessages.phone;
   }
 

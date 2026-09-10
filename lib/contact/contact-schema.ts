@@ -1,10 +1,10 @@
 import { z } from "zod";
 
-import { collectAttachmentFiles, validateContactAttachments } from "@/lib/contact/attachment-validation";
 import {
   collectContactFormFieldErrors,
   hasContactFormFieldErrors,
 } from "@/lib/contact/contact-field-validation";
+import { normalizeContactNumberInput } from "@/lib/contact/input-normalization";
 import { CONTACT_CATEGORIES } from "@/types/contact";
 import type { ContactCategory, ContactFormData, ContactFormFieldErrors } from "@/types/contact";
 
@@ -22,8 +22,10 @@ export const contactApiBodySchema = z
     firstName: trimmedString,
     email: trimmedString,
     emailConfirm: trimmedString,
-    phone: z.string().transform((value) => value.trim()),
-    postalCode: z.string().transform((value) => value.trim()),
+    phone: z.string().transform((value) => normalizeContactNumberInput(value).trim()),
+    postalCode: z
+      .string()
+      .transform((value) => normalizeContactNumberInput(value).trim()),
     prefecture: z.string().transform((value) => value.trim()),
     addressLine1: z.string().transform((value) => value.trim()),
     addressLine2: z.string().transform((value) => value.trim()),
@@ -115,28 +117,7 @@ export function parseContactApiBody(
 export function parseContactMultipartForm(
   formData: FormData
 ):
-  | { ok: true; data: ContactApiParsedData; turnstileToken: string; attachments: File[] }
+  | { ok: true; data: ContactApiParsedData; turnstileToken: string }
   | { ok: false; errors?: ContactFormFieldErrors; message: string } {
-  const parsed = parseContactApiBody(formDataToBody(formData));
-
-  if (!parsed.ok) {
-    return parsed;
-  }
-
-  const attachments = collectAttachmentFiles(formData);
-  const attachmentValidation = validateContactAttachments(attachments);
-
-  if (!attachmentValidation.ok) {
-    return {
-      ok: false,
-      message: attachmentValidation.message,
-    };
-  }
-
-  return {
-    ok: true,
-    data: parsed.data,
-    turnstileToken: parsed.turnstileToken,
-    attachments,
-  };
+  return parseContactApiBody(formDataToBody(formData));
 }

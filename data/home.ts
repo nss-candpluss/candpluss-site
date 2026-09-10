@@ -75,5 +75,5 @@ export const homeFeatureLinks = [
 ] as const;
 
 export const homeLabContent = {
-  backgroundImage: "/images/home/home-link-labo.webp",
+  backgroundImage: "/images/home/home-image.webp",
 } as const;

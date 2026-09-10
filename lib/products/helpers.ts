@@ -86,6 +86,10 @@ export function getSelectedVariant(product: Product, variantId?: string | null) 
 
 const PLACEHOLDER_VARIANT_NAME = /^(default title|default)$/i;
 
+type ProductWithVariantNames = {
+  variants: ReadonlyArray<Pick<ProductVariant, "colorName">>;
+};
+
 /** Shopify 未設定バリアント（Default Title）やローカルの DEFAULT */
 export function isPlaceholderProductVariantName(name?: string | null): boolean {
   return !name?.trim() || PLACEHOLDER_VARIANT_NAME.test(name.trim());
@@ -93,13 +97,13 @@ export function isPlaceholderProductVariantName(name?: string | null): boolean {
 
 /** カラーチップは1つでも表示する */
 export function shouldDisplayProductVariantOptions(
-  product: Pick<Product, "variants">
+  product: ProductWithVariantNames
 ): boolean {
   return product.variants.length > 0;
 }
 
 export function shouldDisplayProductVariantLabel(
-  product: Pick<Product, "variants">,
+  product: ProductWithVariantNames,
   selectedVariant?: Pick<ProductVariant, "colorName"> | null
 ): boolean {
   const selectableCount = product.variants.filter(

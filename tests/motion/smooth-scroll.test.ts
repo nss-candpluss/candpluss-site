@@ -24,6 +24,10 @@ const contactScrollSource = readFileSync(
   join(testDirectory, "../../lib/contact/scroll-to-error.ts"),
   "utf8"
 );
+const supportContactScrollSource = readFileSync(
+  join(testDirectory, "../../lib/support-contact/scroll-to-error.ts"),
+  "utf8"
+);
 
 function stubBrowser({ touchPoints = 0 }: { touchPoints?: number } = {}) {
   vi.stubGlobal("navigator", { maxTouchPoints: touchPoints });
@@ -71,6 +75,10 @@ describe("site-wide smooth scroll", () => {
     expect(conceptNavSource).not.toContain("scrollIntoView");
     expect(contactScrollSource).toContain("scrollBoundLenisTo(element)");
     expect(contactScrollSource).toContain(
+      'element.scrollIntoView({ behavior: "smooth", block: "start" })'
+    );
+    expect(supportContactScrollSource).toContain("scrollBoundLenisTo(element)");
+    expect(supportContactScrollSource).toContain(
       'element.scrollIntoView({ behavior: "smooth", block: "start" })'
     );
   });

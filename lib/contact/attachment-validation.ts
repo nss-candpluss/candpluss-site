@@ -16,6 +16,28 @@ type ValidatableFile = {
   type: string;
 };
 
+type AttachmentValidationOptions = {
+  maxCount?: number;
+  maxCountMessage?: string;
+  maxFileSize?: number;
+  maxFileSizeMessage?: string;
+  maxTotalSize?: number;
+  maxTotalSizeMessage?: string;
+};
+
+const JPEG_SIGNATURE = [0xff, 0xd8, 0xff] as const;
+const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a] as const;
+const HEIC_BRANDS = new Set([
+  "heic",
+  "heix",
+  "hevc",
+  "hevx",
+  "heim",
+  "heis",
+  "mif1",
+  "msf1",
+]);
+
 function getFileExtension(filename: string): string {
   const normalized = filename.trim().toLowerCase();
   const lastDotIndex = normalized.lastIndexOf(".");
@@ -63,11 +85,57 @@ function isAllowedFileType(file: ValidatableFile): boolean {
   return isAllowedFallbackMimeType(mimeType, extension);
 }
 
+function startsWith(bytes: Uint8Array, signature: readonly number[]): boolean {
+  return signature.every((value, index) => bytes[index] === value);
+}
+
+function readAscii(bytes: Uint8Array, offset: number): string {
+  return String.fromCharCode(...bytes.slice(offset, offset + 4));
+}
+
+function hasHeicSignature(bytes: Uint8Array): boolean {
+  if (bytes.length < 12 || readAscii(bytes, 4) !== "ftyp") {
+    return false;
+  }
+
+  if (HEIC_BRANDS.has(readAscii(bytes, 8))) {
+    return true;
+  }
+
+  for (let offset = 16; offset + 4 <= bytes.length; offset += 4) {
+    if (HEIC_BRANDS.has(readAscii(bytes, offset))) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function matchesImageSignature(bytes: Uint8Array): boolean {
+  return (
+    startsWith(bytes, JPEG_SIGNATURE) ||
+    startsWith(bytes, PNG_SIGNATURE) ||
+    hasHeicSignature(bytes)
+  );
+}
+
 export function validateContactAttachments(
-  files: ValidatableFile[]
+  files: ValidatableFile[],
+  options: AttachmentValidationOptions = {}
 ): { ok: true } | { ok: false; message: string } {
-  if (files.length > CONTACT_ATTACHMENT_MAX_COUNT) {
-    return { ok: false, message: contactAttachmentValidationMessages.maxCount };
+  const maxCount = options.maxCount ?? CONTACT_ATTACHMENT_MAX_COUNT;
+  const maxFileSize =
+    options.maxFileSize ?? CONTACT_ATTACHMENT_MAX_FILE_SIZE;
+  const maxTotalSize =
+    options.maxTotalSize ?? CONTACT_ATTACHMENT_MAX_TOTAL_SIZE;
+
+  if (files.length > maxCount) {
+    return {
+      ok: false,
+      message:
+        options.maxCountMessage ??
+        contactAttachmentValidationMessages.maxCount,
+    };
   }
 
   let totalSize = 0;
@@ -81,15 +149,40 @@ export function validateContactAttachments(
       return { ok: false, message: contactAttachmentValidationMessages.invalidType };
     }
 
-    if (file.size > CONTACT_ATTACHMENT_MAX_FILE_SIZE) {
-      return { ok: false, message: contactAttachmentValidationMessages.maxFileSize };
+    if (file.size > maxFileSize) {
+      return {
+        ok: false,
+        message:
+          options.maxFileSizeMessage ??
+          contactAttachmentValidationMessages.maxFileSize,
+      };
     }
 
     totalSize += file.size;
   }
 
-  if (totalSize > CONTACT_ATTACHMENT_MAX_TOTAL_SIZE) {
-    return { ok: false, message: contactAttachmentValidationMessages.maxTotalSize };
+  if (totalSize > maxTotalSize) {
+    return {
+      ok: false,
+      message:
+        options.maxTotalSizeMessage ??
+        contactAttachmentValidationMessages.maxTotalSize,
+    };
+  }
+
+  return { ok: true };
+}
+
+export async function validateAttachmentContents(
+  files: File[],
+  invalidContentMessage: string
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  for (const file of files) {
+    const bytes = new Uint8Array(await file.slice(0, 64).arrayBuffer());
+
+    if (!matchesImageSignature(bytes)) {
+      return { ok: false, message: invalidContentMessage };
+    }
   }
 
   return { ok: true };

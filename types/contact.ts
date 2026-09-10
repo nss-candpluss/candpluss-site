@@ -1,22 +1,14 @@
 export const CONTACT_CATEGORIES = [
   {
-    label: "ご注文について",
-    value: "order",
-  },
-  {
-    label: "返品・交換について",
-    value: "return",
-  },
-  {
-    label: "修理のご依頼",
-    value: "repair",
+    label: "製品に関するお問い合わせ",
+    value: "product",
   },
   {
     label: "卸売について",
     value: "wholesale",
   },
   {
-    label: "その他お問い合わせ",
+    label: "その他ご質問・ご意見",
     value: "other",
   },
 ] as const;

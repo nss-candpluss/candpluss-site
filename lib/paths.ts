@@ -24,3 +24,14 @@ export function getContactApiUrl(): string {
 
   return withBasePath("/api/contact");
 }
+
+/** 製品保証・修理フォーム API の POST 先 */
+export function getSupportContactApiUrl(): string {
+  const explicitUrl = process.env.NEXT_PUBLIC_SUPPORT_CONTACT_API_URL?.trim();
+
+  if (explicitUrl) {
+    return explicitUrl;
+  }
+
+  return withBasePath("/api/support-contact");
+}

@@ -31,6 +31,8 @@ describe("fallbackHeaderTheme", () => {
     expect(fallbackHeaderTheme("/news")).toBe("onLight");
     expect(fallbackHeaderTheme("/news/official-website-open")).toBe("onLight");
     expect(fallbackHeaderTheme("/contact")).toBe("onLight");
+    expect(fallbackHeaderTheme("/support/confirm")).toBe("onLight");
+    expect(fallbackHeaderTheme("/support/thanks")).toBe("onLight");
     expect(fallbackHeaderTheme("/cart")).toBe("onLight");
     expect(fallbackHeaderTheme("/company")).toBe("onLight");
     expect(fallbackHeaderTheme("/shopping-guide")).toBe("onLight");

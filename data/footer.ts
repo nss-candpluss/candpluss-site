@@ -35,7 +35,7 @@ export const footerContent = {
     },
     {
       label: "LINE",
-      href: "https://line.me/",
+      href: "https://lin.ee/qNFv6Jn",
       icon: "/assets/icons/icon-sns-line.svg",
     },
     {

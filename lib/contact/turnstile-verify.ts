@@ -3,6 +3,8 @@ type TurnstileVerifyResponse = {
   "error-codes"?: string[];
 };
 
+export const TURNSTILE_VERIFY_TIMEOUT_MS = 5_000;
+
 function shouldSendRemoteIp(remoteIp: string | null): remoteIp is string {
   if (!remoteIp) {
     return false;
@@ -13,7 +15,8 @@ function shouldSendRemoteIp(remoteIp: string | null): remoteIp is string {
 
 export async function verifyTurnstileToken(
   token: string,
-  remoteIp: string | null
+  remoteIp: string | null,
+  timeoutMs = TURNSTILE_VERIFY_TIMEOUT_MS
 ): Promise<boolean> {
   const secret = process.env.TURNSTILE_SECRET_KEY?.trim();
 
@@ -31,6 +34,9 @@ export async function verifyTurnstileToken(
     params.set("remoteip", remoteIp);
   }
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
   try {
     const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
       method: "POST",
@@ -38,6 +44,7 @@ export async function verifyTurnstileToken(
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: params.toString(),
+      signal: controller.signal,
     });
 
     const result = (await response.json()) as TurnstileVerifyResponse;
@@ -54,5 +61,7 @@ export async function verifyTurnstileToken(
   } catch (error) {
     console.error("[contact] Turnstile verify error:", error);
     return false;
+  } finally {
+    clearTimeout(timeout);
   }
 }

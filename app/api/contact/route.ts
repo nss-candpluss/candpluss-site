@@ -5,8 +5,19 @@ import {
   buildAdminContactMail,
   buildAutoReplyContactMail,
 } from "@/lib/contact/contact-mail";
+import { deliverAutoReplyAfterAcceptance } from "@/lib/contact/auto-reply-delivery";
 import { parseContactMultipartForm } from "@/lib/contact/contact-schema";
-import { withContactCorsHeaders } from "@/lib/contact/cors";
+import {
+  CONTACT_CORS_REJECTION_MESSAGE,
+  isContactOriginAllowed,
+  withContactCorsHeaders,
+} from "@/lib/contact/cors";
+import {
+  checkContactRateLimit,
+  CONTACT_RATE_LIMIT_MESSAGE,
+} from "@/lib/contact/rate-limit";
+import { sendResendEmailWithTimeout } from "@/lib/contact/resend-mail";
+import { logContactSubmissionEvent } from "@/lib/contact/submission-monitoring";
 import { generateContactTicketNumber } from "@/lib/contact/contact-ticket";
 import { verifyTurnstileToken } from "@/lib/contact/turnstile-verify";
 
@@ -15,11 +26,6 @@ type ContactEnvConfig = {
   adminEmail: string;
   fromEmail: string;
   replyToEmail: string;
-};
-
-type ResendAttachment = {
-  filename: string;
-  content: Buffer;
 };
 
 function getContactEnvConfig(): ContactEnvConfig | null {
@@ -46,20 +52,25 @@ function getClientIpAddress(request: Request): string | null {
   return request.headers.get("x-real-ip")?.trim() || null;
 }
 
-async function buildResendAttachments(files: File[]): Promise<ResendAttachment[]> {
-  return Promise.all(
-    files.map(async (file) => ({
-      filename: file.name,
-      content: Buffer.from(await file.arrayBuffer()),
-    }))
-  );
-}
-
 export async function OPTIONS(request: Request) {
+  if (!isContactOriginAllowed(request)) {
+    return NextResponse.json(
+      { ok: false, message: CONTACT_CORS_REJECTION_MESSAGE },
+      { status: 403 }
+    );
+  }
+
   return new NextResponse(null, withContactCorsHeaders(request, { status: 204 }));
 }
 
 export async function POST(request: Request) {
+  if (!isContactOriginAllowed(request)) {
+    return NextResponse.json(
+      { ok: false, message: CONTACT_CORS_REJECTION_MESSAGE },
+      { status: 403 }
+    );
+  }
+
   let formData: FormData;
 
   try {
@@ -99,10 +110,33 @@ export async function POST(request: Request) {
     );
   }
 
+  const rateLimitResult = await checkContactRateLimit({
+    ipAddress,
+    email: parsed.data.email,
+  });
+
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(
+      {
+        ok: false,
+        message: CONTACT_RATE_LIMIT_MESSAGE,
+      },
+      withContactCorsHeaders(request, {
+        status: 429,
+        headers: {
+          "Retry-After": String(rateLimitResult.retryAfterSeconds),
+        },
+      })
+    );
+  }
+
   const envConfig = getContactEnvConfig();
 
   if (!envConfig) {
-    console.error("[contact] Missing mail environment variables.");
+    logContactSubmissionEvent("error", {
+      event: "mail_configuration_missing",
+      formKind: "contact",
+    });
     return NextResponse.json(
       {
         ok: false,
@@ -114,33 +148,38 @@ export async function POST(request: Request) {
 
   const receivedAt = new Date();
   const ticketNumber = generateContactTicketNumber(receivedAt);
-  const attachmentCount = parsed.attachments.length;
   const mailContext = {
     ticketNumber,
     receivedAt,
     ipAddress,
     data: parsed.data,
-    attachmentCount,
   };
 
   const adminMail = buildAdminContactMail(mailContext);
   const autoReplyMail = buildAutoReplyContactMail(mailContext);
   const resend = new Resend(envConfig.apiKey);
-  const adminAttachments =
-    attachmentCount > 0 ? await buildResendAttachments(parsed.attachments) : undefined;
 
   try {
-    const adminResult = await resend.emails.send({
-      from: envConfig.fromEmail,
-      to: envConfig.adminEmail,
-      replyTo: parsed.data.email,
-      subject: adminMail.subject,
-      text: adminMail.text,
-      ...(adminAttachments ? { attachments: adminAttachments } : {}),
-    });
+    const adminResult = await sendResendEmailWithTimeout(
+      resend,
+      {
+        from: envConfig.fromEmail,
+        to: envConfig.adminEmail,
+        replyTo: parsed.data.email,
+        subject: adminMail.subject,
+        text: adminMail.text,
+      },
+      `${ticketNumber}:admin`
+    );
 
     if (adminResult.error) {
-      console.error("[contact] Admin mail failed:", adminResult.error);
+      logContactSubmissionEvent("error", {
+        event: "admin_mail_failed",
+        formKind: "contact",
+        ticketNumber,
+        recipientEmail: envConfig.adminEmail,
+        error: adminResult.error,
+      });
       return NextResponse.json(
         {
           ok: false,
@@ -150,26 +189,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const autoReplyResult = await resend.emails.send({
-      from: envConfig.fromEmail,
-      to: parsed.data.email,
-      replyTo: envConfig.replyToEmail,
-      subject: autoReplyMail.subject,
-      text: autoReplyMail.text,
-    });
-
-    if (autoReplyResult.error) {
-      console.error("[contact] Auto reply mail failed:", autoReplyResult.error);
-      return NextResponse.json(
-        {
-          ok: false,
-          message: "送信に失敗しました。時間をおいて再度お試しください。",
-        },
-        withContactCorsHeaders(request, { status: 500 })
-      );
-    }
   } catch (error) {
-    console.error("[contact] Mail send error:", error);
+    logContactSubmissionEvent("error", {
+      event: "admin_mail_failed",
+      formKind: "contact",
+      ticketNumber,
+      recipientEmail: envConfig.adminEmail,
+      error,
+    });
     return NextResponse.json(
       {
         ok: false,
@@ -178,6 +205,30 @@ export async function POST(request: Request) {
       withContactCorsHeaders(request, { status: 500 })
     );
   }
+
+  const autoReplyResult = await deliverAutoReplyAfterAcceptance({
+    formKind: "contact",
+    ticketNumber,
+    recipientEmail: parsed.data.email,
+    adminEmail: envConfig.adminEmail,
+    fromEmail: envConfig.fromEmail,
+    replyToEmail: envConfig.replyToEmail,
+    autoReplyMail,
+    sendMail: (email, deliveryType) =>
+      sendResendEmailWithTimeout(
+        resend,
+        email,
+        `${ticketNumber}:${deliveryType}`
+      ),
+  });
+
+  logContactSubmissionEvent("info", {
+    event: "submission_accepted",
+    formKind: "contact",
+    ticketNumber,
+    recipientEmail: parsed.data.email,
+    ...autoReplyResult,
+  });
 
   return NextResponse.json(
     {

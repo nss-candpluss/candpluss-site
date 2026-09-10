@@ -10,27 +10,28 @@ import {
 import { SiteGrid } from "@/components/ui/SiteGrid";
 import { contactFormCopy, contactPageContent } from "@/data/contact";
 import { getContactApiUrl } from "@/lib/paths";
-import { formHalfSpanClassName } from "@/lib/layout";
+import { formActionHalfSpanClassName } from "@/lib/layout";
+import { arrowMaskStyle } from "@/lib/maskStyle";
 import { appendContactFormData } from "@/lib/contact/build-form-data";
-import {
-  clearContactAttachments,
-  getContactAttachments,
-} from "@/lib/contact/attachment-store";
 import { buildContactConfirmRows } from "@/lib/contact/display";
+import { writeContactTicketNumber } from "@/lib/contact/ticket-storage";
 import { useContactFormDraft } from "@/lib/contact/use-contact-form-draft";
-import { ContactHero } from "@/sections/contact/ContactHero";
 import {
+  contactConfirmLabelClassName,
+  contactConfirmRowClassName,
+  contactConfirmSectionClassName,
+  contactConfirmValueClassName,
   contactErrorClassName,
-  contactFormRowClassName,
-  contactPrimaryButtonClassName,
-  contactSecondaryButtonClassName,
+  contactInquiryBodyClassName,
+  contactInquiryBodyWrapClassName,
+  contactInquiryTitleClassName,
+  contactTitleToContentGapClassName,
 } from "@/sections/contact/contactStyles";
-import { bodyText, uiText } from "@/lib/typography";
+import {
+  supportContactButtonClassName,
+  supportContactSecondaryButtonClassName,
+} from "@/sections/support/supportContactStyles";
 import type { ContactApiResponse } from "@/types/contact";
-
-const confirmLabelClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(16)}`;
-
-const confirmValueClassName = `font-body-ja whitespace-pre-line text-[var(--foreground)] ${bodyText(15)}`;
 
 export function ContactConfirm() {
   const router = useRouter();
@@ -46,7 +47,7 @@ export function ContactConfirm() {
     }
   }, [formData, router]);
 
-  if (formData === null) {
+  if (formData == null) {
     return null;
   }
 
@@ -67,10 +68,6 @@ export function ContactConfirm() {
       appendContactFormData(formData, confirmedFormData);
       formData.append("turnstileToken", turnstileToken);
 
-      for (const file of getContactAttachments()) {
-        formData.append("attachments", file);
-      }
-
       const response = await fetch(getContactApiUrl(), {
         method: "POST",
         body: formData,
@@ -78,21 +75,19 @@ export function ContactConfirm() {
 
       const result = (await response.json()) as ContactApiResponse | { message: string };
 
-      if (!response.ok || ("ok" in result && !result.ok)) {
+      if (!response.ok || !("ok" in result) || !result.ok) {
         const errorMessage = "message" in result ? result.message : undefined;
         const message =
           errorMessage === "Turnstile verification failed."
             ? "認証に失敗しました。時間をおいて再度お試しください。"
-            : "ok" in result && result.ok
-              ? submit.failure
-              : errorMessage || submit.failure;
+            : errorMessage || submit.failure;
         setSubmitError(message);
         turnstileRef.current?.reset();
         return;
       }
 
+      writeContactTicketNumber("contact", result.ticketNumber);
       router.push("/contact/thanks");
-      clearContactAttachments();
     } catch {
       setSubmitError(submit.failure);
       turnstileRef.current?.reset();
@@ -103,13 +98,24 @@ export function ContactConfirm() {
 
   return (
     <>
-      <ContactHero showIntro={false} title={contactPageContent.confirmTitle} />
+      <h1 className={contactInquiryTitleClassName}>
+        {contactPageContent.confirmTitle}
+      </h1>
+      <div
+        className={`${contactInquiryBodyWrapClassName} ${contactInquiryBodyClassName}`}
+      >
+        {contactPageContent.confirmIntroParagraphs.map((paragraph) => (
+          <p key={paragraph} className="whitespace-pre-line">
+            {paragraph}
+          </p>
+        ))}
+      </div>
 
-      <div className="mt-[calc(48px*var(--gap-scale-y))] overflow-hidden bg-[#f5f5f5]">
+      <div className={contactConfirmSectionClassName}>
         {rows.map((row) => (
-          <div key={row.label} className={contactFormRowClassName}>
-            <p className={confirmLabelClassName}>{row.label}</p>
-            <p className={`mt-[calc(16px*var(--gap-scale-y))] ${confirmValueClassName}`}>{row.value}</p>
+          <div key={row.label} className={contactConfirmRowClassName}>
+            <p className={contactConfirmLabelClassName}>{row.label}</p>
+            <p className={`${contactTitleToContentGapClassName} ${contactConfirmValueClassName}`}>{row.value}</p>
           </div>
         ))}
       </div>
@@ -124,21 +130,31 @@ export function ContactConfirm() {
         <ContactTurnstile ref={turnstileRef} onTokenChange={setTurnstileToken} />
       </div>
 
-      <SiteGrid className="mt-[calc(32px*var(--gap-scale-y))] gap-[calc(16px*var(--gap-scale-y))]">
+      <SiteGrid className="mt-[calc(32px*var(--gap-scale-y))] gap-[calc(16px*var(--gap-scale-x))]">
         <button
           type="button"
-          className={`${contactSecondaryButtonClassName} ${formHalfSpanClassName}`}
+          className={`${supportContactSecondaryButtonClassName} ${formActionHalfSpanClassName} cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`}
           onClick={() => router.push("/contact")}
           disabled={isSubmitting}
         >
+          <span
+            aria-hidden="true"
+            className="size-[calc(24px*var(--text-scale))] shrink-0 rotate-180 bg-current"
+            style={arrowMaskStyle}
+          />
           {buttons.back}
         </button>
         <button
           type="button"
-          className={`${contactPrimaryButtonClassName} ${formHalfSpanClassName}`}
+          className={`${supportContactButtonClassName} ${formActionHalfSpanClassName} cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`}
           onClick={handleSubmit}
           disabled={isSubmitting || !turnstileToken}
         >
+          <span
+            aria-hidden="true"
+            className="size-[calc(24px*var(--text-scale))] shrink-0 bg-current"
+            style={arrowMaskStyle}
+          />
           {isSubmitting ? buttons.submitting : buttons.submit}
         </button>
       </SiteGrid>

@@ -46,6 +46,9 @@ export const threeColumnFeatureSpanClassName =
 export const formHalfSpanClassName =
   "col-span-12 min-[640px]:col-span-6";
 
+/** 確認ページの戻る／送信: スマホでも常に 2 列 */
+export const formActionHalfSpanClassName = "col-span-6";
+
 /** 定義リスト: 1列 → 3 + 9 カラム（768px） */
 export const definitionLabelSpanClassName =
   "col-span-12 min-[768px]:col-span-3";

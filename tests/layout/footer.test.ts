@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import { footerContent } from "@/data/footer";
+import { isSocialLinkVisible } from "@/lib/site-navigation-visibility";
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const footerSource = readFileSync(join(rootDir, "components/layout/Footer.tsx"), "utf8");
@@ -81,9 +82,20 @@ describe("footer nav links", () => {
 
     expect(labels.indexOf("LINE")).toBe(labels.indexOf("Instagram") + 1);
     expect(line?.icon).toBe("/assets/icons/icon-sns-line.svg");
+    expect(line?.href).toBe("https://lin.ee/qNFv6Jn");
   });
 
   it("reuses footer social links in the hamburger menu", () => {
     expect(mobileMenuSource).toContain("footerContent.socialLinks");
+  });
+
+  it("shows Instagram, LINE, and YouTube with a dummy YouTube URL", () => {
+    const youtube = footerContent.socialLinks.find((link) => link.label === "YouTube");
+
+    expect(isSocialLinkVisible("Instagram")).toBe(true);
+    expect(isSocialLinkVisible("LINE")).toBe(true);
+    expect(isSocialLinkVisible("YouTube")).toBe(true);
+    expect(youtube?.href).toBe("https://www.youtube.com/");
+    expect(youtube?.icon).toBe("/assets/icons/icon-sns-youtube.svg");
   });
 });

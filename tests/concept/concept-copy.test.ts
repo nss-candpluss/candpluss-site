@@ -31,7 +31,7 @@ const typographySource = readFileSync(
 );
 
 describe("concept page copy", () => {
-  it("has nine story sections with concept backgrounds except 04 and 05", () => {
+  it("has nine story sections with their numbered concept backgrounds", () => {
     expect(conceptContent.sections.map((section) => section.title)).toEqual([
       "01｜Camp + Something",
       "02｜Our Origin",
@@ -47,8 +47,8 @@ describe("concept page copy", () => {
       "/images/concept/concept-01.webp",
       "/images/concept/concept-02.webp",
       "/images/concept/concept-03.webp",
-      "/images/products/_shared/placeholder.webp",
-      "/images/products/_shared/placeholder.webp",
+      "/images/concept/concept-04.webp",
+      "/images/concept/concept-05.webp",
       "/images/concept/concept-06.webp",
       "/images/concept/concept-07.webp",
       "/images/concept/concept-08.webp",

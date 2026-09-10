@@ -10,7 +10,7 @@ export const siteNavigationVisibility = {
   contact: true,
   snsFacebook: false,
   snsX: false,
-  snsYoutube: false,
+  snsYoutube: true,
   snsPinterest: false,
 } as const;
 

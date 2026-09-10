@@ -7,7 +7,6 @@ export type ContactMailContext = {
   receivedAt: Date;
   ipAddress: string | null;
   data: ContactFormData;
-  attachmentCount: number;
 };
 
 export type ContactMailContent = {
@@ -45,16 +44,8 @@ function formatAddress(data: ContactFormData): string {
   return lines.join("\n");
 }
 
-function formatAttachmentSummary(count: number, includeCount: boolean): string {
-  if (count <= 0) {
-    return "なし";
-  }
-
-  return includeCount ? `あり（${String(count)}枚）` : "あり";
-}
-
 export function buildAdminContactMail(context: ContactMailContext): ContactMailContent {
-  const { ticketNumber, receivedAt, ipAddress, data, attachmentCount } = context;
+  const { ticketNumber, receivedAt, ipAddress, data } = context;
   const categoryLabel = getContactCategoryLabel(data.category);
 
   return {
@@ -101,11 +92,6 @@ export function buildAdminContactMail(context: ContactMailContext): ContactMailC
       formatAddress(data),
       "",
       "────────────────────────────",
-      "添付画像",
-      "",
-      formatAttachmentSummary(attachmentCount, true),
-      "",
-      "────────────────────────────",
       "",
       "このメールはC AND+S公式サイトのお問い合わせフォームより自動送信されています。",
     ].join("\n"),
@@ -113,7 +99,7 @@ export function buildAdminContactMail(context: ContactMailContext): ContactMailC
 }
 
 export function buildAutoReplyContactMail(context: ContactMailContext): ContactMailContent {
-  const { ticketNumber, data, attachmentCount } = context;
+  const { ticketNumber, data } = context;
   const categoryLabel = getContactCategoryLabel(data.category);
 
   return {
@@ -155,10 +141,6 @@ export function buildAutoReplyContactMail(context: ContactMailContext): ContactM
       "",
       "お問い合わせ内容：",
       data.message,
-      "",
-      "添付画像",
-      "",
-      formatAttachmentSummary(attachmentCount, false),
       "",
       "────────────────────────────",
       "",

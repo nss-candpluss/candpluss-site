@@ -56,6 +56,8 @@ describe("12 column grid adoption", () => {
       "app/contact/page.tsx",
       "app/contact/confirm/page.tsx",
       "app/contact/thanks/page.tsx",
+      "app/support/confirm/page.tsx",
+      "app/support/thanks/page.tsx",
       "app/company/page.tsx",
     ]) {
       const fileSource = source(path);
@@ -70,7 +72,13 @@ describe("12 column grid adoption", () => {
       "formHalfSpanClassName"
     );
     expect(source("sections/contact/ContactConfirm.tsx")).toContain(
+      "formActionHalfSpanClassName"
+    );
+    expect(source("sections/support/SupportContactForm.tsx")).toContain(
       "formHalfSpanClassName"
+    );
+    expect(source("sections/support/SupportContactConfirm.tsx")).toContain(
+      "formActionHalfSpanClassName"
     );
 
     const companySource = source("components/company/CompanyDocument.tsx");

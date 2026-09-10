@@ -28,15 +28,12 @@ export const supportContent = {
     lineButton: {
       label: "LINEでお問い合わせ",
     },
-    contactButton: {
-      label: "お問い合わせフォーム",
-      href: "/contact",
-    },
     phoneSection: {
       title: "お電話でのお問い合わせ",
       phoneNumber: "0120-64-8175",
-      hours: "受付時間 9:00 ～ 17:00",
-      note: "※土日、祝日のお問い合わせは、LINEまたはお問い合わせフォームよりお問い合わせください。",
+      hours: "受付時間：平日 09:00〜17:00",
+      hoursEmphasis: "平日 09:00〜17:00",
+      note: "※土日、祝日、年末年始のお問い合わせは、「LINE」または「初期不良・修理 専用フォーム」よりお問い合わせください。",
     },
   },
 } as const;

@@ -20,6 +20,14 @@ const supportAccordionSource = readFileSync(
   "utf8"
 );
 
+const supportContactStylesSource = readFileSync(
+  join(
+    dirname(fileURLToPath(import.meta.url)),
+    "../../sections/support/supportContactStyles.ts"
+  ),
+  "utf8"
+);
+
 describe("support guide accordions", () => {
   it("uses the same empty-line spacing as legal body blocks", () => {
     expect(supportAccordionSource).toContain('body.split("\\n\\n")');
@@ -46,43 +54,94 @@ describe("support guide accordions", () => {
     );
   });
 
-  it("splits contact actions into LINE and form buttons", () => {
+  it("places the LINE button between phone contact and the dedicated form", () => {
     const line = footerContent.socialLinks.find((link) => link.label === "LINE");
 
     expect(supportContent.guide.lineButton.label).toBe("LINEでお問い合わせ");
-    expect(supportContent.guide.contactButton.label).toBe(
-      "お問い合わせフォーム"
-    );
-    expect(supportGuideSource).toContain("SiteGrid");
-    expect(supportGuideSource).toContain("twoColumnFeatureSpanClassName");
-    expect(supportGuideSource).not.toContain('"col-span-6"');
-    expect(supportGuideSource).toContain("justify-center");
-    expect(supportGuideSource).toContain("gap-[calc(32px*var(--gap-scale-x))]");
-    expect(supportGuideSource).not.toContain("gap-[calc(16px*var(--gap-scale-x))]");
+    expect(supportContent.guide).not.toHaveProperty("contactButton");
+    expect(supportGuideSource).not.toContain("SiteGrid");
+    expect(supportGuideSource).not.toContain("twoColumnFeatureSpanClassName");
+    expect(supportGuideSource).not.toContain("guide.contactButton");
+    expect(supportGuideSource).not.toContain("isContactLinkVisible");
+    expect(supportContactStylesSource).toContain("justify-center");
     expect(supportGuideSource).toContain("guide.lineButton.label");
-    expect(supportGuideSource).toContain("guide.contactButton.label");
+    expect(
+      supportGuideSource.indexOf("{supportContactPageContent.sectionTitle}")
+    ).toBeLessThan(supportGuideSource.indexOf("guide.phoneSection.title"));
+    expect(
+      supportGuideSource.indexOf("guide.phoneSection.note")
+    ).toBeLessThan(supportGuideSource.indexOf("guide.lineButton.label"));
+    expect(
+      supportGuideSource.indexOf("guide.lineButton.label")
+    ).toBeLessThan(
+      supportGuideSource.indexOf("{supportContactPageContent.title}")
+    );
+    expect(
+      supportGuideSource.indexOf("{supportContactPageContent.title}")
+    ).toBeLessThan(supportGuideSource.indexOf("<SupportContactForm"));
+    expect(supportGuideSource).toContain("sectionTitle62ClassName");
+    expect(supportGuideSource).toContain("uiText(20)");
+    expect(supportGuideSource).toContain(
+      'const supportContactTitleClassName = `font-body-ja font-bold text-[var(--foreground)] ${uiText(20)}`'
+    );
+    expect(supportGuideSource).toContain("max-w-[400px]");
+    expect(supportGuideSource).toContain(
+      'className="mt-[var(--section-title-gap)]"'
+    );
     expect(supportGuideSource).toContain("lineLink.icon");
     expect(line?.icon).toBe("/assets/icons/icon-sns-line.svg");
     expect(supportGuideSource).toContain("target=\"_blank\"");
-    expect(supportGuideSource).toContain("px-[calc(32px*var(--gap-scale-x))]");
-    expect(supportGuideSource).toContain("py-[calc(32px*var(--layout-scale-y))]");
-    expect(supportGuideSource).toContain("min-[1025px]:py-[calc(18px*var(--gap-scale-y))]");
+    expect(supportContactStylesSource).toContain("px-[calc(32px*var(--gap-scale-x))]");
+    expect(supportContactStylesSource).toContain("py-[calc(32px*var(--layout-scale-y))]");
+    expect(supportContactStylesSource).toContain(
+      "min-[1025px]:py-[calc(18px*var(--gap-scale-y))]"
+    );
   });
 
-  it("shows phone contact details below the LINE and form buttons", () => {
+  it("shows phone contact details below the Product Support title", () => {
     expect(supportContent.guide.phoneSection).toEqual({
       title: "お電話でのお問い合わせ",
       phoneNumber: "0120-64-8175",
-      hours: "受付時間 9:00 ～ 17:00",
-      note: "※土日、祝日のお問い合わせは、LINEまたはお問い合わせフォームよりお問い合わせください。",
+      hours: "受付時間：平日 09:00〜17:00",
+      hoursEmphasis: "平日 09:00〜17:00",
+      note: "※土日、祝日、年末年始のお問い合わせは、「LINE」または「初期不良・修理 専用フォーム」よりお問い合わせください。",
     });
+    expect(supportGuideSource).toContain(
+      "`mt-[calc(8px*var(--gap-scale-y))] ${supportIntroNoteClassName}`"
+    );
+    expect(supportGuideSource).toContain("guide.phoneSection.hoursEmphasis");
+    expect(supportGuideSource).toContain(
+      "<span className=\"font-semibold\">\n                  {guide.phoneSection.hoursEmphasis}"
+    );
     expect(supportGuideSource).toContain("guide.phoneSection.title");
+    expect(supportGuideSource).toContain(
+      "<h3 className={supportContactTitleClassName}>\n                {guide.phoneSection.title}"
+    );
+    expect(supportGuideSource).not.toContain("phoneHeadingClassName");
+    expect(supportGuideSource).not.toContain("uiText(16)");
     expect(supportGuideSource).toContain("tel:${guide.phoneSection.phoneNumber}");
-    expect(supportGuideSource).toContain("mt-[calc(60px*var(--gap-scale))]");
+    expect(supportGuideSource).toContain(
+      'const supportLineButtonAreaGapClassName =\n  "mt-[clamp(32px,calc(60px*var(--gap-scale)),60px)]"'
+    );
+    expect(supportGuideSource).not.toContain("mt-[calc(60px*var(--gap-scale))]");
+    expect(supportGuideSource).toContain(
+      'const phoneNumberClassName = `font-ui-en font-bold text-[var(--foreground)] ${uiText(24)}`'
+    );
+    expect(supportGuideSource).toContain(
+      'const TOLL_FREE_ICON_SRC = "/assets/icons/icon-tollfree.svg"'
+    );
+    expect(supportGuideSource).toContain(
+      "h-[1em] w-[calc(1em*120/78.317)] shrink-0 bg-current"
+    );
     expect(supportGuideSource).toContain("font-bold");
     expect(supportGuideSource).toContain("uiText(24)");
+    expect(supportGuideSource).toContain(
+      "`mt-[calc(32px*var(--gap-scale))] ${phoneNumberClassName}`"
+    );
     expect(supportGuideSource).toContain("mt-[calc(24px*var(--gap-scale))]");
     expect(supportGuideSource).toContain("mt-[calc(16px*var(--gap-scale))]");
+    expect(supportGuideSource).toContain("data-support-contact");
+    expect(supportGuideSource).toContain("SupportContactForm");
   });
 
   it("does not render the former warranty intro above the accordions", () => {
@@ -92,6 +151,19 @@ describe("support guide accordions", () => {
     expect(supportGuideSource).not.toContain("guide.title");
     expect(supportGuideSource).not.toContain("guide.body");
     expect(supportGuideSource).toContain('data-support-guide');
+    expect(supportGuideSource).toContain('data-support-accordion');
+    expect(supportGuideSource.indexOf("data-support-accordion")).toBeLessThan(
+      supportGuideSource.indexOf("data-support-contact")
+    );
+    expect(supportGuideSource.indexOf("SupportAccordion")).toBeLessThan(
+      supportGuideSource.indexOf("data-support-contact")
+    );
+    expect(supportGuideSource.match(/pt-\[var\(--container-y-top\)\]/g)).toHaveLength(
+      1
+    );
+    expect(supportGuideSource).toContain("supportAccordionSectionClassName");
+    expect(supportGuideSource).toContain("supportContactSectionClassName");
+    expect(supportGuideSource).toContain("bg-[#f5f5f5]");
     expect(supportGuideSource).not.toContain("min-h-svh");
   });
 
