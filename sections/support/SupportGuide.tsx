@@ -48,9 +48,10 @@ export function SupportGuide() {
       </section>
 
       <section
+        id={supportContactPageContent.sectionId}
         data-header-theme="onLight"
         data-support-contact
-        className={supportContactSectionClassName}
+        className={`scroll-mt-[var(--header-height)] ${supportContactSectionClassName}`}
       >
         <Container>
           <div className="mx-auto w-full max-w-[1050px]">

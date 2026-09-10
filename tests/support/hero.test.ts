@@ -64,6 +64,7 @@ describe("support hero copy", () => {
 
   it("lets the next section cover the pinned hero from below without a footer gap", () => {
     expect(supportPageSource).toContain("<SupportStickyRegion>");
+    expect(supportPageSource).toContain("<SupportHashScroll />");
     expect(supportHeroSource).toContain("sticky top-0 z-0 h-lvh overflow-hidden");
     expect(supportHeroSource).toContain("relative z-10 -mt-[100lvh]");
     expect(supportStickyRegionSource).toContain("paddingBottom");

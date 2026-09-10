@@ -7,12 +7,14 @@ import {
   contactValidationFormatMessages,
   contactValidationMessages,
 } from "@/data/contact";
+import { SUPPORT_PRODUCT_SUPPORT_SECTION_ID } from "@/lib/paths";
 
 /**
  * 初期不良・修理専用フォームの表示文言。
  * Contact と切り分けているので、種別・項目はここだけ直す。
  */
 export const supportContactPageContent = {
+  sectionId: SUPPORT_PRODUCT_SUPPORT_SECTION_ID,
   sectionTitle: "Product Support",
   title: "初期不良・修理 専用フォーム",
   confirmTitle: contactPageContent.confirmTitle,

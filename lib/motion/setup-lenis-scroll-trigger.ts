@@ -42,12 +42,15 @@ export function getLenisScrollPosition(): number | null {
   return boundLenis?.scroll ?? null;
 }
 
-export function scrollBoundLenisTo(target: number | string | HTMLElement): boolean {
+export function scrollBoundLenisTo(
+  target: number | string | HTMLElement,
+  options?: { immediate?: boolean; offset?: number }
+): boolean {
   if (!boundLenis) {
     return false;
   }
 
-  boundLenis.scrollTo(target);
+  boundLenis.scrollTo(target, options);
   return true;
 }
 

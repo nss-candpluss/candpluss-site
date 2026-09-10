@@ -17,6 +17,7 @@ import {
   validateAttachmentContents,
   validateContactAttachments,
 } from "@/lib/contact/attachment-validation";
+import { getSupportProductSupportPath } from "@/lib/paths";
 import {
   SUPPORT_CONTACT_ATTACHMENT_MAX_COUNT,
   SUPPORT_CONTACT_ATTACHMENT_MAX_FILE_SIZE,
@@ -51,6 +52,8 @@ describe("support warranty contact form", () => {
     );
 
     expect(guideSource).toContain("data-support-contact");
+    expect(guideSource).toContain("id={supportContactPageContent.sectionId}");
+    expect(guideSource).toContain("scroll-mt-[var(--header-height)]");
     expect(guideSource).toContain("SupportContactForm");
     expect(guideSource).toContain("supportContactButtonClassName");
     expect(buttonStyleSource).toContain(
@@ -69,8 +72,24 @@ describe("support warranty contact form", () => {
       guideSource.indexOf("<SupportContactForm")
     );
     expect(supportContactPageContent.sectionTitle).toBe("Product Support");
+    expect(supportContactPageContent.sectionId).toBe("product-support");
     expect(supportContactPageContent.title).toBe(
       "初期不良・修理 専用フォーム"
+    );
+  });
+
+  it("exposes a stable Product Support hash for QR landings", () => {
+    const pageSource = source("sections/support/SupportPage.tsx");
+    const hashScrollSource = source("sections/support/SupportHashScroll.tsx");
+    const scrollSource = source("lib/support-contact/scroll-to-section.ts");
+
+    expect(getSupportProductSupportPath()).toBe("/support#product-support");
+    expect(pageSource).toContain("<SupportHashScroll />");
+    expect(hashScrollSource).toContain("subscribeMotionReady");
+    expect(hashScrollSource).toContain("hashchange");
+    expect(scrollSource).toContain("scrollBoundLenisTo(element, { immediate: true, offset })");
+    expect(scrollSource).toContain(
+      'element.scrollIntoView({ behavior: "auto", block: "start" })'
     );
   });
 
