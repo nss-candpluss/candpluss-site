@@ -33,11 +33,28 @@ describe("ProductDetailFeatureImageGallery touch drag", () => {
     expect(featureGallerySource).toContain(
       "const threshold = Math.max(48, width * 0.12)"
     );
-    expect(featureGallerySource).toContain("imageIndex: wrapIndex(selectedIndex + direction, images.length)");
+    expect(featureGallerySource).toContain(
+      "imageIndex: wrapIndex(selectedIndex + direction, media.length)"
+    );
   });
 
   it("keys each slide by its track slot so committing never remounts it", () => {
     expect(featureGallerySource).toContain("key={slot.id}");
+  });
+
+  it("renders ordered image and video slides and only activates the centred video", () => {
+    expect(featureGallerySource).toContain(
+      'item?.kind === "image"'
+    );
+    expect(featureGallerySource).toContain(
+      'item?.kind === "video"'
+    );
+    expect(featureGallerySource).toContain(
+      "<ProductDetailFeatureVideo video={item} active={isActive} />"
+    );
+    expect(featureGallerySource).toContain(
+      '!active || !isVisible || document.visibilityState === "hidden"'
+    );
   });
 });
 
