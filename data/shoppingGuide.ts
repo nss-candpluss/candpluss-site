@@ -4,78 +4,7 @@ export const shoppingGuideContent = {
   title: "ショッピングガイド",
   sections: [
     {
-      title: "送料・配送について",
-      subsections: [
-        {
-          blocks: [
-            {
-              type: "paragraph",
-              text: "■送料について\n・送料：全国一律700円（税込価格5,000円以上で送料無料）\n・各種決済手数料（代引き手数料、後払い手数料など）",
-            },
-          ],
-        },
-        {
-          blocks: [
-            {
-              type: "paragraph",
-              text: "■お届け日数に関して\n決済承認（またはご入金確認）後、通常3営業日以内に発送いたします。ただし、予約商品等の場合は商品ページに記載の納期に基づきます。\n土・日・祝日の発送は行っておりません。\n配送に関するお問い合わせにはご回答できかねますので、お問い合わせはご遠慮ください。\nその他、下記理由により商品の発送が遅れる場合がございます。",
-            },
-            {
-              type: "bullets",
-              items: [
-                "年末年始、夏季休暇、棚卸、社員研修等により発送作業を行えない場合",
-                "オンラインストアの受注が混み合い作業にお時間をいただく場合",
-                "天災や交通事情による配送遅延が起きた場合",
-              ],
-            },
-          ],
-        },
-        {
-          blocks: [
-            {
-              type: "paragraph",
-              text: "■配送時間指定\n弊社では日時指定日は承っておりません。最短での発送に努めておりますのでご了承ください。\n発送完了後の日時指定は佐川急便、（修理用パーツはヤマト運輸）のサービスをご利用頂けます。\n佐川急便、ヤマト運輸サイトで変更の場合は、発送メールに記載の伝票番号をご確認の上お手続きください。",
-            },
-            { type: "paragraph", text: "■佐川急便「スマートクラブ」ご案内" },
-            {
-              type: "link",
-              label: "https://www.sagawa-exp.co.jp/service/smartclub/",
-              href: "https://www.sagawa-exp.co.jp/service/smartclub/",
-              external: true,
-            },
-            { type: "paragraph", text: "■ヤマト運輸「クロネコメンバーズ」ご案内" },
-            {
-              type: "link",
-              label: "https://www.kuronekoyamato.co.jp/ytc/customer/members/",
-              href: "https://www.kuronekoyamato.co.jp/ytc/customer/members/",
-              external: true,
-            },
-            {
-              type: "paragraph",
-              text: "※天災や交通事情、お届け先のご不在等の諸事情で、ご希望の時間にお届けできない場合があります。",
-            },
-          ],
-        },
-        {
-          blocks: [
-            {
-              type: "paragraph",
-              text: "■配送方法\n商品は宅配便にて国内より発送いたします。配送業者は、佐川急便になります。",
-            },
-          ],
-        },
-        {
-          blocks: [
-            {
-              type: "paragraph",
-              text: "■海外配送について\nYou can order globally here.\n（Please note that if you use a forwarding service to ship globally from this website, we cannot accept returns or exchanges for incorrectly sent or defective products.）\nPlease note that shipping fees, customs duties, etc. will be charged separately for international shipping.",
-            },
-          ],
-        },
-      ],
-    },
-    {
-      title: "ご注文について",
+      title: "1.ご注文について",
       subsections: [
         {
           blocks: [
@@ -88,7 +17,20 @@ export const shoppingGuideContent = {
       ],
     },
     {
-      title: "お支払いについて",
+      title: "2.在庫について",
+      subsections: [
+        {
+          blocks: [
+            {
+              type: "paragraph",
+              text: "カートに入れた時点では商品の在庫は確保されません。\n決済ページの「今すぐ支払う」をクリック後、注文完了画面が表示されましたら在庫確保となります。\n万が一、ご注文いただきました商品が在庫切れの場合、メールでお知らせ後にキャンセル処理をさせていただきます。",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      title: "3.お支払いについて",
       subsections: [
         {
           blocks: [
@@ -114,31 +56,59 @@ export const shoppingGuideContent = {
             },
             {
               type: "paragraph",
-              text: "■銀行振込\n銀行振込でのお支払いもご利用いただけます。お支払い期限はご利用の決済手段（カード会社等）の規約に基づきます。",
+              text: "■銀行振込\n銀行振込でのお支払いもご利用いただけます。お支払い期限はご注文日より1週間以内です。\n振込手数料は、ご負担頂けますようお願い申し上げます。",
             },
           ],
         },
       ],
     },
     {
-      title: "在庫について",
+      title: "4.送料・配送について",
       subsections: [
         {
           blocks: [
             {
               type: "paragraph",
-              text: "カートに入れた時点では商品の在庫は確保されません。\n決済ページの「今すぐ支払う」をクリック後、注文完了画面が表示されましたら在庫確保となります。\n万が一、ご注文いただきました商品が在庫切れの場合、メールでお知らせ後にキャンセル処理をさせていただきます。",
+              text: "■送料について\n・送料：全国一律700円（税込価格5,000円以上で送料無料）\n・各種決済手数料（振込手数料など）",
             },
+          ],
+        },
+        {
+          blocks: [
             {
               type: "paragraph",
-              text: "■入荷通知について\n各製品ページの入荷通知メールにご登録頂けますと入荷次第、自動配信メールにてお知らせいたします。\n※入荷通知に関するご注意点\n・製品の再入荷をお知らせするもので、製品の予約を承るものではございません。\n・ご登録いただいても、再入荷がない可能性もございます。\n・再入荷お知らせメール配信後、すぐに売り切れとなる可能性もございます。\n・再入荷通知メールの配信は1回のみです。もう一度同じ製品の通知を受け取りたい場合は、あらためてご登録ください。",
+              text: "■お届け日数に関して\nご注文確認後、通常3営業日以内に発送いたします。ただし、予約商品等の場合は商品ページに記載の納期に基づきます。\n土・日・祝日の発送は行っておりません。\n配送に関するお問い合わせにはご回答できかねますので、お問い合わせはご遠慮ください。\nその他、下記理由により商品の発送が遅れる場合がございます。",
+            },
+            {
+              type: "bullets",
+              items: [
+                "年末年始、夏季休暇、棚卸、社員研修等により発送作業を行えない場合",
+                "オンラインストアの受注が混み合い作業にお時間をいただく場合",
+                "天災や交通事情による配送遅延が起きた場合",
+              ],
+            },
+          ],
+        },
+        {
+          blocks: [
+            {
+              type: "paragraph",
+              text: "■配送時間指定\n弊社では日時指定日は承っておりません。最短での発送に努めておりますのでご了承ください。",
+            },
+          ],
+        },
+        {
+          blocks: [
+            {
+              type: "paragraph",
+              text: "■配送方法\n商品は宅配便にて国内より発送いたします。配送業者は、ヤマト運輸 / 佐川急便 / 日本郵便になります。",
             },
           ],
         },
       ],
     },
     {
-      title: "返品・交換・キャンセルについて",
+      title: "5.返品・交換・キャンセルについて",
       subsections: [
         {
           blocks: [
@@ -167,13 +137,13 @@ export const shoppingGuideContent = {
       ],
     },
     {
-      title: "領収書、納品書について",
+      title: "6.領収書、納品書について",
       subsections: [
         {
           blocks: [
             {
               type: "paragraph",
-              text: "金額が記載されたお買い上げ領収書、納品書は、お届けする製品には同梱しておりません。\n商品発送後にマイページの注文履歴ページ（ログイン必要）から領収書を発行していただくか、商品発送のお知らせメールから遷移できる注文履歴ページ（ログイン必要）から領収書の発行が可能です。\n※領収書発行には会員登録が必要になります。\n※領収書は発行後の宛名や但し書きの変更が出来かねますのでご了承ください。",
+              text: "納品書は、お届けする製品に同梱し発送いたします。",
             },
           ],
         },
