@@ -17,7 +17,7 @@ const featureGallerySource = readFileSync(
   "utf8"
 );
 
-describe("ProductDetailFeatureImageGallery touch drag", () => {
+describe("ProductDetailFeatureMediaGallery touch drag", () => {
   it("moves the current and adjacent images with the pointer", () => {
     expect(featureGallerySource).toContain(
       "translate3d(calc(${slot.position * 100}% + ${dragOffsetX}px), 0, 0)"
@@ -33,11 +33,16 @@ describe("ProductDetailFeatureImageGallery touch drag", () => {
     expect(featureGallerySource).toContain(
       "const threshold = Math.max(48, width * 0.12)"
     );
-    expect(featureGallerySource).toContain("imageIndex: wrapIndex(selectedIndex + direction, images.length)");
+    expect(featureGallerySource).toContain("imageIndex: wrapIndex(selectedIndex + direction, media.length)");
   });
 
   it("keys each slide by its track slot so committing never remounts it", () => {
     expect(featureGallerySource).toContain("key={slot.id}");
+  });
+
+  it("renders video slides inside the same carousel as images", () => {
+    expect(featureGallerySource).toContain('item?.kind === "video"');
+    expect(featureGallerySource).toContain("active={isCurrent}");
   });
 });
 

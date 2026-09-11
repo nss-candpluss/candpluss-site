@@ -88,6 +88,8 @@ export type ProductFeature = {
   image?: string;
   images?: string[];
   video?: ProductVideo;
+  /** Shopify の登録順を保った画像・動画。混在時はこの順でカルーセル表示する */
+  media?: ProductGalleryMedia[];
   links?: Array<{
     label: string;
     href?: string;

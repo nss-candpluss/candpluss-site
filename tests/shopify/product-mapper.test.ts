@@ -240,6 +240,80 @@ describe("mapShopifyProductToProduct", () => {
     ).toBe("/products/moya500-inner-tent");
   });
 
+  it("keeps feature media in registration order when images and video are mixed", () => {
+    const product = mapShopifyProductToProduct({
+      id: "gid://shopify/Product/mixed-feature",
+      handle: "moya420",
+      title: "MOYA420",
+      description: "",
+      productType: "テント・シェルター",
+      availableForSale: true,
+      featuredImage: null,
+      media: { nodes: [] },
+      variants: { nodes: [] },
+      salesStatus: null,
+      features: {
+        references: {
+          nodes: [
+            {
+              id: "gid://shopify/Metaobject/mixed",
+              type: "product_feature",
+              fields: [
+                {
+                  key: "title",
+                  type: "single_line_text_field",
+                  value: "24箇所のギアループ",
+                },
+                {
+                  key: "media",
+                  type: "list.file_reference",
+                  references: {
+                    nodes: [
+                      {
+                        id: "gid://shopify/MediaImage/1",
+                        image: { url: "https://cdn.shopify.com/loop-01.webp" },
+                      },
+                      {
+                        id: "gid://shopify/Video/1",
+                        sources: [
+                          {
+                            url: "https://cdn.shopify.com/loop.m3u8",
+                            mimeType: "application/x-mpegURL",
+                          },
+                          {
+                            url: "https://cdn.shopify.com/loop.mp4",
+                            mimeType: "video/mp4",
+                          },
+                        ],
+                      },
+                      {
+                        id: "gid://shopify/MediaImage/2",
+                        image: { url: "https://cdn.shopify.com/loop-02.webp" },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      },
+      optionProducts: null,
+    } as Parameters<typeof mapShopifyProductToProduct>[0]);
+
+    expect(
+      product.features?.[0].media?.map((item) => [item.kind, item.src])
+    ).toEqual([
+      ["image", "https://cdn.shopify.com/loop-01.webp"],
+      ["video", "https://cdn.shopify.com/loop.mp4"],
+      ["image", "https://cdn.shopify.com/loop-02.webp"],
+    ]);
+    expect(product.features?.[0].images).toEqual([
+      "https://cdn.shopify.com/loop-01.webp",
+      "https://cdn.shopify.com/loop-02.webp",
+    ]);
+  });
+
   it("uses the first legacy PDF when the dedicated manual field is empty", () => {
     const product = mapShopifyProductToProduct({
       id: "gid://shopify/Product/legacy-download",

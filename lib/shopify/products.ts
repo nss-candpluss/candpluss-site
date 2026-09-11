@@ -481,6 +481,7 @@ function mapFeature(metaobject: ShopifyMetaobject, index: number): ProductFeatur
     group: mapFeatureGroup(fields.get("group")?.value),
     title: fields.get("title")?.value || `Feature ${index + 1}`,
     body: fields.get("body")?.value || "",
+    media: media.length ? media : undefined,
     image: images[0],
     images: images.length ? images : undefined,
     video:
