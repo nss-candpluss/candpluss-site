@@ -96,7 +96,8 @@ function createRequest(path: string, body: FormData): Request {
 beforeEach(() => {
   vi.clearAllMocks();
   vi.stubEnv("RESEND_API_KEY", "re_test");
-  vi.stubEnv("CONTACT_ADMIN_EMAIL", "admin@candpluss.camp");
+  vi.stubEnv("CONTACT_ADMIN_EMAIL", "contact@candpluss.camp");
+  vi.stubEnv("SUPPORT_CONTACT_ADMIN_EMAIL", "support@candpluss.camp");
   vi.stubEnv("CONTACT_FROM_EMAIL", "C AND+S <info@candpluss.camp>");
   vi.stubEnv("CONTACT_REPLY_TO_EMAIL", "info@candpluss.camp");
   vi.spyOn(console, "info").mockImplementation(() => undefined);
@@ -133,7 +134,7 @@ describe("Contact and Support API mail integration", () => {
     expect(body.ticketNumber).toMatch(/^CTS-/);
     expect(mocks.sendMail).toHaveBeenCalledTimes(2);
     expect(mocks.sendMail.mock.calls[0]?.[0]).toMatchObject({
-      to: "admin@candpluss.camp",
+      to: "contact@candpluss.camp",
       replyTo: "customer@example.com",
     });
     expect(mocks.sendMail.mock.calls[1]?.[0]).toMatchObject({
@@ -159,7 +160,7 @@ describe("Contact and Support API mail integration", () => {
     expect(body.ticketNumber).toMatch(/^SPR-/);
     expect(mocks.sendMail).toHaveBeenCalledTimes(2);
     expect(mocks.sendMail.mock.calls[0]?.[0]).toMatchObject({
-      to: "admin@candpluss.camp",
+      to: "support@candpluss.camp",
       attachments: [
         expect.objectContaining({
           filename: "破損箇所.jpg",
@@ -211,7 +212,7 @@ describe("Contact and Support API mail integration", () => {
     await expect(response.json()).resolves.toMatchObject({ ok: true });
     expect(mocks.sendMail).toHaveBeenCalledTimes(3);
     expect(mocks.sendMail.mock.calls[2]?.[0]).toMatchObject({
-      to: "admin@candpluss.camp",
+      to: "contact@candpluss.camp",
     });
     expect(mocks.sendMail.mock.calls[2]?.[1]).toMatchObject({
       idempotencyKey: expect.stringContaining(":failure-alert"),

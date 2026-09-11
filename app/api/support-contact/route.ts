@@ -38,7 +38,7 @@ type ResendAttachment = {
 
 function getContactEnvConfig(): ContactEnvConfig | null {
   const apiKey = process.env.RESEND_API_KEY;
-  const adminEmail = process.env.CONTACT_ADMIN_EMAIL;
+  const adminEmail = process.env.SUPPORT_CONTACT_ADMIN_EMAIL;
   const fromEmail = process.env.CONTACT_FROM_EMAIL;
   const replyToEmail = process.env.CONTACT_REPLY_TO_EMAIL;
 
