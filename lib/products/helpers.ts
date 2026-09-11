@@ -1,23 +1,46 @@
+import { productListingHandleOrder } from "@/data/product-listing-order";
 import { productCategories, type Product, type ProductVariant } from "@/types/product";
 
 const LISTING_CATEGORY_ORDER = productCategories
   .filter((category) => category.slug !== "all")
   .map((category) => category.slug);
 
-/** 一覧はカテゴリタブと同じ順。同一カテゴリ内は入力順を保つ */
-export function sortProductsForListing<T extends { categorySlug: string }>(
-  products: T[]
-): T[] {
-  const order = new Map<string, number>(
+/**
+ * 一覧はカテゴリタブと同じ順。同一カテゴリ内は
+ * `productListingHandleOrder` の指定順 → 残りは入力順。
+ */
+export function sortProductsForListing<
+  T extends { handle: string; categorySlug: string },
+>(products: T[]): T[] {
+  const categoryOrder = new Map<string, number>(
     LISTING_CATEGORY_ORDER.map((slug, index) => [slug, index])
   );
-  const fallbackIndex = LISTING_CATEGORY_ORDER.length;
+  const handleOrder = new Map<string, number>(
+    productListingHandleOrder.map((handle, index) => [handle, index])
+  );
+  const categoryFallback = LISTING_CATEGORY_ORDER.length;
+  const handleFallback = productListingHandleOrder.length;
 
-  return [...products].sort((a, b) => {
-    const aIndex = order.get(a.categorySlug) ?? fallbackIndex;
-    const bIndex = order.get(b.categorySlug) ?? fallbackIndex;
-    return aIndex - bIndex;
-  });
+  return products
+    .map((product, inputIndex) => ({ product, inputIndex }))
+    .sort((a, b) => {
+      const categoryDiff =
+        (categoryOrder.get(a.product.categorySlug) ?? categoryFallback) -
+        (categoryOrder.get(b.product.categorySlug) ?? categoryFallback);
+      if (categoryDiff !== 0) {
+        return categoryDiff;
+      }
+
+      const handleDiff =
+        (handleOrder.get(a.product.handle) ?? handleFallback) -
+        (handleOrder.get(b.product.handle) ?? handleFallback);
+      if (handleDiff !== 0) {
+        return handleDiff;
+      }
+
+      return a.inputIndex - b.inputIndex;
+    })
+    .map(({ product }) => product);
 }
 
 /** Shopify 経由の一覧では、ストアに存在する商品だけを残す */
