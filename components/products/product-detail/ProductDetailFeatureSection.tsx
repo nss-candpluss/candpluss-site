@@ -5,11 +5,16 @@ import {
   useEffect,
   useRef,
   useState,
-  type AnimationEvent as ReactAnimationEvent,
   type PointerEvent as ReactPointerEvent,
   type TransitionEvent as ReactTransitionEvent,
 } from "react";
 
+import {
+  createFeatureTrack,
+  settleFeatureTrack,
+  wrapIndex,
+  type FeatureTrackSlot,
+} from "@/components/products/product-detail/feature-track";
 import { preloadProductDetailImage } from "@/components/products/product-detail/image-preload";
 import {
   PRODUCT_DETAIL_SLIDE_MS,
@@ -47,17 +52,6 @@ type ProductDetailFeatureSectionProps = {
 
 type FeatureSlideEnterFrom = "left" | "right";
 
-type FeatureSlideLayer = {
-  key: string;
-  image: string | null;
-  role: "incoming" | "outgoing" | "settled";
-  enterFrom: FeatureSlideEnterFrom;
-};
-
-function wrapIndex(index: number, length: number) {
-  return length > 0 ? ((index % length) + length) % length : 0;
-}
-
 function resolveFeatureNavigation(
   fromIndex: number,
   toIndex: number,
@@ -69,22 +63,6 @@ function resolveFeatureNavigation(
   return forward <= backward
     ? { enterFrom: "right", steps: forward }
     : { enterFrom: "left", steps: -backward };
-}
-
-function featureSlideClassName(layer: FeatureSlideLayer) {
-  if (layer.role === "settled") {
-    return "";
-  }
-
-  if (layer.role === "incoming") {
-    return layer.enterFrom === "left"
-      ? "product-detail-feature-in-left"
-      : "product-detail-feature-in-right";
-  }
-
-  return layer.enterFrom === "left"
-    ? "product-detail-feature-out-right"
-    : "product-detail-feature-out-left";
 }
 
 function ProductDetailFeatureVideo({
@@ -191,24 +169,18 @@ function ProductDetailFeatureImageGallery({
   images: (string | null)[];
   priority: boolean;
 }) {
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [slideLayers, setSlideLayers] = useState<FeatureSlideLayer[]>(() => [
-    {
-      key: `settled-0-${images[0] ?? "placeholder"}`,
-      image: images[0],
-      role: "settled",
-      enterFrom: "right",
-    },
-  ]);
-  const [backdropImage, setBackdropImage] = useState(images[0]);
-  const [slideMs, setSlideMs] = useState(PRODUCT_DETAIL_SLIDE_MS);
+  const [slots, setSlots] = useState<FeatureTrackSlot[]>(() =>
+    createFeatureTrack(images.length)
+  );
   const [dragOffsetX, setDragOffsetX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [dragSnapBack, setDragSnapBack] = useState(false);
-  const slideSeqRef = useRef(0);
-  const selectionRequestRef = useRef(0);
+  const [transitionMs, setTransitionMs] = useState(0);
   const viewportRef = useRef<HTMLDivElement>(null);
-  const pendingCommitIndexRef = useRef<number | null>(null);
+  const pendingCommitRef = useRef<{
+    imageIndex: number;
+    direction: 1 | -1;
+  } | null>(null);
+  const navigationRequestRef = useRef(0);
   const swipeRef = useRef<{
     pointerId: number;
     startX: number;
@@ -217,14 +189,8 @@ function ProductDetailFeatureImageGallery({
     moved: boolean;
   } | null>(null);
   const hasMultipleImages = images.length > 1;
-  const isSliding = slideLayers.some((layer) => layer.role !== "settled");
-  const previousImage = images[wrapIndex(selectedIndex - 1, images.length)];
-  const nextImage = images[wrapIndex(selectedIndex + 1, images.length)];
-  const showDragPeek = hasMultipleImages && !isSliding;
-  const dragTransition =
-    dragSnapBack && !isDragging
-      ? `transform ${PRODUCT_DETAIL_SLIDE_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`
-      : "none";
+  const selectedIndex =
+    slots.find((slot) => slot.position === 0)?.imageIndex ?? 0;
 
   useEffect(() => {
     images.forEach((image) => {
@@ -234,39 +200,51 @@ function ProductDetailFeatureImageGallery({
     });
   }, [images]);
 
-  const settleToIndex = useCallback(
-    (index: number) => {
-      const nextIndex = wrapIndex(index, images.length);
-      const nextImage = images[nextIndex];
+  const settleTrack = useCallback(() => {
+    const pending = pendingCommitRef.current;
+    pendingCommitRef.current = null;
 
-      slideSeqRef.current += 1;
-      selectionRequestRef.current += 1;
-      setDragSnapBack(false);
-      setIsDragging(false);
-      setDragOffsetX(0);
-      setBackdropImage(nextImage);
-      setSelectedIndex(nextIndex);
-      setSlideLayers([
-        {
-          key: `settled-${slideSeqRef.current}-${nextImage ?? "placeholder"}`,
-          image: nextImage,
-          role: "settled",
-          enterFrom: "right",
-        },
-      ]);
+    setTransitionMs(0);
+    setDragOffsetX(0);
+
+    if (pending) {
+      setSlots((currentSlots) =>
+        settleFeatureTrack(
+          currentSlots,
+          pending.imageIndex,
+          pending.direction,
+          images.length
+        )
+      );
+    }
+  }, [images.length]);
+
+  const animateTrack = useCallback(
+    (fromOffsetX: number, toOffsetX: number, durationMs: number) => {
+      // 動く距離がないと transitionend が来ないため、その場で確定させる
+      if (Math.abs(toOffsetX - fromOffsetX) < 1) {
+        settleTrack();
+        return;
+      }
+
+      setTransitionMs(durationMs);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setDragOffsetX(toOffsetX);
+        });
+      });
     },
-    [images]
+    [settleTrack]
   );
 
-  const selectImage = useCallback(
-    (
-      index: number,
-      navigationOverride?: {
-        enterFrom: FeatureSlideEnterFrom;
-        steps: number;
-      }
-    ) => {
-      if (!images.length || pendingCommitIndexRef.current != null) {
+  const goToIndex = useCallback(
+    (index: number) => {
+      if (
+        !hasMultipleImages ||
+        isDragging ||
+        transitionMs > 0 ||
+        pendingCommitRef.current != null
+      ) {
         return;
       }
 
@@ -275,100 +253,64 @@ function ProductDetailFeatureImageGallery({
         return;
       }
 
-      const currentImage = images[selectedIndex];
-      const nextImage = images[nextIndex];
-
-      const navigation =
-        navigationOverride ??
-        resolveFeatureNavigation(selectedIndex, nextIndex, images.length);
+      const navigation = resolveFeatureNavigation(
+        selectedIndex,
+        nextIndex,
+        images.length
+      );
+      const direction: 1 | -1 = navigation.enterFrom === "right" ? 1 : -1;
       const durationMs = productDetailSlideDurationMs(navigation.steps);
-      const requestId = ++selectionRequestRef.current;
-
+      const nextImage = images[nextIndex];
+      const requestId = ++navigationRequestRef.current;
       const preloadNextImage = nextImage
         ? preloadProductDetailImage(nextImage)
         : Promise.resolve(true);
 
       void preloadNextImage.then(() => {
-        if (requestId !== selectionRequestRef.current) {
+        if (
+          requestId !== navigationRequestRef.current ||
+          pendingCommitRef.current != null
+        ) {
           return;
         }
 
-        const sequence = ++slideSeqRef.current;
-        setSlideMs(durationMs);
-        setSelectedIndex(nextIndex);
-        setSlideLayers((layers) => {
-          const settledLayer = layers.find(
-            (layer) =>
-              layer.role === "settled" && layer.image === currentImage
-          );
+        // 差し替え先は画面外の待機スロットなので、入れ替えは見えない
+        setSlots((currentSlots) =>
+          currentSlots.map((slot) =>
+            slot.position === direction
+              ? { ...slot, imageIndex: nextIndex }
+              : slot
+          )
+        );
 
-          return [
-            settledLayer
-              ? {
-                  ...settledLayer,
-                  role: "outgoing",
-                  enterFrom: navigation.enterFrom,
-                }
-              : {
-                  key: `out-${sequence}-${currentImage ?? "placeholder"}`,
-                  image: currentImage,
-                  role: "outgoing",
-                  enterFrom: navigation.enterFrom,
-                },
-            {
-              key: `in-${sequence}-${nextImage ?? "placeholder"}`,
-              image: nextImage,
-              role: "incoming",
-              enterFrom: navigation.enterFrom,
-            },
-          ];
-        });
+        const width = viewportRef.current?.clientWidth ?? 0;
+        pendingCommitRef.current = { imageIndex: nextIndex, direction };
+        animateTrack(0, direction === 1 ? -width : width, durationMs);
       });
     },
-    [images, selectedIndex]
+    [
+      animateTrack,
+      hasMultipleImages,
+      images,
+      isDragging,
+      selectedIndex,
+      transitionMs,
+    ]
   );
 
-  const selectRelativeImage = (offset: -1 | 1) => {
-    selectImage(selectedIndex + offset, {
-      enterFrom: offset < 0 ? "left" : "right",
-      steps: offset,
-    });
-  };
-
-  const handleIncomingAnimationEnd = (
-    event: ReactAnimationEvent<HTMLDivElement>,
-    layer: FeatureSlideLayer
-  ) => {
-    if (event.target !== event.currentTarget) {
-      return;
-    }
-
-    setBackdropImage(layer.image);
-    setSlideLayers((layers) => {
-      const incoming = layers.find(
-        (currentLayer) =>
-          currentLayer.key === layer.key && currentLayer.role === "incoming"
-      );
-
-      return incoming
-        ? [
-            {
-              ...incoming,
-              role: "settled",
-            },
-          ]
-        : layers;
-    });
+  /** 3 枚で画面を覆える範囲に収め、ドラッグ中に隙間が出ないようにする */
+  const clampDragOffset = (value: number) => {
+    const width = viewportRef.current?.clientWidth ?? 0;
+    return width > 0 ? Math.max(-width, Math.min(width, value)) : value;
   };
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (
       event.pointerType !== "touch" ||
       !hasMultipleImages ||
-      isSliding ||
       isDragging ||
-      dragSnapBack ||
-      pendingCommitIndexRef.current != null ||
+      transitionMs > 0 ||
+      pendingCommitRef.current != null ||
       (event.target as Element | null)?.closest?.("button, a")
     ) {
       return;
@@ -381,7 +323,6 @@ function ProductDetailFeatureImageGallery({
       axis: null,
       moved: false,
     };
-    setDragSnapBack(false);
   };
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -411,7 +352,7 @@ function ProductDetailFeatureImageGallery({
 
     if (swipe.axis === "x") {
       event.preventDefault();
-      setDragOffsetX(deltaX);
+      setDragOffsetX(clampDragOffset(deltaX));
     }
   };
 
@@ -421,7 +362,7 @@ function ProductDetailFeatureImageGallery({
       return;
     }
 
-    const deltaX = event.clientX - swipe.startX;
+    const offsetX = clampDragOffset(event.clientX - swipe.startX);
     const wasHorizontalDrag = swipe.axis === "x" && swipe.moved;
     swipeRef.current = null;
 
@@ -429,40 +370,31 @@ function ProductDetailFeatureImageGallery({
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
 
+    setIsDragging(false);
+
     if (!wasHorizontalDrag) {
-      setIsDragging(false);
       setDragOffsetX(0);
       return;
     }
 
     const width = viewportRef.current?.clientWidth ?? 0;
     const threshold = Math.max(48, width * 0.12);
-    const shouldStep = Math.abs(deltaX) >= threshold;
 
-    setIsDragging(false);
-
-    if (!shouldStep && Math.abs(deltaX) < 1) {
-      setDragOffsetX(0);
-      setDragSnapBack(false);
+    if (width <= 0 || Math.abs(offsetX) < threshold) {
+      animateTrack(offsetX, 0, PRODUCT_DETAIL_SLIDE_MS);
       return;
     }
 
-    setDragSnapBack(true);
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        if (!shouldStep) {
-          setDragOffsetX(0);
-          return;
-        }
-
-        pendingCommitIndexRef.current = wrapIndex(
-          selectedIndex + (deltaX < 0 ? 1 : -1),
-          images.length
-        );
-        setDragOffsetX(deltaX < 0 ? -width : width);
-      });
-    });
+    const direction: 1 | -1 = offsetX < 0 ? 1 : -1;
+    pendingCommitRef.current = {
+      imageIndex: wrapIndex(selectedIndex + direction, images.length),
+      direction,
+    };
+    animateTrack(
+      offsetX,
+      direction === 1 ? -width : width,
+      PRODUCT_DETAIL_SLIDE_MS
+    );
   };
 
   const handlePointerCancel = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -471,43 +403,26 @@ function ProductDetailFeatureImageGallery({
       return;
     }
 
+    const offsetX = clampDragOffset(event.clientX - swipe.startX);
     swipeRef.current = null;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
     setIsDragging(false);
-
-    if (Math.abs(dragOffsetX) < 1) {
-      setDragOffsetX(0);
-      setDragSnapBack(false);
-      return;
-    }
-
-    setDragSnapBack(true);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setDragOffsetX(0);
-      });
-    });
+    animateTrack(offsetX, 0, PRODUCT_DETAIL_SLIDE_MS);
   };
 
-  const handleDragTransitionEnd = (
+  const handleTrackTransitionEnd = (
     event: ReactTransitionEvent<HTMLDivElement>
   ) => {
-    if (event.propertyName !== "transform") {
+    if (
+      event.propertyName !== "transform" ||
+      event.target !== event.currentTarget
+    ) {
       return;
     }
 
-    const pendingIndex = pendingCommitIndexRef.current;
-    if (pendingIndex != null) {
-      pendingCommitIndexRef.current = null;
-      settleToIndex(pendingIndex);
-      return;
-    }
-
-    if (dragSnapBack) {
-      setDragSnapBack(false);
-    }
+    settleTrack();
   };
 
   return (
@@ -519,103 +434,43 @@ function ProductDetailFeatureImageGallery({
       onPointerUp={handlePointerEnd}
       onPointerCancel={handlePointerCancel}
     >
-      {backdropImage ? (
-        <SiteImage
-          src={backdropImage}
-          alt=""
-          fill
-          sizes="(min-width: 1025px) 33vw, (min-width: 768px) 50vw, 100vw"
-          priority={priority}
-          aria-hidden="true"
-          className="pointer-events-none object-cover object-center"
-        />
-      ) : null}
+      {slots.map((slot) => {
+        const image = images[slot.imageIndex];
 
-      {showDragPeek ? (
-        <>
+        return (
           <div
-            aria-hidden="true"
+            key={slot.id}
+            aria-hidden={slot.position !== 0}
             className="pointer-events-none absolute inset-0 bg-[var(--color-line)]"
             style={{
-              transform: `translate3d(calc(-100% + ${dragOffsetX}px), 0, 0)`,
-              transition: dragTransition,
+              transform: `translate3d(calc(${slot.position * 100}% + ${dragOffsetX}px), 0, 0)`,
+              transition:
+                transitionMs > 0
+                  ? `transform ${transitionMs}ms cubic-bezier(0.22, 1, 0.36, 1)`
+                  : "none",
             }}
+            onTransitionEnd={handleTrackTransitionEnd}
           >
-            {previousImage ? (
+            {image ? (
               <SiteImage
-                src={previousImage}
+                src={image}
                 alt=""
                 fill
                 sizes="(min-width: 1025px) 33vw, (min-width: 768px) 50vw, 100vw"
+                priority={priority && slot.imageIndex === 0}
                 className="object-cover object-center"
               />
             ) : null}
           </div>
-
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-[var(--color-line)]"
-            style={{
-              transform: `translate3d(calc(100% + ${dragOffsetX}px), 0, 0)`,
-              transition: dragTransition,
-            }}
-          >
-            {nextImage ? (
-              <SiteImage
-                src={nextImage}
-                alt=""
-                fill
-                sizes="(min-width: 1025px) 33vw, (min-width: 768px) 50vw, 100vw"
-                className="object-cover object-center"
-              />
-            ) : null}
-          </div>
-        </>
-      ) : null}
-
-      {slideLayers.map((layer) => (
-        <div
-          key={layer.key}
-          aria-hidden={layer.role === "outgoing"}
-          className={`absolute inset-0 bg-[var(--color-line)] ${featureSlideClassName(layer)}`}
-          style={
-            layer.role === "settled"
-              ? showDragPeek
-                ? {
-                    transform: `translate3d(${dragOffsetX}px, 0, 0)`,
-                    transition: dragTransition,
-                  }
-                : undefined
-              : { animationDuration: `${slideMs}ms` }
-          }
-          onAnimationEnd={
-            layer.role === "incoming"
-              ? (event) => handleIncomingAnimationEnd(event, layer)
-              : undefined
-          }
-          onTransitionEnd={
-            layer.role === "settled" ? handleDragTransitionEnd : undefined
-          }
-        >
-          {layer.image ? (
-            <SiteImage
-              src={layer.image}
-              alt=""
-              fill
-              sizes="(min-width: 1025px) 33vw, (min-width: 768px) 50vw, 100vw"
-              priority={priority && selectedIndex === 0}
-              className="object-cover object-center"
-            />
-          ) : null}
-        </div>
-      ))}
+        );
+      })}
 
       {hasMultipleImages ? (
         <>
           <button
             type="button"
             aria-label="前のFeature画像を表示"
-            onClick={() => selectRelativeImage(-1)}
+            onClick={() => goToIndex(selectedIndex - 1)}
             className="absolute top-1/2 left-[12px] z-10 flex size-[clamp(40px,calc(48px*var(--gap-scale-x)),48px)] -translate-y-1/2 items-center justify-center rounded-full border border-[#ccc] bg-white/80 text-[var(--foreground)] [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
           >
             <ProductGalleryChevron direction="left" />
@@ -624,7 +479,7 @@ function ProductDetailFeatureImageGallery({
           <button
             type="button"
             aria-label="次のFeature画像を表示"
-            onClick={() => selectRelativeImage(1)}
+            onClick={() => goToIndex(selectedIndex + 1)}
             className="absolute top-1/2 right-[12px] z-10 flex size-[clamp(40px,calc(48px*var(--gap-scale-x)),48px)] -translate-y-1/2 items-center justify-center rounded-full border border-[#ccc] bg-white/80 text-[var(--foreground)] [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
           >
             <ProductGalleryChevron direction="right" />
@@ -643,7 +498,7 @@ function ProductDetailFeatureImageGallery({
                   type="button"
                   aria-label={`${index + 1}枚目のFeature画像を表示`}
                   aria-current={index === selectedIndex ? "true" : undefined}
-                  onClick={() => selectImage(index)}
+                  onClick={() => goToIndex(index)}
                   className={`block rounded-full opacity-70 transition-[width,height,background-color] ${
                     index === selectedIndex
                       ? "size-[11px] bg-white"
@@ -761,44 +616,6 @@ export function ProductDetailFeatureSection({
         hasBottomPadding ? "pb-[var(--container-y-bottom)]" : "pb-0"
       }`}
     >
-      <style>{`
-        @keyframes product-detail-feature-in-left {
-          from { transform: translate3d(-100%, 0, 0); }
-          to { transform: translate3d(0, 0, 0); }
-        }
-        @keyframes product-detail-feature-in-right {
-          from { transform: translate3d(100%, 0, 0); }
-          to { transform: translate3d(0, 0, 0); }
-        }
-        @keyframes product-detail-feature-out-left {
-          from { transform: translate3d(0, 0, 0); }
-          to { transform: translate3d(-100%, 0, 0); }
-        }
-        @keyframes product-detail-feature-out-right {
-          from { transform: translate3d(0, 0, 0); }
-          to { transform: translate3d(100%, 0, 0); }
-        }
-        .product-detail-feature-in-left,
-        .product-detail-feature-in-right,
-        .product-detail-feature-out-left,
-        .product-detail-feature-out-right {
-          animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-          animation-fill-mode: both;
-        }
-        .product-detail-feature-in-left {
-          animation-name: product-detail-feature-in-left;
-        }
-        .product-detail-feature-in-right {
-          animation-name: product-detail-feature-in-right;
-        }
-        .product-detail-feature-out-left {
-          animation-name: product-detail-feature-out-left;
-        }
-        .product-detail-feature-out-right {
-          animation-name: product-detail-feature-out-right;
-        }
-      `}</style>
-
       <h2 className={`font-heading text-[var(--foreground)] ${productDetailSectionTitleClassName}`}>
         {title}
       </h2>
