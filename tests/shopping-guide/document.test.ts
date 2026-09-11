@@ -42,7 +42,7 @@ describe("shopping guide document", () => {
     expect(shipping).toContain("全国一律700円（税込価格5,000円以上で送料無料）");
     expect(shipping).toContain("通常3営業日以内に発送");
     expect(shipping).not.toContain("990円");
-    expect(payment).toContain("クレジットカード決済、Google Pay、Apple Pay、Amazon Pay、銀行振込");
+    expect(payment).toContain("クレジットカード決済、Google Pay、Apple Pay、銀行振込");
     expect(payment).toContain("■Shop Pay");
     expect(payment).toContain("ネットショップシステムShopifyが提供する決済サービスです");
     expect(payment).toContain("6桁のショップペイコード（SMS認証）");

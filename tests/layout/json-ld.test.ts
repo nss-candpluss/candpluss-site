@@ -87,6 +87,9 @@ describe("json-ld", () => {
     expect(jsonLd.name).toBe(siteConfig.name);
     expect(jsonLd.legalName).toBe("株式会社NSS");
     expect(jsonLd.currenciesAccepted).toBe("JPY");
+    expect(jsonLd.paymentAccepted).toBe(
+      "クレジットカード, Google Pay, Apple Pay, 銀行振込"
+    );
     expect(parent.name).toBe("株式会社NSS");
     expect(returns.merchantReturnDays).toBe(7);
     expect(returns.merchantReturnLink).toBe(

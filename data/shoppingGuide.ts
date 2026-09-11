@@ -94,7 +94,7 @@ export const shoppingGuideContent = {
           blocks: [
             {
               type: "paragraph",
-              text: "クレジットカード決済、Google Pay、Apple Pay、Amazon Pay、銀行振込\n注文完了手続き時にシステム上で決済処理が行われます。お支払い期限はご利用の決済手段（カード会社等）の規約に基づきます。",
+              text: "クレジットカード決済、Google Pay、Apple Pay、銀行振込\n注文完了手続き時にシステム上で決済処理が行われます。お支払い期限はご利用の決済手段（カード会社等）の規約に基づきます。",
             },
             {
               type: "paragraph",
@@ -111,10 +111,6 @@ export const shoppingGuideContent = {
             {
               type: "paragraph",
               text: "■Google Pay\nGoogle Payはおサイフケータイ対応のAndroidスマートフォンでご利用可能な決済サービスです。\nあらかじめクレジットカードを登録しておけば、クレジットカード情報の入力を行うことなく、簡単・安全に決済ができます。",
-            },
-            {
-              type: "paragraph",
-              text: "■Amazon Pay\nAmazonアカウントに登録されたお支払い方法・配送先情報を利用して決済できます。",
             },
             {
               type: "paragraph",

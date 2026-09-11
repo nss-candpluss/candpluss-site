@@ -39,7 +39,7 @@ describe("commercial transactions document", () => {
     ]);
     expect(item("支払方法")?.blocks[0]).toEqual({
       type: "paragraph",
-      text: "クレジットカード決済、Google Pay、Apple Pay、Amazon Pay、銀行振込",
+      text: "クレジットカード決済、Google Pay、Apple Pay、銀行振込",
     });
     expect(item("商品の引渡時期")?.blocks[0]).toEqual({
       type: "paragraph",

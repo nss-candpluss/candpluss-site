@@ -61,7 +61,7 @@ export const commercialTransactionsContent = {
       blocks: [
         {
           type: "paragraph",
-          text: "クレジットカード決済、Google Pay、Apple Pay、Amazon Pay、銀行振込",
+          text: "クレジットカード決済、Google Pay、Apple Pay、銀行振込",
         },
       ],
     },

@@ -93,7 +93,7 @@ export function buildOnlineStoreJsonLd(): JsonLdObject {
     ...organizationCore(),
     currenciesAccepted: "JPY",
     paymentAccepted:
-      "クレジットカード, Google Pay, Apple Pay, Amazon Pay, 銀行振込",
+      "クレジットカード, Google Pay, Apple Pay, 銀行振込",
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer service",
