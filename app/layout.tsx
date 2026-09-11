@@ -58,6 +58,14 @@ export const metadata: Metadata = {
   appleWebApp: {
     title: siteConfig.name,
   },
+  // iOS が本文の日付・電話番号などを自動でリンク化し、hydration 前に
+  // HTML を書き換えてしまうのを防ぐ
+  formatDetection: {
+    telephone: false,
+    date: false,
+    address: false,
+    email: false,
+  },
   ...(siteConfig.allowSearchIndexing
     ? {}
     : {
