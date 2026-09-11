@@ -85,6 +85,8 @@ export type ProductFeature = {
   group?: string;
   title: string;
   body: string;
+  /** Shopifyで管理する、順序付きのFeature画像・動画 */
+  media?: ProductGalleryMedia[];
   image?: string;
   images?: string[];
   video?: ProductVideo;

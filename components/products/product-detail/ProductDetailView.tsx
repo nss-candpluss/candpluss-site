@@ -50,7 +50,7 @@ function buildProductFeatures(
 ): ProductDetailFeature[] {
   return (
     product.features?.map((feature) => {
-      if (feature.images?.length || feature.video) {
+      if (feature.media?.length || feature.images?.length || feature.video) {
         return feature;
       }
 

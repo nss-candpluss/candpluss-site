@@ -62,6 +62,41 @@ describe("mapShopifyProductToProduct", () => {
                 },
                 { key: "body", type: "multi_line_text_field", value: "Body" },
                 {
+                  key: "media",
+                  type: "list.file_reference",
+                  references: {
+                    nodes: [
+                      {
+                        id: "gid://shopify/MediaImage/feature-1",
+                        image: {
+                          url: "https://cdn.shopify.com/feature-1.webp",
+                          altText: "Feature image 1",
+                        },
+                      },
+                      {
+                        id: "gid://shopify/Video/feature-2",
+                        previewImage: {
+                          url: "https://cdn.shopify.com/feature-2-poster.webp",
+                        },
+                        sources: [
+                          {
+                            url: "https://cdn.shopify.com/feature-2.mp4",
+                            mimeType: "video/mp4",
+                          },
+                        ],
+                        alt: "Feature video 2",
+                      },
+                      {
+                        id: "gid://shopify/MediaImage/feature-3",
+                        image: {
+                          url: "https://cdn.shopify.com/feature-3.webp",
+                          altText: "Feature image 3",
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
                   key: "link_label",
                   type: "single_line_text_field",
                   value: "拡張用プロダクト一覧へ",
@@ -213,6 +248,21 @@ describe("mapShopifyProductToProduct", () => {
         },
       ],
     });
+    expect(product.features?.[0].media).toEqual([
+      expect.objectContaining({
+        kind: "image",
+        src: "https://cdn.shopify.com/feature-1.webp",
+      }),
+      expect.objectContaining({
+        kind: "video",
+        src: "https://cdn.shopify.com/feature-2.mp4",
+        poster: "https://cdn.shopify.com/feature-2-poster.webp",
+      }),
+      expect.objectContaining({
+        kind: "image",
+        src: "https://cdn.shopify.com/feature-3.webp",
+      }),
+    ]);
     expect(product.features?.[1]).toMatchObject({
       title: "ZIG STAKE 20",
       links: [

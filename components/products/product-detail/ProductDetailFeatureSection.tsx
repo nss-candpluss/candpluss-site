@@ -27,15 +27,15 @@ import { SiteImage } from "@/components/ui/SiteImage";
 import { assetPath } from "@/lib/assetPath";
 import { splitFeatureNotes } from "@/lib/products/feature-notes";
 import { productDetailSectionTitleClassName, productFeatureItemTitleClassName } from "@/lib/typography";
-import type { ProductFeature } from "@/types/product";
+import type {
+  ProductFeature,
+  ProductGalleryMedia,
+  ProductVideo,
+} from "@/types/product";
 
 export type ProductDetailFeature = ProductFeature & {
   images?: string[];
   mediaSlots?: (string | null)[];
-  video?: {
-    src: string;
-    poster?: string;
-  };
   links?: Array<{
     label: string;
     href?: string;
@@ -67,8 +67,10 @@ function resolveFeatureNavigation(
 
 function ProductDetailFeatureVideo({
   video,
+  active,
 }: {
-  video: NonNullable<ProductDetailFeature["video"]>;
+  video: ProductVideo;
+  active: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoSrc = assetPath(video.src);
@@ -90,7 +92,7 @@ function ProductDetailFeatureVideo({
       const isVisible =
         rect.height > 0 && visibleHeight / rect.height >= 0.2;
 
-      if (!isVisible || document.visibilityState === "hidden") {
+      if (!active || !isVisible || document.visibilityState === "hidden") {
         element.pause();
         return;
       }
@@ -144,14 +146,14 @@ function ProductDetailFeatureVideo({
       window.removeEventListener("pageshow", scheduleSync);
       element.pause();
     };
-  }, [videoSrc]);
+  }, [active, videoSrc]);
 
   return (
     <video
       ref={videoRef}
       src={videoSrc}
       poster={video.poster ? assetPath(video.poster) : undefined}
-      autoPlay
+      autoPlay={active}
       muted
       playsInline
       loop
@@ -162,15 +164,17 @@ function ProductDetailFeatureVideo({
   );
 }
 
-function ProductDetailFeatureImageGallery({
-  images,
+type ProductDetailFeatureMedia = ProductGalleryMedia | null;
+
+function ProductDetailFeatureMediaGallery({
+  media,
   priority,
 }: {
-  images: (string | null)[];
+  media: ProductDetailFeatureMedia[];
   priority: boolean;
 }) {
   const [slots, setSlots] = useState<FeatureTrackSlot[]>(() =>
-    createFeatureTrack(images.length)
+    createFeatureTrack(media.length)
   );
   const [dragOffsetX, setDragOffsetX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -188,17 +192,17 @@ function ProductDetailFeatureImageGallery({
     axis: "x" | "y" | null;
     moved: boolean;
   } | null>(null);
-  const hasMultipleImages = images.length > 1;
+  const hasMultipleMedia = media.length > 1;
   const selectedIndex =
     slots.find((slot) => slot.position === 0)?.imageIndex ?? 0;
 
   useEffect(() => {
-    images.forEach((image) => {
-      if (image) {
-        void preloadProductDetailImage(image);
+    media.forEach((item) => {
+      if (item?.kind === "image") {
+        void preloadProductDetailImage(item.src);
       }
     });
-  }, [images]);
+  }, [media]);
 
   const settleTrack = useCallback(() => {
     const pending = pendingCommitRef.current;
@@ -213,11 +217,11 @@ function ProductDetailFeatureImageGallery({
           currentSlots,
           pending.imageIndex,
           pending.direction,
-          images.length
+          media.length
         )
       );
     }
-  }, [images.length]);
+  }, [media.length]);
 
   const animateTrack = useCallback(
     (fromOffsetX: number, toOffsetX: number, durationMs: number) => {
@@ -240,7 +244,7 @@ function ProductDetailFeatureImageGallery({
   const goToIndex = useCallback(
     (index: number) => {
       if (
-        !hasMultipleImages ||
+        !hasMultipleMedia ||
         isDragging ||
         transitionMs > 0 ||
         pendingCommitRef.current != null
@@ -248,7 +252,7 @@ function ProductDetailFeatureImageGallery({
         return;
       }
 
-      const nextIndex = wrapIndex(index, images.length);
+      const nextIndex = wrapIndex(index, media.length);
       if (nextIndex === selectedIndex) {
         return;
       }
@@ -256,17 +260,17 @@ function ProductDetailFeatureImageGallery({
       const navigation = resolveFeatureNavigation(
         selectedIndex,
         nextIndex,
-        images.length
+        media.length
       );
       const direction: 1 | -1 = navigation.enterFrom === "right" ? 1 : -1;
       const durationMs = productDetailSlideDurationMs(navigation.steps);
-      const nextImage = images[nextIndex];
+      const nextMedia = media[nextIndex];
       const requestId = ++navigationRequestRef.current;
-      const preloadNextImage = nextImage
-        ? preloadProductDetailImage(nextImage)
+      const preloadNextMedia = nextMedia?.kind === "image"
+        ? preloadProductDetailImage(nextMedia.src)
         : Promise.resolve(true);
 
-      void preloadNextImage.then(() => {
+      void preloadNextMedia.then(() => {
         if (
           requestId !== navigationRequestRef.current ||
           pendingCommitRef.current != null
@@ -290,9 +294,9 @@ function ProductDetailFeatureImageGallery({
     },
     [
       animateTrack,
-      hasMultipleImages,
-      images,
+      hasMultipleMedia,
       isDragging,
+      media,
       selectedIndex,
       transitionMs,
     ]
@@ -307,7 +311,7 @@ function ProductDetailFeatureImageGallery({
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (
       event.pointerType !== "touch" ||
-      !hasMultipleImages ||
+      !hasMultipleMedia ||
       isDragging ||
       transitionMs > 0 ||
       pendingCommitRef.current != null ||
@@ -387,7 +391,7 @@ function ProductDetailFeatureImageGallery({
 
     const direction: 1 | -1 = offsetX < 0 ? 1 : -1;
     pendingCommitRef.current = {
-      imageIndex: wrapIndex(selectedIndex + direction, images.length),
+      imageIndex: wrapIndex(selectedIndex + direction, media.length),
       direction,
     };
     animateTrack(
@@ -435,13 +439,16 @@ function ProductDetailFeatureImageGallery({
       onPointerCancel={handlePointerCancel}
     >
       {slots.map((slot) => {
-        const image = images[slot.imageIndex];
+        const item = media[slot.imageIndex];
+        const isActive = slot.position === 0;
 
         return (
           <div
             key={slot.id}
-            aria-hidden={slot.position !== 0}
-            className="pointer-events-none absolute inset-0 bg-[var(--color-line)]"
+            aria-hidden={!isActive}
+            className={`pointer-events-none absolute inset-0 ${
+              item?.kind === "video" ? "bg-black" : "bg-[var(--color-line)]"
+            }`}
             style={{
               transform: `translate3d(calc(${slot.position * 100}% + ${dragOffsetX}px), 0, 0)`,
               transition:
@@ -451,25 +458,27 @@ function ProductDetailFeatureImageGallery({
             }}
             onTransitionEnd={handleTrackTransitionEnd}
           >
-            {image ? (
+            {item?.kind === "image" ? (
               <SiteImage
-                src={image}
-                alt=""
+                src={item.src}
+                alt={item.alt}
                 fill
                 sizes="(min-width: 1025px) 33vw, (min-width: 768px) 50vw, 100vw"
                 priority={priority && slot.imageIndex === 0}
                 className="object-cover object-center"
               />
+            ) : item?.kind === "video" ? (
+              <ProductDetailFeatureVideo video={item} active={isActive} />
             ) : null}
           </div>
         );
       })}
 
-      {hasMultipleImages ? (
+      {hasMultipleMedia ? (
         <>
           <button
             type="button"
-            aria-label="前のFeature画像を表示"
+            aria-label="前のFeatureメディアを表示"
             onClick={() => goToIndex(selectedIndex - 1)}
             className="absolute top-1/2 left-[12px] z-10 flex size-[clamp(40px,calc(48px*var(--gap-scale-x)),48px)] -translate-y-1/2 items-center justify-center rounded-full border border-[#ccc] bg-white/80 text-[var(--foreground)] [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
           >
@@ -478,7 +487,7 @@ function ProductDetailFeatureImageGallery({
 
           <button
             type="button"
-            aria-label="次のFeature画像を表示"
+            aria-label="次のFeatureメディアを表示"
             onClick={() => goToIndex(selectedIndex + 1)}
             className="absolute top-1/2 right-[12px] z-10 flex size-[clamp(40px,calc(48px*var(--gap-scale-x)),48px)] -translate-y-1/2 items-center justify-center rounded-full border border-[#ccc] bg-white/80 text-[var(--foreground)] [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
           >
@@ -486,17 +495,17 @@ function ProductDetailFeatureImageGallery({
           </button>
 
           <ol
-            aria-label="Feature画像"
+            aria-label="Featureメディア"
             className="absolute bottom-[14px] left-1/2 z-10 flex -translate-x-1/2 items-center gap-[6px]"
           >
-            {images.map((image, index) => (
+            {media.map((item, index) => (
               <li
-                key={`${image ?? "placeholder"}-${index}`}
+                key={`${item?.id ?? "placeholder"}-${index}`}
                 className="flex items-center"
               >
                 <button
                   type="button"
-                  aria-label={`${index + 1}枚目のFeature画像を表示`}
+                  aria-label={`${index + 1}件目のFeatureメディアを表示`}
                   aria-current={index === selectedIndex ? "true" : undefined}
                   onClick={() => goToIndex(index)}
                   className={`block rounded-full opacity-70 transition-[width,height,background-color] ${
@@ -522,34 +531,49 @@ function ProductDetailFeatureCard({
   priority: boolean;
 }) {
   const { body, notes } = splitFeatureNotes(feature.body);
+  const media: ProductDetailFeatureMedia[] = feature.media?.length
+    ? feature.media
+    : feature.video
+      ? [
+          {
+            id: `${feature.id}-video`,
+            kind: "video",
+            ...feature.video,
+          },
+        ]
+      : feature.mediaSlots?.length
+        ? feature.mediaSlots.map((src, index) =>
+            src
+              ? {
+                  id: `${feature.id}-media-${index}`,
+                  kind: "image" as const,
+                  src,
+                  alt: "",
+                }
+              : null
+          )
+        : feature.images?.length
+          ? feature.images.map((src, index) => ({
+              id: `${feature.id}-image-${index}`,
+              kind: "image" as const,
+              src,
+              alt: "",
+            }))
+          : feature.image
+            ? [
+                {
+                  id: `${feature.id}-image`,
+                  kind: "image" as const,
+                  src: feature.image,
+                  alt: "",
+                },
+              ]
+            : [];
 
   return (
     <article className="block">
-      {feature.video ? (
-        <div className="relative aspect-[13/10] overflow-hidden bg-black">
-          <ProductDetailFeatureVideo video={feature.video} />
-        </div>
-      ) : feature.mediaSlots?.length ? (
-        <ProductDetailFeatureImageGallery
-          images={feature.mediaSlots}
-          priority={priority}
-        />
-      ) : feature.images?.length ? (
-        <ProductDetailFeatureImageGallery
-          images={feature.images}
-          priority={priority}
-        />
-      ) : feature.image ? (
-        <div className="relative aspect-[13/10] overflow-hidden bg-[var(--color-line)]">
-          <SiteImage
-            src={feature.image}
-            alt=""
-            fill
-            sizes="(min-width: 768px) 33vw, 100vw"
-            priority={priority}
-            className="object-cover object-center"
-          />
-        </div>
+      {media.length ? (
+        <ProductDetailFeatureMediaGallery media={media} priority={priority} />
       ) : (
         <div
           aria-label="画像準備中"
