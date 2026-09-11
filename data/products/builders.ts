@@ -3,7 +3,7 @@ import type {
   ProductImage,
   StandardGallery,
 } from "@/types/product";
-import { buildColoredPhotoImages, buildPhotoImages, PRODUCT_IMAGE_PLACEHOLDER, productImagePath } from "@/lib/products/image-paths";
+import { buildPhotoImages, PRODUCT_IMAGE_PLACEHOLDER, productImagePath } from "@/lib/products/image-paths";
 
 const CAMERA_ANGLES = [
   "01-front",
@@ -88,19 +88,6 @@ export function buildPhotoImageGallery(
   return {
     type: "standard",
     images: buildPhotoImages(handle, title, count),
-  };
-}
-
-export function buildColoredPhotoImageGallery({
-  handle,
-  title,
-  colorCode,
-  colorName,
-  count,
-}: BuildGalleryOptions & { count: number }): StandardGallery {
-  return {
-    type: "standard",
-    images: buildColoredPhotoImages(handle, title, colorCode, colorName, count),
   };
 }
 

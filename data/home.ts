@@ -49,7 +49,7 @@ export const homeMainProducts = {
       id: "zig-stake",
       title: "ZIG STAKE",
       caption: "BUILT TO HOLD.",
-      href: "/products/zig-stake20",
+      href: "/products/zig-stake",
       image: "/images/home/home-link-zigstake.webp",
     },
   ],

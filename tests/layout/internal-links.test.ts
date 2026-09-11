@@ -61,8 +61,17 @@ const pendingInternalHrefs = new Set([
   "/documents/products/moya500/manual.pdf",
 ]);
 
+/**
+ * Shopify にのみ存在する handle。
+ *
+ * PRODUCT_SOURCE=shopify では一覧・詳細ともに Shopify の handle が使われるため、
+ * ローカル catalog（data/products.ts）に無くても実際のルートは解決する。
+ * ローカル catalog の handle を Shopify に揃えたら、この集合から外せる。
+ */
+const shopifyOnlyProductHrefs = new Set(["/products/zig-stake"]);
+
 function isResolvedInternalHref(href: string): boolean {
-  if (pendingInternalHrefs.has(href)) {
+  if (pendingInternalHrefs.has(href) || shopifyOnlyProductHrefs.has(href)) {
     return true;
   }
 

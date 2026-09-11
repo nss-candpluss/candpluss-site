@@ -1,5 +1,4 @@
 import {
-  buildColoredPhotoImageGallery,
   buildNokutaStandardGallery,
   buildOpenCloseGallery,
   buildPhotoImageGallery,
@@ -52,25 +51,12 @@ function priceTbd() {
   };
 }
 
-const ATARI_DESCRIPTION = "サンプル文章入れてください";
-
-const MOYA500_OPTION_HANDLES = [
-  "moya500-roof-sheet",
-  "moya500-tpu-window",
-  "moya500-ground-sheet",
-  "moya500-inner-tent",
-  "moya500-mesh-inner-tent",
-] as const;
-
-const ZIG_STAKE_OPTION_HANDLES = ["zig-stake20", "zig-stake30"] as const;
-
 const GEARAID_OPTION_HANDLES = [
   "gearaid-seam-grip",
   "gearaid-sil-nylon-patch",
 ] as const;
 
 const MOYA500_MAIN_OPTION_HANDLES = [
-  ...MOYA500_OPTION_HANDLES,
   "nokuta",
   ...GEARAID_OPTION_HANDLES,
 ] as const;
@@ -113,13 +99,6 @@ const MOYA500_SIZE_SPEC: ProductSizeSpec = {
   manualHref: "/documents/products/moya500/manual.pdf",
 };
 
-/** 図面非表示用（一時）。復活時は MOYA500_SIZE_SPEC をそのまま指定する */
-const MOYA500_SIZE_SPEC_WITHOUT_DRAWING: ProductSizeSpec = {
-  specGroups: MOYA500_SIZE_SPEC.specGroups,
-  notes: MOYA500_SIZE_SPEC.notes,
-  manualHref: MOYA500_SIZE_SPEC.manualHref,
-};
-
 const GEARAID_SEAM_GRIP_SIZE_SPEC: ProductSizeSpec = {
   specGroups: [
     { label: "材質", value: "シリコーンゴム" },
@@ -150,146 +129,10 @@ const GEARAID_SIL_NYLON_PATCH_SIZE_SPEC: ProductSizeSpec = {
   ],
 };
 
-const MOYA500_INNER_TENT_SIZE_SPEC: ProductSizeSpec = {
-  specGroups: [
-    {
-      label: "材質",
-      value:
-        "ウォール : 75D ポリエステル格子状通気性生地\nメッシュ : B3\nボトム : 210D ポリエステル オックスフォード/ 耐水圧1800mm",
-    },
-    {
-      label: "サイズ",
-      value: "収納時 : W67×D24.5×H21cm\n設営時 : W475×D433×H205cm",
-    },
-    {
-      label: "重量",
-      value: "約3.9kg",
-    },
-    {
-      label: "原産国",
-      value: "China",
-    },
-  ],
-  drawingImage: drawingImage("moya500-inner-tent", "MOYA500 インナーテント drawing"),
-};
-
-const MOYA500_MESH_INNER_TENT_SIZE_SPEC: ProductSizeSpec = {
-  specGroups: [
-    {
-      label: "材質",
-      value:
-        "メッシュ（ウォール） : 20D ポリエステルメッシュ\nボトム : 210D ポリエステル オックスフォード/ 耐水圧1800mm",
-    },
-    {
-      label: "サイズ",
-      value: "収納時 : W67×D24.5×H21cm\n設営時 : W475×D433×H205cm",
-    },
-    {
-      label: "重量",
-      value: "約2.7kg",
-    },
-    {
-      label: "原産国",
-      value: "China",
-    },
-  ],
-  drawingImage: drawingImage("moya500-mesh-inner-tent", "MOYA500 メッシュインナーテント drawing"),
-};
-
-const MOYA500_GROUND_SHEET_SIZE_SPEC: ProductSizeSpec = {
-  specGroups: [
-    {
-      label: "材質",
-      value: "210D オックスフォード/ 耐水圧1800mm",
-    },
-    {
-      label: "サイズ",
-      value: "収納時：W50×D23×H8cm\n設営時：W500×D433cm",
-    },
-    {
-      label: "重量",
-      value: "約1.94kg",
-    },
-    {
-      label: "原産国",
-      value: "China",
-    },
-  ],
-};
-
-const MOYA500_ROOF_SHEET_SIZE_SPEC: ProductSizeSpec = {
-  specGroups: [
-    {
-      label: "材質",
-      value:
-        "75D ポリエステル オックスフォード（ブラック全遮光 UV50+テフロン撥水処理）/ 耐水圧1800mm",
-    },
-    {
-      label: "サイズ",
-      value: "収納時：W53×D20×H80cm\n設営時：W43.5×D40.5cm",
-    },
-    {
-      label: "重量",
-      value: "約1.1kg",
-    },
-    {
-      label: "原産国",
-      value: "China",
-    },
-  ],
-};
-
-const ZIG_STAKE20_SIZE_SPEC: ProductSizeSpec = {
-  specGroups: [
-    {
-      label: "サイズ",
-      value: "2cm（ヘッド部1.5×0.9cm）",
-    },
-    {
-      label: "重量",
-      value: "100g",
-    },
-    {
-      label: "素材",
-      value: "スチール（S55C、カチオン黒色電着塗装）",
-    },
-  ],
-};
-
-const ZIG_STAKE30_SIZE_SPEC: ProductSizeSpec = {
-  specGroups: [
-    {
-      label: "サイズ",
-      value: "30cm（ヘッド部1.6×1cm）",
-    },
-    {
-      label: "重量",
-      value: "140g",
-    },
-    {
-      label: "素材",
-      value: "スチール（S55C、カチオン黒色電着塗装）",
-    },
-  ],
-};
-
-function atariProductSections(options?: readonly string[]) {
-  return {
-    description: ATARI_DESCRIPTION,
-    sizeSpec: MOYA500_SIZE_SPEC,
-    ...(options ? { options: [...options] } : {}),
-  };
-}
-
 const MOYA500_COLOR_DEFINITIONS = [
   { id: "cy", colorCode: "cy", colorName: "CLASSIC YELLOW", swatch: "#d8b24a" },
   { id: "gb", colorCode: "gb", colorName: "GOLD BEIGE", swatch: "#b9a47a" },
   { id: "sg", colorCode: "sg", colorName: "SHADOW GRAY", swatch: "#5f6264" },
-] as const;
-
-const BLACK_RED_COLOR_DEFINITIONS = [
-  { id: "black", colorCode: "black", colorName: "BLACK", swatch: "#191919" },
-  { id: "red", colorCode: "red", colorName: "RED", swatch: "#9b1b30" },
 ] as const;
 
 function buildMoya500ColorVariants(
@@ -304,17 +147,6 @@ function buildMoya500ColorVariants(
     swatch: color.swatch,
     shopifyVariantId: null,
     gallery: buildGallery(color.colorCode, color.colorName),
-  }));
-}
-
-function buildBlackRedVariants(handle: string, title: string): ProductVariant[] {
-  return BLACK_RED_COLOR_DEFINITIONS.map((color) => ({
-    id: color.id,
-    colorCode: color.colorCode,
-    colorName: color.colorName,
-    swatch: color.swatch,
-    shopifyVariantId: null,
-    gallery: buildPlaceholderGallery(handle, `${title} ${color.colorName}`),
   }));
 }
 
@@ -339,13 +171,6 @@ function buildSingleVariant(
 
 const GEARAID_SEAM_GRIP_PHOTO_IMAGE_COUNT = 5;
 const GEARAID_SIL_NYLON_PATCH_PHOTO_IMAGE_COUNT = 5;
-const MOYA500_GROUND_SHEET_PHOTO_IMAGE_COUNT = 2;
-const MOYA500_ROOF_SHEET_PHOTO_IMAGE_COUNT = 2;
-const MOYA500_TPU_WINDOW_PHOTO_IMAGE_COUNT = 1;
-const MOYA500_INNER_TENT_PHOTO_IMAGE_COUNT = 3;
-const MOYA500_MESH_INNER_TENT_PHOTO_IMAGE_COUNT = 3;
-const ZIG_STAKE20_PHOTO_IMAGE_COUNT = 2;
-const ZIG_STAKE30_PHOTO_IMAGE_COUNT = 1;
 
 const MOYA500_VARIANTS = buildMoya500ColorVariants("moya500", "MOYA500", (colorCode, colorName) =>
   buildOpenCloseGallery({
@@ -376,40 +201,6 @@ const NOKUTA_VARIANTS = buildMoya500ColorVariants("nokuta", "NOKUTA", (colorCode
         ? "CTP-NTPOGB"
         : "CTP-NTPOSG",
 }));
-
-const MOYA500_ROOF_SHEET_VARIANTS = buildMoya500ColorVariants(
-  "moya500-roof-sheet",
-  "MOYA500 ルーフシート",
-  (colorCode, colorName) =>
-    buildColoredPhotoImageGallery({
-      handle: "moya500-roof-sheet",
-      title: "MOYA500 ルーフシート",
-      colorCode,
-      colorName,
-      count: MOYA500_ROOF_SHEET_PHOTO_IMAGE_COUNT,
-    })
-).map((variant) => ({
-  ...variant,
-  code:
-    variant.colorCode === "cy"
-      ? "COP-RFPOM50CY"
-      : variant.colorCode === "gb"
-        ? "COP-RFPOM50GB"
-        : "COP-RFPOM50SG",
-}));
-
-const MOYA500_TPU_WINDOW_VARIANTS = buildMoya500ColorVariants(
-  "moya500-tpu-window",
-  "MOYA500 TPUウインドウ",
-  (colorCode, colorName) =>
-    buildColoredPhotoImageGallery({
-      handle: "moya500-tpu-window",
-      title: "MOYA500 TPUウインドウ",
-      colorCode,
-      colorName,
-      count: MOYA500_TPU_WINDOW_PHOTO_IMAGE_COUNT,
-    })
-);
 
 export const products: Product[] = [
   {
@@ -474,107 +265,6 @@ export const products: Product[] = [
     options: [...MOYA500_MAIN_OPTION_HANDLES],
   },
   {
-    id: "moya500-roof-sheet",
-    handle: "moya500-roof-sheet",
-    title: "MOYA500 ルーフシート",
-    code: "COP-RFPOM50CY",
-    category: "テント・シェルター オプション",
-    categorySlug: "tent-option",
-    ...priceYen(13270),
-    ...COMING_SOON_STATUS,
-    description:
-      "MOYA500専用のルーフシート。\n夏場の強い日差しを90%以上遮るブラック遮光加工（UV50+）を施し、シェルター内の温度上昇を軽減。さらに、優れた撥水性能を備えたテフロン撥水加工により、雨天時の雨や汚れからテント本体を保護します。",
-    variants: MOYA500_ROOF_SHEET_VARIANTS,
-    sizeSpec: MOYA500_ROOF_SHEET_SIZE_SPEC,
-    options: [...MOYA500_OPTION_HANDLES],
-  },
-  {
-    id: "moya500-tpu-window",
-    handle: "moya500-tpu-window",
-    title: "MOYA500 TPUウインドウ",
-    category: "テント・シェルター オプション",
-    categorySlug: "tent-option",
-    ...priceYen(18480),
-    ...RESERVATION_STATUS,
-    ...atariProductSections(MOYA500_OPTION_HANDLES),
-    sizeSpec: MOYA500_SIZE_SPEC_WITHOUT_DRAWING,
-    description:
-      "MOYA500専用のTPUウインドウ。\n冬場や夜間の冷気の侵入を抑えながら、シェルター内から開放感あふれる景色を楽しめます。\n悪天候時でも快適性を損なうことなく自然を身近に感じられる、MOYA500専用オプションです。\n最大3か所の出入り口に取り付けられるため、開放感のある空間を自由に演出できます。",
-    variants: MOYA500_TPU_WINDOW_VARIANTS,
-  },
-  {
-    id: "moya500-ground-sheet",
-    handle: "moya500-ground-sheet",
-    title: "MOYA500 グランドシート",
-    category: "テント・シェルター オプション",
-    categorySlug: "tent-option",
-    ...priceYen(15270),
-    ...RESERVATION_STATUS,
-    ...atariProductSections(MOYA500_OPTION_HANDLES),
-    sizeSpec: MOYA500_GROUND_SHEET_SIZE_SPEC,
-    description:
-      "MOYA500専用のグランドシート。\nシェルター内の地面全体を覆う専用設計。インナースカートの上に設置するため、冷気や虫の侵入を抑え、季節を問わず快適なシェルター環境を実現します。",
-    variants: buildSingleVariant(
-      "moya500-ground-sheet",
-      "MOYA500 グランドシート",
-      "DEFAULT",
-      "#191919",
-      buildPhotoImageGallery(
-        "moya500-ground-sheet",
-        "MOYA500 グランドシート",
-        MOYA500_GROUND_SHEET_PHOTO_IMAGE_COUNT
-      )
-    ),
-  },
-  {
-    id: "moya500-inner-tent",
-    handle: "moya500-inner-tent",
-    title: "MOYA500 インナーテント",
-    category: "テント・シェルター オプション",
-    categorySlug: "tent-option",
-    ...priceYen(38700),
-    ...RESERVATION_STATUS,
-    options: [...MOYA500_OPTION_HANDLES],
-    sizeSpec: MOYA500_INNER_TENT_SIZE_SPEC,
-    description:
-      "MOYA500専用のインナーテント。\n誰でも簡単に設置できる吊り下げ式を採用。通気性と肌触りに優れたポリエステル生地を使用し、快適な寝室空間とプライバシーを確保します。\nMOYA500本体に合わせて3か所のメッシュ付き出入り口を備え、シェルター内でも優れた通気性を確保します。\n別売りのグランドシートと組み合わせることで、地面からの冷気や汚れを軽減し、より快適にお使いいただけます。\nMOYA500に快適な寝室空間をつくるための専用オプションです。",
-    variants: buildSingleVariant(
-      "moya500-inner-tent",
-      "MOYA500 インナーテント",
-      "DEFAULT",
-      "#191919",
-      buildPhotoImageGallery(
-        "moya500-inner-tent",
-        "MOYA500 インナーテント",
-        MOYA500_INNER_TENT_PHOTO_IMAGE_COUNT
-      )
-    ),
-  },
-  {
-    id: "moya500-mesh-inner-tent",
-    handle: "moya500-mesh-inner-tent",
-    title: "MOYA500 メッシュインナーテント",
-    category: "テント・シェルター オプション",
-    categorySlug: "tent-option",
-    ...priceYen(27150),
-    ...RESERVATION_STATUS,
-    options: [...MOYA500_OPTION_HANDLES],
-    sizeSpec: MOYA500_MESH_INNER_TENT_SIZE_SPEC,
-    description:
-      "MOYA500専用のメッシュインナーテント。\n誰でも簡単に設置できる吊り下げ式を採用。MOYA500の開放感を損なわないフルメッシュ仕様で、優れた通気性と快適な寝室空間を確保します。\n別売りのグランドシートと組み合わせることで、地面からの冷気や汚れを軽減し、さらに快適にお使いいただけます。\nMOYA500に快適な寝室空間をつくるための専用オプションです。",
-    variants: buildSingleVariant(
-      "moya500-mesh-inner-tent",
-      "MOYA500 メッシュインナーテント",
-      "DEFAULT",
-      "#191919",
-      buildPhotoImageGallery(
-        "moya500-mesh-inner-tent",
-        "MOYA500 メッシュインナーテント",
-        MOYA500_MESH_INNER_TENT_PHOTO_IMAGE_COUNT
-      )
-    ),
-  },
-  {
     id: "nokuta",
     handle: "nokuta",
     title: "NOKUTA",
@@ -587,100 +277,6 @@ export const products: Product[] = [
       "NOKUTAは、日差しを90%以上遮るブラック遮光加工（UV50+）を施したヘキサゴンタープです。幕下の温度上昇を抑え、夏場でも快適な空間をつくります。\nポールの本数や設営方法を変えることで、シーンやキャンプスタイルに合わせた多彩なレイアウトに対応。\nさらに、付属の連結パーツを使用することで、MOYA500との連結も簡単に行えます。",
     options: [...NOKUTA_OPTION_HANDLES],
     variants: NOKUTA_VARIANTS,
-  },
-  {
-    id: "zig-stake20",
-    handle: "zig-stake20",
-    title: "ZIG STAKE20",
-    code: "CDS-ZS20",
-    category: "ペグ・ペグハンマー",
-    categorySlug: "peg-hammer",
-    ...priceYen(600),
-    ...RESERVATION_STATUS,
-    options: [...ZIG_STAKE_OPTION_HANDLES],
-    sizeSpec: ZIG_STAKE20_SIZE_SPEC,
-    description:
-      "新潟県燕三条の職人が一つひとつ丁寧に仕上げた鍛造ペグ。\n曲がりや折れに強い鍛造スチールを採用。高い剛性を生むオリジナルのT字形状により、さらに曲がりにくく、打ち込みやすさと打ち込み時の回転抑制を実現しています。\nさまざまなフィールドで安心して使える20cm鍛造ペグです。",
-    variants: buildSingleVariant(
-      "zig-stake20",
-      "ZIG STAKE20",
-      "DEFAULT",
-      "#191919",
-      buildPhotoImageGallery("zig-stake20", "ZIG STAKE20", ZIG_STAKE20_PHOTO_IMAGE_COUNT)
-    ),
-  },
-  {
-    id: "zig-stake30",
-    handle: "zig-stake30",
-    title: "ZIG STAKE30",
-    code: "CDS-ZS30",
-    category: "ペグ・ペグハンマー",
-    categorySlug: "peg-hammer",
-    ...priceYen(760),
-    ...RESERVATION_STATUS,
-    options: [...ZIG_STAKE_OPTION_HANDLES],
-    sizeSpec: ZIG_STAKE30_SIZE_SPEC,
-    description:
-      "新潟県燕三条の職人が一つひとつ丁寧に仕上げた鍛造ペグ。\n曲がりや折れに強い鍛造スチールを採用。高い剛性を生むオリジナルのT字形状により、さらに曲がりにくく、打ち込みやすさと打ち込み時の回転抑制を実現しています。\nより強度が求められるシーンでも安心して使える30cm鍛造ペグです。",
-    variants: buildSingleVariant(
-      "zig-stake30",
-      "ZIG STAKE30",
-      "DEFAULT",
-      "#191919",
-      buildPhotoImageGallery("zig-stake30", "ZIG STAKE30", ZIG_STAKE30_PHOTO_IMAGE_COUNT)
-    ),
-  },
-  {
-    id: "black-rope-3mm-15m",
-    handle: "black-rope-3mm-15m",
-    title: "ブラックロープ 3mm 15mカット",
-    category: "アクセサリー",
-    categorySlug: "accessory",
-    listingHidden: true,
-    ...priceYen(2420),
-    ...RESERVATION_STATUS,
-    description:
-      "しなやかで取り回しのしやすいリフレクター入りブラックロープ。\nφ3mmの15mカットロープです。",
-    variants: buildSingleVariant("black-rope-3mm-15m", "ブラックロープ 3mm 15mカット"),
-  },
-  {
-    id: "aluminum-jammer-set",
-    handle: "aluminum-jammer-set",
-    title: "アルミ自在セット 6個セット",
-    category: "アクセサリー",
-    categorySlug: "accessory",
-    listingHidden: true,
-    ...priceTbd(),
-    ...RESERVATION_STATUS,
-    description:
-      "MOYAのロープに付属している三角アルミ自在セットです。\n3つの穴に通すことでロープにかかる摩擦力が強く、2つ穴タイプに比べてロープが緩みにくく高いストッパー性能を発揮します。",
-    variants: buildSingleVariant("aluminum-jammer-set", "アルミ自在セット 6個セット"),
-  },
-  {
-    id: "zipper-tab-s",
-    handle: "zipper-tab-s",
-    title: "ジッパータブ S 6個セット",
-    category: "アクセサリー",
-    categorySlug: "accessory",
-    listingHidden: true,
-    ...priceTbd(),
-    ...RESERVATION_STATUS,
-    description:
-      "お手持ちのギアなど様々なジッパーに取り付け可能なC AND+Sのロゴ入りジッパータブです。",
-    variants: buildBlackRedVariants("zipper-tab-s", "ジッパータブ S 6個セット"),
-  },
-  {
-    id: "zipper-tab-m",
-    handle: "zipper-tab-m",
-    title: "ジッパータブ M 6個セット",
-    category: "アクセサリー",
-    categorySlug: "accessory",
-    listingHidden: true,
-    ...priceTbd(),
-    ...RESERVATION_STATUS,
-    description:
-      "お手持ちのギアなど様々なジッパーに取り付け可能なC AND+Sのロゴ入りジッパータブです。",
-    variants: buildBlackRedVariants("zipper-tab-m", "ジッパータブ M 6個セット"),
   },
   {
     id: "gearaid-seam-grip",

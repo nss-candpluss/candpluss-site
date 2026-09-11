@@ -54,6 +54,24 @@ export function scrollBoundLenisTo(
   return true;
 }
 
+/**
+ * 慣性アニメーションを打ち切り、Lenis の内部位置を実スクロール位置に同期する。
+ *
+ * Lenis は慣性中（isScrolling === "smooth"）はネイティブ scroll イベントを無視するため、
+ * その間にページ遷移が起きると Next.js の scrollTop = 0 が次フレームで上書きされ、
+ * 遷移先でページ途中に着地する。遷移が始まる前に慣性を止めておくことで回避する。
+ *
+ * reset() は Lenis の型定義上 private なので、内部で reset() を呼ぶ stop()/start() を使う。
+ */
+export function settleBoundLenis() {
+  if (!boundLenis || boundLenis.isScrolling !== "smooth") {
+    return;
+  }
+
+  boundLenis.stop();
+  boundLenis.start();
+}
+
 export function stopBoundLenis() {
   boundLenis?.stop();
 }

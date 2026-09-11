@@ -82,4 +82,25 @@ describe("site-wide smooth scroll", () => {
       'element.scrollIntoView({ behavior: "smooth", block: "start" })'
     );
   });
+
+  it("settles Lenis momentum before a navigation starts", () => {
+    // 慣性中（isScrolling === "smooth"）の Lenis はネイティブ scroll を無視するため、
+    // Next.js の scrollTop = 0 が次フレームで上書きされ遷移先でページ途中に着地する。
+    // 遷移が始まる前に慣性を打ち切ることで回避している。
+    expect(providerSource).toContain("settleBoundLenis()");
+    expect(providerSource).toContain(
+      'document.addEventListener("pointerdown", onNavigationPointerDown, true)'
+    );
+    expect(providerSource).toMatch(
+      /document\.removeEventListener\(\s*"pointerdown"/
+    );
+    // router.push を使うボタン経由の遷移も対象にする
+    expect(providerSource).toContain("a[href], button, [role='button']");
+  });
+
+  it("keeps the cart scroll lock intact while settling momentum", () => {
+    // CartDialog が stopBoundLenis() でロック中は isScrolling === false になる。
+    // ガードがないと stop()/start() でロックを解除してしまう。
+    expect(integrationSource).toContain('boundLenis.isScrolling !== "smooth"');
+  });
 });

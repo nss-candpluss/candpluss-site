@@ -29,6 +29,14 @@ describe("home Main Products", () => {
       "/images/home/home-link-nokuta.webp",
       "/images/home/home-link-zigstake.webp",
     ]);
+    // href は Shopify の handle と一致させる。一覧（/products）のカードと
+    // 同じ詳細ページに遷移しないと、ローカル catalog の旧商品ページが開いてしまう。
+    expect(homeMainProducts.items.map((item) => item.href)).toEqual([
+      "/products/moya500",
+      "/products/moya420",
+      "/products/nokuta",
+      "/products/zig-stake",
+    ]);
     expect(homeMainProducts.link).toEqual({
       label: "ALL PRODUCTS",
       href: "/products",

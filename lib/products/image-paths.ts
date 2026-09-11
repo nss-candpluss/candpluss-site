@@ -34,27 +34,6 @@ export function buildPhotoImages(
   });
 }
 
-export function coloredPhotoImageFilename(colorCode: string, index: number): string {
-  return `${colorCode}-photo-image-${String(index).padStart(2, "0")}.webp`;
-}
-
-export function buildColoredPhotoImages(
-  handle: string,
-  title: string,
-  colorCode: string,
-  colorName: string,
-  count: number
-): ProductImage[] {
-  return Array.from({ length: count }, (_, index) => {
-    const imageIndex = index + 1;
-
-    return {
-      src: productImagePath(handle, coloredPhotoImageFilename(colorCode, imageIndex)),
-      alt: `${title} ${colorName} photo ${String(imageIndex).padStart(2, "0")}`,
-    };
-  });
-}
-
 export function featureImagePath(handle: string, index: number): string {
   return productImagePath(handle, featureImageFilename(index));
 }
