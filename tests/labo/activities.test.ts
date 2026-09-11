@@ -29,6 +29,11 @@ describe("labo activities section", () => {
       "確かめてその場で選ぶ",
     ]);
     expect(laboActivitiesContent.items).toHaveLength(3);
+    expect(laboActivitiesContent.items.map((item) => item.image)).toEqual([
+      "/images/labo/labo-can-image01.webp",
+      "/images/labo/labo-can-image02.webp",
+      "/images/home/home-link-products.webp",
+    ]);
   });
 
   it("follows the Home News three-column card layout", () => {

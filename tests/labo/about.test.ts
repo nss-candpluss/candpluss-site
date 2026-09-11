@@ -25,7 +25,7 @@ const laboPageSource = readFileSync(
 );
 
 describe("labo about section", () => {
-  it("uses the about copy and a single dummy image", () => {
+  it("uses the about copy and section images", () => {
     expect(laboAboutContent.number).toBe("01.");
     expect(laboAboutContent.title).toBe("LABOについて");
     expect(laboAboutContent.titleWrapSegments).toEqual(["LABOに", "ついて"]);
@@ -35,7 +35,7 @@ describe("labo about section", () => {
       "MOYAシリーズの製品展示をはじめ、ZIG STAKEなど"
     );
     expect(laboAboutContent.image.src).toBe(
-      "/images/labo/labo-materials-01.webp"
+      "/images/labo/labo-about-image01.webp"
     );
     expect(laboAboutContent.bodyImage.src).toBe(
       "/images/labo/labo-materials-01.webp"
