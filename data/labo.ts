@@ -37,20 +37,20 @@ export const laboActivitiesContent = {
   items: [
     {
       id: "moya",
-      title: "MOYAを実寸サイズで",
-      body: "MOYA500、MOYA420を展示。サイズ感や内部空間、生地、フレーム、各部のディテールを直接ご確認いただけます。",
+      title: "MOYAシリーズを実寸サイズで",
+      body: "MOYA500、MOYA420、各オプション製品を展示。サイズ感や内部空間、生地、フレーム、カラーなど各部のディテールを直接ご確認いただけます。",
       image: "/images/labo/labo-can-image02.webp",
     },
     {
       id: "zig-stake",
       title: "細部まで手に取って確かめる",
-      body: "燕三条で製造するZIG STAKEを展示。重量感や形状、仕上げなど写真ではわからない細部の品質を直接体感いただけます。",
+      body: "燕三条で製造するZIG STAKEを展示。重量感や形状、仕上げなど写真ではわからない細部の品質を、実物を手に取って触って直接ご体感いただけます。",
       image: "/images/labo/labo-can-image01.webp",
     },
     {
       id: "purchase",
       title: "確かめてその場で選ぶ",
-      body: "展示製品を実際に確認したうえで、C AND+Sの各種製品をご購入いただけます。",
+      body: "展示製品を実際に確認したうえで、C AND+Sの各種製品をその場でご購入いただけます。気になる製品、実際に見てみたい製品がございましたら、ご予約時にお伝えください。",
       image: "/images/labo/labo-can-image03.webp",
     },
   ],

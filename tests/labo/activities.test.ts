@@ -24,7 +24,7 @@ describe("labo activities section", () => {
     ]);
     expect(laboActivitiesContent.label).toBe("WHAT YOU CAN DO");
     expect(laboActivitiesContent.items.map((item) => item.title)).toEqual([
-      "MOYAを実寸サイズで",
+      "MOYAシリーズを実寸サイズで",
       "細部まで手に取って確かめる",
       "確かめてその場で選ぶ",
     ]);
