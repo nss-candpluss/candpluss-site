@@ -122,7 +122,7 @@ export function HeaderMobileMenu({ id, isOpen, onClose, onExited }: HeaderMobile
                     href={link.href}
                     aria-label={link.label}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="inline-flex text-[var(--foreground)]"
                   >
                     <HeaderMaskGraphic src={link.icon} className={headerIconClassName} />

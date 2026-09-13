@@ -104,7 +104,7 @@ export function SupportGuide() {
               <a
                 href={lineLink.href}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className={`${supportContactButtonClassName} ${supportLineButtonAreaGapClassName} max-w-[400px]`}
               >
                 <span

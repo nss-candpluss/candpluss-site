@@ -30,7 +30,7 @@ export function NewsArticleContent({ article, className = "" }: NewsArticleConte
             <a
               href={contentLink.href}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className={contentLinkClassName}
             >
               {contentLink.label}

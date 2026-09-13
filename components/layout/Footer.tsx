@@ -94,7 +94,7 @@ export function Footer() {
                 href={link.href}
                 aria-label={link.label}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="inline-flex text-[var(--foreground)] transition-opacity duration-300 hover:opacity-60"
               >
                 <span

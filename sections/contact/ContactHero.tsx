@@ -68,7 +68,7 @@ export function ContactHero() {
         <a
           href={lineLink.href}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           className={`${supportContactButtonClassName} ${contactLineButtonAreaGapClassName} max-w-[400px]`}
         >
           <span
