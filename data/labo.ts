@@ -23,8 +23,8 @@ export const laboAboutContent = {
     alt: "C AND+S LABO",
   },
   bodyImage: {
-    src: "/images/labo/labo-materials-01.webp",
-    alt: "C AND+S LABO",
+    src: "/images/labo/labo-about-image02.webp",
+    alt: "LABOに展示されたMOYAシリーズ",
   },
 } as const;
 
@@ -33,24 +33,25 @@ export const laboActivitiesContent = {
   title: "LABOでできること",
   titleWrapSegments: ["LABOで", "できること"],
   label: "WHAT YOU CAN DO",
+  /** PC では各項目の画像が本文の反対列に入る（SP は order で画像→本文の順に並ぶ） */
   items: [
     {
       id: "moya",
       title: "MOYAを実寸サイズで",
       body: "MOYA500、MOYA420を展示。サイズ感や内部空間、生地、フレーム、各部のディテールを直接ご確認いただけます。",
-      image: "/images/labo/labo-can-image01.webp",
+      image: "/images/labo/labo-can-image02.webp",
     },
     {
       id: "zig-stake",
       title: "細部まで手に取って確かめる",
       body: "燕三条で製造するZIG STAKEを展示。重量感や形状、仕上げなど写真ではわからない細部の品質を直接体感いただけます。",
-      image: "/images/labo/labo-can-image02.webp",
+      image: "/images/labo/labo-can-image01.webp",
     },
     {
       id: "purchase",
       title: "確かめてその場で選ぶ",
       body: "展示製品を実際に確認したうえで、C AND+Sの各種製品をご購入いただけます。",
-      image: "/images/home/home-link-products.webp",
+      image: "/images/labo/labo-can-image03.webp",
     },
   ],
 } as const;
@@ -69,7 +70,7 @@ export const laboDesignContent = {
   label: "DESIGN & DEVELOPMENT",
   body:
     "C AND+S LABOでは、製品を生み出す拠点でもあります。実際に使い、検証し、改善を重ねることで、美しさと機能を両立した製品を生み出しています。",
-  image: "/images/labo/labo-skech-image.webp",
+  image: "/images/labo/labo-design-image01.webp",
 } as const;
 
 export const laboVisitContent = {

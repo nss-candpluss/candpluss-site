@@ -62,6 +62,10 @@ logos/
 
 images/
 
+common/
+
+concept/
+
 hero/
 
 home/
@@ -91,6 +95,10 @@ moya500/
 nokuta/
 
 zig-stake20/
+
+現在は商品画像を Shopify で管理しているため
+public/images/products/ には _shared/placeholder.webp のみを置いている
+（商品画像未登録時のプレースホルダー）
 
 ---
 
@@ -152,17 +160,20 @@ home-○○.webp
 
 例
 
-home-support.webp
+home-image.webp
 
-home-link-labo.webp
-
-home-products-link.webp
+home-link-products.webp
 
 home-link-moya500.webp
+
+home-link-moya420.webp
 
 home-link-nokuta.webp
 
 home-link-zigstake.webp
+
+LABO / SUPPORT の導線カードは複数ページで共有するため
+public/images/common/ に link-labo.webp / link-support.webp として置く
 
 ---
 

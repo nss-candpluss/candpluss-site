@@ -146,27 +146,27 @@ export function LaboActivities() {
               </div>
             </div>
             {featuredItem ? (
-              <>
-                <div className="order-3">
-                  <p
-                    className={`mt-[clamp(38px,calc(102px*var(--gap-scale-y)),102px)] font-body-ja font-bold text-[var(--foreground)] min-[1025px]:mt-[clamp(38px,calc(148px*var(--gap-scale-y)),148px)] ${uiText(21)}`}
-                  >
-                    {featuredItem.title}
-                  </p>
-                  <p
-                    className={`mt-[clamp(18px,calc(32px*var(--gap-scale-y)),32px)] font-body-ja text-[var(--foreground)] ${bodyText(16)}`}
-                  >
-                    {featuredItem.body}
-                  </p>
-                </div>
-                <MaskedImage
-                  src={featuredItem.image}
-                  alt=""
-                  aspectClassName="aspect-[13/10]"
-                  containerClassName="order-4 mt-[clamp(38px,calc(102px*var(--gap-scale-y)),102px)] bg-[var(--color-line)]"
-                  sizes="(min-width: 1025px) 50vw, 100vw"
-                />
-              </>
+              <div className="order-3">
+                <p
+                  className={`mt-[clamp(38px,calc(102px*var(--gap-scale-y)),102px)] font-body-ja font-bold text-[var(--foreground)] min-[1025px]:mt-[clamp(38px,calc(148px*var(--gap-scale-y)),148px)] ${uiText(21)}`}
+                >
+                  {featuredItem.title}
+                </p>
+                <p
+                  className={`mt-[clamp(18px,calc(32px*var(--gap-scale-y)),32px)] font-body-ja text-[var(--foreground)] ${bodyText(16)}`}
+                >
+                  {featuredItem.body}
+                </p>
+              </div>
+            ) : null}
+            {secondItem ? (
+              <MaskedImage
+                src={secondItem.image}
+                alt=""
+                aspectClassName="aspect-[13/10]"
+                containerClassName="order-4 mt-[clamp(38px,calc(102px*var(--gap-scale-y)),102px)] bg-[var(--color-line)]"
+                sizes="(min-width: 1025px) 50vw, 100vw"
+              />
             ) : null}
             {thirdItem ? (
               <div className="order-7">
@@ -188,28 +188,28 @@ export function LaboActivities() {
             data-labo-activities-right
             className="contents min-[1025px]:col-start-2 min-[1025px]:block"
           >
+            {featuredItem ? (
+              <MaskedImage
+                src={featuredItem.image}
+                alt=""
+                aspectClassName="aspect-[13/10]"
+                containerClassName="order-2 mt-[calc(98px*var(--layout-scale-y))] bg-[var(--color-line)] min-[1025px]:mt-0"
+                sizes="(min-width: 1025px) 50vw, 100vw"
+              />
+            ) : null}
             {secondItem ? (
-              <>
-                <MaskedImage
-                  src={secondItem.image}
-                  alt=""
-                  aspectClassName="aspect-[13/10]"
-                  containerClassName="order-2 mt-[calc(98px*var(--layout-scale-y))] bg-[var(--color-line)] min-[1025px]:mt-0"
-                  sizes="(min-width: 1025px) 50vw, 100vw"
-                />
-                <div className="order-5">
-                  <h3
-                    className={`mt-[clamp(38px,calc(102px*var(--gap-scale-y)),102px)] min-w-0 font-body-ja font-bold text-[var(--foreground)] ${uiText(21)}`}
-                  >
-                    {secondItem.title}
-                  </h3>
-                  <p
-                    className={`mt-[clamp(18px,calc(32px*var(--gap-scale-y)),32px)] font-body-ja text-[var(--foreground)] ${bodyText(16)}`}
-                  >
-                    {secondItem.body}
-                  </p>
-                </div>
-              </>
+              <div className="order-5">
+                <h3
+                  className={`mt-[clamp(38px,calc(102px*var(--gap-scale-y)),102px)] min-w-0 font-body-ja font-bold text-[var(--foreground)] ${uiText(21)}`}
+                >
+                  {secondItem.title}
+                </h3>
+                <p
+                  className={`mt-[clamp(18px,calc(32px*var(--gap-scale-y)),32px)] font-body-ja text-[var(--foreground)] ${bodyText(16)}`}
+                >
+                  {secondItem.body}
+                </p>
+              </div>
             ) : null}
             {thirdItem ? (
               <MaskedImage

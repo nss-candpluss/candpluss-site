@@ -38,7 +38,7 @@ describe("labo about section", () => {
       "/images/labo/labo-about-image01.webp"
     );
     expect(laboAboutContent.bodyImage.src).toBe(
-      "/images/labo/labo-materials-01.webp"
+      "/images/labo/labo-about-image02.webp"
     );
   });
 

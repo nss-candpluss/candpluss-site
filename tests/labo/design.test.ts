@@ -22,7 +22,9 @@ describe("labo design section", () => {
     ]);
     expect(laboDesignContent.label).toBe("DESIGN & DEVELOPMENT");
     expect(laboDesignContent.body).toContain("製品を生み出す拠点でもあります");
-    expect(laboDesignContent.image).toBe("/images/labo/labo-skech-image.webp");
+    expect(laboDesignContent.image).toBe(
+      "/images/labo/labo-design-image01.webp"
+    );
   });
 
   it("uses a single left-aligned text column over a right-aligned background image", () => {

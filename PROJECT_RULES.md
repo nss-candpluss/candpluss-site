@@ -103,11 +103,10 @@ public/
 | TOP Hero 背景 | `hero-bg.webp` |
 | TOP Hero 前景（透過） | `hero-foreground.webp` |
 | TOP Hero タイトル SVG | `hero-title.svg` |
-| TOP Hero OUR BEGINNING | `our-beginning.webp` |
 | TOP 導線カード（Products） | `home-link-products.webp` |
-| TOP 導線カード（LABO） | `home-link-labo.webp` |
-| 商品ギャラリー | `product-moya500-gallery-01.webp` |
-| LABO セクション | `labo-materials-01.webp` |
+| 共通導線カード（LABO / SUPPORT） | `link-labo.webp` / `link-support.webp` |
+| LABO セクション | `labo-about-image01.webp` |
+| 商品画像 | Shopify で管理（`public/images/products/` は `_shared/placeholder.webp` のみ） |
 
 ■ フォーマット
 
