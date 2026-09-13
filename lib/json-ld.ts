@@ -23,18 +23,12 @@ export type BreadcrumbItem = {
 
 const SCHEMA = "https://schema.org";
 
-const OUT_OF_STOCK_STATUSES: readonly ProductStatus[] = [
-  "soldOut",
-  "ended",
-  "discontinued",
-];
+const OUT_OF_STOCK_STATUSES: readonly ProductStatus[] = ["soldOut", "ended"];
 const PREORDER_STATUSES: readonly ProductStatus[] = [
   "preorder",
-  "preorderMember",
   "comingSoon",
   "waiting",
 ];
-const BACKORDER_STATUSES: readonly ProductStatus[] = ["backorderMember"];
 
 function isProfileUrl(href: string): boolean {
   try {
@@ -146,10 +140,6 @@ export function productAvailability(product: Product): string {
 
   if (PREORDER_STATUSES.includes(product.status)) {
     return `${SCHEMA}/PreOrder`;
-  }
-
-  if (BACKORDER_STATUSES.includes(product.status)) {
-    return `${SCHEMA}/BackOrder`;
   }
 
   const allUnavailable =

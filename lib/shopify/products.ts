@@ -630,35 +630,30 @@ function mapStatus(product: ShopifyProduct): {
 } {
   const fields = fieldMap(product.salesStatus?.reference);
   const configuredValue = fields.get("status")?.value;
-  const configuredStatuses: ProductStatus[] = [
+  const knownStatuses: ProductStatus[] = [
     "available",
-    "new",
     "comingSoon",
     "waiting",
     "preorder",
     "ending",
     "ended",
     "soldOut",
-    "preorderMember",
-    "backorderMember",
-    "discontinuedSoon",
-    "discontinued",
   ];
-  const configured = configuredStatuses.find(
-    (status) => status === configuredValue
-  );
+  const known = knownStatuses.find((status) => status === configuredValue);
+  const statusLabel = fields.get("label")?.value || undefined;
+  const statusColor = fields.get("color")?.value || undefined;
 
-  if (configured) {
-    return {
-      status: configured,
-      statusLabel: fields.get("label")?.value || undefined,
-      statusColor: fields.get("color")?.value || undefined,
-    };
+  if (known) {
+    return { status: known, statusLabel, statusColor };
   }
 
-  return product.availableForSale
-    ? { status: "available" }
-    : { status: "soldOut", statusLabel: "SOLD OUT" };
+  // Shopify に新しいエントリーが先に増えた場合。ラベルは出して、
+  // 購入可否は在庫に従う。サイト側でステータスを先回りして増やさない。
+  return {
+    status: product.availableForSale ? "available" : "soldOut",
+    statusLabel: statusLabel ?? (product.availableForSale ? undefined : "SOLD OUT"),
+    statusColor,
+  };
 }
 
 export function mapShopifyProductToProduct(product: ShopifyProduct): Product {
@@ -686,17 +681,12 @@ export function mapShopifyProductToProduct(product: ShopifyProduct): Product {
       variant.compareAtPrice.amount > variant.price.amount
   );
   const defaultStatusLabels: Partial<Record<ProductStatus, string>> = {
-    new: "NEW",
     comingSoon: "近日発売",
     waiting: "入荷待ち",
     preorder: "予約販売",
     ending: "在庫限り販売終了",
     ended: "販売終了",
     soldOut: "SOLD OUT",
-    preorderMember: "先行予約：会員限定",
-    backorderMember: "予約注文：会員限定",
-    discontinuedSoon: "廃盤：在庫限り",
-    discontinued: "販売終了",
   };
   const statusLabels = [
     ...(badges.includes("new") ? ["NEW"] : []),

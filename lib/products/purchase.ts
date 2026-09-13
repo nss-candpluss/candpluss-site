@@ -16,7 +16,6 @@ const NON_PURCHASABLE_STATUSES: ReadonlySet<string> = new Set<Product["status"]>
   "waiting",
   "ended",
   "soldOut",
-  "discontinued",
 ]);
 
 /** Shopify から来る生の status 文字列にも使える判定（カート API 用） */

@@ -550,4 +550,45 @@ describe("mapShopifyProductToProduct", () => {
 
     expect(product.sizeSpec?.drawingImage?.alt).toBe("MOYA500 サイズ図面");
   });
+
+  // 将来 Shopify にエントリーが増えても、サイト側の型を先回りして増やさない。
+  // ラベルは出して、購入可否は在庫に従う。
+  it("未知の sales_status はラベルだけ残し、在庫で available / soldOut にする", () => {
+    const unknownStatus = {
+      id: "gid://shopify/Product/6",
+      handle: "unknown-status",
+      title: "Unknown",
+      description: "",
+      productType: "アクセサリー",
+      featuredImage: null,
+      media: { nodes: [] },
+      variants: { nodes: [] },
+      features: null,
+      optionProducts: null,
+      salesStatus: {
+        reference: {
+          id: "gid://shopify/Metaobject/99",
+          type: "product_sales_status",
+          fields: [
+            { key: "status", type: "single_line_text_field", value: "paused" },
+            { key: "label", type: "single_line_text_field", value: "一時停止" },
+          ],
+        },
+      },
+    };
+
+    const inStock = mapShopifyProductToProduct({
+      ...unknownStatus,
+      availableForSale: true,
+    } as Parameters<typeof mapShopifyProductToProduct>[0]);
+    const outOfStock = mapShopifyProductToProduct({
+      ...unknownStatus,
+      availableForSale: false,
+    } as Parameters<typeof mapShopifyProductToProduct>[0]);
+
+    expect(inStock.status).toBe("available");
+    expect(inStock.statusLabel).toBe("一時停止");
+    expect(outOfStock.status).toBe("soldOut");
+    expect(outOfStock.statusLabel).toBe("一時停止");
+  });
 });

@@ -44,6 +44,9 @@ Shopify のメタオブジェクト `product_sales_status` のエントリーが
 - soldOut → SOLD OUT / 購入不可。Shopify のエントリーではなく、
   `availableForSale` が false のときのフォールバック。
 - 購入可否の判定は `lib/products/purchase.ts` に集約する。
+- 将来ステータスを増やすときは、Shopify にエントリーを追加したあと
+  型・mapper・購入判定・この表を同時に更新する。サイト側だけで先に増やさない。
+  未知の handle はラベルだけ表示し、購入可否は在庫に従う。
 
 【NEW バッジ・会員限定】
 sales_status とは別のメタフィールドで、購入可否とは独立して制御する。

@@ -78,8 +78,10 @@ describe("canPurchaseProduct", () => {
    * NEW は sales_status ではなく `custom.is_new` が担うため、購入可否とは無関係。
    * 以前 `new` を購入不可扱いしていたので、戻らないように固定する。
    */
-  it("NEW は購入できる", () => {
-    expect(canPurchaseProduct(buildProduct({ status: "new" }), false)).toBe(true);
+  it("NEW バッジは購入可否に影響しない", () => {
+    expect(
+      canPurchaseProduct(buildProduct({ status: "available", badges: ["new"] }), false)
+    ).toBe(true);
     expect(isNonPurchasableStatus("new")).toBe(false);
   });
 });
@@ -132,10 +134,10 @@ describe("productAvailability", () => {
     }
   });
 
-  it("NEW は InStock のまま", () => {
-    expect(productAvailability(buildProduct({ status: "new" }))).toBe(
-      "https://schema.org/InStock"
-    );
+  it("NEW バッジは InStock のまま", () => {
+    expect(
+      productAvailability(buildProduct({ status: "available", badges: ["new"] }))
+    ).toBe("https://schema.org/InStock");
   });
 
   // 会員限定は「会員なら買える」ので在庫ありのまま

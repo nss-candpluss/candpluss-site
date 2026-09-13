@@ -1,16 +1,12 @@
+/** Shopify `product_sales_status` の6値 + soldOut（在庫フォールバック） */
 export type ProductStatus =
   | "available"
-  | "new"
   | "comingSoon"
   | "waiting"
   | "preorder"
   | "ending"
   | "ended"
-  | "soldOut"
-  | "preorderMember"
-  | "backorderMember"
-  | "discontinuedSoon"
-  | "discontinued";
+  | "soldOut";
 
 export type ProductMemberAccess = "public" | "memberOnly";
 export type ProductBadge = "new";

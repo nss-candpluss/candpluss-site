@@ -2,17 +2,12 @@ import type { ProductStatus } from "@/types/product";
 import { uiText, type UiTextSizePx } from "@/lib/typography";
 
 const statusLabels: Partial<Record<ProductStatus, string>> = {
-  new: "NEW",
   comingSoon: "近日発売",
   waiting: "入荷待ち",
   preorder: "予約販売",
   ending: "在庫限り販売終了",
   ended: "販売終了",
   soldOut: "SOLD OUT",
-  preorderMember: "先行予約：会員限定",
-  backorderMember: "予約注文：会員限定",
-  discontinuedSoon: "廃盤：在庫限り",
-  discontinued: "販売終了",
 };
 
 const STATUS_LABEL_SEPARATOR = "　";
