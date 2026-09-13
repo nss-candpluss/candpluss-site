@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { CartDomesticShippingNotes } from "@/components/commerce/CartDomesticShippingNotes";
 import { CartLineThumbnail } from "@/components/commerce/CartLineThumbnail";
 import { CartQuantityStepper } from "@/components/commerce/CartQuantityStepper";
 import { CartRemoveButton } from "@/components/commerce/CartRemoveButton";
@@ -136,6 +137,7 @@ export default function CartPage() {
             >
               CHECKOUT
             </a>
+            <CartDomesticShippingNotes />
           </div>
         </>
       ) : null}

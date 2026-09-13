@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
+import { CartDomesticShippingNotes } from "@/components/commerce/CartDomesticShippingNotes";
 import { CartLineThumbnail } from "@/components/commerce/CartLineThumbnail";
 import { CartQuantityStepper } from "@/components/commerce/CartQuantityStepper";
 import { CartRemoveButton } from "@/components/commerce/CartRemoveButton";
@@ -306,12 +307,15 @@ function CartDialogView({ onDismiss }: { onDismiss: () => void }) {
               </p>
             </div>
             {checkoutHref ? (
-              <a
-                href={checkoutHref}
-                className={`mt-[20px] flex w-full items-center justify-center bg-[var(--foreground)] px-[12px] py-[16px] text-center font-body-ja font-medium text-white min-[1025px]:py-[clamp(16px,2.2vh,24px)] ${uiText(16)}`}
-              >
-                ご購入の手続き
-              </a>
+              <>
+                <a
+                  href={checkoutHref}
+                  className={`mt-[20px] flex w-full items-center justify-center bg-[var(--foreground)] px-[12px] py-[16px] text-center font-body-ja font-medium text-white min-[1025px]:py-[clamp(16px,2.2vh,24px)] ${uiText(16)}`}
+                >
+                  ご購入の手続き
+                </a>
+                <CartDomesticShippingNotes />
+              </>
             ) : null}
           </div>
         ) : null}

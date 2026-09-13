@@ -659,6 +659,7 @@ export function ProductDetailMobileHero({
         </h1>
 
         <ProductStatusLabel
+          handle={product.handle}
           status={product.status}
           label={product.statusLabel}
           color={product.statusColor}

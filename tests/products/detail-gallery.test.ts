@@ -1,7 +1,19 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { describe, expect, it } from "vitest";
 
 import { buildProductDetailGallery } from "@/components/products/product-detail/gallery-items";
 import type { Product, ProductVariant } from "@/types/product";
+
+const galleryMediaSource = readFileSync(
+  join(
+    dirname(fileURLToPath(import.meta.url)),
+    "../../components/products/product-detail/ProductDetailGalleryMedia.tsx"
+  ),
+  "utf8"
+);
 
 const product = {
   handle: "moya500",
@@ -98,5 +110,12 @@ describe("buildProductDetailGallery", () => {
 
   it("returns an empty gallery when a product has no variant", () => {
     expect(buildProductDetailGallery(product, null)).toEqual([]);
+  });
+});
+
+describe("ProductDetailGalleryMedia sizes", () => {
+  it("passes the parent sizes through to video posters", () => {
+    expect(galleryMediaSource).toContain("sizes={sizes}");
+    expect(galleryMediaSource).not.toContain('sizes="100vw"');
   });
 });

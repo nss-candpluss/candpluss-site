@@ -61,7 +61,11 @@ export function ProductCard({
     "ja-JP"
   );
   const hasMultipleVariants = product.variants.length > 1;
-  const showStatusLabel = hasProductStatusLabel(product.status, product.statusLabel);
+  const showStatusLabel = hasProductStatusLabel(
+    product.status,
+    product.statusLabel,
+    product.handle
+  );
   const usesProductsListingStyles = presentation === "productsListing";
 
   return (
@@ -120,6 +124,7 @@ export function ProductCard({
         >
           {showStatusLabel ? (
             <ProductStatusLabel
+              handle={product.handle}
               status={product.status}
               label={product.statusLabel}
               color={product.statusColor}

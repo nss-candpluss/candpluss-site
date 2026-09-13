@@ -40,6 +40,8 @@ describe("labo design section", () => {
     expect(laboDesignSource).toContain("min-[1025px]:left-auto");
     expect(laboDesignSource).toContain("min-[1025px]:right-0");
     expect(laboDesignSource).toContain("aspect-[3/2]");
+    expect(laboDesignSource).toContain('sizes="(min-width: 1025px) 50vw, 75vw"');
+    expect(laboDesignSource).not.toContain('sizes="100vw"');
     expect(laboDesignSource).toContain("object-left");
     expect(laboDesignSource).toContain("min-[1025px]:object-right");
     expect(laboDesignSource).toContain("overflow-hidden");

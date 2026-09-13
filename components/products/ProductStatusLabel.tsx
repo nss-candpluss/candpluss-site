@@ -1,3 +1,4 @@
+import { productStatusDisplayOverrides } from "@/data/product-status-overrides";
 import type { ProductStatus } from "@/types/product";
 import { uiText, type UiTextSizePx } from "@/lib/typography";
 
@@ -18,6 +19,7 @@ const newBadgeClassName =
   "inline-flex h-[1.5em] shrink-0 items-center justify-center box-border rounded-[4px] border border-[var(--color-new)] px-[0.45em] font-ui-en !text-[clamp(11px,calc(12px*var(--text-scale)),12px)] text-[var(--color-new)] !leading-none";
 
 type ProductStatusLabelProps = {
+  handle?: string;
   status: ProductStatus;
   label?: string;
   color?: string;
@@ -25,10 +27,23 @@ type ProductStatusLabelProps = {
   size?: UiTextSizePx;
 };
 
+export function getProductStatusDisplayOverride(handle?: string) {
+  if (!handle) {
+    return undefined;
+  }
+
+  return productStatusDisplayOverrides[handle];
+}
+
 export function hasProductStatusLabel(
   status: ProductStatus,
-  label?: string
+  label?: string,
+  handle?: string
 ): boolean {
+  if (getProductStatusDisplayOverride(handle)) {
+    return true;
+  }
+
   return Boolean(label ?? statusLabels[status]);
 }
 
@@ -65,19 +80,22 @@ function StatusLabelContent({
 }
 
 export function ProductStatusLabel({
+  handle,
   status,
   label,
   color,
   className = "",
   size = 11,
 }: ProductStatusLabelProps) {
-  const displayLabel = label ?? statusLabels[status];
+  const override = getProductStatusDisplayOverride(handle);
+  const displayLabel = override?.label ?? label ?? statusLabels[status];
+  const displayColor = override?.color ?? color;
 
   if (!displayLabel) {
     return null;
   }
 
-  const isCustomLabel = Boolean(label);
+  const isCustomLabel = Boolean(override || label);
   const hasNewLabel = displayLabel
     .split(STATUS_LABEL_SEPARATOR)
     .includes(NEW_STATUS_TEXT);
@@ -90,10 +108,10 @@ export function ProductStatusLabel({
         hasNewLabel
           ? "inline-flex items-center flex-wrap gap-x-[calc(8px*var(--gap-scale-x))] gap-y-[calc(4px*var(--gap-scale-y))]"
           : ""
-      } ${color && !hasNewLabel ? "" : "text-[var(--color-muted)]"} ${uiText(size)} ${className}`.trim()}
-      style={color && !hasNewLabel ? { color } : undefined}
+      } ${displayColor && !hasNewLabel ? "" : "text-[var(--color-muted)]"} ${uiText(size)} ${className}`.trim()}
+      style={displayColor && !hasNewLabel ? { color: displayColor } : undefined}
     >
-      <StatusLabelContent label={displayLabel} color={color} />
+      <StatusLabelContent label={displayLabel} color={displayColor} />
     </p>
   );
 }

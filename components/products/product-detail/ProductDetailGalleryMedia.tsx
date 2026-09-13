@@ -32,9 +32,11 @@ function pauseOtherGalleryVideos(current: HTMLVideoElement) {
 /** サムネ・再生準備中の下敷き用。動画と同じ先頭フレーム画像を使う */
 function ProductDetailVideoPoster({
   posterSrc,
+  sizes,
   className,
 }: {
   posterSrc: string;
+  sizes: string;
   className: string;
 }) {
   return (
@@ -42,7 +44,7 @@ function ProductDetailVideoPoster({
       src={posterSrc}
       alt=""
       fill
-      sizes="100vw"
+      sizes={sizes}
       shopifyOriginal
       draggable={false}
       className={className}
@@ -53,11 +55,13 @@ function ProductDetailVideoPoster({
 function ProductDetailVideoMedia({
   item,
   mode,
+  sizes,
   className,
   useThumbnail,
 }: {
   item: Extract<ProductDetailGalleryItem, { kind: "video" }>;
   mode: "preview" | "playback";
+  sizes: string;
   className: string;
   useThumbnail: boolean;
 }) {
@@ -121,6 +125,7 @@ function ProductDetailVideoMedia({
     return (
       <ProductDetailVideoPoster
         posterSrc={posterSrc}
+        sizes={sizes}
         className={className}
       />
     );
@@ -131,6 +136,7 @@ function ProductDetailVideoMedia({
       {/* 動画と同じ先頭フレームを下に敷き、iOS の切替を隠す */}
       <ProductDetailVideoPoster
         posterSrc={posterSrc}
+        sizes={sizes}
         className={className}
       />
       <video
@@ -236,6 +242,7 @@ export function ProductDetailGalleryMedia({
         key={item.id}
         item={item}
         mode={mode}
+        sizes={sizes}
         className={className}
         useThumbnail={useThumbnail}
       />

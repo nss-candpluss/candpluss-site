@@ -1,3 +1,4 @@
+import { productDefaultColorNameByHandlePrefix } from "@/data/product-default-variants";
 import { productListingHandleOrder } from "@/data/product-listing-order";
 import { productCategories, type Product, type ProductVariant } from "@/types/product";
 
@@ -58,6 +59,32 @@ export function shouldDisplayProductPrice(
   return resolveProductPriceAmount(product, variant) !== 0;
 }
 
+function normalizeColorName(name: string) {
+  return name.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function matchesHandlePrefix(handle: string, prefix: string) {
+  return handle === prefix || handle.startsWith(`${prefix}_`);
+}
+
+function getPreferredDefaultVariant(
+  product: Pick<Product, "handle" | "variants">
+) {
+  const rule = productDefaultColorNameByHandlePrefix.find((item) =>
+    matchesHandlePrefix(product.handle, item.handlePrefix)
+  );
+
+  if (!rule) {
+    return undefined;
+  }
+
+  const wanted = normalizeColorName(rule.colorName);
+
+  return product.variants.find(
+    (variant) => normalizeColorName(variant.colorName) === wanted
+  );
+}
+
 export function resolveProductVariantId(
   product: Product,
   variantId?: string | null
@@ -66,7 +93,7 @@ export function resolveProductVariantId(
     return variantId;
   }
 
-  return product.variants[0]?.id ?? "";
+  return getPreferredDefaultVariant(product)?.id ?? product.variants[0]?.id ?? "";
 }
 
 /** Next.js が日本語ハンドルをパーセントエンコードしたまま渡すことがある */
@@ -111,11 +138,9 @@ export function getProductDetailHref(
 }
 
 export function getSelectedVariant(product: Product, variantId?: string | null) {
-  return (
-    product.variants.find((variant) => variant.id === variantId) ??
-    product.variants[0] ??
-    null
-  );
+  const resolvedId = resolveProductVariantId(product, variantId);
+
+  return product.variants.find((variant) => variant.id === resolvedId) ?? null;
 }
 
 const PLACEHOLDER_VARIANT_NAME = /^(default title|default)$/i;

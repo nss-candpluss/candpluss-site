@@ -101,7 +101,7 @@ export function LaboDesign() {
             src={image}
             alt=""
             fill
-            sizes="100vw"
+            sizes="(min-width: 1025px) 50vw, 75vw"
             className="object-cover object-left min-[1025px]:object-right"
           />
         </div>

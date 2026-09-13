@@ -1,3 +1,4 @@
+import { resolveProductVariantId } from "@/lib/products/helpers";
 import type { PageOgImage } from "@/lib/site-metadata";
 import type {
   OpenCloseGroupId,
@@ -33,8 +34,9 @@ export function getProductListingImage(
   product: Product,
   variantId?: string
 ): ProductImage | null {
+  const resolvedId = resolveProductVariantId(product, variantId);
   const variant =
-    product.variants.find((item) => item.id === variantId) ?? product.variants[0];
+    product.variants.find((item) => item.id === resolvedId) ?? product.variants[0];
 
   if (!variant) {
     return null;
