@@ -14,7 +14,7 @@ export const conceptContent = {
       title: "01｜Camp + Something",
       backgroundImage: conceptBackground("01"),
       label: "CONNECTING TO WHAT MATTERS.",
-      body: `キャンプと大切なものをつなぐ。
+      body: `キャンプと、大切なものをつなぐ。
 「C」はCamp。
 「S」はSomething。
 そのSomethingに決まった答えはありません。
@@ -42,7 +42,7 @@ CAMP + SOMETHING.
 それが「C AND+S」という名前に込めた想いです。
 
 あなたにとってキャンプとつながる大切なものは何ですか。
-WHAT’S YOUR + S ?`,
+What’s Your + S ?`,
     },
     {
       id: "our-origin",

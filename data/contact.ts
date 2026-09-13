@@ -15,13 +15,13 @@ export const contactPageContent = {
   ],
   thanksBodyAutoReplyNote:
     "※自動返信メールが届かない場合は、迷惑メールフォルダをご確認いただくか、入力されたメールアドレスに誤りがないかをご確認ください。",
-  formTitle: "お問合せフォーム",
+  formTitle: "お問い合わせフォーム",
   introParagraphs: [
     "お問い合わせ内容を下記項目にご入力ください。",
   ],
   introNotes: [
-    "※ 初期設定で「パソコンからのメールを受信拒否」している場合は設定を変更してください。ドメイン指定をされている場合は、弊社からのメールが受信できるように「@candpluss.camp」を受信可能なドメインに指定してください。",
-    "※ （*）の項目は必須項目です。",
+    "※初期設定で「パソコンからのメールを受信拒否」している場合は設定を変更してください。ドメイン指定をされている場合は、当社からのメールが受信できるように「@candpluss.camp」を受信可能なドメインに指定してください。",
+    "※（*）の項目は必須項目です。",
   ],
   mailDomainNote: "@candpluss.camp",
   privacyPolicyHref: "/legal/privacy-policy",

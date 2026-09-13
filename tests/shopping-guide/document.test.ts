@@ -69,7 +69,7 @@ describe("shopping guide document", () => {
     expect(payment).toContain("Shop Pay ログインページは こちら>>");
     expect(payment).toContain("Shop Pay アカウント削除ページは こちら>>");
     expect(payment).toContain("お支払い期限はご注文日より1週間以内です");
-    expect(payment).toContain("振込手数料は、ご負担頂けますようお願い申し上げます。");
+    expect(payment).toContain("振込手数料は、ご負担いただけますようお願い申し上げます。");
     expect(receipt).toContain("納品書は、お届けする製品に同梱し発送いたします。");
     expect(receipt).not.toContain("領収書は発行後の宛名");
     expect(returns).toEqual(legalReturns);

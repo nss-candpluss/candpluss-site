@@ -114,8 +114,8 @@ describe("support warranty contact form", () => {
       'className="whitespace-pre-line"'
     );
     expect(supportContactPageContent.introNotes).toEqual([
-      "※ 初期設定で「パソコンからのメールを受信拒否」している場合は設定を変更してください。ドメイン指定をされている場合は、弊社からのメールが受信できるように「@candpluss.camp」を受信可能なドメインに指定してください。",
-      "※ （*）の項目は必須項目です。",
+      "※初期設定で「パソコンからのメールを受信拒否」している場合は設定を変更してください。ドメイン指定をされている場合は、当社からのメールが受信できるように「@candpluss.camp」を受信可能なドメインに指定してください。",
+      "※（*）の項目は必須項目です。",
     ]);
     expect(supportContactPageContent.introNotes[0]).toContain(
       supportContactPageContent.mailDomainNote

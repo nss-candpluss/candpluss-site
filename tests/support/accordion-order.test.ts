@@ -174,7 +174,7 @@ describe("support guide accordions", () => {
       "修理に関する注意点",
     ]);
     expect(supportContent.guide.accordionNote).toBe(
-      "※初期不良による交換および修理をご依頼の際は、必ず上記「初期不良に関する保証基準」「損傷・破損による修理について」「修理に関する注意点」をお読みいただいてから、ご依頼いただきますようお願い致します。"
+      "※初期不良による交換および修理をご依頼の際は、必ず上記「初期不良に関する保証基準」「損傷・破損による修理について」「修理に関する注意点」をお読みいただいてから、ご依頼いただきますようお願いいたします。"
     );
     expect(supportGuideSource).toContain(
       'const supportAccordionNoteClassName = "mt-[calc(42px*var(--gap-scale))]"'
@@ -205,9 +205,9 @@ describe("support guide accordions", () => {
     expect(body).toContain("【修理期間について】");
     expect(body).toContain("【修理品の発送前に】");
     expect(body).toContain("【お受けできない修理品・修理内容について】");
-    expect(body).toContain("【お見積りについて】");
+    expect(body).toContain("【お見積について】");
     expect(body).toContain(
-      "輸送中の事故・トラブルについては弊社では責任を負いかねますので、ご利用の宅配業者にお問い合わせください。"
+      "輸送中の事故・トラブルについては当社では責任を負いかねますので、ご利用の宅配業者にお問い合わせください。"
     );
   });
 

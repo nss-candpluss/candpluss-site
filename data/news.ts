@@ -31,7 +31,7 @@ export const newsItems = [
   },
   {
     id: "002",
-    title: "C AND+S 公式WEBサイトOPEN",
+    title: "C AND+S公式WEBサイトOPEN",
     tag: "Information",
     excerpt:
       "C AND+S 公式WEBサイトを公開しました。ブランドの想いやプロダクト情報を、これから順次お届けしていきます。",
@@ -44,7 +44,7 @@ export const newsItems = [
   },
   {
     id: "003",
-    title: "C AND+S公式インスタグラムを開設しました。",
+    title: "C AND+S公式Instagramを開設しました",
     tag: "Information",
     excerpt:
       "C AND+S公式Instagramを開設しました。ブランドコンセプトや製品情報、イベント情報など、最新情報を発信してまいります。",
@@ -55,7 +55,7 @@ export const newsItems = [
     content:
       "C AND+S公式Instagramを開設しました。\nブランドコンセプトをはじめ、製品情報、イベント情報など、ブランドの最新情報を発信してまいります。\nぜひフォローして、C AND+Sの最新情報をご覧ください。",
     contentLink: {
-      label: "Follow US",
+      label: "Follow Us",
       href: "https://www.instagram.com/c_and_plus_s?igsh=MXI0bDJ6Znp3bm81dw==",
     },
   },

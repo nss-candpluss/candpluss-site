@@ -74,7 +74,7 @@ describe("contact form", () => {
     expect(heroSource).toContain("contactInquiryTitleClassName");
     expect(heroSource).toContain("contactInquiryBodyClassName");
     expect(heroSource).toContain("contactInquiryBodyWrapClassName");
-    expect(contactPageContent.formTitle).toBe("お問合せフォーム");
+    expect(contactPageContent.formTitle).toBe("お問い合わせフォーム");
     expect(contactPageContent.thanksTitle).toBe("お問い合わせが完了しました");
     expect(contactPageContent.thanksBodyIntro).toEqual([
       "お問い合わせありがとうございます。",
@@ -89,8 +89,8 @@ describe("contact form", () => {
       "お問い合わせ内容を下記項目にご入力ください。",
     ]);
     expect(contactPageContent.introNotes).toEqual([
-      "※ 初期設定で「パソコンからのメールを受信拒否」している場合は設定を変更してください。ドメイン指定をされている場合は、弊社からのメールが受信できるように「@candpluss.camp」を受信可能なドメインに指定してください。",
-      "※ （*）の項目は必須項目です。",
+      "※初期設定で「パソコンからのメールを受信拒否」している場合は設定を変更してください。ドメイン指定をされている場合は、当社からのメールが受信できるように「@candpluss.camp」を受信可能なドメインに指定してください。",
+      "※（*）の項目は必須項目です。",
     ]);
     expect(contactPageContent.introNotes[0]).toContain(
       contactPageContent.mailDomainNote

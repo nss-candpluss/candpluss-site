@@ -69,7 +69,7 @@ export const laboDesignContent = {
   titleWrapSegments: laboDesignTitleWrapSegments,
   label: "DESIGN & DEVELOPMENT",
   body:
-    "C AND+S LABOでは、製品を生み出す拠点でもあります。実際に使い、検証し、改善を重ねることで、美しさと機能を両立した製品を生み出しています。",
+    "C AND+S LABOは、製品を生み出す拠点でもあります。実際に使い、検証し、改善を重ねることで、美しさと機能を両立した製品を生み出しています。",
   image: "/images/labo/labo-design-image01.webp",
 } as const;
 
@@ -81,9 +81,9 @@ export const laboVisitContent = {
   body:
     "C AND+S LABOの見学は事前予約制です。MOYAシリーズの実製品の確認など、見学をご希望の方は下記よりご予約ください。",
   notes: [
-    "※ 完全予約制です。事前にLINEまたはお問い合わせフォームにてご予約ください。",
-    "※ 見学時間の目安は1組様あたり60分程度とさせていただきます。",
-    "※ 複数名での見学ご希望のグループ様は最大4名迄とさせていただきます。",
+    "※完全予約制です。事前にLINEまたはお問い合わせフォームにてご予約ください。",
+    "※見学時間の目安は1組様あたり60分程度とさせていただきます。",
+    "※複数名での見学ご希望のグループ様は最大4名までとさせていただきます。",
   ],
   lineButton: {
     label: "LINEでご予約",
@@ -104,7 +104,7 @@ export const laboAccessContent = {
     street: "福岡県大野城市乙金1-10-40-1F",
   },
   details: [
-    { label: "営業時間", value: "10:00 - 17:00" },
+    { label: "営業時間", value: "10:00〜17:00" },
     { label: "定休日", value: "土日、祝日、年末年始" },
     { label: "駐車場", value: "あり" },
   ],

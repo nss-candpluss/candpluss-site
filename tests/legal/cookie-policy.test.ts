@@ -9,7 +9,7 @@ describe("cookie policy document", () => {
 
   it("keeps numbered sections aligned with the other legal pages", () => {
     expect(cookiePolicyContent.sections.map((item) => item.title)).toEqual([
-      "1. 当サイトでのCookieの利用",
+      "1. 本サイトでのCookieの利用",
       "2. 発行されるCookieの分類",
       "3. 決済における必須Cookieについて",
       "4. Cookieの拒否について",

@@ -73,12 +73,12 @@ describe("concept page copy", () => {
 
   it("uses ギア instead of 道具 in story body copy", () => {
     expect(conceptContent.sections.map((section) => section.body).join("\n")).not.toContain("道具");
-    expect(conceptContent.sections[0]?.body).toContain("キャンプと大切なものをつなぐ。");
+    expect(conceptContent.sections[0]?.body).toContain("キャンプと、大切なものをつなぐ。");
     expect(conceptContent.sections[0]?.body).toContain("ギアをつくること。");
     expect(conceptContent.sections[0]?.body).toContain(
       "それが「C AND+S」という名前に込めた想いです。"
     );
-    expect(conceptContent.sections[0]?.body).toContain("WHAT’S YOUR + S ?");
+    expect(conceptContent.sections[0]?.body).toContain("What’s Your + S ?");
     expect(conceptContent.sections[1]?.body).toContain("すべてはフィールドから始まった。");
     expect(conceptContent.sections[1]?.body).toContain(
       "「日本の厳しい四季に向き合い、そのすべてを楽しめるテントをつくれないだろうか」"
@@ -121,7 +121,7 @@ describe("concept page copy", () => {
     expect(conceptPageSource).toContain("opacity-[0.65]");
     expect(conceptPageSource).toContain("uiText(18)");
     expect(conceptPageSource).toContain("mt-[calc(32px*var(--gap-scale-y))]");
-    expect(conceptContent.sections[0]?.body.startsWith("キャンプと大切なものをつなぐ。")).toBe(
+    expect(conceptContent.sections[0]?.body.startsWith("キャンプと、大切なものをつなぐ。")).toBe(
       true
     );
     expect(conceptContent.sections[1]?.body.startsWith("IT STARTED IN THE FIELD.")).toBe(
