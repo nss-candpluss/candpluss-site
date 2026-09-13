@@ -22,6 +22,7 @@ import { ProductOptions } from "@/components/products/ProductOptions";
 import { ProductSizeSpecSection } from "@/components/products/ProductSizeSpec";
 import {
   getSelectedVariant,
+  isPlaceholderProductVariantId,
   resolveProductVariantId,
 } from "@/lib/products/helpers";
 import { productDetailSectionTitleClassName, uiText } from "@/lib/typography";
@@ -45,6 +46,27 @@ const PRODUCT_DETAIL_SIZE_SPEC_TYPOGRAPHY = {
 
 function buildProductFeatures(product: Product): ProductDetailFeature[] {
   return product.features ?? [];
+}
+
+/**
+ * 選択中のカラーを URL に反映し、その状態のまま共有・ブックマークできるようにする。
+ * 履歴を増やさないよう replaceState を使う（一覧のカテゴリ絞り込みと同じ方針）。
+ * basePath や他のクエリ・ハッシュを壊さないため現在の URL を基点に書き換える。
+ */
+function syncVariantIdToUrl(variantId: string) {
+  const url = new URL(window.location.href);
+
+  if (isPlaceholderProductVariantId(variantId)) {
+    url.searchParams.delete("color");
+  } else {
+    url.searchParams.set("color", variantId);
+  }
+
+  window.history.replaceState(
+    null,
+    "",
+    `${url.pathname}${url.search}${url.hash}`
+  );
 }
 
 export function ProductDetailView({
@@ -98,6 +120,7 @@ export function ProductDetailView({
 
       if (requestId === variantRequestRef.current) {
         setSelectedVariantId(variantId);
+        syncVariantIdToUrl(variantId);
       }
     },
     [preloadVariantEntry, selectedVariantId]

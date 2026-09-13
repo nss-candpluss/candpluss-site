@@ -30,7 +30,6 @@ const staticRoutes = new Set([
   "/products",
   "/concept",
   "/labo",
-  "/quality",
   "/support",
   "/support/confirm",
   "/support/thanks",
