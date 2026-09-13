@@ -210,6 +210,7 @@ function buildVariantOffer(
     ...offer,
     priceCurrency: productCurrency(product, variant),
     price,
+    valueAddedTaxIncluded: true,
   };
 }
 
@@ -239,6 +240,7 @@ function buildProductOffer(product: Product): JsonLdObject {
       offerCount: prices.length,
       availability,
       itemCondition: `${SCHEMA}/NewCondition`,
+      valueAddedTaxIncluded: true,
     };
   }
 
@@ -246,6 +248,7 @@ function buildProductOffer(product: Product): JsonLdObject {
     ...offer,
     priceCurrency: productCurrency(product),
     price: lowPrice,
+    valueAddedTaxIncluded: true,
   };
 }
 

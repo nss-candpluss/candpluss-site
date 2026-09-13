@@ -46,6 +46,14 @@ describe("privacy policy document", () => {
     expect(section("1. 個人情報の取得")?.body ?? "").toContain("添付画像");
   });
 
+  // 画像添付は初期不良・修理フォームのみ（tests/contact/contact-form.test.ts で
+  // 一般お問い合わせフォームに添付欄がないことを検証している）
+  it("添付画像の取得範囲を初期不良・修理の依頼に限定している", () => {
+    expect(section("1. 個人情報の取得")?.body ?? "").toContain(
+      "初期不良・修理のご依頼に際してお客様が送信される添付画像"
+    );
+  });
+
   it("keeps Cookie policy and inquiry details as normal body text", () => {
     expect(section("6. Cookie等の利用")?.body).toBe(
       "当社は、サービスの利便性向上および利用状況の分析のため、Cookie等の技術を使用しています。\n別途定める「Cookieポリシー」をご確認ください。"

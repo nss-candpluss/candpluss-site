@@ -78,6 +78,16 @@ describe("json-ld", () => {
     expect(buildProductPageJsonLd(product)["@type"]).toBe("Product");
   });
 
+  // サイト表示・特商法とも税込のため、構造化データでも税込であることを明示する
+  it("marks offer prices as tax inclusive", () => {
+    const offers = buildProductJsonLd(product).offers as Record<
+      string,
+      unknown
+    >;
+
+    expect(offers.valueAddedTaxIncluded).toBe(true);
+  });
+
   it("builds an OnlineStore with the legal parent and return window", () => {
     const jsonLd = buildOnlineStoreJsonLd();
     const parent = jsonLd.parentOrganization as Record<string, unknown>;
