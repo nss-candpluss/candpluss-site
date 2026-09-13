@@ -29,6 +29,9 @@ export const supportContent = {
       "※初期不良による交換および修理をご依頼の際は、必ず上記「初期不良に関する保証基準」「損傷・破損による修理について」「修理に関する注意点」をお読みいただいてから、ご依頼いただきますようお願いいたします。",
     lineButton: {
       label: "LINEでお問い合わせ",
+      body: "スマートフォン版LINEで下記QRコードをスキャンし、友達追加してください。",
+      qrImage: "/images/common/line-qr.png",
+      qrAlt: "LINE公式アカウントのQRコード",
     },
     phoneSection: {
       title: "お電話でのお問い合わせ",

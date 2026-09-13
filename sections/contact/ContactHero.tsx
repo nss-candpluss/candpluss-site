@@ -9,7 +9,7 @@ import {
   contactInquiryBodyWrapClassName,
   contactInquiryTitleClassName,
 } from "@/sections/contact/contactStyles";
-import { supportContactButtonClassName } from "@/sections/support/supportContactStyles";
+import { LineInquiryCta } from "@/sections/support/LineInquiryCta";
 
 const TOLL_FREE_ICON_SRC = "/assets/icons/icon-tollfree.svg";
 
@@ -65,19 +65,15 @@ export function ContactHero() {
       </div>
 
       {showLine && lineLink ? (
-        <a
+        <LineInquiryCta
+          label={supportContent.guide.lineButton.label}
+          body={supportContent.guide.lineButton.body}
           href={lineLink.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`${supportContactButtonClassName} ${contactLineButtonAreaGapClassName} max-w-[400px]`}
-        >
-          <span
-            aria-hidden="true"
-            className="size-[calc(24px*var(--text-scale))] shrink-0 bg-current"
-            style={maskGraphicStyle(lineLink.icon)}
-          />
-          {supportContent.guide.lineButton.label}
-        </a>
+          icon={lineLink.icon}
+          qrSrc={supportContent.guide.lineButton.qrImage}
+          qrAlt={supportContent.guide.lineButton.qrAlt}
+          className={contactLineButtonAreaGapClassName}
+        />
       ) : null}
 
       <div className={contactLineButtonAreaGapClassName}>

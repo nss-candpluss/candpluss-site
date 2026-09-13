@@ -67,7 +67,7 @@ describe("contact form", () => {
     expect(heroSource).toContain("tel:${phoneSection.phoneNumber}");
     expect(heroSource).toContain('const TOLL_FREE_ICON_SRC = "/assets/icons/icon-tollfree.svg"');
     expect(heroSource).toContain("supportContent.guide.lineButton.label");
-    expect(heroSource).toContain('target="_blank"');
+    expect(heroSource).toContain("LineInquiryCta");
     expect(heroSource).toContain("formTitle");
     expect(heroSource).toContain("introParagraphs.map");
     expect(heroSource).toContain("introNotes.map");

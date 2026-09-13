@@ -8,9 +8,9 @@ import { maskGraphicStyle } from "@/lib/maskStyle";
 import { isSocialLinkVisible } from "@/lib/site-navigation-visibility";
 import { bodyText, sectionTitle62ClassName, uiText } from "@/lib/typography";
 
+import { LineInquiryCta } from "@/sections/support/LineInquiryCta";
 import { SupportAccordion } from "@/sections/support/SupportAccordion";
 import { SupportContactForm } from "@/sections/support/SupportContactForm";
-import { supportContactButtonClassName } from "@/sections/support/supportContactStyles";
 
 const TOLL_FREE_ICON_SRC = "/assets/icons/icon-tollfree.svg";
 
@@ -101,19 +101,15 @@ export function SupportGuide() {
             </div>
 
             {showLine && lineLink ? (
-              <a
+              <LineInquiryCta
+                label={guide.lineButton.label}
+                body={guide.lineButton.body}
                 href={lineLink.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`${supportContactButtonClassName} ${supportLineButtonAreaGapClassName} max-w-[400px]`}
-              >
-                <span
-                  aria-hidden="true"
-                  className="size-[calc(24px*var(--text-scale))] shrink-0 bg-current"
-                  style={maskGraphicStyle(lineLink.icon)}
-                />
-                {guide.lineButton.label}
-              </a>
+                icon={lineLink.icon}
+                qrSrc={guide.lineButton.qrImage}
+                qrAlt={guide.lineButton.qrAlt}
+                className={supportLineButtonAreaGapClassName}
+              />
             ) : null}
 
             <div

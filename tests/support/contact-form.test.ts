@@ -57,7 +57,7 @@ describe("support warranty contact form", () => {
     expect(guideSource).toContain("id={supportContactPageContent.sectionId}");
     expect(guideSource).toContain("scroll-mt-[var(--header-height)]");
     expect(guideSource).toContain("SupportContactForm");
-    expect(guideSource).toContain("supportContactButtonClassName");
+    expect(guideSource).toContain("LineInquiryCta");
     expect(buttonStyleSource).toContain(
       "py-[calc(32px*var(--layout-scale-y))]"
     );

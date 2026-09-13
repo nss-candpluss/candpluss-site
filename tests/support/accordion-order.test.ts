@@ -58,6 +58,9 @@ describe("support guide accordions", () => {
     const line = footerContent.socialLinks.find((link) => link.label === "LINE");
 
     expect(supportContent.guide.lineButton.label).toBe("LINEでお問い合わせ");
+    expect(supportContent.guide.lineButton.qrImage).toBe(
+      "/images/common/line-qr.png"
+    );
     expect(supportContent.guide).not.toHaveProperty("contactButton");
     expect(supportGuideSource).not.toContain("SiteGrid");
     expect(supportGuideSource).not.toContain("twoColumnFeatureSpanClassName");
@@ -84,13 +87,12 @@ describe("support guide accordions", () => {
     expect(supportGuideSource).toContain(
       'const supportContactTitleClassName = `font-body-ja font-bold text-[var(--foreground)] ${uiText(20)}`'
     );
-    expect(supportGuideSource).toContain("max-w-[400px]");
+    expect(supportGuideSource).toContain("LineInquiryCta");
     expect(supportGuideSource).toContain(
       'className="mt-[var(--section-title-gap)]"'
     );
     expect(supportGuideSource).toContain("lineLink.icon");
     expect(line?.icon).toBe("/assets/icons/icon-sns-line.svg");
-    expect(supportGuideSource).toContain("target=\"_blank\"");
     expect(supportContactStylesSource).toContain("px-[calc(32px*var(--gap-scale-x))]");
     expect(supportContactStylesSource).toContain("py-[calc(32px*var(--layout-scale-y))]");
     expect(supportContactStylesSource).toContain(
