@@ -1,3 +1,5 @@
+import { featureLinkImages } from "@/data/feature-link-images";
+
 export const topHeroContent = {
   backgroundImage: "/images/hero/hero-bg.webp",
   foregroundImage: "/images/hero/hero-foreground.webp",
@@ -18,8 +20,6 @@ export const topHeroContent = {
     },
   },
 } as const;
-
-const MAIN_PRODUCT_DUMMY_IMAGE = "/images/products/_shared/placeholder.webp";
 
 export const homeMainProducts = {
   title: "Main Products",
@@ -64,13 +64,13 @@ export const homeFeatureLinks = [
     id: "labo",
     title: "LABO",
     href: "/labo",
-    image: MAIN_PRODUCT_DUMMY_IMAGE,
+    image: featureLinkImages.labo,
   },
   {
     id: "support",
     title: "SUPPORT",
     href: "/support",
-    image: "/images/common/link-support.webp",
+    image: featureLinkImages.support,
   },
 ] as const;
 

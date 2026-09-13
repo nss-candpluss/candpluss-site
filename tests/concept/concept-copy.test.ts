@@ -59,6 +59,11 @@ describe("concept page copy", () => {
       "LABO",
       "SUPPORT",
     ]);
+    expect(conceptContent.featureLinks.map((item) => item.image)).toEqual([
+      "/images/common/link-products.webp",
+      "/images/common/link-labo.webp",
+      "/images/common/link-support.webp",
+    ]);
   });
 
   it("center-aligns the 01-09 story copy", () => {

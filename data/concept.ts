@@ -1,3 +1,5 @@
+import { featureLinkImages } from "@/data/feature-link-images";
+
 function conceptBackground(index: "01" | "02" | "03" | "04" | "05" | "06" | "07" | "08" | "09") {
   return `/images/concept/concept-${index}.webp`;
 }
@@ -276,19 +278,19 @@ Duraflexのパーツ。
       id: "products",
       title: "ALL PRODUCTS",
       href: "/products",
-      image: "/images/home/home-link-products.webp",
+      image: featureLinkImages.products,
     },
     {
       id: "labo",
       title: "LABO",
       href: "/labo",
-      image: "/images/common/link-labo.webp",
+      image: featureLinkImages.labo,
     },
     {
       id: "support",
       title: "SUPPORT",
       href: "/support",
-      image: "/images/common/link-support.webp",
+      image: featureLinkImages.support,
     },
   ],
 } as const;
