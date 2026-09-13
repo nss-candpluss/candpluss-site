@@ -96,7 +96,7 @@ const MOYA500_SIZE_SPEC: ProductSizeSpec = {
     "※ご使用前に取扱説明書を必ずよくお読みいただき、正しく安全に設営・ご使用ください。",
   ],
   drawingImage: drawingImage("moya500", "MOYA500 drawing"),
-  manualHref: "/documents/products/moya500/manual.pdf",
+  // 取扱説明書は Shopify の custom.manual_pdf から取得する（public に PDF は置かない）
 };
 
 const GEARAID_SEAM_GRIP_SIZE_SPEC: ProductSizeSpec = {

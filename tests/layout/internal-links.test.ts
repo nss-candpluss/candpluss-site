@@ -58,9 +58,8 @@ const newsHandles = new Set<string>(newsItems.map((item) => item.handle));
 
 /** 未確定のため現状維持。公開前に解消する。 */
 const pendingInternalHrefs = new Set([
-  "/products/moya420",
+  // 検索ページは第二弾で実装する。ヘッダーアイコンは headerSearch: false で非表示。
   "/search",
-  "/documents/products/moya500/manual.pdf",
 ]);
 
 /**
@@ -70,7 +69,10 @@ const pendingInternalHrefs = new Set([
  * ローカル catalog（data/products.ts）に無くても実際のルートは解決する。
  * ローカル catalog の handle を Shopify に揃えたら、この集合から外せる。
  */
-const shopifyOnlyProductHrefs = new Set(["/products/zig-stake"]);
+const shopifyOnlyProductHrefs = new Set([
+  "/products/zig-stake",
+  "/products/moya420",
+]);
 
 function isResolvedInternalHref(href: string): boolean {
   if (pendingInternalHrefs.has(href) || shopifyOnlyProductHrefs.has(href)) {
@@ -155,11 +157,15 @@ describe("internal page links", () => {
   });
 
   it("keeps pending internal links listed until they are ready", () => {
+    expect(headerIconLinks.some((link) => link.href === "/search")).toBe(true);
+    expect(isHeaderIconLinkVisible("Search")).toBe(false);
+  });
+
+  // moya420 は Shopify にのみ存在する（ローカル catalog は moya500 / nokuta / gearaid のみ）。
+  // PRODUCT_SOURCE=shopify で解決するため、pending ではなく shopifyOnly として扱う。
+  it("treats Shopify-only product links as resolved", () => {
     expect(collectHrefs(homeMainProducts.items)).toContain("/products/moya420");
     expect(productHandles.has("moya420")).toBe(false);
-    expect(headerIconLinks.some((link) => link.href === "/search")).toBe(true);
-    expect(existsSync(join(rootDir, "public/documents/products/moya500/manual.pdf"))).toBe(
-      false
-    );
+    expect(isResolvedInternalHref("/products/moya420")).toBe(true);
   });
 });
