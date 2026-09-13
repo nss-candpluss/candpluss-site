@@ -23,8 +23,14 @@ describe("LINEでお問い合わせ CTA", () => {
       qrAlt: "LINE公式アカウントのQRコード",
     });
     expect(source).toContain("{body}");
-    expect(source).toContain("hidden min-[1025px]:block");
-    expect(source).toContain("min-[1025px]:hidden");
+    // QR とボタンの切り替えは 1376px 以下がタブレットレイアウト。
+    expect(source).toContain(
+      'export const lineQrPanelVisibilityClassName = "hidden min-[1377px]:block"'
+    );
+    expect(source).toContain(
+      'export const lineQrButtonVisibilityClassName = "min-[1377px]:hidden"'
+    );
+    expect(source).not.toContain("min-[1025px]:block");
     expect(source).toContain("qrSrc");
     expect(source).toContain("supportContactButtonClassName");
     expect(source).toContain('target="_blank"');

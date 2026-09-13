@@ -11,6 +11,11 @@ import {
   isSocialLinkVisible,
 } from "@/lib/site-navigation-visibility";
 import { bodyText, uiText } from "@/lib/typography";
+import {
+  LineQrPanel,
+  lineQrButtonVisibilityClassName,
+  lineQrPanelVisibilityClassName,
+} from "@/sections/support/LineInquiryCta";
 
 const contactButtonClassName = `font-body-ja inline-flex w-full items-center justify-center gap-x-[calc(8px*var(--gap-scale-x))] gap-y-[calc(8px*var(--gap-scale-y))] font-semibold text-white ${uiText(16)} bg-[var(--foreground)] px-[calc(32px*var(--gap-scale-x))] py-[calc(32px*var(--layout-scale-y))] min-[1025px]:py-[calc(18px*var(--gap-scale-y))]`;
 
@@ -68,37 +73,49 @@ export function LaboVisit() {
         </ul>
 
         {showLine || showForm ? (
-          <SiteGrid className="mt-[var(--section-title-gap)] gap-[calc(32px*var(--gap-scale-x))]">
+          <div className="mt-[var(--section-title-gap)]">
             {showLine && lineLink ? (
-              <a
-                href={lineLink.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`${contactButtonClassName} ${buttonSpanClassName}`}
-              >
-                <span
-                  aria-hidden="true"
-                  className="size-[calc(24px*var(--text-scale))] shrink-0 bg-current"
-                  style={maskGraphicStyle(lineLink.icon)}
-                />
-                {lineButton.label}
-              </a>
+              <LineQrPanel
+                label={lineButton.label}
+                body={lineButton.body}
+                qrSrc={lineButton.qrImage}
+                qrAlt={lineButton.qrAlt}
+                className={lineQrPanelVisibilityClassName}
+              />
             ) : null}
 
-            {showForm ? (
-              <Link
-                href={contactButton.href}
-                className={`${contactButtonClassName} ${buttonSpanClassName}`}
-              >
-                <span
-                  aria-hidden="true"
-                  className="size-[calc(24px*var(--text-scale))] shrink-0 bg-current"
-                  style={arrowMaskStyle}
-                />
-                {contactButton.label}
-              </Link>
-            ) : null}
-          </SiteGrid>
+            <SiteGrid className="gap-[calc(32px*var(--gap-scale-x))] min-[1377px]:mt-[clamp(32px,calc(60px*var(--gap-scale)),60px)]">
+              {showLine && lineLink ? (
+                <a
+                  href={lineLink.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${contactButtonClassName} ${buttonSpanClassName} ${lineQrButtonVisibilityClassName}`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="size-[calc(24px*var(--text-scale))] shrink-0 bg-current"
+                    style={maskGraphicStyle(lineLink.icon)}
+                  />
+                  {lineButton.label}
+                </a>
+              ) : null}
+
+              {showForm ? (
+                <Link
+                  href={contactButton.href}
+                  className={`${contactButtonClassName} ${buttonSpanClassName} min-[1377px]:max-w-[400px]`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="size-[calc(24px*var(--text-scale))] shrink-0 bg-current"
+                    style={arrowMaskStyle}
+                  />
+                  {contactButton.label}
+                </Link>
+              ) : null}
+            </SiteGrid>
+          </div>
         ) : null}
       </Container>
     </section>

@@ -87,6 +87,9 @@ export const laboVisitContent = {
   ],
   lineButton: {
     label: "LINEでご予約",
+    body: "スマートフォン版LINEで下記QRコードをスキャンし、友達追加してください。",
+    qrImage: "/images/common/line-qr.png",
+    qrAlt: "LINE公式アカウントのQRコード",
   },
   contactButton: {
     label: "お問い合わせフォームよりご予約",

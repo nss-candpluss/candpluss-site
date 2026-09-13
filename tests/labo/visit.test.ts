@@ -21,7 +21,12 @@ describe("labo visit reservation", () => {
     expect(laboVisitContent.body).toContain("見学は事前予約制です");
     expect(laboVisitContent.notes).toHaveLength(3);
     expect(laboVisitContent.notes[0]).toContain("完全予約制です");
-    expect(laboVisitContent.lineButton.label).toBe("LINEでご予約");
+    expect(laboVisitContent.lineButton).toEqual({
+      label: "LINEでご予約",
+      body: "スマートフォン版LINEで下記QRコードをスキャンし、友達追加してください。",
+      qrImage: "/images/common/line-qr.png",
+      qrAlt: "LINE公式アカウントのQRコード",
+    });
     expect(laboVisitContent.contactButton.label).toBe(
       "お問い合わせフォームよりご予約"
     );
@@ -62,17 +67,35 @@ describe("labo visit reservation", () => {
     );
   });
 
-  it("uses Support-style LINE and form buttons", () => {
+  it("shows the Support-style LINE QR only on PC and keeps the button below it", () => {
     const line = footerContent.socialLinks.find((link) => link.label === "LINE");
 
+    expect(laboVisitSource).toContain("LineQrPanel");
+    expect(laboVisitSource).toContain("lineButton.body");
+    expect(laboVisitSource).toContain("lineQrPanelVisibilityClassName");
+    expect(laboVisitSource).toContain("min-[1377px]:max-w-[400px]");
+    expect(laboVisitSource.indexOf("LineQrPanel")).toBeLessThan(
+      laboVisitSource.indexOf("contactButton.label")
+    );
+    expect(line?.icon).toBe("/assets/icons/icon-sns-line.svg");
+  });
+
+  it("keeps the tablet and mobile reservation buttons as they were", () => {
     expect(laboVisitSource).toContain("twoColumnFeatureSpanClassName");
+    expect(laboVisitSource).toContain("SiteGrid");
+    expect(laboVisitSource).toContain("gap-[calc(32px*var(--gap-scale-x))]");
     expect(laboVisitSource).toContain("lineButton.label");
-    expect(laboVisitSource).toContain("contactButton.label");
     expect(laboVisitSource).toContain("lineLink.icon");
     expect(laboVisitSource).toContain("arrowMaskStyle");
     expect(laboVisitSource).toContain("px-[calc(32px*var(--gap-scale-x))]");
     expect(laboVisitSource).toContain("py-[calc(32px*var(--layout-scale-y))]");
-    expect(laboVisitSource).toContain("min-[1025px]:py-[calc(18px*var(--gap-scale-y))]");
-    expect(line?.icon).toBe("/assets/icons/icon-sns-line.svg");
+    expect(laboVisitSource).toContain(
+      "min-[1025px]:py-[calc(18px*var(--gap-scale-y))]"
+    );
+    // LINE ボタンは 1377px 以上だけ QR に置き換わる。1376px 以下は幅の上限なし。
+    expect(laboVisitSource).toContain(
+      `${"${buttonSpanClassName}"} ${"${lineQrButtonVisibilityClassName}"}`
+    );
+    expect(laboVisitSource).not.toContain("w-full max-w-[400px]");
   });
 });
