@@ -457,4 +457,97 @@ describe("mapShopifyProductToProduct", () => {
       "30cm",
     ]);
   });
+
+  // 選択肢のない商品は variant.title が "Default Title" になる。
+  // そのまま連結すると alt に「ガイロープ Default Title」と出てしまう
+  it("altText 未登録時の代替テキストに Default Title を混ぜない", () => {
+    const product = mapShopifyProductToProduct({
+      id: "gid://shopify/Product/4",
+      handle: "guyrope",
+      title: "ガイロープ",
+      description: "",
+      productType: "アクセサリー",
+      availableForSale: true,
+      featuredImage: null,
+      media: { nodes: [] },
+      variants: {
+        nodes: [
+          {
+            id: "gid://shopify/ProductVariant/40",
+            title: "Default Title",
+            sku: null,
+            availableForSale: true,
+            quantityAvailable: 5,
+            selectedOptions: [{ name: "Title", value: "Default Title" }],
+            price: { amount: "1500", currencyCode: "JPY" },
+            compareAtPrice: null,
+            image: {
+              url: "https://cdn.shopify.com/guyrope.webp",
+              altText: null,
+              width: 800,
+              height: 800,
+            },
+            colorCode: null,
+            swatch: null,
+            gallery: null,
+          },
+        ],
+      },
+      salesStatus: null,
+      features: null,
+      optionProducts: null,
+    } as Parameters<typeof mapShopifyProductToProduct>[0]);
+
+    const gallery = product.variants[0].gallery;
+
+    expect(gallery.type).toBe("standard");
+
+    const alts =
+      gallery.type === "standard" ? gallery.images.map((image) => image.alt) : [];
+
+    expect(alts).toEqual(["ガイロープ"]);
+    for (const alt of alts) {
+      expect(alt).not.toContain("Default Title");
+    }
+  });
+
+  it("サイズ図面の代替テキストは商品名を含む日本語にする", () => {
+    const product = mapShopifyProductToProduct({
+      id: "gid://shopify/Product/5",
+      handle: "moya500",
+      title: "MOYA500",
+      description: "",
+      productType: "テント・シェルター",
+      availableForSale: true,
+      featuredImage: null,
+      media: { nodes: [] },
+      variants: { nodes: [] },
+      salesStatus: null,
+      features: null,
+      optionProducts: null,
+      sizeSpec: {
+        reference: {
+          id: "gid://shopify/Metaobject/10",
+          type: "product_size_spec",
+          fields: [
+            {
+              key: "drawing",
+              type: "file_reference",
+              reference: {
+                id: "gid://shopify/MediaImage/10",
+                image: {
+                  url: "https://cdn.shopify.com/drawing.webp",
+                  altText: null,
+                  width: 1200,
+                  height: 800,
+                },
+              },
+            },
+          ],
+        },
+      },
+    } as Parameters<typeof mapShopifyProductToProduct>[0]);
+
+    expect(product.sizeSpec?.drawingImage?.alt).toBe("MOYA500 サイズ図面");
+  });
 });

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { isPlaceholderProductVariantName } from "@/lib/products/helpers";
 import { PRODUCT_IMAGE_PLACEHOLDER } from "@/lib/products/image-paths";
 import { shopifyStorefrontRequest } from "@/lib/shopify/client";
 import type {
@@ -286,6 +287,17 @@ function mapMediaNodes(nodes: ShopifyMediaNode[], fallbackAlt: string) {
 
 const DEFAULT_TITLE_OPTION = /^title$/i;
 
+/**
+ * 画像の altText 未登録時に使う代替テキスト。
+ * 選択肢のない商品は variant.title が "Default Title" になるため、
+ * そのまま連結すると alt に混入する。
+ */
+function variantFallbackAlt(productTitle: string, variantTitle: string): string {
+  return isPlaceholderProductVariantName(variantTitle)
+    ? productTitle
+    : `${productTitle} ${variantTitle}`;
+}
+
 function primarySelectedOption(variant: ShopifyVariant) {
   return (
     variant.selectedOptions.find((option) => !DEFAULT_TITLE_OPTION.test(option.name)) ??
@@ -355,11 +367,9 @@ function mapVariant(
   productMedia: ProductGalleryMedia[],
   id: string
 ): ProductVariant {
-  const variantImage = mapImage(variant.image, `${product.title} ${variant.title}`);
-  const galleryMedia = mapMediaNodes(
-    variant.gallery?.references?.nodes ?? [],
-    `${product.title} ${variant.title}`
-  );
+  const fallbackAlt = variantFallbackAlt(product.title, variant.title);
+  const variantImage = mapImage(variant.image, fallbackAlt);
+  const galleryMedia = mapMediaNodes(variant.gallery?.references?.nodes ?? [], fallbackAlt);
   const fallbackImages = [
     ...(variantImage ? [variantImage] : []),
     ...productMedia
@@ -525,6 +535,7 @@ function youtubeHref(value?: string | null) {
 }
 
 function mapSizeSpec(
+  productTitle: string,
   metaobject?: ShopifyMetaobject | null,
   productManual?: ShopifyMediaNode | null,
   productSetupVideoUrl?: string | null,
@@ -537,7 +548,7 @@ function mapSizeSpec(
   );
   const drawing = mapMedia(
     fields.get("drawing")?.reference as ShopifyMediaNode,
-    "Size drawing"
+    `${productTitle} サイズ図面`
   );
   const notes = parseJsonValue<string[]>(fields.get("notes")?.value, []);
   const legacyDownloads = [
@@ -718,6 +729,7 @@ export function mapShopifyProductToProduct(product: ShopifyProduct): Product {
     features:
       product.features?.references?.nodes.map(mapFeature) ?? undefined,
     sizeSpec: mapSizeSpec(
+      product.title,
       product.sizeSpec?.reference,
       product.manualPdf?.reference,
       product.setupVideoUrl?.value,
