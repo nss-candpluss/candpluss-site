@@ -13,13 +13,6 @@ const shopifyConfigSchema = z.object({
 
 export type ShopifyConfig = z.infer<typeof shopifyConfigSchema>;
 
-export function isShopifyConfigured() {
-  return Boolean(
-    process.env.SHOPIFY_STORE_DOMAIN &&
-      process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN
-  );
-}
-
 export function getShopifyConfig(): ShopifyConfig {
   const parsed = shopifyConfigSchema.safeParse({
     storeDomain: process.env.SHOPIFY_STORE_DOMAIN,

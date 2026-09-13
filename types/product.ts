@@ -148,13 +148,6 @@ export type Product = {
   options?: string[];
 };
 
-export const productDetailTabs = [
-  { id: "photo", label: "PHOTO" },
-  { id: "feature", label: "FEATURE" },
-  { id: "size-spec", label: "SIZE & SPEC" },
-  { id: "options", label: "OPTIONS" },
-] as const;
-
 export const productCategories = [
   { label: "全ての商品", slug: "all" },
   { label: "テント・シェルター", slug: "tent-shelter" },

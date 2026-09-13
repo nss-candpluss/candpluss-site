@@ -38,10 +38,6 @@ export function isLenisBound(): boolean {
   return boundLenis !== null;
 }
 
-export function getLenisScrollPosition(): number | null {
-  return boundLenis?.scroll ?? null;
-}
-
 export function scrollBoundLenisTo(
   target: number | string | HTMLElement,
   options?: { immediate?: boolean; offset?: number }

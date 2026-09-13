@@ -1,8 +1,4 @@
-import {
-  createEmptyContactFormData,
-  isContactCategory,
-  type ContactFormData,
-} from "@/types/contact";
+import { isContactCategory, type ContactFormData } from "@/types/contact";
 import {
   parseExpiringDraft,
   serializeExpiringDraft,
@@ -78,8 +74,4 @@ export function clearContactFormDraft(): void {
 
   window.sessionStorage.removeItem(CONTACT_FORM_STORAGE_KEY);
   window.dispatchEvent(new Event(CONTACT_DRAFT_CHANGED_EVENT));
-}
-
-export function readContactFormDraftOrEmpty(): ContactFormData {
-  return readContactFormDraft() ?? createEmptyContactFormData();
 }

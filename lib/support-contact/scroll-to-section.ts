@@ -16,9 +16,9 @@ export function scrollToSupportProductSupportHash(): void {
     return;
   }
 
-  const offset = -(parseFloat(getComputedStyle(element).scrollMarginTop) || 0);
-
-  if (!scrollBoundLenisTo(element, { immediate: true, offset })) {
+  // Lenis の scrollTo と scrollIntoView はどちらも scroll-margin-top を
+  // 自分で差し引くため、ヘッダー分の offset を渡すと二重に効く。
+  if (!scrollBoundLenisTo(element, { immediate: true })) {
     element.scrollIntoView({ behavior: "auto", block: "start" });
   }
 }

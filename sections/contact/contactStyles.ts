@@ -44,26 +44,12 @@ export function getContactRadioClassName(status: ContactFieldStatus = "idle"): s
   return base;
 }
 
-export const contactFieldClassName = getContactFieldClassName("idle");
-
-export const contactSelectClassName = getContactSelectClassName("idle");
-
-export const contactSelectChevronStyle = {
-  backgroundImage:
-    "linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%)",
-  backgroundSize: "6px 6px, 6px 6px",
-  backgroundPosition:
-    "right calc(22px * var(--gap-scale-x)) center, right calc(16px * var(--gap-scale-x)) center",
-} as const;
-
 export const contactInquiryTitleClassName = `font-body-ja font-bold text-[var(--foreground)] ${uiText(20)}`;
 
 export const contactInquiryBodyClassName = `font-body-ja text-[var(--foreground)] ${bodyText(15)}`;
 
 export const contactInquiryBodyWrapClassName =
   "mt-[calc(24px*var(--gap-scale))] flex flex-col gap-[calc(24px*var(--gap-scale-y))]";
-
-export const contactFormSectionClassName = "mt-[calc(48px*var(--gap-scale-y))] overflow-hidden bg-[#f5f5f5]";
 
 export const contactConfirmSectionClassName =
   "mt-[calc(48px*var(--gap-scale-y))] overflow-hidden border border-[var(--color-divider)] bg-white px-[clamp(20px,calc(48px*var(--gap-scale-x)),48px)] [&>div:first-child]:pt-[clamp(20px,calc(48px*var(--gap-scale-x)),48px)] [&>div:last-child]:pb-[clamp(20px,calc(48px*var(--gap-scale-x)),48px)]";

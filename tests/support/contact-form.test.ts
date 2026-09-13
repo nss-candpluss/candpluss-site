@@ -83,19 +83,32 @@ describe("support warranty contact form", () => {
     );
   });
 
+  /**
+   * この URL は紙の広告の QR コードに印刷するため、刷った後は変更できない。
+   * セクション id を変えるとその QR が全て無効になるので、ここで固定する。
+   */
   it("exposes a stable warranty form hash for QR landings", () => {
     const pageSource = source("sections/support/SupportPage.tsx");
     const hashScrollSource = source("sections/support/SupportHashScroll.tsx");
     const scrollSource = source("lib/support-contact/scroll-to-section.ts");
 
     expect(getSupportProductSupportPath()).toBe("/support#product-support");
+    expect(supportContactPageContent.sectionId).toBe("product-support");
+    // scroll-margin-top が無いと、着地時に見出しがヘッダーの下に隠れる
+    expect(source("sections/support/SupportGuide.tsx")).toContain(
+      "scroll-mt-[var(--header-height)]"
+    );
     expect(pageSource).toContain("<SupportHashScroll />");
     expect(hashScrollSource).toContain("subscribeMotionReady");
     expect(hashScrollSource).toContain("hashchange");
-    expect(scrollSource).toContain("scrollBoundLenisTo(element, { immediate: true, offset })");
+    expect(scrollSource).toContain("scrollBoundLenisTo(element, { immediate: true })");
     expect(scrollSource).toContain(
       'element.scrollIntoView({ behavior: "auto", block: "start" })'
     );
+    // Lenis も scrollIntoView も scroll-margin-top を自分で差し引くため、
+    // ヘッダー分を計算して渡すと二重に効いて着地位置がずれる
+    expect(scrollSource).not.toContain("scrollMarginTop");
+    expect(scrollSource).not.toContain("offset:");
   });
 
   it("uses two radio categories and a serial number field", () => {

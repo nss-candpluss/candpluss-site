@@ -5,7 +5,7 @@ import {
   fetchProductByHandle,
 } from "@/lib/shopify/products";
 
-import type { Product, ProductCategorySlug } from "@/types/product";
+import type { Product } from "@/types/product";
 import {
   normalizeProductHandle,
   sortProductsForListing,
@@ -59,18 +59,6 @@ export async function getProductsByHandles(handles: string[]): Promise<Product[]
   return handles
     .map((handle) => allProducts.find((product) => product.handle === handle))
     .filter((product): product is Product => Boolean(product));
-}
-
-export async function getProductsByCategory(
-  categorySlug: ProductCategorySlug
-): Promise<Product[]> {
-  const listingProducts = await getListingProducts();
-
-  if (categorySlug === "all") {
-    return listingProducts;
-  }
-
-  return listingProducts.filter((product) => product.categorySlug === categorySlug);
 }
 
 export async function getAllProductHandles(): Promise<string[]> {

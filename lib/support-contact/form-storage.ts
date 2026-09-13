@@ -1,5 +1,4 @@
 import {
-  createEmptySupportContactFormData,
   isSupportContactCategory,
   type SupportContactFormData,
 } from "@/types/support-contact";
@@ -79,8 +78,4 @@ export function clearSupportContactFormDraft(): void {
 
   window.sessionStorage.removeItem(SUPPORT_CONTACT_FORM_STORAGE_KEY);
   window.dispatchEvent(new Event(SUPPORT_CONTACT_DRAFT_CHANGED_EVENT));
-}
-
-export function readSupportContactFormDraftOrEmpty(): SupportContactFormData {
-  return readSupportContactFormDraft() ?? createEmptySupportContactFormData();
 }
