@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { ProductDetailView } from "@/components/products/product-detail/ProductDetailView";
 import { JsonLd } from "@/components/layout/JsonLd";
-import { getProductListingImage } from "@/lib/products/gallery";
+import { getProductOgImage } from "@/lib/products/gallery";
 import { getProductMetaDescription } from "@/lib/products/description";
 import {
   getAllProductHandles,
@@ -44,7 +44,7 @@ export async function generateMetadata({
     title: product.title,
     description: getProductMetaDescription(product.description),
     path: `/products/${handle}`,
-    image: getProductListingImage(product)?.src,
+    image: getProductOgImage(product),
   });
 }
 

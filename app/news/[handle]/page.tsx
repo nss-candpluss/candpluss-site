@@ -12,6 +12,7 @@ import {
   getArticleByHandle,
 } from "@/lib/news/articles";
 import { formatNewsDate } from "@/lib/news/format";
+import { getNewsOgImage } from "@/lib/news/og-image";
 import { resolveArticleExcerpt } from "@/lib/news/excerpt";
 import {
   buildBreadcrumbJsonLd,
@@ -47,7 +48,7 @@ export async function generateMetadata({
     title: article.title,
     description: resolveArticleExcerpt(article),
     path: `/news/${handle}`,
-    image: article.image,
+    image: getNewsOgImage(article),
     ogType: "article",
   });
 }

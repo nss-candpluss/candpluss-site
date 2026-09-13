@@ -6,8 +6,8 @@ import { createPageMetadata } from "@/lib/site-metadata";
 import { siteConfig } from "@/lib/site";
 
 export const metadata = createPageMetadata({
-  title: "お問合せありがとうございます",
-  description: `${siteConfig.name}製品保証・修理お問い合わせ完了ページです。`,
+  title: "製品保証・修理 送信完了",
+  description: `${siteConfig.name}の製品保証・修理に関するお問い合わせ送信完了ページです。`,
   path: "/support/thanks",
   index: false,
 });

@@ -6,8 +6,8 @@ import { createPageMetadata } from "@/lib/site-metadata";
 import { siteConfig } from "@/lib/site";
 
 export const metadata = createPageMetadata({
-  title: "お問合せありがとうございます",
-  description: `${siteConfig.name}お問い合わせ完了ページです。`,
+  title: "Contact 送信完了",
+  description: `${siteConfig.name}のお問い合わせ送信完了ページです。`,
   path: "/contact/thanks",
   index: false,
 });

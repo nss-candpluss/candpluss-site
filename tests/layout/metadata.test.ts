@@ -86,6 +86,39 @@ describe("site metadata foundation", () => {
     });
   });
 
+  /**
+   * og:type=product は metadata の other でしか出せず、Next.js が
+   * `property=` ではなく `name="og:type"` を書くため Facebook が読まない。
+   * 有効な og:type が消える方が損なので website / article に限る。
+   */
+  it("og:type は openGraph.type だけで出し、other を使わない", () => {
+    for (const ogType of ["website", "article"] as const) {
+      const metadata = createPageMetadata({
+        description: "説明",
+        path: "/example",
+        ogType,
+      });
+
+      expect(metadata.other).toBeUndefined();
+      expect(metadata.openGraph).toMatchObject({ type: ogType });
+    }
+  });
+
+  it("OG 画像の寸法を渡せる（Facebook / LINE の初回クロール用）", () => {
+    const metadata = createPageMetadata({
+      description: "商品",
+      path: "/products/moya500",
+      image: { url: "https://cdn.example.com/a.jpg", width: 1200, height: 630 },
+    });
+
+    expect(metadata.openGraph).toMatchObject({
+      images: [{ url: "https://cdn.example.com/a.jpg", width: 1200, height: 630 }],
+    });
+    expect(metadata.twitter).toMatchObject({
+      images: ["https://cdn.example.com/a.jpg"],
+    });
+  });
+
   it("keeps confirm and account pages out of the index", () => {
     const metadata = createPageMetadata({
       title: "カート",
@@ -98,5 +131,23 @@ describe("site metadata foundation", () => {
       index: false,
       follow: false,
     });
+  });
+
+  // 送信完了・確認ページは2系統あるので、どちらの導線か title で区別できるようにする
+  it("お問い合わせ系と製品保証・修理系で title が重複しない", () => {
+    const titles = [
+      "app/contact/confirm/page.tsx",
+      "app/contact/thanks/page.tsx",
+      "app/support/confirm/page.tsx",
+      "app/support/thanks/page.tsx",
+    ].map((relativePath) => {
+      const match = readSource(relativePath).match(/title: "([^"]+)"/);
+
+      expect(match, `${relativePath} に title がありません`).not.toBeNull();
+
+      return match![1];
+    });
+
+    expect(new Set(titles).size).toBe(titles.length);
   });
 });

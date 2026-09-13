@@ -223,6 +223,29 @@ news-20260708-03.webp
 公開日 + 2桁連番で管理します。
 同じ日付の記事が複数ある場合も連番で区別できます。
 
+## SNS 共有用（OG 画像）
+
+格納場所
+
+public/images/news/og/
+
+命名
+
+news-YYYYMMDD-NN.jpg（記事画像と同じ連番）
+
+例
+
+news-20260708-01.jpg
+
+記事画像とは別に、1200×630 の JPEG を1枚用意します。
+記事画像（WebP）を OG に流用してはいけません。
+LINE と Facebook は JPG / PNG のみ対応で、ローカル配信の WebP は
+Content-Type: image/webp がそのまま返るためプレビューが出ません
+（Shopify CDN の商品画像は Accept で出し分けるため WebP URL のままで問題ありません）。
+
+`data/news.ts` の `ogImage` に指定します。未指定の記事は共通 OG 画像になります。
+サイズは 500KB 未満に保ちます。
+
 ---
 
 # 9. Product Images
