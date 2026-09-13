@@ -140,18 +140,12 @@ export type Product = {
   badges?: ProductBadge[];
   isOnSale?: boolean;
   description: string;
-  /** ギャラリー下に縦スクロール表示する静止画像（最大5枚想定） */
-  scrollImages?: ProductImage[];
   variants: ProductVariant[];
   /** Shopify の選択肢名（COLOR / SIZE など）。未指定時は COLOR */
   variantOptionName?: string;
   features?: ProductFeature[];
-  /** Feature 画像を {colorCode}-feature-XX.webp でカラー別表示する */
-  colorKeyedFeatureImages?: boolean;
   sizeSpec?: ProductSizeSpec;
   options?: string[];
-  /** true の場合、商品一覧ページに表示しない */
-  listingHidden?: boolean;
 };
 
 export const productDetailTabs = [

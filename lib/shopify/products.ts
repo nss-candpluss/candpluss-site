@@ -1,5 +1,6 @@
 import "server-only";
 
+import { PRODUCT_IMAGE_PLACEHOLDER } from "@/lib/products/image-paths";
 import { shopifyStorefrontRequest } from "@/lib/shopify/client";
 import type {
   Product,
@@ -394,7 +395,7 @@ function mapVariant(
       images:
         fallbackImages.length > 0
           ? fallbackImages
-          : [{ src: "/images/products/_shared/placeholder.webp", alt: product.title }],
+          : [{ src: PRODUCT_IMAGE_PLACEHOLDER, alt: product.title }],
     },
   };
 }

@@ -126,12 +126,11 @@ including `https://candpluss.camp/test/products/...`, into site-relative hrefs.
 
 ## Environment variables
 
-Use `PRODUCT_SOURCE=shopify` to overlay Shopify products onto the local catalog.
-Handles that exist in Shopify replace local data. Unmigrated local products remain
-visible.
+Products are served from Shopify only; there is no local catalog fallback. The
+build fails when Shopify returns zero products, so a misconfigured token or an
+unpublished Headless channel cannot ship an empty storefront unnoticed.
 
 ```text
-PRODUCT_SOURCE=local
 SHOPIFY_STORE_DOMAIN=example.myshopify.com
 SHOPIFY_STOREFRONT_PRIVATE_TOKEN=
 NEXT_PUBLIC_SHOPIFY_STOREFRONT_PUBLIC_TOKEN=

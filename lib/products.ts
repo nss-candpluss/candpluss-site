@@ -1,6 +1,5 @@
 import "server-only";
 
-import { products } from "@/data/products";
 import {
   fetchAllProducts,
   fetchProductByHandle,
@@ -8,7 +7,6 @@ import {
 
 import type { Product, ProductCategorySlug } from "@/types/product";
 import {
-  keepShopifyListingProducts,
   normalizeProductHandle,
   sortProductsForListing,
 } from "@/lib/products/helpers";
@@ -22,66 +20,37 @@ export {
   resolveProductVariantId,
 } from "@/lib/products/helpers";
 
-function usesShopifyProducts() {
-  return process.env.PRODUCT_SOURCE === "shopify";
-}
-
-function mergeShopifyProducts(shopifyProducts: Product[]) {
-  const shopifyByHandle = new Map(
-    shopifyProducts.map((product) => [product.handle, product])
-  );
-  const localHandles = new Set(products.map((product) => product.handle));
-
-  return [
-    ...products.map(
-      (product) => shopifyByHandle.get(product.handle) ?? product
-    ),
-    ...shopifyProducts.filter((product) => !localHandles.has(product.handle)),
-  ];
-}
-
 /**
- * PRODUCT_SOURCE=shopify のときは Shopify を優先し、
- * 詳細などでは未移行のローカル商品も残す。
+ * 商品は Shopify のみをソースとする。
+ *
+ * 未設定・API エラーは Shopify クライアントが例外を投げるため、
+ * 唯一の無言の失敗が「取得は成功したが 0 件」。トークン失効や
+ * Headless チャネルからの公開解除で起こり、フォールバックを持たない
+ * 以上そのまま配信すると商品が空のサイトが公開されてしまう。
+ * ISR 配下では例外時に直前の正常なページが維持される。
  */
-export async function getAllProducts(): Promise<Product[]> {
-  if (!usesShopifyProducts()) {
-    return products;
-  }
+async function fetchProductCatalog(): Promise<Product[]> {
+  const catalog = await fetchAllProducts();
 
-  return mergeShopifyProducts(await fetchAllProducts());
-}
-
-export async function getListingProducts(): Promise<Product[]> {
-  if (!usesShopifyProducts()) {
-    return sortProductsForListing(
-      products.filter((product) => !product.listingHidden)
+  if (catalog.length === 0) {
+    throw new Error(
+      "Shopify から商品を 1 件も取得できませんでした。Storefront API のトークンと、Headless チャネルでの商品公開状態を確認してください。"
     );
   }
 
-  const shopifyProducts = await fetchAllProducts();
-  const shopifyHandles = new Set(
-    shopifyProducts.map((product) => product.handle)
-  );
+  return catalog;
+}
 
-  return sortProductsForListing(
-    keepShopifyListingProducts(
-      mergeShopifyProducts(shopifyProducts),
-      shopifyHandles
-    )
-  );
+export async function getAllProducts(): Promise<Product[]> {
+  return fetchProductCatalog();
+}
+
+export async function getListingProducts(): Promise<Product[]> {
+  return sortProductsForListing(await fetchProductCatalog());
 }
 
 export async function getProductByHandle(handle: string): Promise<Product | null> {
-  const decodedHandle = normalizeProductHandle(handle);
-  const localProduct =
-    products.find((product) => product.handle === decodedHandle) ?? null;
-
-  if (!usesShopifyProducts()) {
-    return localProduct;
-  }
-
-  return (await fetchProductByHandle(decodedHandle)) ?? localProduct;
+  return fetchProductByHandle(normalizeProductHandle(handle));
 }
 
 export async function getProductsByHandles(handles: string[]): Promise<Product[]> {

@@ -5,6 +5,11 @@
  * その中では Shopify から取得した順（商品名順）を保つ。
  */
 export const productListingHandleOrder: readonly string[] = [
+  // テント・シェルター（MOYA500 → MOYA420）
+  // 未指定だと Shopify の商品名順で MOYA420 が先に来るため明示する
+  "moya500",
+  "moya420",
+
   // テント・シェルター オプション（MOYA500 → MOYA420）
   "moya500_roofsheet",
   "moya500_groundsheet",

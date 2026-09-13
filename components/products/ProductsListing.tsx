@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import { ProductCard } from "@/components/products/ProductCard";
 import { SiteGrid } from "@/components/ui/SiteGrid";
-import { productCategories } from "@/data/products";
-import type { Product, ProductCategorySlug } from "@/data/products";
+import { productCategories } from "@/types/product";
+import type { Product, ProductCategorySlug } from "@/types/product";
 import { HoverUnderlineText } from "@/components/ui/TextLink";
 import { productCardSpanClassName } from "@/lib/layout";
 import { uiText } from "@/lib/typography";

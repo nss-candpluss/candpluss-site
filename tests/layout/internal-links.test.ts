@@ -16,7 +16,6 @@ import {
   mobileSecondaryNavigationLinks,
 } from "@/data/navigation";
 import { newsItems } from "@/data/news";
-import { products } from "@/data/products";
 import { supportContactPageContent } from "@/data/support-contact";
 import {
   isContactLinkVisible,
@@ -51,9 +50,6 @@ const staticRoutes = new Set([
   "/legal/licenses",
 ]);
 
-const productHandles = new Set<string>(
-  products.map((product) => product.handle)
-);
 const newsHandles = new Set<string>(newsItems.map((item) => item.handle));
 
 /** 未確定のため現状維持。公開前に解消する。 */
@@ -63,19 +59,23 @@ const pendingInternalHrefs = new Set([
 ]);
 
 /**
- * Shopify にのみ存在する handle。
+ * サイト内から直接リンクしている Shopify 商品の handle。
  *
- * PRODUCT_SOURCE=shopify では一覧・詳細ともに Shopify の handle が使われるため、
- * ローカル catalog（data/products.ts）に無くても実際のルートは解決する。
- * ローカル catalog の handle を Shopify に揃えたら、この集合から外せる。
+ * 商品は Shopify のみをソースとするため、実在確認はオフラインでは行えない。
+ * ここでは「リンク先の handle を書き間違えていないか」だけを見る。
+ * Shopify 側の実在確認は `node scripts/verify-shopify.mjs` が担当する。
+ * サイト内リンクを増やしたらこの集合にも追加する。
  */
-const shopifyOnlyProductHrefs = new Set([
-  "/products/zig-stake",
-  "/products/moya420",
+const linkedShopifyProductHandles = new Set([
+  // トップの Main Products（data/home.ts）
+  "moya500",
+  "moya420",
+  "nokuta",
+  "zig-stake",
 ]);
 
 function isResolvedInternalHref(href: string): boolean {
-  if (pendingInternalHrefs.has(href) || shopifyOnlyProductHrefs.has(href)) {
+  if (pendingInternalHrefs.has(href)) {
     return true;
   }
 
@@ -85,7 +85,7 @@ function isResolvedInternalHref(href: string): boolean {
 
   const productMatch = href.match(/^\/products\/([^/#?]+)$/);
   if (productMatch) {
-    return productHandles.has(productMatch[1] ?? "");
+    return linkedShopifyProductHandles.has(productMatch[1] ?? "");
   }
 
   const newsMatch = href.match(/^\/news\/([^/#?]+)$/);
@@ -161,11 +161,10 @@ describe("internal page links", () => {
     expect(isHeaderIconLinkVisible("Search")).toBe(false);
   });
 
-  // moya420 は Shopify にのみ存在する（ローカル catalog は moya500 / nokuta / gearaid のみ）。
-  // PRODUCT_SOURCE=shopify で解決するため、pending ではなく shopifyOnly として扱う。
-  it("treats Shopify-only product links as resolved", () => {
+  // 商品は Shopify のみをソースとするため、handle の書き間違いだけを検出する。
+  it("resolves linked Shopify product handles and rejects unknown ones", () => {
     expect(collectHrefs(homeMainProducts.items)).toContain("/products/moya420");
-    expect(productHandles.has("moya420")).toBe(false);
     expect(isResolvedInternalHref("/products/moya420")).toBe(true);
+    expect(isResolvedInternalHref("/products/moya42")).toBe(false);
   });
 });

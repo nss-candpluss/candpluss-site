@@ -43,16 +43,6 @@ export function sortProductsForListing<
     .map(({ product }) => product);
 }
 
-/** Shopify 経由の一覧では、ストアに存在する商品だけを残す */
-export function keepShopifyListingProducts<T extends { handle: string; listingHidden?: boolean }>(
-  products: T[],
-  shopifyHandles: ReadonlySet<string>
-): T[] {
-  return products.filter(
-    (product) => !product.listingHidden && shopifyHandles.has(product.handle)
-  );
-}
-
 export function resolveProductPriceAmount(
   product: Pick<Product, "price">,
   variant?: Pick<ProductVariant, "price"> | null

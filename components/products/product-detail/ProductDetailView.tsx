@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Shopify / ローカルの Product データを共通表示する商品詳細 View。
+ * Shopify の Product データを表示する商品詳細 View。
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -24,7 +24,6 @@ import {
   getSelectedVariant,
   resolveProductVariantId,
 } from "@/lib/products/helpers";
-import { resolveFeatureImageSrc } from "@/lib/products/image-paths";
 import { productDetailSectionTitleClassName, uiText } from "@/lib/typography";
 import type { Product } from "@/types/product";
 
@@ -44,26 +43,8 @@ const PRODUCT_DETAIL_SIZE_SPEC_TYPOGRAPHY = {
   note: "text-[clamp(13px,calc(14px*var(--text-scale)),14px)] leading-[clamp(22.75px,calc(24.5px*var(--text-scale)),24.5px)]",
 } as const;
 
-function buildProductFeatures(
-  product: Product,
-  colorCode: string
-): ProductDetailFeature[] {
-  return (
-    product.features?.map((feature) => {
-      if (feature.media?.length || feature.images?.length || feature.video) {
-        return feature;
-      }
-
-      return {
-        ...feature,
-        image: resolveFeatureImageSrc(feature, {
-          handle: product.handle,
-          colorCode,
-          colorKeyed: Boolean(product.colorKeyedFeatureImages),
-        }),
-      };
-    }) ?? []
-  );
+function buildProductFeatures(product: Product): ProductDetailFeature[] {
+  return product.features ?? [];
 }
 
 export function ProductDetailView({
@@ -148,10 +129,7 @@ export function ProductDetailView({
     () => buildProductDetailGallery(product, selectedVariant),
     [product, selectedVariant]
   );
-  const features = useMemo(
-    () => buildProductFeatures(product, selectedColorCode),
-    [product, selectedColorCode]
-  );
+  const features = useMemo(() => buildProductFeatures(product), [product]);
 
   useEffect(() => {
     if (!selectedColorCode) {
