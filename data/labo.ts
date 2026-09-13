@@ -24,7 +24,7 @@ export const laboAboutContent = {
   },
   bodyImage: {
     src: "/images/labo/labo-materials-01.webp",
-    alt: "C AND+S LABO（ダミー画像）",
+    alt: "C AND+S LABO",
   },
 } as const;
 
