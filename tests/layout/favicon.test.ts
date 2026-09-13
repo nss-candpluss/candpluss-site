@@ -14,21 +14,27 @@ function readSource(relativePath: string) {
 
 const faviconFiles = [
   "app/favicon.ico",
-  "app/icon.svg",
-  "app/apple-icon.png",
   "public/apple-touch-icon.png",
   "public/favicon-96x96.png",
-  "public/favicon.ico",
   "public/favicon.svg",
   "public/site.webmanifest",
   "public/web-app-manifest-192x192.png",
   "public/web-app-manifest-512x512.png",
 ] as const;
 
+/** metadata.icons が優先されるため、これらを置くと配信されないルートが増えるだけ */
+const duplicateIconFiles = ["app/icon.svg", "app/apple-icon.png"] as const;
+
 describe("favicon set", () => {
   it("keeps the generated favicon files in public/", () => {
     for (const relativePath of faviconFiles) {
       expect(existsSync(join(rootDir, relativePath))).toBe(true);
+    }
+  });
+
+  it("does not duplicate the icons as app/ file conventions", () => {
+    for (const relativePath of duplicateIconFiles) {
+      expect(existsSync(join(rootDir, relativePath))).toBe(false);
     }
   });
 

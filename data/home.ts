@@ -4,7 +4,7 @@ export const topHeroContent = {
   backgroundImage: "/images/hero/hero-bg.webp",
   foregroundImage: "/images/hero/hero-foreground.webp",
   titleImage: "/images/hero/hero-title.svg",
-  titleImageSp: "/images/hero/sp-hero-title.svg",
+  titleImageSp: "/images/hero/hero-title-sp.svg",
   titleAlt: "Find your soul. Touch the ground.",
   beginning: {
     title: "Camp + Something.",

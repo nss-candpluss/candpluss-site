@@ -116,15 +116,21 @@ icon-○○.svg
 
 icon-arrow-right.svg
 
-icon-gallery-prev.svg
+icon-cart.svg
 
-icon-gallery-next.svg
+icon-close.svg
+
+icon-cursor-zoom-in.svg
+
+icon-cursor-zoom-out.svg
 
 icon-sns-facebook.svg
 
 icon-sns-instagram.svg
 
 icon-sns-youtube.svg
+
+カーソル用の SVG も icon- 接頭辞を付けて同じ場所に置く。
 
 ---
 
@@ -162,8 +168,6 @@ home-○○.webp
 
 home-image.webp
 
-home-link-products.webp
-
 home-link-moya500.webp
 
 home-link-moya420.webp
@@ -172,8 +176,9 @@ home-link-nokuta.webp
 
 home-link-zigstake.webp
 
-LABO / SUPPORT の導線カードは複数ページで共有するため
-public/images/common/ に link-labo.webp / link-support.webp として置く
+PRODUCTS / LABO / SUPPORT の導線カードは複数ページで共有するため
+public/images/common/ に link-products.webp / link-labo.webp / link-support.webp
+として置く
 
 ---
 
@@ -191,6 +196,10 @@ hero-foreground.webp
 
 hero-title.svg
 
+hero-title-sp.svg
+
+SP 専用の差し替え画像は末尾に -sp を付ける。
+
 ---
 
 # 8. News Images
@@ -201,15 +210,18 @@ public/images/news/
 
 命名
 
-news-001.webp
+news-YYYYMMDD-NN.webp
 
-news-002.webp
+例
 
-news-003.webp
+news-20260708-01.webp
 
-...
+news-20260708-02.webp
 
-3桁連番で管理します。
+news-20260708-03.webp
+
+公開日 + 2桁連番で管理します。
+同じ日付の記事が複数ある場合も連番で区別できます。
 
 ---
 

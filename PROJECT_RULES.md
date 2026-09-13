@@ -102,16 +102,16 @@ public/
 |------|------------|
 | TOP Hero 背景 | `hero-bg.webp` |
 | TOP Hero 前景（透過） | `hero-foreground.webp` |
-| TOP Hero タイトル SVG | `hero-title.svg` |
-| TOP 導線カード（Products） | `home-link-products.webp` |
-| 共通導線カード（LABO / SUPPORT） | `link-labo.webp` / `link-support.webp` |
+| TOP Hero タイトル SVG | `hero-title.svg`（SP 版は `hero-title-sp.svg`） |
+| 共通導線カード（PRODUCTS / LABO / SUPPORT） | `link-products.webp` / `link-labo.webp` / `link-support.webp` |
 | LABO セクション | `labo-about-image01.webp` |
 | 商品画像 | Shopify で管理（`public/images/products/` は `_shared/placeholder.webp` のみ） |
 
 ■ フォーマット
 
 - 写真・ビジュアルは `.webp` を基本とする
-- SVG ロゴ・アイコンは `public/assets/` を使用する（`public/images/` には置かない）
+- ロゴ・アイコンの SVG は `public/assets/` を使用する
+- 特定ページのビジュアルを構成する SVG は、写真と同じくページフォルダへ置く（例: Hero タイトルの `public/images/hero/hero-title.svg`）
 
 ■ 画像表示ルール
 
