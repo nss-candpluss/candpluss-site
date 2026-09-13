@@ -7,12 +7,12 @@ import { standardCardSpanClassName } from "@/lib/layout";
 import { getArticles, NEWS_LIST_PAGE_SIZE } from "@/lib/news/articles";
 import { buildBreadcrumbJsonLd, pageBreadcrumb } from "@/lib/json-ld";
 import { createPageMetadata } from "@/lib/site-metadata";
-import { siteConfig } from "@/lib/site";
 import { sectionTitle62ClassName } from "@/lib/typography";
 
 export const metadata = createPageMetadata({
   title: "News & Topics",
-  description: `${siteConfig.name}のニュース・トピックス一覧です。`,
+  description:
+    "C AND+Sからの最新情報をお届けします。新製品の発売日やオンラインストアのお知らせ、イベント・展示の情報などを掲載しています。",
   path: "/news",
 });
 

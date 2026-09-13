@@ -5,11 +5,11 @@ import { SiteGrid } from "@/components/ui/SiteGrid";
 import { fullSpanClassName } from "@/lib/layout";
 import { buildBreadcrumbJsonLd, pageBreadcrumb } from "@/lib/json-ld";
 import { createPageMetadata } from "@/lib/site-metadata";
-import { siteConfig } from "@/lib/site";
 
 export const metadata = createPageMetadata({
   title: "会社概要",
-  description: `${siteConfig.name}の会社概要ページです。`,
+  description:
+    "アウトドアブランドC AND+Sを運営する株式会社NSSの会社概要。福岡県大野城市を拠点に、アウトドア製品の開発・製造・販売を行っています。",
   path: "/company",
 });
 

@@ -3,11 +3,11 @@ import { SupportPage } from "@/sections/support/SupportPage";
 import { JsonLd } from "@/components/layout/JsonLd";
 import { buildBreadcrumbJsonLd, pageBreadcrumb } from "@/lib/json-ld";
 import { createPageMetadata } from "@/lib/site-metadata";
-import { siteConfig } from "@/lib/site";
 
 export const metadata = createPageMetadata({
   title: supportContent.title,
-  description: `${siteConfig.name}の製品保証・修理について紹介するページです。`,
+  description:
+    "C AND+S製品の保証と修理について。保証の範囲や期間、修理をご依頼いただく際の流れとお問い合わせ方法をご案内します。",
   path: "/support",
 });
 

@@ -1,6 +1,6 @@
 import { footerContent } from "@/data/footer";
 import { getProductListingImage, getVariantChipImage } from "@/lib/products/gallery";
-import { getProductDescriptionText } from "@/lib/products/description";
+import { getProductMetaDescription } from "@/lib/products/description";
 import {
   getProductDetailHref,
   getProductVariantOptionName,
@@ -312,7 +312,7 @@ function buildProductVariantJsonLd(
 
 export function buildProductJsonLd(product: Product): JsonLdObject {
   const sku = product.code ?? product.variants[0]?.code;
-  const description = getProductDescriptionText(product.description);
+  const description = getProductMetaDescription(product.description);
 
   return {
     "@context": SCHEMA,
@@ -329,7 +329,7 @@ export function buildProductJsonLd(product: Product): JsonLdObject {
 }
 
 export function buildProductGroupJsonLd(product: Product): JsonLdObject {
-  const description = getProductDescriptionText(product.description);
+  const description = getProductMetaDescription(product.description);
 
   return {
     "@context": SCHEMA,

@@ -4,12 +4,12 @@ import { ProductsListing } from "@/components/products/ProductsListing";
 import { getListingProducts } from "@/lib/products";
 import { buildBreadcrumbJsonLd, pageBreadcrumb } from "@/lib/json-ld";
 import { createPageMetadata } from "@/lib/site-metadata";
-import { siteConfig } from "@/lib/site";
 import { sectionTitle62ClassName } from "@/lib/typography";
 
 export const metadata = createPageMetadata({
   title: "Products",
-  description: `${siteConfig.name}の製品一覧ページです。`,
+  description:
+    "C AND+Sの製品一覧。ドームシェルターMOYA、タープNOKUTA、燕三条製ペグZIG STAKEなど、テント・タープからアクセサリーまでご覧いただけます。",
   path: "/products",
 });
 

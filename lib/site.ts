@@ -1,7 +1,9 @@
 export const siteConfig = {
   name: "C AND+S",
   legalName: "株式会社NSS",
-  description: "C AND+S ブランドサイト兼EC導線サイト",
+  /** トップの description 兼、各ページが未指定だった場合の既定値 */
+  description:
+    "C AND+Sは、「キャンプと大切なものをつなぐ」をコンセプトに掲げる日本のアウトドアブランドです。ドームシェルターMOYAをはじめ、素材とディテールにこだわった製品を開発・販売しています。",
   locale: "ja-JP",
   url: "https://candpluss.camp",
   email: "info@candpluss.camp",

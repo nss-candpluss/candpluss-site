@@ -4,11 +4,11 @@ import { LegalPageLayout } from "@/components/legal/LegalPageLayout";
 import { shoppingGuideContent } from "@/data/shoppingGuide";
 import { buildBreadcrumbJsonLd, pageBreadcrumb } from "@/lib/json-ld";
 import { createPageMetadata } from "@/lib/site-metadata";
-import { siteConfig } from "@/lib/site";
 
 export const metadata = createPageMetadata({
   title: shoppingGuideContent.title,
-  description: `${siteConfig.name}の${shoppingGuideContent.title}ページです。`,
+  description:
+    "C AND+Sオンラインストアのご利用ガイド。ご注文の流れ、お支払い方法、配送・送料、返品・交換について、ご購入前に確認いただきたい内容をまとめています。",
   path: "/shopping-guide",
 });
 
