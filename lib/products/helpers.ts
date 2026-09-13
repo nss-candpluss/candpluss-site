@@ -84,7 +84,7 @@ export function normalizeProductHandle(handle: string): string {
 export function getProductDetailHref(handle: string, variantId?: string): string {
   const baseHref = `/products/${handle}`;
 
-  return variantId
+  return variantId && !isPlaceholderProductVariantId(variantId)
     ? `${baseHref}?color=${encodeURIComponent(variantId)}`
     : baseHref;
 }
@@ -106,6 +106,14 @@ type ProductWithVariantNames = {
 /** Shopify 未設定バリアント（Default Title）やローカルの DEFAULT */
 export function isPlaceholderProductVariantName(name?: string | null): boolean {
   return !name?.trim() || PLACEHOLDER_VARIANT_NAME.test(name.trim());
+}
+
+/**
+ * 未設定バリアント名から生成された ID（Default Title → default-title）。
+ * 選択肢が実質ないため、URL に ?color= として出さない。
+ */
+export function isPlaceholderProductVariantId(variantId?: string | null): boolean {
+  return isPlaceholderProductVariantName(variantId?.replace(/-/g, " "));
 }
 
 /** カラーチップは1つでも表示する */

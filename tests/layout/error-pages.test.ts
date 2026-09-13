@@ -62,7 +62,23 @@ describe("404 / エラーページ", () => {
     expect(source).toContain('"./globals.css"');
   });
 
-  it("not-found は metadata を export しない（Next.js が未サポート・404 は自動で noindex）", () => {
-    expect(readSource("app/not-found.tsx")).not.toContain("export const metadata");
+  // 404 でもタブ・履歴・共有時に内容が分かるようにする。
+  // Next.js のドキュメントは global-not-found.js のみ metadata 対応と書いているが、
+  // このバージョンの not-found.tsx では title / description が実際に反映される。
+  it("404 は専用の title を持ち、サイト名だけの見出しにしない", () => {
+    const source = readSource("app/not-found.tsx");
+
+    expect(source).toContain("export const metadata");
+    expect(source).toContain("title: notFoundContent.title");
+  });
+
+  // Next.js が 404 に noindex を自動注入するため、指定すると robots meta が重複する。
+  // 存在しない URL なので canonical も持たせない。
+  it("404 は canonical と robots を自前で指定しない", () => {
+    const source = readSource("app/not-found.tsx");
+
+    expect(source).not.toMatch(/^\s*robots:/m);
+    expect(source).not.toMatch(/^\s*canonical:/m);
+    expect(source).not.toContain("createPageMetadata");
   });
 });
