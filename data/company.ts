@@ -9,7 +9,7 @@ export const companyContent = {
     },
     {
       label: "本社所在地",
-      blocks: [{ type: "paragraph", text: "〒816-0902 福岡県大野城市乙金1-10-40" }],
+      blocks: [{ type: "paragraph", text: "〒816-0902　福岡県大野城市乙金1-10-40" }],
     },
     {
       label: "TEL",

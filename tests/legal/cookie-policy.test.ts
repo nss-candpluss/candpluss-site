@@ -18,13 +18,14 @@ describe("cookie policy document", () => {
     ]);
   });
 
-  it("uses full-width subsection numbers for cookie types", () => {
+  // 「2.」の下位項目なので（1）形式を保つ。数字は他ページと同じ半角
+  it("uses half-width subsection numbers for cookie types", () => {
     const classification = cookiePolicyContent.sections.find(
       (item) => item.title === "2. 発行されるCookieの分類"
     );
     const texts = classification?.clauses?.map((clause) => clause.text) ?? [];
 
-    expect(texts[0]).toMatch(/^（１）/);
-    expect(texts[3]).toMatch(/^（２）/);
+    expect(texts[0]).toMatch(/^（1）/);
+    expect(texts[3]).toMatch(/^（2）/);
   });
 });

@@ -12,7 +12,7 @@ export const cookiePolicyContent = {
       title: "2. 発行されるCookieの分類",
       clauses: [
         {
-          text: "（１）ヘッドレス構成の特性上、本サイトでは以下の2種類のCookieが発行されます。",
+          text: "（1）ヘッドレス構成の特性上、本サイトでは以下の2種類のCookieが発行されます。",
         },
         {
           text: "独自フロントエンドCookie：本サイトのドメインから発行され、ユーザーのログイン状態やサイト内での設定、カート情報の一次保持のために使用されます。",
@@ -21,7 +21,7 @@ export const cookiePolicyContent = {
           text: "ShopifyプラットフォームCookie：決済手続き（チェックアウト）および会員認証を安全に進行するため、バックエンドシステムであるShopify Inc.から発行される必須Cookieです。",
         },
         {
-          text: "（２）本サイトでは以下の目的でCookieを使用します。",
+          text: "（2）本サイトでは以下の目的でCookieを使用します。",
           bullets: [
             "必須Cookie（ログイン、カート、決済処理）",
             "機能性Cookie（設定保持）",

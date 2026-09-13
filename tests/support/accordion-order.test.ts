@@ -104,7 +104,7 @@ describe("support guide accordions", () => {
       phoneNumber: "0120-64-8175",
       hours: "受付時間：平日 10:00〜17:00",
       hoursEmphasis: "平日 10:00〜17:00",
-      note: "※土日、祝日、年末年始のお問い合わせは、「LINE」または「初期不良・修理 専用フォーム」よりお問い合わせください。",
+      note: "※土・日・祝日・年末年始のお問い合わせは、「LINE」または「初期不良・修理 専用フォーム」よりお問い合わせください。",
     });
     expect(supportGuideSource).toContain(
       "`mt-[calc(8px*var(--gap-scale-y))] ${supportIntroNoteClassName}`"
