@@ -14,9 +14,9 @@ import {
 export type { Product, ProductCategorySlug } from "@/types/product";
 export {
   getProductDetailHref,
+  getProductVariantParamName,
   getSelectedVariant,
   normalizeProductHandle,
-  resolveProductColorId,
   resolveProductVariantId,
 } from "@/lib/products/helpers";
 

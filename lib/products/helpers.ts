@@ -69,9 +69,6 @@ export function resolveProductVariantId(
   return product.variants[0]?.id ?? "";
 }
 
-/** @deprecated URL param name remains `color` for compatibility */
-export const resolveProductColorId = resolveProductVariantId;
-
 /** Next.js が日本語ハンドルをパーセントエンコードしたまま渡すことがある */
 export function normalizeProductHandle(handle: string): string {
   try {
@@ -81,12 +78,36 @@ export function normalizeProductHandle(handle: string): string {
   }
 }
 
-export function getProductDetailHref(handle: string, variantId?: string): string {
-  const baseHref = `/products/${handle}`;
+/** Shopify のオプション名が英数字に変換できない場合の代替 */
+const DEFAULT_VARIANT_PARAM_NAME = "color";
 
-  return variantId && !isPlaceholderProductVariantId(variantId)
-    ? `${baseHref}?color=${encodeURIComponent(variantId)}`
-    : baseHref;
+/**
+ * バリアント指定に使う URL のクエリ名。Shopify のオプション名から決まるため
+ * （Color → ?color=、Size → ?size=）、商品追加時にサイト側の設定は不要。
+ */
+export function getProductVariantParamName(
+  product: Pick<Product, "variantOptionName">
+): string {
+  const slug = product.variantOptionName
+    ?.trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return slug || DEFAULT_VARIANT_PARAM_NAME;
+}
+
+export function getProductDetailHref(
+  product: Pick<Product, "handle" | "variantOptionName">,
+  variantId?: string
+): string {
+  const baseHref = `/products/${product.handle}`;
+
+  if (!variantId || isPlaceholderProductVariantId(variantId)) {
+    return baseHref;
+  }
+
+  return `${baseHref}?${getProductVariantParamName(product)}=${encodeURIComponent(variantId)}`;
 }
 
 export function getSelectedVariant(product: Product, variantId?: string | null) {

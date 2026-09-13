@@ -51,7 +51,7 @@ export function ProductCard({
   const [selectedVariantId, setSelectedVariantId] = useState(defaultVariantId);
 
   const displayImage = getProductListingImage(product, selectedVariantId);
-  const detailHref = getProductDetailHref(product.handle, selectedVariantId);
+  const detailHref = getProductDetailHref(product, selectedVariantId);
   const selectedVariant =
     product.variants.find((variant) => variant.id === selectedVariantId) ??
     product.variants[0] ??

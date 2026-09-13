@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   getProductDetailHref,
+  getProductVariantParamName,
   normalizeProductHandle,
 } from "@/lib/products/helpers";
 
@@ -18,18 +19,36 @@ describe("normalizeProductHandle", () => {
   });
 });
 
+describe("getProductVariantParamName", () => {
+  // Shopify のオプション名から自動で決まるため、商品追加時のサイト側設定は不要
+  it("derives the query name from the Shopify option name", () => {
+    expect(getProductVariantParamName({ variantOptionName: "COLOR" })).toBe("color");
+    expect(getProductVariantParamName({ variantOptionName: "SIZE" })).toBe("size");
+  });
+
+  it("falls back to color when the option name is missing or not slug-able", () => {
+    expect(getProductVariantParamName({ variantOptionName: undefined })).toBe("color");
+    expect(getProductVariantParamName({ variantOptionName: "サイズ" })).toBe("color");
+  });
+});
+
 describe("getProductDetailHref", () => {
-  it("keeps the color query for selectable variants", () => {
-    expect(getProductDetailHref("moya500", "cy")).toBe("/products/moya500?color=cy");
-    expect(getProductDetailHref("zig-stake", "20cm")).toBe(
-      "/products/zig-stake?color=20cm"
-    );
+  // zig-stake は Shopify のオプション名が Size なので ?size= になる
+  it("names the query after the Shopify option", () => {
+    expect(
+      getProductDetailHref({ handle: "moya500", variantOptionName: "COLOR" }, "cy")
+    ).toBe("/products/moya500?color=cy");
+    expect(
+      getProductDetailHref({ handle: "zig-stake", variantOptionName: "SIZE" }, "20cm")
+    ).toBe("/products/zig-stake?size=20cm");
   });
 
   // Shopify の Default Title 由来の ID は選択肢にならないため URL に出さない
-  it("omits the color query for placeholder variants", () => {
-    expect(getProductDetailHref("guyrope", "default-title")).toBe("/products/guyrope");
-    expect(getProductDetailHref("guyrope", "default")).toBe("/products/guyrope");
-    expect(getProductDetailHref("guyrope")).toBe("/products/guyrope");
+  it("omits the query for placeholder variants", () => {
+    const guyrope = { handle: "guyrope", variantOptionName: undefined };
+
+    expect(getProductDetailHref(guyrope, "default-title")).toBe("/products/guyrope");
+    expect(getProductDetailHref(guyrope, "default")).toBe("/products/guyrope");
+    expect(getProductDetailHref(guyrope)).toBe("/products/guyrope");
   });
 });

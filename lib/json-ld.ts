@@ -198,7 +198,7 @@ function buildVariantOffer(
   product: Product,
   variant: ProductVariant
 ): JsonLdObject {
-  const url = absoluteUrl(getProductDetailHref(product.handle, variant.id));
+  const url = absoluteUrl(getProductDetailHref(product, variant.id));
   const offer = offerBase(url, variantAvailability(product, variant));
   const price = variant.price?.amount ?? product.price;
 

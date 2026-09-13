@@ -21,6 +21,7 @@ import {
 import { ProductOptions } from "@/components/products/ProductOptions";
 import { ProductSizeSpecSection } from "@/components/products/ProductSizeSpec";
 import {
+  getProductVariantParamName,
   getSelectedVariant,
   isPlaceholderProductVariantId,
   resolveProductVariantId,
@@ -49,17 +50,18 @@ function buildProductFeatures(product: Product): ProductDetailFeature[] {
 }
 
 /**
- * 選択中のカラーを URL に反映し、その状態のまま共有・ブックマークできるようにする。
+ * 選択中のバリアントを URL に反映し、その状態のまま共有・ブックマークできるようにする。
+ * クエリ名は Shopify のオプション名に従う（Color → ?color=、Size → ?size=）。
  * 履歴を増やさないよう replaceState を使う（一覧のカテゴリ絞り込みと同じ方針）。
  * basePath や他のクエリ・ハッシュを壊さないため現在の URL を基点に書き換える。
  */
-function syncVariantIdToUrl(variantId: string) {
+function syncVariantIdToUrl(paramName: string, variantId: string) {
   const url = new URL(window.location.href);
 
   if (isPlaceholderProductVariantId(variantId)) {
-    url.searchParams.delete("color");
+    url.searchParams.delete(paramName);
   } else {
-    url.searchParams.set("color", variantId);
+    url.searchParams.set(paramName, variantId);
   }
 
   window.history.replaceState(
@@ -76,6 +78,7 @@ export function ProductDetailView({
 }: ProductDetailViewProps) {
   const [selectedVariantId, setSelectedVariantId] = useState(initialVariantId);
   const variantRequestRef = useRef(0);
+  const variantParamName = getProductVariantParamName(product);
 
   const preloadVariantEntry = useCallback(
     (variantId: string) => {
@@ -120,14 +123,16 @@ export function ProductDetailView({
 
       if (requestId === variantRequestRef.current) {
         setSelectedVariantId(variantId);
-        syncVariantIdToUrl(variantId);
+        syncVariantIdToUrl(variantParamName, variantId);
       }
     },
-    [preloadVariantEntry, selectedVariantId]
+    [preloadVariantEntry, selectedVariantId, variantParamName]
   );
 
   useEffect(() => {
-    const variantIdFromUrl = new URLSearchParams(window.location.search).get("color");
+    const variantIdFromUrl = new URLSearchParams(window.location.search).get(
+      variantParamName
+    );
     if (!variantIdFromUrl) {
       return;
     }
@@ -140,7 +145,7 @@ export function ProductDetailView({
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
-  }, [preloadVariantEntry, product]);
+  }, [preloadVariantEntry, product, variantParamName]);
 
   const selectedVariant = useMemo(
     () => getSelectedVariant(product, selectedVariantId),
