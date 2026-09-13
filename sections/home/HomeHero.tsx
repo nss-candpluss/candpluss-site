@@ -20,7 +20,8 @@ import { conceptStoryBodyClassName, conceptStoryTitleClassName } from "@/lib/typ
 const HERO_LAYER_IMAGE_CLASS = "object-cover object-center";
 
 export function HomeHero() {
-  const titleLayerRef = useRef<HTMLDivElement>(null);
+  // ヒーローのタイトル画像がページの h1（CSS はクラス指定なのでタグ変更の影響なし）
+  const titleLayerRef = useRef<HTMLHeadingElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -149,7 +150,7 @@ export function HomeHero() {
           />
         </div>
 
-        <div
+        <h1
           ref={titleLayerRef}
           data-hero-title-layer
           className="hero-title-layer pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-4 md:px-6 will-change-[transform,opacity]"
@@ -166,7 +167,7 @@ export function HomeHero() {
             alt={topHeroContent.titleAlt}
             className="hidden h-auto w-[88vw] max-w-none object-contain md:w-[94vw] min-[1025px]:block"
           />
-        </div>
+        </h1>
 
         <div className="pointer-events-none absolute inset-0 z-20">
           <SiteImage

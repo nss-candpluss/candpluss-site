@@ -14,6 +14,7 @@ import {
   saveCartIdToSession,
 } from "@/lib/shopify/cart-session";
 import { getCustomerTokenSession } from "@/lib/shopify/customer-session";
+import { isNonPurchasableStatus } from "@/lib/products/purchase";
 
 export const runtime = "nodejs";
 
@@ -70,32 +71,16 @@ export async function POST(request: Request) {
   try {
     const input = addLineSchema.parse(await request.json());
     const policy = await getCartMerchandisePolicy(input.merchandiseId);
-    const blockedStatuses = new Set([
-      "new",
-      "comingSoon",
-      "waiting",
-      "ended",
-      "soldOut",
-      "discontinued",
-    ]);
 
-    if (
-      !policy.availableForSale ||
-      (policy.status && blockedStatuses.has(policy.status))
-    ) {
+    if (!policy.availableForSale || isNonPurchasableStatus(policy.status)) {
       return Response.json(
         { error: "This product is not currently available for purchase." },
         { status: 409 }
       );
     }
 
-    if (!policy.memberAccessConfigured) {
-      return Response.json(
-        { error: "Product member access has not been configured." },
-        { status: 409 }
-      );
-    }
-
+    // member_only 未登録は「会員限定ではない」として通す。
+    // 以前はここで 409 を返していたため、未登録の間は購入できなかった。
     if (policy.memberOnly) {
       const customerSession = await getCustomerTokenSession();
       if (!customerSession || customerSession.expiresAt <= Date.now()) {

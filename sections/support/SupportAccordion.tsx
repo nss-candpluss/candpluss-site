@@ -58,7 +58,8 @@ function SupportAccordionPanel({
 }: SupportAccordionPanelProps) {
   return (
     <div className={`border-b pb-[max(18px,calc(32px*var(--gap-scale-y)))] ${dividerClassName}`}>
-      <h3>
+      {/* このセクションに見出しが無く h1 直下に来るため、h3 ではなく h2 */}
+      <h2>
         <button
           id={buttonId}
           type="button"
@@ -70,7 +71,7 @@ function SupportAccordionPanel({
           <span className={accordionTitleClassName}>{title}</span>
           <SupportAccordionToggle isOpen={isOpen} />
         </button>
-      </h3>
+      </h2>
 
       <div
         id={panelId}

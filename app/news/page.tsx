@@ -43,6 +43,7 @@ export default async function NewsPage() {
               key={article.id}
               article={article}
               className={standardCardSpanClassName}
+              headingLevel={2}
               priority={index === 0}
               bodyTypographyClassName="text-[clamp(14px,calc(15px*var(--text-scale)),15px)] leading-[calc(23px*var(--text-scale))]"
             />

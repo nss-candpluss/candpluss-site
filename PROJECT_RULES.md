@@ -29,13 +29,27 @@
 - Shopify Storefront API
 
 【商品ステータス】
-- preorder → 先行予約：会員限定
-- new → NEW
-- normal → 表示なし
-- waiting → 入荷待ち
-- waiting + reservableForMembers → 入荷待ち / 会員限定で予約注文が可能です
-- ending → 廃盤：在庫限り
-- ended → 販売終了
+Shopify のメタオブジェクト `product_sales_status` のエントリーが唯一の定義。
+サイト側で増やすものではないので、追加・変更は Shopify 側で行う。
+
+| status | ラベル表示 | 購入 |
+|---|---|---|
+| available | 表示なし | 可 |
+| preorder | 予約販売 | 可 |
+| ending | 在庫限り販売終了 | 可 |
+| waiting | 入荷待ち | 不可 |
+| comingSoon | 近日発売 | 不可 |
+| ended | 販売終了 | 不可 |
+
+- soldOut → SOLD OUT / 購入不可。Shopify のエントリーではなく、
+  `availableForSale` が false のときのフォールバック。
+- 購入可否の判定は `lib/products/purchase.ts` に集約する。
+
+【NEW バッジ・会員限定】
+sales_status とは別のメタフィールドで、購入可否とは独立して制御する。
+
+- `custom.is_new`（true / false）→ NEW バッジ。購入可否には影響しない
+- `custom.member_only`（true / false）→ 会員限定。true かつ未ログインのみ購入不可
 
 【会員表示】
 - ログイン済み → ユーザーアイコン表示

@@ -6,6 +6,7 @@ import {
   getProductVariantOptionName,
   isPlaceholderProductVariantName,
 } from "@/lib/products/helpers";
+import { canPurchaseProduct } from "@/lib/products/purchase";
 import { resolveArticleExcerpt } from "@/lib/news/excerpt";
 import { isSocialLinkVisible } from "@/lib/site-navigation-visibility";
 import { absoluteUrl } from "@/lib/site-metadata";
@@ -156,6 +157,18 @@ export function productAvailability(product: Product): string {
     product.variants.every((variant) => variant.availableForSale === false);
 
   if (allUnavailable) {
+    return `${SCHEMA}/OutOfStock`;
+  }
+
+  /**
+   * ここまでで InStock になるケースでも、実際にカートに入れられないなら
+   * 在庫ありと宣言しない。構造化データとページの内容が食い違うと
+   * Google に不一致とみなされる。
+   *
+   * 会員限定は「会員なら買える」ため InStock のままにしたい。
+   * ログイン済みとして判定し、会員でも買えない場合だけ落とす。
+   */
+  if (!canPurchaseProduct(product, true)) {
     return `${SCHEMA}/OutOfStock`;
   }
 
