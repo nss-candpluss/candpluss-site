@@ -19,7 +19,7 @@ export const supportContactPageContent = {
   title: "初期不良・修理 専用フォーム",
   confirmTitle: contactPageContent.confirmTitle,
   confirmIntroParagraphs: contactPageContent.confirmIntroParagraphs,
-  thanksTitle: contactPageContent.thanksTitle,
+  thanksTitle: "初期不良・修理のお問い合わせが完了しました",
   thanksBodyIntro: contactPageContent.thanksBodyIntro,
   thanksBodyAutoReplyNote: contactPageContent.thanksBodyAutoReplyNote,
   introParagraphs: [

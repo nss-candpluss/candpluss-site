@@ -12,6 +12,7 @@ import {
   supportContactFormCopy,
   supportContactPageContent,
 } from "@/data/support-contact";
+import { contactPageContent } from "@/data/contact";
 import { CONTACT_FORM_STORAGE_KEY } from "@/lib/contact/form-storage";
 import {
   validateAttachmentContents,
@@ -695,6 +696,16 @@ describe("support warranty contact form", () => {
     expect(confirmSource).toContain("formActionHalfSpanClassName");
     expect(confirmSource).toContain("arrowMaskStyle");
     expect(confirmSource).toContain("rotate-180");
+  });
+
+  it("完了見出しは Contact と区別し、フォーム名の呼び方に揃える", () => {
+    expect(supportContactPageContent.thanksTitle).toBe(
+      "初期不良・修理のお問い合わせが完了しました"
+    );
+    expect(supportContactPageContent.thanksTitle).not.toBe(contactPageContent.thanksTitle);
+    // フォーム見出しと同じ「初期不良・修理」を使う。meta も同じ呼び方に揃えている
+    expect(supportContactPageContent.thanksTitle).toContain("初期不良・修理");
+    expect(supportContactPageContent.title).toContain("初期不良・修理");
   });
 
   it("normalizes and restricts support serial numbers", () => {

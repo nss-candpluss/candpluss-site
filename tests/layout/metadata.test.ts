@@ -134,7 +134,7 @@ describe("site metadata foundation", () => {
   });
 
   // 送信完了・確認ページは2系統あるので、どちらの導線か title で区別できるようにする
-  it("お問い合わせ系と製品保証・修理系で title が重複しない", () => {
+  it("お問い合わせ系と初期不良・修理系で title が重複しない", () => {
     const titles = [
       "app/contact/confirm/page.tsx",
       "app/contact/thanks/page.tsx",
@@ -149,5 +149,15 @@ describe("site metadata foundation", () => {
     });
 
     expect(new Set(titles).size).toBe(titles.length);
+  });
+
+  // 画面に出る呼び名は「初期不良・修理」なので、meta だけ別の呼び方にしない
+  it("Support の meta は画面と同じ「初期不良・修理」を使う", () => {
+    for (const relativePath of ["app/support/confirm/page.tsx", "app/support/thanks/page.tsx"]) {
+      const source = readSource(relativePath);
+
+      expect(source, relativePath).toContain("初期不良・修理");
+      expect(source, relativePath).not.toContain("製品保証・修理");
+    }
   });
 });
