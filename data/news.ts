@@ -18,8 +18,8 @@ export const newsItems = [
     tag: "Information",
     excerpt:
       "ドームシェルター「MOYA500」の販売開始日が決定いたしました。",
-    image: "/images/news/news-20260708-02.webp",
-    ogImage: "/images/news/og/news-20260708-02.jpg",
+    image: "/images/news/news-20260912-02.webp",
+    ogImage: "/images/news/og/news-20260912-02.jpg",
     publishedAt: "2026-09-12",
     handle: "moya500-order-information",
     content:
@@ -35,8 +35,8 @@ export const newsItems = [
     tag: "Information",
     excerpt:
       "C AND+S 公式WEBサイトを公開しました。ブランドの想いやプロダクト情報を、これから順次お届けしていきます。",
-    image: "/images/news/news-20260708-01.webp",
-    ogImage: "/images/news/og/news-20260708-01.jpg",
+    image: "/images/news/news-20260912-01.webp",
+    ogImage: "/images/news/og/news-20260912-01.jpg",
     publishedAt: "2026-09-12",
     handle: "official-website-open",
     content:
