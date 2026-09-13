@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -16,13 +16,31 @@ function readSource(relativePath: string) {
 describe("site metadata foundation", () => {
   it("uses the production origin as the metadata base", () => {
     expect(siteConfig.url).toBe("https://candpluss.camp");
-    expect(siteConfig.ogImage).toBe("/images/home/home-image.webp");
+    expect(siteConfig.ogImage).toBe("/images/common/og-default.jpg");
+    expect(siteConfig.ogImageWidth).toBe(1200);
+    expect(siteConfig.ogImageHeight).toBe(630);
 
     const layoutSource = readSource("app/layout.tsx");
 
     expect(layoutSource).toContain("metadataBase: new URL(siteConfig.url)");
     expect(layoutSource).toContain("default: siteConfig.name");
     expect(layoutSource).toContain("template: `%s | ${siteConfig.name}`");
+  });
+
+  it("共通 OG 画像が public に実在し、OG 推奨比 1.91:1 に収まっている", () => {
+    const filePath = join(rootDir, "public", siteConfig.ogImage);
+
+    expect(existsSync(filePath)).toBe(true);
+
+    // クローラー互換のため WebP は使わない
+    expect(siteConfig.ogImage.endsWith(".jpg")).toBe(true);
+
+    const ratio = siteConfig.ogImageWidth / siteConfig.ogImageHeight;
+    expect(ratio).toBeGreaterThan(1.85);
+    expect(ratio).toBeLessThan(2);
+
+    // 取得に時間がかかるとサムネイルが出ないクローラーがあるため 500KB 未満に保つ
+    expect(statSync(filePath).size).toBeLessThan(500 * 1024);
   });
 
   it("keeps page titles suffix-free so the root template can append the site name", () => {
@@ -53,7 +71,13 @@ describe("site metadata foundation", () => {
       siteName: siteConfig.name,
       title: "CONCEPT",
       url: "/concept",
-      images: [{ url: siteConfig.ogImage }],
+      images: [
+        {
+          url: siteConfig.ogImage,
+          width: siteConfig.ogImageWidth,
+          height: siteConfig.ogImageHeight,
+        },
+      ],
     });
     expect(metadata.twitter).toMatchObject({
       card: "summary_large_image",

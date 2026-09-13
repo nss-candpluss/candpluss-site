@@ -106,7 +106,7 @@ export function buildOnlineStoreJsonLd(): JsonLdObject {
       legalName: siteConfig.legalName,
       address: organizationAddress(),
       email: siteConfig.email,
-      telephone: siteConfig.telephone,
+      telephone: siteConfig.companyTelephone,
     },
     hasMerchantReturnPolicy: {
       "@type": "MerchantReturnPolicy",

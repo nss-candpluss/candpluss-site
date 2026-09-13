@@ -66,7 +66,16 @@ export function createPageMetadata({
       title: pageTitle,
       description,
       url: canonical,
-      images: [{ url: image }],
+      // 寸法が分かるのは共通 OG 画像のみ。商品・News の個別画像は寸法を持たないため省略する
+      images: [
+        image === siteConfig.ogImage
+          ? {
+              url: image,
+              width: siteConfig.ogImageWidth,
+              height: siteConfig.ogImageHeight,
+            }
+          : { url: image },
+      ],
     },
     twitter: {
       card: "summary_large_image",

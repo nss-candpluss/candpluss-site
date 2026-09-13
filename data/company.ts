@@ -13,11 +13,11 @@ export const companyContent = {
     },
     {
       label: "TEL",
-      blocks: [{ type: "paragraph", text: "092-580-8707" }],
+      blocks: [{ type: "paragraph", text: "092-504-7370" }],
     },
     {
       label: "FAX",
-      blocks: [{ type: "paragraph", text: "092-580-8708" }],
+      blocks: [{ type: "paragraph", text: "092-504-7371" }],
     },
     {
       label: "代表者",
