@@ -19,6 +19,7 @@ export const newsItems = [
     excerpt:
       "ドームシェルター「MOYA500」の販売開始日が決定いたしました。",
     image: "/images/news/news-20260912-02.webp",
+    imageAlt: "草原に設営したドームシェルター MOYA500 Classic Yellow",
     ogImage: "/images/news/og/news-20260912-02.jpg",
     publishedAt: "2026-09-12",
     handle: "moya500-order-information",
@@ -36,6 +37,8 @@ export const newsItems = [
     excerpt:
       "C AND+S 公式WEBサイトを公開しました。ブランドの想いやプロダクト情報を、これから順次お届けしていきます。",
     image: "/images/news/news-20260912-01.webp",
+    imageAlt:
+      "湖畔に設営したドームシェルター MOYA と、タグライン Find your soul. Touch the ground.",
     ogImage: "/images/news/og/news-20260912-01.jpg",
     publishedAt: "2026-09-12",
     handle: "official-website-open",
@@ -49,6 +52,7 @@ export const newsItems = [
     excerpt:
       "C AND+S公式Instagramを開設しました。ブランドコンセプトや製品情報、イベント情報など、最新情報を発信してまいります。",
     image: "/images/news/news-20260708-03.webp",
+    imageAlt: "C AND+S のロゴと、公式Instagramアカウント @c_and_plus_s",
     ogImage: "/images/news/og/news-20260708-03.jpg",
     publishedAt: "2026-07-08",
     handle: "official-instagram-open",

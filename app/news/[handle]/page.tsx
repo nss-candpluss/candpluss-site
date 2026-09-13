@@ -93,7 +93,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
 
           <MaskedImage
             src={article.image}
-            alt=""
+            alt={article.imageAlt ?? ""}
             aspectClassName="aspect-video"
             containerClassName="mt-[calc(36px*var(--gap-scale-y))] bg-[var(--color-line)]"
             sizes="(min-width: 980px) 980px, 100vw"

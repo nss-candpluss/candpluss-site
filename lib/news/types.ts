@@ -7,6 +7,12 @@ export type NewsArticle = {
   excerpt?: string;
   image: string;
   /**
+   * 詳細ページのメイン画像の代替テキスト。
+   * 一覧・TOP のカードは見出しがリンク名になるため alt="" のままにする。
+   * 画像に文字が入っている場合はその文字も含める。
+   */
+  imageAlt?: string;
+  /**
    * SNS 用 OG 画像（1200×630 の JPEG / public/images/news/og/）。
    * image は WebP で LINE / Facebook が読めないため OG には使えない。
    * 未設定の記事は共通 OG 画像にフォールバックする。
