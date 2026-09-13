@@ -18,6 +18,7 @@ export const sitemapStaticPaths = [
   "/legal/terms",
   "/legal/privacy-policy",
   "/legal/cookie-policy",
+  "/legal/licenses",
 ] as const;
 
 /** 公開後もクロールさせないパス */

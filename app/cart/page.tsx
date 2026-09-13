@@ -78,11 +78,14 @@ export default function CartPage() {
                       {line.merchandise.title}
                     </p>
                   ) : null}
-                  <p className="mt-4 font-ui-en text-sm">
-                    {formatMoney(
-                      line.merchandise.price.amount,
-                      line.merchandise.price.currencyCode
-                    )}
+                  <p className="mt-4 inline-flex items-baseline gap-[4px]">
+                    <span className="font-ui-en text-sm">
+                      {formatMoney(
+                        line.merchandise.price.amount,
+                        line.merchandise.price.currencyCode
+                      )}
+                    </span>
+                    <span className={`font-body-ja ${uiText(11)}`}>税込</span>
                   </p>
 
                   <div className="mt-5 flex flex-nowrap items-center gap-4">
@@ -110,17 +113,22 @@ export default function CartPage() {
           </ul>
 
           <div className="mt-10 ml-auto max-w-[420px]">
-            <div className="flex justify-between font-body-ja text-base font-semibold">
+            <div className="flex items-baseline justify-between font-body-ja text-base font-semibold">
               <span>合計</span>
-              <span className="font-ui-en">
-                {formatMoney(
-                  cart.cost.totalAmount.amount,
-                  cart.cost.totalAmount.currencyCode
-                )}
+              <span className="inline-flex items-baseline justify-end gap-[4px]">
+                <span className="font-ui-en">
+                  {formatMoney(
+                    cart.cost.totalAmount.amount,
+                    cart.cost.totalAmount.currencyCode
+                  )}
+                </span>
+                <span className={`font-body-ja ${uiText(11)} font-normal`}>
+                  税込
+                </span>
               </span>
             </div>
             <p className="mt-3 font-body-ja text-xs text-[var(--color-muted)]">
-              税・送料はチェックアウト画面で確定します。
+              配送料はご購入画面で確定します
             </p>
             <a
               href={shopifyCheckoutUrl(cart.checkoutUrl, Boolean(customer))}

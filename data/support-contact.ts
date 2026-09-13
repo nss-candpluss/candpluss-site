@@ -29,6 +29,16 @@ export const supportContactPageContent = {
   mailDomainNote: contactPageContent.mailDomainNote,
   privacyPolicyHref: contactPageContent.privacyPolicyHref,
   termsHref: contactPageContent.termsHref,
+  /**
+   * 添付画像の変換・圧縮に LGPL-3.0+ の heic-to を使うため、告知への導線が必要。
+   * このフォームが唯一の利用箇所なので、リンクはここだけに置く。
+   */
+  licenseNote: {
+    before: "※上記お問い合わせフォームでは、画像の変換、圧縮するためにオープンソースソフトウェア（",
+    linkLabel: "ライセンス表記",
+    href: "/legal/licenses",
+    after: "）を利用しています。",
+  },
 } as const;
 
 export const supportContactFormCopy = {

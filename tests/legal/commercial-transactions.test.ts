@@ -74,6 +74,24 @@ describe("commercial transactions document", () => {
     expect(item("返品・交換・キャンセルについて")?.blocks).toHaveLength(5);
   });
 
+  it("ショッピングガイドの購入制限を法定表示項目として転記している", () => {
+    const text = item("販売数量の制限")?.blocks[0];
+
+    expect(text).toMatchObject({
+      type: "paragraph",
+      text: expect.stringContaining("購入数量の制限"),
+    });
+    expect(text).toMatchObject({
+      text: expect.stringContaining("各商品ページに記載"),
+    });
+  });
+
+  it("電話番号は運営会社の代表番号を載せる", () => {
+    expect(item("電話番号")?.blocks[0]).toMatchObject({
+      text: expect.stringContaining("092-504-7370"),
+    });
+  });
+
   it("lists shop contact emails on separate lines with the official shop address", () => {
     expect(item("メールアドレス")?.blocks).toEqual([
       { type: "paragraph", text: "info@cpcam.jp（代表）" },

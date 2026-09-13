@@ -17,6 +17,7 @@ import {
 } from "@/data/navigation";
 import { newsItems } from "@/data/news";
 import { products } from "@/data/products";
+import { supportContactPageContent } from "@/data/support-contact";
 import {
   isContactLinkVisible,
   isHeaderIconLinkVisible,
@@ -47,6 +48,7 @@ const staticRoutes = new Set([
   "/legal/terms",
   "/legal/privacy-policy",
   "/legal/cookie-policy",
+  "/legal/licenses",
 ]);
 
 const productHandles = new Set<string>(
@@ -137,6 +139,7 @@ describe("internal page links", () => {
       laboVisitContent.contactButton.href,
       contactPageContent.privacyPolicyHref,
       contactPageContent.termsHref,
+      supportContactPageContent.licenseNote.href,
       ...newsItems.flatMap((item) =>
         "contentLink" in item && item.contentLink.href.startsWith("/")
           ? [item.contentLink.href]

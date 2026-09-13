@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Container } from "@/components/ui/Container";
 import { footerContent } from "@/data/footer";
 import { supportContent } from "@/data/support";
@@ -23,6 +25,8 @@ const supportIntroNoteFollowingClassName =
   "mt-[clamp(8px,calc(12px*var(--gap-scale-y)),12px)]";
 const supportLineButtonAreaGapClassName =
   "mt-[clamp(32px,calc(60px*var(--gap-scale)),60px)]";
+const supportLicenseNoteGapClassName =
+  "mt-[clamp(16px,calc(24px*var(--gap-scale-y)),24px)]";
 const supportSectionClassName =
   "pt-[var(--container-y-top)] pb-[var(--container-y-bottom)] text-[var(--foreground)]";
 const supportAccordionSectionClassName = `bg-white ${supportSectionClassName}`;
@@ -151,6 +155,19 @@ export function SupportGuide() {
                 </p>
               ))}
               <SupportContactForm />
+
+              <p
+                className={`${supportIntroNoteClassName} ${supportLicenseNoteGapClassName}`}
+              >
+                {supportContactPageContent.licenseNote.before}
+                <Link
+                  href={supportContactPageContent.licenseNote.href}
+                  className="underline underline-offset-2 hover:no-underline"
+                >
+                  {supportContactPageContent.licenseNote.linkLabel}
+                </Link>
+                {supportContactPageContent.licenseNote.after}
+              </p>
             </div>
           </div>
         </Container>
