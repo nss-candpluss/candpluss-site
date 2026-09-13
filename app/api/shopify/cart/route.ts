@@ -13,8 +13,8 @@ import {
   getCartIdFromSession,
   saveCartIdToSession,
 } from "@/lib/shopify/cart-session";
+import { evaluateCartMerchandisePolicy } from "@/lib/commerce/cart-policy";
 import { getCustomerTokenSession } from "@/lib/shopify/customer-session";
-import { isNonPurchasableStatus } from "@/lib/products/purchase";
 
 export const runtime = "nodejs";
 
@@ -38,15 +38,27 @@ function buyerIp(request: Request) {
 }
 
 function errorResponse(error: unknown) {
-  const message =
-    error instanceof Error ? error.message : "Cart request failed.";
+  const message = error instanceof Error ? error.message : "";
   const configurationError =
     message.includes("SHOPIFY") || message.includes("SESSION_SECRET");
 
+  if (error instanceof z.ZodError) {
+    return Response.json({ error: "Invalid cart request." }, { status: 400 });
+  }
+
   return Response.json(
-    { error: configurationError ? "Commerce is not configured." : message },
+    {
+      error: configurationError
+        ? "Commerce is not configured."
+        : "Cart request failed.",
+    },
     { status: configurationError ? 503 : 400 }
   );
+}
+
+async function isCustomerAuthenticated() {
+  const customerSession = await getCustomerTokenSession();
+  return Boolean(customerSession && customerSession.expiresAt > Date.now());
 }
 
 export async function GET(request: Request) {
@@ -71,24 +83,13 @@ export async function POST(request: Request) {
   try {
     const input = addLineSchema.parse(await request.json());
     const policy = await getCartMerchandisePolicy(input.merchandiseId);
+    const decision = evaluateCartMerchandisePolicy(
+      policy,
+      await isCustomerAuthenticated()
+    );
 
-    if (!policy.availableForSale || isNonPurchasableStatus(policy.status)) {
-      return Response.json(
-        { error: "This product is not currently available for purchase." },
-        { status: 409 }
-      );
-    }
-
-    // member_only 未登録は「会員限定ではない」として通す。
-    // 以前はここで 409 を返していたため、未登録の間は購入できなかった。
-    if (policy.memberOnly) {
-      const customerSession = await getCustomerTokenSession();
-      if (!customerSession || customerSession.expiresAt <= Date.now()) {
-        return Response.json(
-          { error: "Customer login is required to purchase this product." },
-          { status: 403 }
-        );
-      }
+    if (!decision.ok) {
+      return Response.json({ error: decision.error }, { status: decision.status });
     }
 
     const cartId = await getCartIdFromSession();
@@ -120,15 +121,34 @@ export async function PATCH(request: Request) {
     }
 
     const input = updateLineSchema.parse(await request.json());
-    const cart =
-      input.quantity === 0
-        ? await removeCartLines(cartId, [input.lineId], buyerIp(request))
-        : await updateCartLines(
-            cartId,
-            input.lineId,
-            input.quantity,
-            buyerIp(request)
-          );
+    const ip = buyerIp(request);
+
+    if (input.quantity === 0) {
+      const cart = await removeCartLines(cartId, [input.lineId], ip);
+      return Response.json({ cart });
+    }
+
+    const existingCart = await getCart(cartId, ip);
+    const line = existingCart?.lines.nodes.find((item) => item.id === input.lineId);
+
+    if (!existingCart || !line) {
+      return Response.json({ error: "Cart line not found." }, { status: 404 });
+    }
+
+    // 数量を増やすときだけ再検証する。減らす操作は通す。
+    if (input.quantity > line.quantity) {
+      const policy = await getCartMerchandisePolicy(line.merchandise.id);
+      const decision = evaluateCartMerchandisePolicy(
+        policy,
+        await isCustomerAuthenticated()
+      );
+
+      if (!decision.ok) {
+        return Response.json({ error: decision.error }, { status: decision.status });
+      }
+    }
+
+    const cart = await updateCartLines(cartId, input.lineId, input.quantity, ip);
 
     return Response.json({ cart });
   } catch (error) {

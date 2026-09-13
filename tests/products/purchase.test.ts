@@ -108,9 +108,10 @@ describe("購入判定の二重定義", () => {
       "utf8"
     );
 
-    expect(source).toContain("isNonPurchasableStatus(policy.status)");
+    expect(source).toContain("evaluateCartMerchandisePolicy");
     expect(source).not.toContain("blockedStatuses");
     expect(source).not.toContain("policy.memberAccessConfigured");
+    expect(source).not.toContain("isNonPurchasableStatus(policy.status)");
   });
 });
 
