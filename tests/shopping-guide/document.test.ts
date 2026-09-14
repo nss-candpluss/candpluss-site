@@ -63,11 +63,9 @@ describe("shopping guide document", () => {
     expect(shipping).not.toContain("クロネコメンバーズ");
     expect(stock).not.toContain("入荷通知について");
     expect(payment).toContain("クレジットカード決済、Google Pay、Apple Pay、銀行振込");
-    expect(payment).toContain("■Shop Pay");
-    expect(payment).toContain("ネットショップシステムShopifyが提供する決済サービスです");
-    expect(payment).toContain("6桁のショップペイコード（SMS認証）");
-    expect(payment).toContain("Shop Pay ログインページは こちら>>");
-    expect(payment).toContain("Shop Pay アカウント削除ページは こちら>>");
+    // Shop Pay は支払方法として提供しないため、説明ごと削除した
+    expect(payment).not.toContain("Shop Pay");
+    expect(payment).not.toContain("ショップペイコード");
     expect(payment).toContain("お支払い期限はご注文日より1週間以内です");
     expect(payment).toContain("振込手数料は、ご負担いただけますようお願い申し上げます。");
     expect(receipt).toContain("納品書は、お届けする製品に同梱し発送いたします。");

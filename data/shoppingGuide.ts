@@ -44,10 +44,6 @@ export const shoppingGuideContent = {
             },
             {
               type: "paragraph",
-              text: "■Shop Pay\nネットショップシステムShopifyが提供する決済サービスです。\nShop Payにてメールアドレスと携帯電話番号を登録すると、次回購入時にメールアドレスと携帯電話番号宛てに送られる6桁のショップペイコード（SMS認証）を入力するだけで、配送先やクレジットカード情報を再度入力することなく、簡単に支払いができます。\n当社では登録情報の編集、削除が行えません。お客様ご自身で下記よりお手続きをお願いいたします。\nShop Pay ログインページは こちら>>\nShop Pay アカウント削除ページは こちら>>",
-            },
-            {
-              type: "paragraph",
               text: "■Apple Pay\nApple PayはiPhoneおよびApple Watch、iPadなどApple製品でご利用可能な決済サービスです。\nあらかじめクレジットカードを登録しておけば、クレジットカード情報の入力を行うことなく、簡単・安全に決済ができます。",
             },
             {
