@@ -32,9 +32,15 @@ Create the following product variant metafield definitions.
 
 | Key | Type | Purpose |
 | --- | --- | --- |
-| `color_code` | `single_line_text_field` | Stable UI color key, for example `cy` |
-| `swatch` | `color` | Color chip fallback |
 | `gallery` | `list.file_reference` | Ordered variant-specific images and videos |
+| `color_code` | `single_line_text_field` | Optional. Pins the `?color=` URL key, for example `cy` |
+| `swatch` | `color` | Optional. Color chip fallback when `gallery` is empty |
+
+`color_code` and `swatch` are not part of the standard registration flow. Leave
+them empty unless a product needs a URL key that the color name cannot produce
+(non-ASCII color names) or has no gallery. When `color_code` is empty, the
+`?color=` key is derived from the color option value, so `Classic Yellow`
+becomes `classic-yellow`.
 
 If `gallery` is empty, the storefront falls back to the variant image and then
 the product media list.
@@ -110,7 +116,7 @@ including `https://candpluss.camp/test/products/...`, into site-relative hrefs.
 
 1. Keep the product handle as `moya500`.
 2. Create the Classic Yellow, Gold Beige, and Shadow Gray variants.
-3. Set each variant SKU, `color_code`, `swatch`, price, and inventory.
+3. Set each variant SKU, price, and inventory.
 4. Add the ordered 20-item Classic Yellow gallery, including the movie.
 5. Add Gold Beige and Shadow Gray gallery media.
 6. Create Feature entries in display order and connect them through

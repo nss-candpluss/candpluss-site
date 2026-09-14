@@ -27,6 +27,7 @@ const query = `
             title
             sku
             availableForSale
+            selectedOptions { name value }
             colorCode: metafield(namespace: "custom", key: "color_code") { value }
             swatch: metafield(namespace: "custom", key: "swatch") { value }
             gallery: metafield(namespace: "custom", key: "gallery") {
@@ -93,6 +94,25 @@ if (!response.ok || payload.errors?.length) {
 const products = payload.data.products.nodes;
 console.log(`Connected to ${domain}: ${products.length} products visible.`);
 
+/** lib/shopify/products.ts の colorValue() / colorCode() と同じ規則を保つ */
+function colorValue(variant) {
+  return (
+    variant.selectedOptions.find((option) => /^(color|colour|カラー)$/i.test(option.name))
+      ?.value ??
+    variant.selectedOptions.find((option) => !/^title$/i.test(option.name))?.value ??
+    variant.selectedOptions[0]?.value ??
+    variant.title
+  );
+}
+
+/** 詳細ページの ?color= / ?size= に入る値 */
+function variantParam(variant) {
+  return (
+    variant.colorCode?.value?.trim() ||
+    colorValue(variant).toLowerCase().replace(/[^a-z0-9]+/g, "-")
+  );
+}
+
 for (const product of products) {
   const missing = [];
   if (!product.variants.nodes.length) missing.push("variants");
@@ -108,10 +128,21 @@ for (const product of products) {
   const variantIssues = product.variants.nodes.flatMap((variant) => {
     const issues = [];
     if (!variant.sku) issues.push("sku");
-    if (!variant.colorCode?.value) issues.push("color_code");
-    if (!variant.swatch?.value) issues.push("swatch");
-    if (!variant.gallery?.references?.nodes.length) issues.push("gallery");
+    // swatch は gallery が空のときだけカラーチップに使われるので、そのときのみ必須
+    if (!variant.gallery?.references?.nodes.length) {
+      issues.push("gallery");
+      if (!variant.swatch?.value) issues.push("swatch");
+    }
     return issues.length ? [`${variant.title}: ${issues.join(", ")}`] : [];
+  });
+
+  // color_code は任意。未登録ならカラー名から URL を組むため、英数字を含まない
+  // カラー名（日本語のみなど）だけが問題になる。
+  const paramIssues = product.variants.nodes.flatMap((variant) => {
+    const param = variantParam(variant);
+    return /[a-z0-9]/.test(param)
+      ? []
+      : [`${variant.title}: needs color_code or an ASCII option value (got "${param}")`];
   });
 
   const featureIssues = (product.features?.references?.nodes ?? []).flatMap(
@@ -162,8 +193,12 @@ for (const product of products) {
             }`
         )
         .join(", ")}]`,
+      `variant params [${product.variants.nodes
+        .map((variant) => `${variant.title}: ${variantParam(variant)}`)
+        .join(", ")}]`,
       missing.length ? `product fields missing [${missing.join(", ")}]` : "",
       variantIssues.length ? `variant fields missing [${variantIssues.join("; ")}]` : "",
+      paramIssues.length ? `variant param issues [${paramIssues.join("; ")}]` : "",
       featureIssues.length ? `feature issues [${featureIssues.join("; ")}]` : "",
     ]
       .filter(Boolean)
