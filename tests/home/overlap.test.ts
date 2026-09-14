@@ -45,18 +45,39 @@ describe("home overlap scroll", () => {
 
   it("darkens the hero overlay to 100% black on the same range as the title motion", () => {
     const visualsSource = source("lib/heroScrollVisuals.ts");
-    const globalsCss = source("app/globals.css");
 
     expect(visualsSource).toContain("OVERLAY_ALPHA = 1");
+    expect(visualsSource).toContain("TITLE_OPACITY_END = 0.32");
     expect(visualsSource).toContain("titleStartY + (titleEndY - titleStartY) * progress");
-    expect(globalsCss).toContain("background-color: rgba(0, 0, 0, 1);");
-    expect(globalsCss).toContain("transform: translate3d(0, -85px, 0);");
-    expect(globalsCss).toContain("transform: translate3d(0, -60px, 0);");
-    expect(globalsCss).toContain(
-      "[data-hero-section] .hero-overlay {\n    animation: hero-overlay-fade linear both;\n    animation-timeline: scroll(root block);\n    animation-range: 0 var(--hero-scroll-end);"
-    );
-    expect(globalsCss).toContain(
-      "[data-hero-section] .hero-title-layer {\n    animation: hero-title-fade-desktop linear both;\n    animation-timeline: scroll(root block);\n    animation-range: 0 var(--hero-scroll-end);"
-    );
+    // desktop: -135 → -85 / mobile: -160 → -60
+    expect(visualsSource).toContain("mobile: -160");
+    expect(visualsSource).toContain("desktop: -135");
+    expect(visualsSource).toContain("mobile: 100");
+    expect(visualsSource).toContain("desktop: 50");
+  });
+
+  /**
+   * CSS の scroll 駆動アニメーションは PC のみ有効な Lenis と同期が外れ、
+   * Chrome で最上部でも黒が残ったまま復帰できなくなる。JS 制御に一本化した。
+   */
+  it("drives the hero fade from JavaScript only, never from a CSS scroll timeline", () => {
+    const globalsCss = source("app/globals.css");
+    const visualsSource = source("lib/heroScrollVisuals.ts");
+    const heroSource = source("sections/home/HomeHero.tsx");
+
+    expect(globalsCss).not.toContain("animation-timeline");
+    expect(globalsCss).not.toContain("--hero-scroll-end");
+    expect(globalsCss).not.toContain("hero-overlay-fade");
+    expect(globalsCss).toContain(".hero-overlay {\n  background-color: rgba(0, 0, 0, 0);");
+
+    expect(visualsSource).not.toContain("supportsHeroScrollCss");
+    expect(heroSource).toContain('section.dataset.heroScrollMode = "js"');
+  });
+
+  /** 最上部なのにスナップショットの黒が残らないこと */
+  it("ends a snapshot-restoring burst with a sync from the real scroll position", () => {
+    const visualsSource = source("lib/heroScrollVisuals.ts");
+
+    expect(visualsSource).toContain("if (allowSnapshot) {\n      syncFn(`${source}:settled`, false);");
   });
 });

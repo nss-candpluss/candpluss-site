@@ -8,11 +8,8 @@ import { TextLink } from "@/components/ui/TextLink";
 import { topHeroContent } from "@/data/home";
 import {
   applyHeroVisualsToElements,
-  clearHeroInlineVisuals,
   getHeroScrollProgress,
   scheduleHeroBurstSync,
-  supportsHeroScrollCss,
-  updateHeroScrollEndVar,
 } from "@/lib/heroScrollVisuals";
 import { assetPath } from "@/lib/assetPath";
 import { conceptStoryBodyClassName, conceptStoryTitleClassName } from "@/lib/typography";
@@ -33,32 +30,6 @@ export function HomeHero() {
 
     if (!section || !titleLayer || !overlay) {
       return;
-    }
-
-    if (supportsHeroScrollCss()) {
-      clearHeroInlineVisuals(section, overlay, titleLayer);
-      section.dataset.heroScrollMode = "css";
-
-      const syncScrollEnd = () => {
-        updateHeroScrollEndVar(section);
-      };
-
-      syncScrollEnd();
-
-      const resizeObserver = new ResizeObserver(syncScrollEnd);
-      resizeObserver.observe(section);
-      if (copy) {
-        resizeObserver.observe(copy);
-      }
-      if (body) {
-        resizeObserver.observe(body);
-      }
-      window.addEventListener("resize", syncScrollEnd);
-
-      return () => {
-        resizeObserver.disconnect();
-        window.removeEventListener("resize", syncScrollEnd);
-      };
     }
 
     section.dataset.heroScrollMode = "js";

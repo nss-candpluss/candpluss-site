@@ -20,13 +20,6 @@ export const TITLE_SCROLL_DOWN_Y = {
 const BURST_DELAYS = [0, 16, 50, 100, 200, 400, 800, 1200, 2000, 3000] as const;
 const BURST_RAF_MS = 2500;
 
-export function supportsHeroScrollCss() {
-  return (
-    typeof CSS !== "undefined" &&
-    CSS.supports("animation-timeline: scroll(root)")
-  );
-}
-
 function getOffsetTopWithin(element: HTMLElement, ancestor: HTMLElement) {
   let top = 0;
   let node: HTMLElement | null = element;
@@ -58,10 +51,6 @@ export function getHeroScrollDistance(section: HTMLElement) {
   }
 
   return Math.max(section.offsetHeight - window.innerHeight, 0);
-}
-
-export function updateHeroScrollEndVar(section: HTMLElement) {
-  section.style.setProperty("--hero-scroll-end", `${getHeroScrollDistance(section)}px`);
 }
 
 export function getTitleScrollValues() {
@@ -110,42 +99,12 @@ export function getHeroScrollProgress(
   return Math.min(1, Math.max(0, progressFromScroll));
 }
 
-export function clearHeroInlineVisuals(
-  section: HTMLElement,
-  overlay: HTMLElement,
-  titleLayer: HTMLElement
-) {
-  overlay.style.removeProperty("background-color");
-  titleLayer.style.removeProperty("opacity");
-  titleLayer.style.removeProperty("transform");
-  section.dataset.heroProgress = "";
-}
-
-export function clearHeroVisualsForCssMode() {
-  const elements = queryHeroElements();
-  if (!elements) {
-    return false;
-  }
-
-  const { section, overlay, titleLayer } = elements;
-  clearHeroInlineVisuals(section, overlay, titleLayer);
-  section.dataset.heroScrollMode = "css";
-  return true;
-}
-
 export function applyHeroVisualsToElements(
   section: HTMLElement,
   overlay: HTMLElement,
   titleLayer: HTMLElement,
   progress: number
 ) {
-  if (supportsHeroScrollCss()) {
-    clearHeroInlineVisuals(section, overlay, titleLayer);
-    section.dataset.heroProgress = progress.toFixed(3);
-    section.dataset.heroScrollMode = "css";
-    return;
-  }
-
   const { titleStartY, titleEndY } = getTitleScrollValues();
   const overlayAlpha = progress * OVERLAY_ALPHA;
   const titleOpacity = 1 - progress * (1 - TITLE_OPACITY_END);
@@ -232,6 +191,13 @@ export function scheduleHeroBurstSync(
 
     if (performance.now() - start < rafMs) {
       window.requestAnimationFrame(rafBurst);
+      return;
+    }
+
+    // 復元用スナップショットで締めると、最上部に戻っているのに黒が残り続ける。
+    // バーストの最後は必ず実スクロール位置で上書きする。
+    if (allowSnapshot) {
+      syncFn(`${source}:settled`, false);
     }
   };
 

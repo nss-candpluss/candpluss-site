@@ -14,9 +14,7 @@ import {
   writeHeroLastPathname,
 } from "@/lib/heroScrollRestore";
 import {
-  clearHeroVisualsForCssMode,
   scheduleHeroBurstSync,
-  supportsHeroScrollCss,
   syncHeroVisualsFromDom,
 } from "@/lib/heroScrollVisuals";
 
@@ -65,11 +63,6 @@ function runHomeHeroSync(trigger: string, pathname: string) {
     return;
   }
 
-  if (supportsHeroScrollCss()) {
-    clearHeroVisualsForCssMode();
-    return;
-  }
-
   if (shouldRestoreHeroOnReturnHome(pathname)) {
     scheduleReturnHomeSync(trigger);
     return;
@@ -88,10 +81,6 @@ export function HeroReturnHomeSync() {
 
     const handleScroll = () => {
       if (pathname !== "/") {
-        return;
-      }
-
-      if (supportsHeroScrollCss()) {
         return;
       }
 

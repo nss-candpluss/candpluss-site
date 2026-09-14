@@ -156,61 +156,17 @@
   background-color: rgba(0, 0, 0, 0);
 }
 
-@supports (animation-timeline: scroll(root)) {
-  [data-hero-section] {
-    --hero-scroll-end: 100vh;
-  }
-
-  [data-hero-section] .hero-overlay {
-    animation: hero-overlay-fade linear both;
-    animation-timeline: scroll(root block);
-    animation-range: 0 var(--hero-scroll-end);
-  }
-
-  [data-hero-section] .hero-title-layer {
-    animation: hero-title-fade-desktop linear both;
-    animation-timeline: scroll(root block);
-    animation-range: 0 var(--hero-scroll-end);
-  }
-
-  @media (max-width: 767px) {
-    [data-hero-section] .hero-title-layer {
-      animation-name: hero-title-fade-mobile;
-    }
-  }
+/* Hero フェードは JS（lib/heroScrollVisuals.ts）が inline style で駆動する。
+   ここは JS の初期同期前に描画される 1 フレーム分の初期値で、
+   値は TITLE_BASE_OFFSET_Y と一致させる。 */
+.hero-title-layer {
+  opacity: 1;
+  transform: translate3d(0, -135px, 0);
 }
 
-@keyframes hero-overlay-fade {
-  from {
-    background-color: rgba(0, 0, 0, 0);
-  }
-
-  to {
-    background-color: rgba(0, 0, 0, 1);
-  }
-}
-
-@keyframes hero-title-fade-desktop {
-  from {
-    opacity: 1;
-    transform: translate3d(0, -135px, 0);
-  }
-
-  to {
-    opacity: 0.32;
-    transform: translate3d(0, -85px, 0);
-  }
-}
-
-@keyframes hero-title-fade-mobile {
-  from {
-    opacity: 1;
+@media (max-width: 767px) {
+  .hero-title-layer {
     transform: translate3d(0, -160px, 0);
-  }
-
-  to {
-    opacity: 0.32;
-    transform: translate3d(0, -60px, 0);
   }
 }
 
