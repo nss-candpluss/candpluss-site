@@ -6,6 +6,8 @@ import {
   getProductVariantOptionName,
   isPlaceholderProductVariantName,
 } from "@/lib/products/helpers";
+import { isWebPurchaseEnabled } from "@/lib/commerce/purchase-channel";
+import { productLaunchStartsAtByHandle } from "@/data/product-launch-notices";
 import { canPurchaseProduct } from "@/lib/products/purchase";
 import { resolveArticleExcerpt } from "@/lib/news/excerpt";
 import { isSocialLinkVisible } from "@/lib/site-navigation-visibility";
@@ -133,7 +135,11 @@ export function buildBreadcrumbJsonLd(items: BreadcrumbItem[]): JsonLdObject {
   };
 }
 
-export function productAvailability(product: Product): string {
+/**
+ * Shopify のステータスと在庫から決まる本来の在庫表記。
+ * 公開ページの購入停止（第一弾）には左右されない。
+ */
+export function productStockAvailability(product: Product): string {
   if (OUT_OF_STOCK_STATUSES.includes(product.status)) {
     return `${SCHEMA}/OutOfStock`;
   }
@@ -165,6 +171,22 @@ export function productAvailability(product: Product): string {
   return `${SCHEMA}/InStock`;
 }
 
+export function productAvailability(product: Product): string {
+  /**
+   * 公開ページの WEB 購入を止めている間は、どの商品も買えない。
+   * 画面が COMING SOON なのに構造化データが在庫ありを主張すると、
+   * 検索結果から来た人が買えず、Google にも不一致とみなされる。
+   *
+   * 10/2 の販売開始で `PUBLIC_WEB_PURCHASE_ENABLED` を戻せば、
+   * 本来の在庫表記に戻る。
+   */
+  if (!isWebPurchaseEnabled("public")) {
+    return `${SCHEMA}/OutOfStock`;
+  }
+
+  return productStockAvailability(product);
+}
+
 function productCurrency(product: Product, variant?: ProductVariant): string {
   return (
     variant?.price?.currencyCode ??
@@ -185,7 +207,22 @@ function variantAvailability(
   return productAvailability(product);
 }
 
+/**
+ * 販売開始日時。在庫切れの理由が「終売」ではなく「発売前」だと伝わる。
+ * 購入を解禁したら過去の日時になるので、止めている間だけ出す。
+ */
+function offerAvailabilityStarts(product: Product): JsonLdObject {
+  const startsAt = productLaunchStartsAtByHandle[product.handle];
+
+  if (!startsAt || isWebPurchaseEnabled("public")) {
+    return {};
+  }
+
+  return { availabilityStarts: startsAt };
+}
+
 function offerBase(
+  product: Product,
   url: string,
   availability: string
 ): JsonLdObject {
@@ -193,6 +230,7 @@ function offerBase(
     "@type": "Offer",
     url,
     availability,
+    ...offerAvailabilityStarts(product),
     itemCondition: `${SCHEMA}/NewCondition`,
   };
 }
@@ -202,7 +240,7 @@ function buildVariantOffer(
   variant: ProductVariant
 ): JsonLdObject {
   const url = absoluteUrl(getProductDetailHref(product, variant.id));
-  const offer = offerBase(url, variantAvailability(product, variant));
+  const offer = offerBase(product, url, variantAvailability(product, variant));
   const price = variant.price?.amount ?? product.price;
 
   if (price <= 0) {
@@ -224,7 +262,7 @@ function buildProductOffer(product: Product): JsonLdObject {
     product.price,
     ...product.variants.map((variant) => variant.price?.amount ?? product.price),
   ].filter((amount) => amount > 0);
-  const offer = offerBase(url, availability);
+  const offer = offerBase(product, url, availability);
 
   if (prices.length === 0) {
     return offer;
@@ -242,6 +280,7 @@ function buildProductOffer(product: Product): JsonLdObject {
       highPrice,
       offerCount: prices.length,
       availability,
+      ...offerAvailabilityStarts(product),
       itemCondition: `${SCHEMA}/NewCondition`,
       valueAddedTaxIncluded: true,
     };

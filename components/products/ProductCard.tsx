@@ -4,12 +4,17 @@ import { SiteImage } from "@/components/ui/SiteImage";
 import Link from "next/link";
 import { useState } from "react";
 
+import { usePurchaseChannel } from "@/components/commerce/PurchaseChannelProvider";
 import { ProductColorChips } from "@/components/products/ProductColorChips";
+import { ProductComingSoonBadge } from "@/components/products/ProductComingSoonBadge";
 import {
   ProductStatusLabel,
   hasProductStatusLabel,
   listingStatusRowMinHeightClassName,
+  useStatusDisplayOverrideHandle,
 } from "@/components/products/ProductStatusLabel";
+import { productLaunchNoticeByHandle } from "@/data/product-launch-notices";
+import { channelPath, isWebPurchaseEnabled } from "@/lib/commerce/purchase-channel";
 import { getProductListingImage } from "@/lib/products/gallery";
 import {
   getProductDetailHref,
@@ -49,9 +54,13 @@ export function ProductCard({
 }: ProductCardProps) {
   const defaultVariantId = resolveProductVariantId(product);
   const [selectedVariantId, setSelectedVariantId] = useState(defaultVariantId);
+  const channel = usePurchaseChannel();
 
   const displayImage = getProductListingImage(product, selectedVariantId);
-  const detailHref = getProductDetailHref(product, selectedVariantId);
+  const detailHref = channelPath(
+    channel,
+    getProductDetailHref(product, selectedVariantId)
+  );
   const selectedVariant =
     product.variants.find((variant) => variant.id === selectedVariantId) ??
     product.variants[0] ??
@@ -61,11 +70,18 @@ export function ProductCard({
     "ja-JP"
   );
   const hasMultipleVariants = product.variants.length > 1;
-  const showStatusLabel = hasProductStatusLabel(
-    product.status,
-    product.statusLabel,
-    product.handle
-  );
+  const statusOverrideHandle = useStatusDisplayOverrideHandle(product.handle);
+  // 購入停止中は Shopify のステータスではなく COMING SOON と販売開始日を出す
+  const showComingSoon = !isWebPurchaseEnabled(channel);
+  const launchNotice = productLaunchNoticeByHandle[product.handle];
+  const showStatusLabel =
+    !showComingSoon &&
+    hasProductStatusLabel(
+      product.status,
+      product.statusLabel,
+      statusOverrideHandle
+    );
+  const hasStatusRow = showComingSoon || showStatusLabel;
   const usesProductsListingStyles = presentation === "productsListing";
 
   return (
@@ -122,7 +138,20 @@ export function ProductCard({
               : ""
           }`}
         >
-          {showStatusLabel ? (
+          {showComingSoon ? (
+            <div className="flex flex-col items-start gap-[6px]">
+              <ProductComingSoonBadge className="!text-[clamp(11px,calc(12px*var(--text-scale)),12px)]" />
+              {launchNotice ? (
+                <p
+                  className={`font-body-ja font-semibold text-[#c40000] ${
+                    usesProductsListingStyles ? listingStatusClassName : uiText(14)
+                  }`}
+                >
+                  {launchNotice}
+                </p>
+              ) : null}
+            </div>
+          ) : showStatusLabel ? (
             <ProductStatusLabel
               handle={product.handle}
               status={product.status}
@@ -141,7 +170,7 @@ export function ProductCard({
                 ? listingTitleClassName
                 : uiText(16)
             } ${
-              showStatusLabel
+              hasStatusRow
                 ? usesProductsListingStyles
                   ? listingTextGapClassName
                   : "mt-[calc(14px*var(--gap-scale-y))]"

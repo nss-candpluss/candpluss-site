@@ -4,7 +4,8 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-import { productAvailability } from "@/lib/json-ld";
+import { isWebPurchaseEnabled } from "@/lib/commerce/purchase-channel";
+import { productAvailability, productStockAvailability } from "@/lib/json-ld";
 import {
   canPurchaseProduct,
   isNonPurchasableStatus,
@@ -115,9 +116,15 @@ describe("購入判定の二重定義", () => {
   });
 });
 
-describe("productAvailability", () => {
+/**
+ * 購入解禁後の在庫表記。第一弾の購入停止で上書きされる前の判定なので、
+ * ここは `productStockAvailability` で確かめる。
+ */
+describe("productStockAvailability", () => {
   it("購入できる商品は InStock", () => {
-    expect(productAvailability(buildProduct())).toBe("https://schema.org/InStock");
+    expect(productStockAvailability(buildProduct())).toBe(
+      "https://schema.org/InStock"
+    );
   });
 
   // 構造化データとページの内容が食い違うと Google に不一致とみなされる
@@ -129,7 +136,7 @@ describe("productAvailability", () => {
 
       const product = buildProduct({ status: status as ProductStatus });
 
-      expect(productAvailability(product), status).not.toBe(
+      expect(productStockAvailability(product), status).not.toBe(
         "https://schema.org/InStock"
       );
     }
@@ -137,22 +144,38 @@ describe("productAvailability", () => {
 
   it("NEW バッジは InStock のまま", () => {
     expect(
-      productAvailability(buildProduct({ status: "available", badges: ["new"] }))
+      productStockAvailability(
+        buildProduct({ status: "available", badges: ["new"] })
+      )
     ).toBe("https://schema.org/InStock");
   });
 
   // 会員限定は「会員なら買える」ので在庫ありのまま
   it("会員限定は InStock のままにする", () => {
     expect(
-      productAvailability(buildProduct({ memberAccess: "memberOnly" }))
+      productStockAvailability(buildProduct({ memberAccess: "memberOnly" }))
     ).toBe("https://schema.org/InStock");
   });
 
   it("近日発売・入荷待ちは PreOrder を維持する", () => {
     for (const status of ["comingSoon", "waiting"] as const) {
-      expect(productAvailability(buildProduct({ status }))).toBe(
+      expect(productStockAvailability(buildProduct({ status }))).toBe(
         "https://schema.org/PreOrder"
       );
+    }
+  });
+});
+
+describe("productAvailability", () => {
+  // 公開ページの購入を止めている間は、本来の在庫表記より購入停止を優先する
+  it("購入を止めている間はステータスに関係なく OutOfStock", () => {
+    expect(isWebPurchaseEnabled("public")).toBe(false);
+
+    for (const status of Object.keys(shopifyStatuses)) {
+      expect(
+        productAvailability(buildProduct({ status: status as ProductStatus })),
+        status
+      ).toBe("https://schema.org/OutOfStock");
     }
   });
 });

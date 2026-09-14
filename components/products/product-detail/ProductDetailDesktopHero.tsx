@@ -12,6 +12,9 @@ import {
 
 import { useCart } from "@/components/commerce/CartProvider";
 import { useCustomer } from "@/components/commerce/CustomerProvider";
+import { usePurchaseChannel } from "@/components/commerce/PurchaseChannelProvider";
+import { ProductComingSoonBadge } from "@/components/products/ProductComingSoonBadge";
+import { ProductComingSoonNotice } from "@/components/products/product-detail/ProductComingSoonNotice";
 import { ProductDetailGalleryMedia } from "@/components/products/product-detail/ProductDetailGalleryMedia";
 import { ProductDetailGalleryModal } from "@/components/products/product-detail/ProductDetailGalleryModal";
 import { PRODUCT_DETAIL_ZOOM_IN_CURSOR } from "@/components/products/product-detail/gallery-cursors";
@@ -20,6 +23,7 @@ import {
   type ProductDetailGalleryItem,
 } from "@/components/products/product-detail/gallery-items";
 import { preloadProductDetailImage } from "@/components/products/product-detail/image-preload";
+import { isWebPurchaseEnabled } from "@/lib/commerce/purchase-channel";
 import { shouldDisplayGalleryNavigation } from "@/lib/products/gallery";
 import { canPurchaseProduct } from "@/lib/products/purchase";
 import {
@@ -114,6 +118,7 @@ export function ProductDetailDesktopHero({
 }: ProductDetailDesktopHeroProps) {
   const { addLine, error: cartError, isLoading: isCartLoading } = useCart();
   const { customer } = useCustomer();
+  const purchaseChannel = usePurchaseChannel();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [slideLayers, setSlideLayers] = useState<MainSlideLayer[]>(() => {
     const initial = items[0];
@@ -177,7 +182,9 @@ export function ProductDetailDesktopHero({
   const canSelectVariant = product.variants.length > 1;
   const showGalleryNavigation = shouldDisplayGalleryNavigation(items.length);
   const isMainSliding = slideLayers.some((layer) => layer.role !== "settled");
-  const canAddToCart = Boolean(selectedVariant?.shopifyVariantId) &&
+  const isPurchaseEnabled = isWebPurchaseEnabled(purchaseChannel);
+  const canAddToCart = isPurchaseEnabled &&
+    Boolean(selectedVariant?.shopifyVariantId) &&
     selectedVariant?.availableForSale !== false &&
     canPurchaseProduct(product, Boolean(customer));
   const showMainDragPeek =
@@ -612,14 +619,21 @@ export function ProductDetailDesktopHero({
           {displayTitle}
         </h1>
 
-        <ProductStatusLabel
-          handle={product.handle}
-          status={product.status}
-          label={product.statusLabel}
-          color={product.statusColor}
-          size={14}
-          className="mt-[clamp(12px,1.8vh,20px)] !text-[clamp(13px,calc(14px*var(--text-scale)),14px)] !leading-[clamp(13px,calc(14px*var(--text-scale)),14px)]"
-        />
+        {isPurchaseEnabled ? null : (
+          <ProductComingSoonBadge className="mt-[clamp(12px,1.8vh,20px)] !text-[clamp(11px,calc(12px*var(--text-scale)),12px)]" />
+        )}
+
+        {/* 購入停止中は商品名上の COMING SOON と赤枠が同じ役目を果たす */}
+        {isPurchaseEnabled ? (
+          <ProductStatusLabel
+            handle={product.handle}
+            status={product.status}
+            label={product.statusLabel}
+            color={product.statusColor}
+            size={14}
+            className="mt-[clamp(12px,1.8vh,20px)] !text-[clamp(13px,calc(14px*var(--text-scale)),14px)] !leading-[clamp(13px,calc(14px*var(--text-scale)),14px)]"
+          />
+        ) : null}
 
         {showVariantOptions ? (
         <div className="mt-[clamp(34px,5vh,58px)]">
@@ -646,45 +660,62 @@ export function ProductDetailDesktopHero({
         </div>
         ) : null}
 
-        <button
-          type="button"
-          data-variant-id={selectedVariant?.id ?? ""}
-          data-color-code={selectedColorCode}
-          data-shopify-variant-id={selectedVariant?.shopifyVariantId ?? ""}
-          disabled={!canAddToCart || isCartLoading}
-          onClick={() => {
-            if (selectedVariant?.shopifyVariantId) {
-              void addLine(selectedVariant.shopifyVariantId);
-            }
-          }}
-          className={`mt-[clamp(32px,5vh,58px)] flex w-full items-center justify-between px-[clamp(22px,2.2vw,36px)] py-[clamp(16px,2.2vh,24px)] text-white disabled:cursor-not-allowed ${
-            canAddToCart ? "bg-[var(--foreground)]" : "bg-[#C6C6C6]"
-          }`}
-        >
-          <span
-            className="inline-flex items-center gap-[calc(8/18*1em)] font-ui-en text-[clamp(15px,calc(16px*var(--text-scale)),16px)] leading-[clamp(15px,calc(16px*var(--text-scale)),16px)] font-medium"
-          >
-            <span
-              aria-hidden="true"
-              className="size-[calc(24/18*1em)] shrink-0 bg-current"
-              style={arrowMaskStyle}
-            />
-            ADD TO CART
-          </span>
-          {showPrice ? (
-          <span
-            className="inline-flex items-baseline gap-[4px] font-ui-en text-[clamp(13px,calc(14px*var(--text-scale)),14px)] leading-[clamp(13px,calc(14px*var(--text-scale)),14px)]"
-          >
-            <span>¥{priceAmount}</span>
-            <span className="font-body-ja text-[11px] leading-[11px]">税込</span>
-          </span>
-          ) : null}
-        </button>
-        {cartError ? (
-          <p role="alert" className="mt-3 font-body-ja text-xs text-[#9b1b30]">
-            {cartError}
-          </p>
-        ) : null}
+        {isPurchaseEnabled ? (
+          <>
+            <button
+              type="button"
+              data-variant-id={selectedVariant?.id ?? ""}
+              data-color-code={selectedColorCode}
+              data-shopify-variant-id={selectedVariant?.shopifyVariantId ?? ""}
+              disabled={!canAddToCart || isCartLoading}
+              onClick={() => {
+                if (selectedVariant?.shopifyVariantId) {
+                  void addLine(selectedVariant.shopifyVariantId);
+                }
+              }}
+              className={`mt-[clamp(32px,5vh,58px)] flex w-full items-center justify-between px-[clamp(22px,2.2vw,36px)] py-[clamp(16px,2.2vh,24px)] text-white disabled:cursor-not-allowed ${
+                canAddToCart ? "bg-[var(--foreground)]" : "bg-[#C6C6C6]"
+              }`}
+            >
+              <span
+                className="inline-flex items-center gap-[calc(8/18*1em)] font-ui-en text-[clamp(15px,calc(16px*var(--text-scale)),16px)] leading-[clamp(15px,calc(16px*var(--text-scale)),16px)] font-medium"
+              >
+                <span
+                  aria-hidden="true"
+                  className="size-[calc(24/18*1em)] shrink-0 bg-current"
+                  style={arrowMaskStyle}
+                />
+                ADD TO CART
+              </span>
+              {showPrice ? (
+                <span
+                  className="inline-flex items-baseline gap-[4px] font-ui-en text-[clamp(13px,calc(14px*var(--text-scale)),14px)] leading-[clamp(13px,calc(14px*var(--text-scale)),14px)]"
+                >
+                  <span>¥{priceAmount}</span>
+                  <span className="font-body-ja text-[11px] leading-[11px]">
+                    税込
+                  </span>
+                </span>
+              ) : null}
+            </button>
+            {cartError ? (
+              <p role="alert" className="mt-3 font-body-ja text-xs text-[#9b1b30]">
+                {cartError}
+              </p>
+            ) : null}
+          </>
+        ) : (
+          <ProductComingSoonNotice
+            handle={product.handle}
+            priceAmount={priceAmount}
+            showPrice={showPrice}
+            className="mt-[clamp(32px,5vh,58px)] px-[clamp(22px,2.2vw,36px)] py-[clamp(16px,2.2vh,24px)]"
+            /* 帯の幅は右カラム幅（＝画面幅に比例）で決まるので、日付を折り返さずに
+               収めるためサイズも vw に合わせる。1230px 以上では 16px で頭打ち */
+            noticeClassName="text-[clamp(13px,1.3vw,16px)] leading-[clamp(13px,1.3vw,16px)]"
+            priceClassName="text-[clamp(13px,calc(14px*var(--text-scale)),14px)] leading-[clamp(13px,calc(14px*var(--text-scale)),14px)]"
+          />
+        )}
 
         <ProductDetailDescription
           product={product}

@@ -14,7 +14,7 @@ function readSource(relativePath: string) {
 describe("カートの税込表記", () => {
   it("カートページとカートダイアログの両方が税込を表示する", () => {
     for (const relativePath of [
-      "app/cart/page.tsx",
+      "components/commerce/CartPageContent.tsx",
       "components/commerce/CartDialog.tsx",
     ]) {
       expect(readSource(relativePath)).toContain("税込");
@@ -23,7 +23,7 @@ describe("カートの税込表記", () => {
 
   it("税込価格と矛盾する «税は確定します» の注記を残さない", () => {
     for (const relativePath of [
-      "app/cart/page.tsx",
+      "components/commerce/CartPageContent.tsx",
       "components/commerce/CartDialog.tsx",
     ]) {
       const source = readSource(relativePath);

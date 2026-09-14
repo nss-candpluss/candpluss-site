@@ -1,4 +1,8 @@
+"use client";
+
+import { usePurchaseChannel } from "@/components/commerce/PurchaseChannelProvider";
 import { productStatusDisplayOverrides } from "@/data/product-status-overrides";
+import { showsStatusDisplayOverride } from "@/lib/commerce/purchase-channel";
 import type { ProductStatus } from "@/types/product";
 import { uiText, type UiTextSizePx } from "@/lib/typography";
 
@@ -33,6 +37,18 @@ export function getProductStatusDisplayOverride(handle?: string) {
   }
 
   return productStatusDisplayOverrides[handle];
+}
+
+/**
+ * 差し替えを引くための handle。テスト領域では差し替えを出さないので
+ * `undefined` を返し、Shopify 本来のステータス表示に戻す。
+ */
+export function useStatusDisplayOverrideHandle(
+  handle?: string
+): string | undefined {
+  const channel = usePurchaseChannel();
+
+  return showsStatusDisplayOverride(channel) ? handle : undefined;
 }
 
 export function hasProductStatusLabel(
@@ -87,7 +103,8 @@ export function ProductStatusLabel({
   className = "",
   size = 11,
 }: ProductStatusLabelProps) {
-  const override = getProductStatusDisplayOverride(handle);
+  const overrideHandle = useStatusDisplayOverrideHandle(handle);
+  const override = getProductStatusDisplayOverride(overrideHandle);
   const displayLabel = override?.label ?? label ?? statusLabels[status];
   const displayColor = override?.color ?? color;
 

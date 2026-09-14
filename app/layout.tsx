@@ -3,6 +3,7 @@ import { Baskervville, Baskervville_SC, Inter, Judson } from "next/font/google";
 import { CartDialog } from "@/components/commerce/CartDialog";
 import { CartProvider } from "@/components/commerce/CartProvider";
 import { CustomerProvider } from "@/components/commerce/CustomerProvider";
+import { PurchaseChannelProvider } from "@/components/commerce/PurchaseChannelProvider";
 import { JsonLd } from "@/components/layout/JsonLd";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
@@ -92,17 +93,19 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <JsonLd data={buildOnlineStoreJsonLd()} />
-        <CustomerProvider>
-          <CartProvider>
-            <SmoothScrollProvider>
-              <HeroReturnHomeSync />
-              <Header />
-              <div className="flex-1">{children}</div>
-              <Footer />
-              <CartDialog />
-            </SmoothScrollProvider>
-          </CartProvider>
-        </CustomerProvider>
+        <PurchaseChannelProvider>
+          <CustomerProvider>
+            <CartProvider>
+              <SmoothScrollProvider>
+                <HeroReturnHomeSync />
+                <Header />
+                <div className="flex-1">{children}</div>
+                <Footer />
+                <CartDialog />
+              </SmoothScrollProvider>
+            </CartProvider>
+          </CustomerProvider>
+        </PurchaseChannelProvider>
       </body>
     </html>
   );

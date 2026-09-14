@@ -102,6 +102,7 @@ describe("sitemap and robots", () => {
     });
     expect(openRules?.disallow).toEqual([...robotsDisallowPaths]);
     expect(openRules?.disallow).toContain("/cart");
+    expect(openRules?.disallow).toContain("/shopify-test");
     expect(openRules?.disallow).toContain("/account");
     expect(openRules?.disallow).toContain("/api/");
   });

@@ -12,10 +12,15 @@ import {
 import { useCart } from "@/components/commerce/CartProvider";
 import { shouldOpenCartPopup } from "@/components/commerce/dialog-panel";
 import { useCustomer } from "@/components/commerce/CustomerProvider";
+import { usePurchaseChannel } from "@/components/commerce/PurchaseChannelProvider";
 import {
-  isHeaderIconLinkVisible,
+  isHeaderIconLinkVisibleInChannel,
   isMembershipLinkVisible,
 } from "@/lib/site-navigation-visibility";
+import {
+  channelPath,
+  type PurchaseChannel,
+} from "@/lib/commerce/purchase-channel";
 import { HeaderMobileMenu } from "@/components/layout/HeaderMobileMenu";
 import { SiteNavLink } from "@/components/layout/SiteNavLink";
 import { hoverUnderlineActiveClassName, hoverUnderlineHoverClassName } from "@/components/ui/TextLink";
@@ -88,6 +93,7 @@ function resolveHeaderTheme(
 type HeaderBarProps = {
   headerRef: Ref<HTMLElement>;
   pathname: string;
+  channel: PurchaseChannel;
   theme: HeaderTheme;
   variant: "page" | "scroll";
   isScrollVisible: boolean;
@@ -101,6 +107,7 @@ type HeaderBarProps = {
 function HeaderBar({
   headerRef,
   pathname,
+  channel,
   theme,
   variant,
   isScrollVisible,
@@ -164,43 +171,47 @@ function HeaderBar({
         </nav>
 
         <div className="flex items-center justify-end gap-[var(--header-icon-gap)]">
-          {headerIconLinks.filter((link) => isHeaderIconLinkVisible(link.label)).map((link) => (
-            <Link
-              key={link.href}
-              href={
-                link.label === "User" && customer
-                  ? "/account"
-                  : link.href
-              }
-              aria-label={link.label}
-              aria-haspopup={link.label === "Cart" ? "dialog" : undefined}
-              tabIndex={isHidden ? -1 : undefined}
-              onClick={
-                link.label === "Cart"
-                  ? (event) => {
-                      if (!shouldOpenCartPopup(event)) {
-                        return;
-                      }
+          {headerIconLinks
+            .filter((link) => isHeaderIconLinkVisibleInChannel(link.label, channel))
+            .map((link) => (
+              <Link
+                key={link.href}
+                href={
+                  link.label === "User" && customer
+                    ? "/account"
+                    : link.label === "Cart"
+                      ? channelPath(channel, link.href)
+                      : link.href
+                }
+                aria-label={link.label}
+                aria-haspopup={link.label === "Cart" ? "dialog" : undefined}
+                tabIndex={isHidden ? -1 : undefined}
+                onClick={
+                  link.label === "Cart"
+                    ? (event) => {
+                        if (!shouldOpenCartPopup(event)) {
+                          return;
+                        }
 
-                      event.preventDefault();
-                      openCart();
-                    }
-                  : undefined
-              }
-              className={`relative items-center justify-center ${
-                link.label === "Search" ? "hidden min-[1025px]:inline-flex" : "inline-flex"
-              }`}
-            >
-              <HeaderMaskGraphic src={link.iconSrc} className={headerIconClassName} />
-              {link.label === "Cart" && cartQuantity ? (
-                <span
-                  className={`font-ui-en absolute top-[-10px] right-[-10px] flex size-[20px] items-center justify-center rounded-full text-[10px] leading-[10px] ${badgeClassName}`}
-                >
-                  {Math.min(cartQuantity, 99)}
-                </span>
-              ) : null}
-            </Link>
-          ))}
+                        event.preventDefault();
+                        openCart();
+                      }
+                    : undefined
+                }
+                className={`relative items-center justify-center ${
+                  link.label === "Search" ? "hidden min-[1025px]:inline-flex" : "inline-flex"
+                }`}
+              >
+                <HeaderMaskGraphic src={link.iconSrc} className={headerIconClassName} />
+                {link.label === "Cart" && cartQuantity ? (
+                  <span
+                    className={`font-ui-en absolute top-[-10px] right-[-10px] flex size-[20px] items-center justify-center rounded-full text-[10px] leading-[10px] ${badgeClassName}`}
+                  >
+                    {Math.min(cartQuantity, 99)}
+                  </span>
+                ) : null}
+              </Link>
+            ))}
 
           <button
             type="button"
@@ -222,6 +233,7 @@ function HeaderBar({
 
 export function Header() {
   const pathname = usePathname();
+  const channel = usePurchaseChannel();
   const { cart, openCart } = useCart();
   const { customer } = useCustomer();
   const pageHeaderRef = useRef<HTMLElement>(null);
@@ -354,6 +366,7 @@ export function Header() {
 
   const headerBarProps = {
     pathname,
+    channel,
     isScrollVisible: isScrollHeaderVisible,
     isMobileMenuOpen,
     cartQuantity,

@@ -1,3 +1,8 @@
+import {
+  isWebPurchaseEnabled,
+  type PurchaseChannel,
+} from "@/lib/commerce/purchase-channel";
+
 /**
  * ヘッダー / フッターのリンク表示制御。
  * 非公開項目は false のまま。復活時は true に戻す。
@@ -29,6 +34,21 @@ export function isHeaderIconLinkVisible(label: string): boolean {
     default:
       return true;
   }
+}
+
+/**
+ * 購入を止めている系統ではカートへの入口も出さない。
+ * `headerCart` のフラグは 10/2 以降も使うため、ここでは系統だけで判断する。
+ */
+export function isHeaderIconLinkVisibleInChannel(
+  label: string,
+  channel: PurchaseChannel
+): boolean {
+  if (label === "Cart" && !isWebPurchaseEnabled(channel)) {
+    return false;
+  }
+
+  return isHeaderIconLinkVisible(label);
 }
 
 export function isContactLinkVisible(): boolean {

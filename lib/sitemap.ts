@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 
+import { TEST_AREA_ROOT_PATH } from "@/lib/commerce/purchase-channel";
 import { absoluteUrl } from "@/lib/site-metadata";
 import { siteConfig } from "@/lib/site";
 
@@ -24,6 +25,7 @@ export const sitemapStaticPaths = [
 /** 公開後もクロールさせないパス */
 export const robotsDisallowPaths = [
   "/cart",
+  TEST_AREA_ROOT_PATH,
   "/account",
   "/contact/confirm",
   "/contact/thanks",

@@ -10,11 +10,13 @@ import { CartQuantityStepper } from "@/components/commerce/CartQuantityStepper";
 import { CartRemoveButton } from "@/components/commerce/CartRemoveButton";
 import { useCart } from "@/components/commerce/CartProvider";
 import { useCustomer } from "@/components/commerce/CustomerProvider";
+import { usePurchaseChannel } from "@/components/commerce/PurchaseChannelProvider";
 import {
   COMMERCE_DIALOG_OVERLAY_CLASS,
   COMMERCE_DIALOG_PANEL_CLASS,
 } from "@/components/commerce/dialog-panel";
 import { shopifyCheckoutUrl } from "@/lib/commerce/checkout-url";
+import { channelPath } from "@/lib/commerce/purchase-channel";
 import {
   startBoundLenis,
   stopBoundLenis,
@@ -39,6 +41,7 @@ function CartDialogView({ onDismiss }: { onDismiss: () => void }) {
   const titleId = useId();
   const { cart, error, isLoading, removeLine, updateLine } = useCart();
   const { customer } = useCustomer();
+  const channel = usePurchaseChannel();
   const [phase, setPhase] = useState<"in" | "out">("in");
   const closingRef = useRef(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -183,7 +186,7 @@ function CartDialogView({ onDismiss }: { onDismiss: () => void }) {
                 カートに商品はありません。
               </p>
               <Link
-                href="/products"
+                href={channelPath(channel, "/products")}
                 onClick={onDismiss}
                 className={`mt-[16px] inline-flex font-ui-en ${uiText(16)}`}
               >
@@ -224,7 +227,10 @@ function CartDialogView({ onDismiss }: { onDismiss: () => void }) {
                         </p>
                       ) : null}
                       <Link
-                        href={`/products/${line.merchandise.product.handle}`}
+                        href={channelPath(
+                          channel,
+                          `/products/${line.merchandise.product.handle}`
+                        )}
                         onClick={onDismiss}
                         className={`block font-body-ja font-semibold ${uiText(18)} ${
                           category ? "mt-[8px]" : ""

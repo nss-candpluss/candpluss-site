@@ -36,7 +36,7 @@ describe("カートの国内配送注釈", () => {
     expect(readSource("components/commerce/CartDialog.tsx")).toContain(
       "CartDomesticShippingNotes"
     );
-    expect(readSource("app/cart/page.tsx")).toContain(
+    expect(readSource("components/commerce/CartPageContent.tsx")).toContain(
       "CartDomesticShippingNotes"
     );
   });

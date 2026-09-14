@@ -12,7 +12,9 @@ import {
   pageBreadcrumb,
   productAvailability,
 } from "@/lib/json-ld";
+import { isWebPurchaseEnabled } from "@/lib/commerce/purchase-channel";
 import { newsItems } from "@/data/news";
+import { productLaunchStartsAtByHandle } from "@/data/product-launch-notices";
 import { absoluteUrl } from "@/lib/site-metadata";
 import { siteConfig } from "@/lib/site";
 import type { Product } from "@/types/product";
@@ -61,7 +63,7 @@ describe("json-ld", () => {
     expect(sameAs).not.toContain("https://www.facebook.com/");
   });
 
-  it("builds Product and Offer data from a priced in-stock item", () => {
+  it("builds Product and Offer data from a priced item", () => {
     const jsonLd = buildProductJsonLd(product);
     const offers = jsonLd.offers as Record<string, unknown>;
 
@@ -72,10 +74,55 @@ describe("json-ld", () => {
     expect(offers["@type"]).toBe("Offer");
     expect(offers.price).toBe(372000);
     expect(offers.priceCurrency).toBe("JPY");
-    expect(offers.availability).toBe("https://schema.org/InStock");
-    expect(productAvailability(product)).toBe("https://schema.org/InStock");
     expect(hasProductGroupVariants(product)).toBe(false);
     expect(buildProductPageJsonLd(product)["@type"]).toBe("Product");
+  });
+
+  /**
+   * 画面が COMING SOON なのに在庫ありと宣言すると、検索結果から来た人が
+   * 買えず、Google にも不一致とみなされる。
+   */
+  it("公開ページの購入を止めている間は在庫ありと宣言しない", () => {
+    const offers = buildProductJsonLd(product).offers as Record<
+      string,
+      unknown
+    >;
+
+    expect(isWebPurchaseEnabled("public")).toBe(false);
+    expect(productAvailability(product)).toBe("https://schema.org/OutOfStock");
+    expect(offers.availability).toBe("https://schema.org/OutOfStock");
+    // 価格は画面の赤帯にも出しているので取り下げない
+    expect(offers.price).toBe(372000);
+  });
+
+  // 在庫切れの理由が「終売」ではなく「発売前」だと伝わるようにする
+  it("販売開始日時が決まっている商品には availabilityStarts を出す", () => {
+    const offers = buildProductJsonLd(product).offers as Record<
+      string,
+      unknown
+    >;
+
+    expect(productLaunchStartsAtByHandle.moya500).toBe(
+      "2026-10-02T20:00:00+09:00"
+    );
+    expect(offers.availabilityStarts).toBe("2026-10-02T20:00:00+09:00");
+  });
+
+  // 2027年春は日時が決まっていない。無い予定を書くとずれても気付けない
+  it("販売開始日時が未定の商品には availabilityStarts を出さない", () => {
+    const springProduct: Product = {
+      ...product,
+      handle: "moya420",
+      title: "MOYA420",
+    };
+    const offers = buildProductJsonLd(springProduct).offers as Record<
+      string,
+      unknown
+    >;
+
+    expect(productLaunchStartsAtByHandle.moya420).toBeUndefined();
+    expect(offers.availabilityStarts).toBeUndefined();
+    expect(offers.availability).toBe("https://schema.org/OutOfStock");
   });
 
   // サイト表示・特商法とも税込のため、構造化データでも税込であることを明示する

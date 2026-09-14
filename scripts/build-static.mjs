@@ -4,11 +4,20 @@ import { spawn } from "node:child_process";
 
 const root = process.cwd();
 const backupRoot = join(root, ".static-build-runtime-backup");
+/**
+ * 静的書き出しに含められない、あるいは含めてはいけないもの。
+ *
+ * `proxy.ts` は `output: export` では動かず、ビルドが失敗する。テスト領域は
+ * その Basic 認証で守っているため、認証なしで配信されないよう一緒に外す。
+ * カート API が無い書き出しでは購入テストもできない。
+ */
 const runtimePaths = [
   "app/api/shopify",
   "app/account/login/start",
   "app/account/authorize",
   "app/account/logout",
+  "app/shopify-test",
+  "proxy.ts",
 ];
 const moved = [];
 
