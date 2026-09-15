@@ -45,8 +45,14 @@ export function NewsCard({
           <time dateTime={article.publishedAt}>{formatNewsDate(article.publishedAt)}</time>
         </p>
 
+        {/*
+          truncate の overflow: hidden は line-height の位置で切るため、
+          font-size と line-height が同値の UI テキストでは g などの
+          下に出る部分が欠ける。padding で切り取り位置だけ下げ、同じ量の
+          負の margin で見た目の位置を元に戻す。
+        */}
         <Heading
-          className={`mt-[calc(20px*var(--gap-scale-y))] min-w-0 truncate font-body-ja font-bold text-[var(--foreground)] ${uiText(16)}`}
+          className={`mt-[calc(20px*var(--gap-scale-y))] -mb-[3px] min-w-0 truncate pb-[3px] font-body-ja font-bold text-[var(--foreground)] ${uiText(16)}`}
         >
           {article.title}
         </Heading>

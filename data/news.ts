@@ -21,7 +21,7 @@ export const newsItems = [
     image: "/images/news/news-20260912-02.webp",
     imageAlt: "草原に設営したドームシェルター MOYA500 Classic Yellow",
     ogImage: "/images/news/og/news-20260912-02.jpg",
-    publishedAt: "2026-09-12",
+    publishedAt: "2026-09-15",
     handle: "moya500-order-information",
     content:
       "ドームシェルター「MOYA500」の販売開始日が決定いたしました。\n2026年10月2日（金曜日）20:00より、販売開始いたします。\n初回販売分は数量限定となりますので、ご希望のお客様はお早めにご購入ください。\nまた、オプション製品や各種アクセサリーも同日販売開始となりますので、MOYA500本体とあわせてぜひご覧ください。",
@@ -40,7 +40,7 @@ export const newsItems = [
     imageAlt:
       "湖畔に設営したドームシェルター MOYA と、タグライン Find your soul. Touch the ground.",
     ogImage: "/images/news/og/news-20260912-01.jpg",
-    publishedAt: "2026-09-12",
+    publishedAt: "2026-09-15",
     handle: "official-website-open",
     content:
       "このたび、C AND+S公式WEBサイトを公開いたしました。\n本サイトでは、ブランドについてのご紹介をはじめ、製品情報や最新のお知らせなどを随時発信してまいります。\nこれからも、より良い製品づくりとサービスの向上に努めてまいりますので、今後ともC AND+Sをよろしくお願いいたします。",
