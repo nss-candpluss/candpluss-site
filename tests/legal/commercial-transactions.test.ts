@@ -58,6 +58,10 @@ describe("commercial transactions document", () => {
       type: "paragraph",
       text: expect.stringContaining("商品到着後8日以内にご連絡ください"),
     });
+    expect(returns[1]).toMatchObject({
+      type: "paragraph",
+      text: expect.stringContaining("商品到着後8日以内に限り承ります"),
+    });
     expect(returns[2]).toMatchObject({
       type: "paragraph",
       text: expect.stringContaining("・商品到着後8日以上経過した場合"),
