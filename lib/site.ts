@@ -28,5 +28,5 @@ export const siteConfig = {
   ogImageWidth: 1200,
   ogImageHeight: 630,
   /** 公開前は false のまま。正式公開時に true に切り替える */
-  allowSearchIndexing: false,
+  allowSearchIndexing: true,
 } as const;
