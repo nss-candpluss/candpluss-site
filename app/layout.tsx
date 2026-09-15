@@ -6,6 +6,7 @@ import { CustomerProvider } from "@/components/commerce/CustomerProvider";
 import { PurchaseChannelProvider } from "@/components/commerce/PurchaseChannelProvider";
 import { JsonLd } from "@/components/layout/JsonLd";
 import { Footer } from "@/components/layout/Footer";
+import { GoogleAnalytics } from "@/components/layout/GoogleAnalytics";
 import { Header } from "@/components/layout/Header";
 import { HeroReturnHomeSync } from "@/components/layout/HeroReturnHomeSync";
 import { SmoothScrollProvider } from "@/components/motion/SmoothScrollProvider";
@@ -94,6 +95,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <JsonLd data={buildOnlineStoreJsonLd()} />
         <PurchaseChannelProvider>
+          <GoogleAnalytics />
           <CustomerProvider>
             <CartProvider>
               <SmoothScrollProvider>
