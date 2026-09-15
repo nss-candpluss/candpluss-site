@@ -100,6 +100,8 @@ beforeEach(() => {
   vi.stubEnv("SUPPORT_CONTACT_ADMIN_EMAIL", "support@candpluss.camp");
   vi.stubEnv("CONTACT_FROM_EMAIL", "C AND+S <info@candpluss.camp>");
   vi.stubEnv("CONTACT_REPLY_TO_EMAIL", "info@candpluss.camp");
+  vi.stubEnv("SUPPORT_CONTACT_FROM_EMAIL", "C AND+S <support@candpluss.camp>");
+  vi.stubEnv("SUPPORT_CONTACT_REPLY_TO_EMAIL", "support@candpluss.camp");
   vi.spyOn(console, "info").mockImplementation(() => undefined);
   vi.spyOn(console, "error").mockImplementation(() => undefined);
   mocks.verifyTurnstile.mockResolvedValue(true);
@@ -160,6 +162,7 @@ describe("Contact and Support API mail integration", () => {
     expect(body.ticketNumber).toMatch(/^SPR-/);
     expect(mocks.sendMail).toHaveBeenCalledTimes(2);
     expect(mocks.sendMail.mock.calls[0]?.[0]).toMatchObject({
+      from: "C AND+S <support@candpluss.camp>",
       to: "support@candpluss.camp",
       attachments: [
         expect.objectContaining({
@@ -167,6 +170,28 @@ describe("Contact and Support API mail integration", () => {
           content: expect.any(Buffer),
         }),
       ],
+    });
+    // 送信元も自動返信への返信先も Support の窓口に寄せる
+    expect(mocks.sendMail.mock.calls[1]?.[0]).toMatchObject({
+      from: "C AND+S <support@candpluss.camp>",
+      to: "customer@example.com",
+      replyTo: "support@candpluss.camp",
+    });
+  });
+
+  it("falls back to the shared sender and reply-to when the Support ones are unset", async () => {
+    vi.stubEnv("SUPPORT_CONTACT_FROM_EMAIL", "");
+    vi.stubEnv("SUPPORT_CONTACT_REPLY_TO_EMAIL", "");
+
+    const response = await postSupportContact(
+      createRequest("/api/support-contact", createSupportFormData())
+    );
+
+    expect(response.status).toBe(200);
+    expect(mocks.sendMail.mock.calls[1]?.[0]).toMatchObject({
+      from: "C AND+S <info@candpluss.camp>",
+      to: "customer@example.com",
+      replyTo: "info@candpluss.camp",
     });
   });
 

@@ -39,8 +39,12 @@ type ResendAttachment = {
 function getContactEnvConfig(): ContactEnvConfig | null {
   const apiKey = process.env.RESEND_API_KEY;
   const adminEmail = process.env.SUPPORT_CONTACT_ADMIN_EMAIL;
-  const fromEmail = process.env.CONTACT_FROM_EMAIL;
-  const replyToEmail = process.env.CONTACT_REPLY_TO_EMAIL;
+  // 送信元と Reply-To を Support の窓口に寄せるため、Contact と分けられるようにする。
+  // 未設定の環境では従来どおり Contact と共通のアドレスを使う。
+  const fromEmail =
+    process.env.SUPPORT_CONTACT_FROM_EMAIL || process.env.CONTACT_FROM_EMAIL;
+  const replyToEmail =
+    process.env.SUPPORT_CONTACT_REPLY_TO_EMAIL || process.env.CONTACT_REPLY_TO_EMAIL;
 
   if (!apiKey || !adminEmail || !fromEmail || !replyToEmail) {
     return null;
