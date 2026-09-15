@@ -8,13 +8,14 @@
  * データも分けている（一覧は「〜発売」、この枠は「〜販売開始」）。
  */
 const LAUNCH_2026_10_02 = "2026年10月2日(金)20:00 販売開始";
+const LAUNCH_2026_12 = "2026年12月 発売予定";
 const LAUNCH_2027_SPRING = "2027年春 発売予定";
 
 export const productLaunchNoticeByHandle: Record<string, string> = {
   // テント・シェルター / タープ / ペグ
   moya500: LAUNCH_2026_10_02,
   moya420: LAUNCH_2027_SPRING,
-  nokuta: LAUNCH_2026_10_02,
+  nokuta: LAUNCH_2026_12,
   "zig-stake": LAUNCH_2026_10_02,
 
   // MOYA500 オプション
@@ -44,8 +45,8 @@ const LAUNCH_2026_10_02_STARTS_AT = "2026-10-02T20:00:00+09:00";
  * 販売開始日時。表示用の文言と取り違えないよう別の定数にするが、対象商品は
  * 上の表から引いて二重管理を避ける。
  *
- * 2027年春の商品は日時が決まっていないので入れない。日付の無い予定を
- * 構造化データに書くと、実際の販売開始とずれても直したことに気付けない。
+ * 2026年12月・2027年春の商品は日時が決まっていないので入れない。日付の無い
+ * 予定を構造化データに書くと、実際の販売開始とずれても直したことに気付けない。
  */
 export const productLaunchStartsAtByHandle: Record<string, string> =
   Object.fromEntries(

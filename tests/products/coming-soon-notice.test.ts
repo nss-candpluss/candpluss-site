@@ -4,7 +4,10 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-import { productLaunchNoticeByHandle } from "@/data/product-launch-notices";
+import {
+  productLaunchNoticeByHandle,
+  productLaunchStartsAtByHandle,
+} from "@/data/product-launch-notices";
 import { isWebPurchaseEnabled } from "@/lib/commerce/purchase-channel";
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -164,19 +167,31 @@ describe("一覧カード", () => {
 });
 
 describe("販売開始時期のデータ", () => {
-  it("MOYA420 系は 2027年春、それ以外は 10/2", () => {
+  it("MOYA420 系は 2027年春、NOKUTA は 2026年12月、それ以外は 10/2", () => {
     expect(productLaunchNoticeByHandle.moya500).toBe(
       "2026年10月2日(金)20:00 販売開始"
     );
     expect(productLaunchNoticeByHandle.moya420).toBe("2027年春 発売予定");
+    expect(productLaunchNoticeByHandle.nokuta).toBe("2026年12月 発売予定");
 
     for (const [handle, notice] of Object.entries(productLaunchNoticeByHandle)) {
-      expect(notice).toBe(
-        handle.startsWith("moya420")
-          ? "2027年春 発売予定"
-          : "2026年10月2日(金)20:00 販売開始"
-      );
+      const expected = handle.startsWith("moya420")
+        ? "2027年春 発売予定"
+        : handle === "nokuta"
+          ? "2026年12月 発売予定"
+          : "2026年10月2日(金)20:00 販売開始";
+
+      expect(notice, handle).toBe(expected);
     }
+  });
+
+  // 日時が決まっていない商品に availabilityStarts を出すと、ずれても気付けない
+  it("日時が決まっている 10/2 の商品だけ availabilityStarts の対象にする", () => {
+    expect(productLaunchStartsAtByHandle.moya500).toBe(
+      "2026-10-02T20:00:00+09:00"
+    );
+    expect(productLaunchStartsAtByHandle.nokuta).toBeUndefined();
+    expect(productLaunchStartsAtByHandle.moya420).toBeUndefined();
   });
 
   // 未登録だと赤枠の左が空くので、公開中の全商品を入れておく
