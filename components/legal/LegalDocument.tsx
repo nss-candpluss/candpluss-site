@@ -3,8 +3,9 @@ import type { ReactNode } from "react";
 import type { LegalClause, LegalContact, LegalDocumentContent, LegalSection } from "@/types/legal";
 import { bodyText, uiText } from "@/lib/typography";
 
-const listClassName =
-  "mt-[calc(16px*var(--gap-scale-y))] list-none space-y-[calc(12px*var(--gap-scale-y))]";
+// ・の行は直前の本文の続きとして読ませる。ショッピングガイドや特商法の
+// ・行と同じく、行間は line-height だけにして上下の余白を付けない。
+const listClassName = "list-none";
 
 const sectionBodyClassName =
   "mt-[calc(24px*var(--gap-scale-y))] space-y-[calc(16px*var(--gap-scale-y))]";
@@ -71,11 +72,14 @@ function LegalContactBlock({ contact }: { contact: LegalContact }) {
 function LegalSectionBlock({ section }: { section: LegalSection }) {
   return (
     <LegalSectionLayout title={section.title} titleAs="h2">
-      {section.intro ? <p className={bodyClassName}>{section.intro}</p> : null}
+      {section.intro || section.bullets?.length ? (
+        <div>
+          {section.intro ? <p className={bodyClassName}>{section.intro}</p> : null}
+          {section.bullets?.length ? <LegalBulletList items={section.bullets} /> : null}
+        </div>
+      ) : null}
 
       {section.body ? <p className={`${bodyClassName} whitespace-pre-line`}>{section.body}</p> : null}
-
-      {section.bullets?.length ? <LegalBulletList items={section.bullets} /> : null}
 
       {section.clauses?.map((clause) => (
         <LegalClauseBlock key={clause.text} clause={clause} />

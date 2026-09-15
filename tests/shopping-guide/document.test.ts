@@ -5,13 +5,8 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import { shoppingGuideContent } from "@/data/shoppingGuide";
-import { commercialTransactionsContent } from "@/data/legal/commercialTransactions";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
-
-function item(label: string) {
-  return commercialTransactionsContent.items.find((entry) => entry.label === label);
-}
 
 function section(title: string) {
   return shoppingGuideContent.sections.find((entry) => entry.title === title);
@@ -49,8 +44,9 @@ describe("shopping guide document", () => {
     const stock = JSON.stringify(section("2.在庫について"));
     const payment = JSON.stringify(section("3.お支払いについて"));
     const receipt = JSON.stringify(section("6.領収書、納品書について"));
-    const returns = section("5.返品・交換・キャンセルについて")?.subsections[0]?.blocks ?? [];
-    const legalReturns = item("返品・交換・キャンセルについて")?.blocks ?? [];
+    const returns = JSON.stringify(
+      section("5.返品・交換・キャンセルについて")?.subsections[0]?.blocks ?? []
+    );
 
     expect(shipping).toContain("全国一律700円（税込価格5,000円以上で送料無料）");
     expect(shipping).toContain("各種決済手数料（振込手数料など）");
@@ -68,9 +64,26 @@ describe("shopping guide document", () => {
     expect(payment).not.toContain("ショップペイコード");
     expect(payment).toContain("お支払い期限はご注文日より1週間以内です");
     expect(payment).toContain("振込手数料は、ご負担いただけますようお願い申し上げます。");
+    expect(shipping).toContain("商品の発送先は日本国内に限ります。");
+    // ・の行は 5章と同じ段落内改行で並べる。bullets ブロックだと項目間と
+    // 上に余白が入り、同じ書き方の箇所と行間が揃わない。
+    expect(shipping).toContain("その他、下記理由により商品の発送が遅れる場合がございます。\\n・年末年始");
+    expect(JSON.stringify(shoppingGuideContent)).not.toContain('"bullets"');
     expect(receipt).toContain("納品書は、お届けする製品に同梱し発送いたします。");
     expect(receipt).not.toContain("領収書は発行後の宛名");
-    expect(returns).toEqual(legalReturns);
+    // リーガル文書は先方支給の原稿ごとに個別更新する。特定商取引法に基づく表記
+    // とは同一文言を前提にせず、ショッピングガイド側の原稿だけを検証する。
+    expect(returns).toContain("商品到着後8日以内にご連絡ください");
+    expect(returns).toContain(
+      "本項の通知期間は、法令上ユーザーに認められる契約不適合に関する権利を制限するものではありません"
+    );
+    expect(returns).toContain("未使用かつ未開封の商品に限り、商品到着後8日以内に限り承ります");
+    expect(returns).toContain(
+      "ただし、商品に契約不適合がある場合その他法令上当社が責任を負う場合を除きます"
+    );
+    expect(returns).toContain("商品到着後8日以上経過した場合");
+    expect(returns).not.toContain("7日以内");
+    expect(returns).not.toContain("9日以上");
   });
 
   it("does not include a contact section or product inquiry links", () => {
