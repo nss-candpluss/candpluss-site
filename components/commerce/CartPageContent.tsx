@@ -6,12 +6,13 @@ import { CartDomesticShippingNotes } from "@/components/commerce/CartDomesticShi
 import { CartLineThumbnail } from "@/components/commerce/CartLineThumbnail";
 import { CartQuantityStepper } from "@/components/commerce/CartQuantityStepper";
 import { CartRemoveButton } from "@/components/commerce/CartRemoveButton";
+import { useCartThumbnailSize } from "@/components/commerce/use-cart-thumbnail-size";
 import { useCart } from "@/components/commerce/CartProvider";
 import { useCustomer } from "@/components/commerce/CustomerProvider";
 import { usePurchaseChannel } from "@/components/commerce/PurchaseChannelProvider";
 import { shopifyCheckoutUrl } from "@/lib/commerce/checkout-url";
 import { channelPath } from "@/lib/commerce/purchase-channel";
-import { uiText } from "@/lib/typography";
+import { cartLineTitleClassName, uiText } from "@/lib/typography";
 
 function formatMoney(amount: string, currencyCode: string) {
   return new Intl.NumberFormat("ja-JP", {
@@ -29,6 +30,9 @@ export function CartPageContent() {
   const { cart, error, isLoading, removeLine, updateLine } = useCart();
   const { customer } = useCustomer();
   const channel = usePurchaseChannel();
+  const { listRef: thumbnailListRef, thumbnailStyle } = useCartThumbnailSize(
+    cart?.lines.nodes.length ?? 0
+  );
 
   return (
     <main
@@ -57,7 +61,11 @@ export function CartPageContent() {
 
       {cart?.lines.nodes.length ? (
         <>
-          <ul className="mt-12 divide-y divide-[#ddd] border-y border-[#ddd]">
+          <ul
+            ref={thumbnailListRef}
+            style={thumbnailStyle}
+            className="mt-12 divide-y divide-[#ddd] border-y border-[#ddd]"
+          >
             {cart.lines.nodes.map((line) => (
               <li
                 key={line.id}
@@ -78,7 +86,7 @@ export function CartPageContent() {
                       channel,
                       `/products/${line.merchandise.product.handle}`
                     )}
-                    className={`block font-body-ja font-semibold ${uiText(18)}`}
+                    className={`block font-body-ja font-semibold ${cartLineTitleClassName}`}
                   >
                     {line.merchandise.product.title}
                   </Link>

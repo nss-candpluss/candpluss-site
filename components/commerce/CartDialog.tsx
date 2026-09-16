@@ -8,6 +8,7 @@ import { CartDomesticShippingNotes } from "@/components/commerce/CartDomesticShi
 import { CartLineThumbnail } from "@/components/commerce/CartLineThumbnail";
 import { CartQuantityStepper } from "@/components/commerce/CartQuantityStepper";
 import { CartRemoveButton } from "@/components/commerce/CartRemoveButton";
+import { useCartThumbnailSize } from "@/components/commerce/use-cart-thumbnail-size";
 import { useCart } from "@/components/commerce/CartProvider";
 import { useCustomer } from "@/components/commerce/CustomerProvider";
 import { usePurchaseChannel } from "@/components/commerce/PurchaseChannelProvider";
@@ -21,7 +22,7 @@ import {
   startBoundLenis,
   stopBoundLenis,
 } from "@/lib/motion/setup-lenis-scroll-trigger";
-import { uiText } from "@/lib/typography";
+import { cartLineTitleClassName, uiText } from "@/lib/typography";
 
 const MOTION_MS = 150;
 
@@ -124,6 +125,9 @@ function CartDialogView({ onDismiss }: { onDismiss: () => void }) {
 
   const motionClassName = phase === "out" ? "is-out" : "is-in";
   const lines = cart?.lines.nodes ?? [];
+  const { listRef: thumbnailListRef, thumbnailStyle } = useCartThumbnailSize(
+    lines.length
+  );
   const checkoutHref = cart?.checkoutUrl
     ? shopifyCheckoutUrl(cart.checkoutUrl, Boolean(customer))
     : null;
@@ -201,7 +205,11 @@ function CartDialogView({ onDismiss }: { onDismiss: () => void }) {
           ) : null}
 
           {lines.length ? (
-            <ul className="mt-[clamp(20px,calc(24px*var(--gap-scale-y)),24px)] divide-y divide-[var(--color-divider)]">
+            <ul
+              ref={thumbnailListRef}
+              style={thumbnailStyle}
+              className="mt-[clamp(20px,calc(24px*var(--gap-scale-y)),24px)] divide-y divide-[var(--color-divider)]"
+            >
               {lines.map((line) => {
                 const variantTitle = line.merchandise.title;
                 const showVariant = Boolean(
@@ -237,7 +245,7 @@ function CartDialogView({ onDismiss }: { onDismiss: () => void }) {
                           `/products/${line.merchandise.product.handle}`
                         )}
                         onClick={onDismiss}
-                        className={`block font-body-ja font-semibold ${uiText(18)} ${
+                        className={`block font-body-ja font-semibold ${cartLineTitleClassName} ${
                           category ? "mt-[8px]" : ""
                         }`}
                       >

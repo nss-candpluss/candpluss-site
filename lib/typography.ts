@@ -107,6 +107,15 @@ export const baskervvilleCapHeightEm = 0.71;
 export const conceptStoryBodyClassName =
   "text-[clamp(16px,calc(18px*var(--text-scale)),18px)] leading-[calc(36px*var(--text-scale))]";
 
+/**
+ * カートの商品名: 18px / 26px
+ *
+ * 商品名は 2 行に折り返すことがあり、UI テキストの 1:1 だと行同士が詰まる。
+ * 商品説明タイトル（`productFeatureItemTitleClassName`）と同じ行間に合わせる。
+ */
+export const cartLineTitleClassName =
+  "text-[clamp(16px,calc(18px*var(--text-scale)),18px)] leading-[clamp(22px,calc(26px*var(--text-scale)),26px)]";
+
 /** 商品詳細セクション見出し（Feature / Size & Spec / Options）: 最大 62px、最小 46px */
 export const productDetailSectionTitleClassName =
   "text-[clamp(46px,calc(32.13px+3.7vw),62px)] leading-[clamp(46px,calc(32.13px+3.7vw),62px)]";
