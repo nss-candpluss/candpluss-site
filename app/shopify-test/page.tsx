@@ -36,6 +36,9 @@ export default function ShopifyTestPage() {
           <li>
             <TextLink href="/shopify-test/cart">カート</TextLink>
           </li>
+          <li>
+            <TextLink href="/shopify-test/account">アカウント</TextLink>
+          </li>
         </ul>
       </Container>
     </main>

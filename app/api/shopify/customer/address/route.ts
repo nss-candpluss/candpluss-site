@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+import {
+  ACCOUNT_BASE_PATH,
+  ACCOUNT_LOGIN_PATH,
+} from "@/lib/commerce/account-login";
 import { saveCustomerAddress } from "@/lib/shopify/customer-account";
 import { getCustomerTokenSession } from "@/lib/shopify/customer-session";
 
@@ -20,7 +24,7 @@ const addressSchema = z.object({
 export async function POST(request: Request) {
   const session = await getCustomerTokenSession();
   if (!session) {
-    return Response.redirect(new URL("/account/login", request.url), 303);
+    return Response.redirect(new URL(ACCOUNT_LOGIN_PATH, request.url), 303);
   }
 
   try {
@@ -38,8 +42,14 @@ export async function POST(request: Request) {
     });
     const { addressId, ...address } = parsed;
     await saveCustomerAddress(session.accessToken, { addressId, address });
-    return Response.redirect(new URL("/account?updated=address", request.url), 303);
+    return Response.redirect(
+      new URL(`${ACCOUNT_BASE_PATH}?updated=address`, request.url),
+      303
+    );
   } catch {
-    return Response.redirect(new URL("/account?error=address", request.url), 303);
+    return Response.redirect(
+      new URL(`${ACCOUNT_BASE_PATH}?error=address`, request.url),
+      303
+    );
   }
 }

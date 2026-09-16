@@ -27,9 +27,9 @@ export const headerIconLinks = [
     href: "/search",
     iconSrc: "/assets/icons/icon-search.svg",
   },
+  // 会員画面の置き場所は `ACCOUNT_BASE_PATH` が決める。Header 側で組み立てる。
   {
     label: "User",
-    href: "/account/login",
     iconSrc: "/assets/icons/icon-user.svg",
   },
   // カートはページを持たない。ヘッダーのアイコンはポップアップを開くボタン。

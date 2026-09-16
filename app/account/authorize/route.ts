@@ -1,3 +1,4 @@
+import { ACCOUNT_BASE_PATH } from "@/lib/commerce/account-login";
 import { exchangeCustomerAuthorizationCode } from "@/lib/shopify/customer-account";
 import { updateCartBuyerIdentity } from "@/lib/shopify/cart";
 import { getCartIdFromSession } from "@/lib/shopify/cart-session";
@@ -21,7 +22,9 @@ export async function GET(request: Request) {
     attempt.state !== state ||
     Date.now() - attempt.createdAt > 10 * 60 * 1000
   ) {
-    return Response.redirect(new URL("/account?error=invalid_state", request.url));
+    return Response.redirect(
+      new URL(`${ACCOUNT_BASE_PATH}?error=invalid_state`, request.url)
+    );
   }
 
   try {
@@ -43,6 +46,8 @@ export async function GET(request: Request) {
     }
     return Response.redirect(new URL(attempt.returnTo, request.url));
   } catch {
-    return Response.redirect(new URL("/account?error=token_exchange", request.url));
+    return Response.redirect(
+      new URL(`${ACCOUNT_BASE_PATH}?error=token_exchange`, request.url)
+    );
   }
 }

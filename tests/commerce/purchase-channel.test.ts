@@ -6,6 +6,10 @@ import { describe, expect, it } from "vitest";
 
 import { headerIconLinks } from "@/data/navigation";
 import {
+  ACCOUNT_BASE_PATH,
+  isAccountEnabled,
+} from "@/lib/commerce/account-login";
+import {
   TEST_AREA_ROOT_PATH,
   channelPath,
   resolvePurchaseChannel,
@@ -126,20 +130,90 @@ describe("カートページはテスト領域だけに置く", () => {
   });
 });
 
-describe("カートへの入口", () => {
+describe("会員画面はリリースまでテスト領域だけで開く", () => {
+  // アイコンを消すだけでは URL 直打ちで入れてしまう
+  it("公開ページ側は閉じている", () => {
+    const source = readSource("app/account/layout.tsx");
+
+    expect(source).toContain('isAccountEnabled("public")');
+    expect(source).toContain("notFound()");
+  });
+
+  // コールバック URL は Shopify 側の設定と固定で紐づくので消せない。
+  // ルートハンドラはレイアウトを通らないので、閉じている間も動く。
+  it("OAuth のエンドポイントは /account 配下に残す", () => {
+    for (const path of [
+      "app/account/authorize/route.ts",
+      "app/account/login/start/route.ts",
+      "app/account/logout/route.ts",
+    ]) {
+      expect(existsSync(join(rootDir, path))).toBe(true);
+    }
+  });
+
+  // 会員は購入の再開とは別タイミングで先行リリースする
+  it("会員画面の置き場所は会員のフラグだけで決まる", () => {
+    expect(ACCOUNT_BASE_PATH).toBe(
+      isAccountEnabled("public") ? "/account" : `${TEST_AREA_ROOT_PATH}/account`
+    );
+    expect(isAccountEnabled("test")).toBe(true);
+  });
+
+  it("公開ページとテスト領域が同じコンポーネントを使う", () => {
+    expect(readSource("app/account/page.tsx")).toContain("AccountPageContent");
+    expect(readSource("app/shopify-test/account/page.tsx")).toContain(
+      "AccountPageContent"
+    );
+    expect(readSource("app/account/login/page.tsx")).toContain(
+      "AccountLoginContent"
+    );
+    expect(readSource("app/shopify-test/account/login/page.tsx")).toContain(
+      "AccountLoginContent"
+    );
+  });
+
+  it("テスト領域の会員画面は閉じない", () => {
+    expect(
+      existsSync(join(rootDir, "app/shopify-test/account/layout.tsx"))
+    ).toBe(false);
+  });
+
+  // 行き先を直書きすると、公開再開時に戻し漏れる
+  it("会員画面への行き先は ACCOUNT_BASE_PATH に寄せる", () => {
+    for (const path of [
+      "app/account/authorize/route.ts",
+      "app/account/login/start/route.ts",
+      "app/api/shopify/customer/profile/route.ts",
+      "app/api/shopify/customer/address/route.ts",
+      "components/layout/Header.tsx",
+    ]) {
+      const source = readSource(path);
+
+      expect(source).toContain("@/lib/commerce/account-login");
+      expect(source).not.toMatch(/["'`]\/account(\/login)?["'?]/);
+    }
+  });
+});
+
+describe("カートと会員への入口", () => {
   it("購入を止めている系統ではヘッダーのカートを出さない", () => {
     expect(isHeaderIconLinkVisibleInChannel("Cart", "public")).toBe(false);
     expect(isHeaderIconLinkVisibleInChannel("Cart", "test")).toBe(true);
   });
 
-  // 系統を見るのはカートだけ。他のアイコンは従来のフラグに従う
-  it("カート以外の判定は変えない", () => {
+  // 会員は購入とは別のフラグで開くので、カートとは独立して判定する
+  it("ヘッダーのユーザーアイコンは会員フラグに従う", () => {
+    expect(isHeaderIconLinkVisibleInChannel("User", "public")).toBe(
+      isAccountEnabled("public")
+    );
+    expect(isHeaderIconLinkVisibleInChannel("User", "test")).toBe(true);
+  });
+
+  // 系統を見るのはカートと会員だけ。他のアイコンは従来のフラグに従う
+  it("カートと会員以外の判定は変えない", () => {
     for (const channel of ["public", "test"] as const) {
       expect(isHeaderIconLinkVisibleInChannel("Search", channel)).toBe(
         isHeaderIconLinkVisible("Search")
-      );
-      expect(isHeaderIconLinkVisibleInChannel("User", channel)).toBe(
-        isHeaderIconLinkVisible("User")
       );
     }
   });

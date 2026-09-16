@@ -1,6 +1,8 @@
 import { createHash, randomBytes } from "node:crypto";
 
 import {
+  ACCOUNT_BASE_PATH,
+  ACCOUNT_LOGIN_PATH,
   loginHintFromEmail,
   safeAccountReturnTo,
 } from "@/lib/commerce/account-login";
@@ -53,9 +55,9 @@ async function startCustomerLogin(request: Request) {
 
     return Response.redirect(authorizationUrl);
   } catch {
-    const loginUrl = new URL("/account/login", request.url);
+    const loginUrl = new URL(ACCOUNT_LOGIN_PATH, request.url);
     loginUrl.searchParams.set("error", "config");
-    if (returnTo !== "/account") {
+    if (returnTo !== ACCOUNT_BASE_PATH) {
       loginUrl.searchParams.set("returnTo", returnTo);
     }
     return Response.redirect(loginUrl, 303);

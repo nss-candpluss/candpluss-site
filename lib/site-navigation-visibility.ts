@@ -1,3 +1,4 @@
+import { isAccountEnabled } from "@/lib/commerce/account-login";
 import {
   isWebPurchaseEnabled,
   type PurchaseChannel,
@@ -10,7 +11,7 @@ import {
 export const siteNavigationVisibility = {
   membership: false,
   headerSearch: false,
-  headerUser: false,
+  headerUser: true,
   headerCart: true,
   contact: true,
   snsFacebook: false,
@@ -37,14 +38,21 @@ export function isHeaderIconLinkVisible(label: string): boolean {
 }
 
 /**
- * 購入を止めている系統ではカートへの入口も出さない。
- * `headerCart` のフラグは 10/2 以降も使うため、ここでは系統だけで判断する。
+ * 閉じている系統では入口も出さない。出すと行き先が 404 になる。
+ *
+ * カートは購入の再開（`PUBLIC_WEB_PURCHASE_ENABLED`）、会員は先行リリース
+ * （`PUBLIC_ACCOUNT_ENABLED`）と、開くタイミングが別なので判定も分ける。
+ * `headerCart` / `headerUser` のフラグは公開後も使うため、ここでは系統だけを見る。
  */
 export function isHeaderIconLinkVisibleInChannel(
   label: string,
   channel: PurchaseChannel
 ): boolean {
   if (label === "Cart" && !isWebPurchaseEnabled(channel)) {
+    return false;
+  }
+
+  if (label === "User" && !isAccountEnabled(channel)) {
     return false;
   }
 

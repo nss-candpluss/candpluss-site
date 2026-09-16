@@ -16,6 +16,10 @@ import {
   isHeaderIconLinkVisibleInChannel,
   isMembershipLinkVisible,
 } from "@/lib/site-navigation-visibility";
+import {
+  ACCOUNT_BASE_PATH,
+  ACCOUNT_LOGIN_PATH,
+} from "@/lib/commerce/account-login";
 import { type PurchaseChannel } from "@/lib/commerce/purchase-channel";
 import { HeaderMobileMenu } from "@/components/layout/HeaderMobileMenu";
 import { SiteNavLink } from "@/components/layout/SiteNavLink";
@@ -204,7 +208,13 @@ function HeaderBar({
               return (
                 <Link
                   key={link.label}
-                  href={link.label === "User" && customer ? "/account" : link.href}
+                  href={
+                    link.label === "User"
+                      ? customer
+                        ? ACCOUNT_BASE_PATH
+                        : ACCOUNT_LOGIN_PATH
+                      : link.href
+                  }
                   aria-label={link.label}
                   tabIndex={isHidden ? -1 : undefined}
                   className={iconClassName}

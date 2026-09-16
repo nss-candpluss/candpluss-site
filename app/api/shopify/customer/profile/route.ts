@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+import {
+  ACCOUNT_BASE_PATH,
+  ACCOUNT_LOGIN_PATH,
+} from "@/lib/commerce/account-login";
 import { updateCustomerProfile } from "@/lib/shopify/customer-account";
 import { getCustomerTokenSession } from "@/lib/shopify/customer-session";
 
@@ -13,7 +17,7 @@ const profileSchema = z.object({
 export async function POST(request: Request) {
   const session = await getCustomerTokenSession();
   if (!session) {
-    return Response.redirect(new URL("/account/login", request.url), 303);
+    return Response.redirect(new URL(ACCOUNT_LOGIN_PATH, request.url), 303);
   }
 
   try {
@@ -23,8 +27,14 @@ export async function POST(request: Request) {
       lastName: formData.get("lastName"),
     });
     await updateCustomerProfile(session.accessToken, input);
-    return Response.redirect(new URL("/account?updated=profile", request.url), 303);
+    return Response.redirect(
+      new URL(`${ACCOUNT_BASE_PATH}?updated=profile`, request.url),
+      303
+    );
   } catch {
-    return Response.redirect(new URL("/account?error=profile", request.url), 303);
+    return Response.redirect(
+      new URL(`${ACCOUNT_BASE_PATH}?error=profile`, request.url),
+      303
+    );
   }
 }
