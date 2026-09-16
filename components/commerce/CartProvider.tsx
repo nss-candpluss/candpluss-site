@@ -124,7 +124,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       isCartOpen,
       addLine,
       updateLine: async (lineId, quantity) => {
-        await mutate("PATCH", { lineId, quantity });
+        const nextCart = await mutate("PATCH", { lineId, quantity });
+        const line = nextCart?.lines.nodes.find((node) => node.id === lineId);
+
+        // Shopify は在庫が足りない場合、エラーにせず在庫数まで切り詰めた数量を返す。
+        // 何も知らせないと入力した数量が入ったように見えるため明示する。
+        if (line && line.quantity < quantity) {
+          setError(`在庫の上限により、数量を ${line.quantity} に変更しました。`);
+        }
       },
       removeLine: async (lineId) => {
         await mutate("DELETE", { lineId });

@@ -28,6 +28,14 @@ const supportContactScrollSource = readFileSync(
   join(testDirectory, "../../lib/support-contact/scroll-to-error.ts"),
   "utf8"
 );
+const cartDialogSource = readFileSync(
+  join(testDirectory, "../../components/commerce/CartDialog.tsx"),
+  "utf8"
+);
+const mobileMenuSource = readFileSync(
+  join(testDirectory, "../../components/layout/HeaderMobileMenu.tsx"),
+  "utf8"
+);
 
 function stubBrowser({ touchPoints = 0 }: { touchPoints?: number } = {}) {
   vi.stubGlobal("navigator", { maxTouchPoints: touchPoints });
@@ -102,5 +110,15 @@ describe("site-wide smooth scroll", () => {
     // CartDialog が stopBoundLenis() でロック中は isScrolling === false になる。
     // ガードがないと stop()/start() でロックを解除してしまう。
     expect(integrationSource).toContain('boundLenis.isScrolling !== "smooth"');
+  });
+
+  it("lets nested overlay scrollers keep their own wheel and touch events", () => {
+    // Lenis は window の wheel / touchmove を preventDefault するため、
+    // data-lenis-prevent がないとオーバーレイ内のスクロール領域が動かない。
+    for (const source of [cartDialogSource, mobileMenuSource]) {
+      const scrollerMatch = source.match(/[^\n]*overflow-y-auto[^\n]*/);
+      expect(scrollerMatch).not.toBeNull();
+      expect(source).toContain("data-lenis-prevent");
+    }
   });
 });

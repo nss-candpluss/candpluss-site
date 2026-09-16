@@ -168,8 +168,13 @@ function CartDialogView({ onDismiss }: { onDismiss: () => void }) {
           </h2>
         </div>
 
+        {/*
+          data-lenis-prevent: Lenis は window の wheel / touchmove を preventDefault するため、
+          付けないとカート内のリストがスクロールできない。
+        */}
         <div
           ref={scrollerRef}
+          data-lenis-prevent
           className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {isLoading && !lines.length ? (

@@ -22,28 +22,23 @@ export function CartQuantityStepper({
   onChange,
   onRemove,
 }: CartQuantityStepperProps) {
-  const [draft, setDraft] = useState(String(value));
-  const [prevValue, setPrevValue] = useState(value);
-
-  if (value !== prevValue) {
-    setPrevValue(value);
-    setDraft(String(value));
-  }
+  // 編集中だけ下書きを持ち、確定後は必ずカート側の数量を表示する。
+  // 下書きを残すと、Shopify が在庫上限などで要求より少ない数量を返したときに
+  // 入力欄だけ希望値のままになり、実際のカート内容とズレる。
+  const [draft, setDraft] = useState<string | null>(null);
 
   function commit(next: string | number) {
+    setDraft(null);
     const quantity = clampCartQuantity(next, value);
-    setDraft(String(quantity));
     if (quantity !== value) {
       onChange(quantity);
     }
   }
 
-  const parsedDraft = Number.parseInt(draft, 10);
-  const current = Number.isFinite(parsedDraft) ? parsedDraft : value;
   const removesOnDecrement = shouldRemoveCartLineOnDecrement(value);
   const canDecrement =
     !disabled && (!removesOnDecrement || Boolean(onRemove));
-  const canIncrement = !disabled && current < CART_QUANTITY_MAX;
+  const canIncrement = !disabled && value < CART_QUANTITY_MAX;
   const buttonClassName =
     "relative size-[32px] disabled:opacity-30 before:absolute before:top-1/2 before:left-1/2 before:h-[1.5px] before:w-[12px] before:-translate-x-1/2 before:-translate-y-1/2 before:bg-current before:content-['']";
 
@@ -58,7 +53,7 @@ export function CartQuantityStepper({
             onRemove?.();
             return;
           }
-          commit(current - 1);
+          commit(value - 1);
         }}
         className={buttonClassName}
       />
@@ -68,10 +63,11 @@ export function CartQuantityStepper({
         pattern="[0-9]*"
         autoComplete="off"
         aria-label="数量"
-        value={draft}
+        value={draft ?? String(value)}
         disabled={disabled}
+        onFocus={() => setDraft(String(value))}
         onChange={(event) => setDraft(event.target.value.replace(/\D/g, ""))}
-        onBlur={() => commit(draft)}
+        onBlur={() => commit(draft ?? value)}
         onKeyDown={(event) => {
           if (event.key === "Enter") {
             event.currentTarget.blur();
@@ -83,7 +79,7 @@ export function CartQuantityStepper({
         type="button"
         aria-label="数量を1増やす"
         disabled={!canIncrement}
-        onClick={() => commit(current + 1)}
+        onClick={() => commit(value + 1)}
         className={`${buttonClassName} after:absolute after:top-1/2 after:left-1/2 after:h-[12px] after:w-[1.5px] after:-translate-x-1/2 after:-translate-y-1/2 after:bg-current after:content-['']`}
       />
     </div>

@@ -70,7 +70,11 @@ export function HeaderMobileMenu({ id, isOpen, onClose, onExited }: HeaderMobile
         onTransitionEnd={handlePanelTransitionEnd}
         className={`header-mobile-menu-panel fixed top-0 right-0 z-10 flex h-dvh max-h-dvh w-full max-w-[360px] flex-col bg-white text-[var(--foreground)] ${isOpen ? "is-open" : ""}`}
       >
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-6">
+        {/* data-lenis-prevent: Lenis 有効幅（768〜1024px）でメニュー内がスクロールできなくなるのを防ぐ */}
+        <div
+          data-lenis-prevent
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-6"
+        >
           <div className="flex min-h-full shrink-0 flex-col">
             <div className="flex h-[var(--header-height)] shrink-0 items-center justify-end">
               <button
