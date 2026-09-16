@@ -56,7 +56,7 @@ describe("カートの商品名", () => {
   // 商品名は 2 行に折り返すため、UI テキストの font-size = line-height だと詰まる
   it("行間を font-size より広く取る", () => {
     expect(cartLineTitleClassName).toContain(
-      "leading-[clamp(22px,calc(26px*var(--text-scale)),26px)]"
+      "leading-[clamp(21px,calc(24px*var(--text-scale)),24px)]"
     );
   });
 

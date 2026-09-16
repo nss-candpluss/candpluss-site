@@ -108,13 +108,13 @@ export const conceptStoryBodyClassName =
   "text-[clamp(16px,calc(18px*var(--text-scale)),18px)] leading-[calc(36px*var(--text-scale))]";
 
 /**
- * カートの商品名: 18px / 26px
+ * カートの商品名: 18px / 24px
  *
  * 商品名は 2 行に折り返すことがあり、UI テキストの 1:1 だと行同士が詰まる。
- * 商品説明タイトル（`productFeatureItemTitleClassName`）と同じ行間に合わせる。
+ * 一覧の中の 1 項目なので、商品説明タイトルの 18px / 26px より詰めて置く。
  */
 export const cartLineTitleClassName =
-  "text-[clamp(16px,calc(18px*var(--text-scale)),18px)] leading-[clamp(22px,calc(26px*var(--text-scale)),26px)]";
+  "text-[clamp(16px,calc(18px*var(--text-scale)),18px)] leading-[clamp(21px,calc(24px*var(--text-scale)),24px)]";
 
 /** 商品詳細セクション見出し（Feature / Size & Spec / Options）: 最大 62px、最小 46px */
 export const productDetailSectionTitleClassName =
