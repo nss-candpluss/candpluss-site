@@ -34,7 +34,6 @@ const staticRoutes = new Set([
   "/support/confirm",
   "/support/thanks",
   "/news",
-  "/cart",
   "/account",
   "/account/login",
   "/contact",
@@ -123,9 +122,10 @@ describe("internal page links", () => {
       ...mobileSecondaryNavigationLinks
         .filter((link) => link.label !== "お問い合わせ" || isContactLinkVisible())
         .map((link) => link.href),
+      // カートは遷移先を持たない（ポップアップを開くボタン）ので href がない
       ...headerIconLinks
         .filter((link) => isHeaderIconLinkVisible(link.label))
-        .map((link) => link.href),
+        .flatMap((link) => ("href" in link ? [link.href] : [])),
       footerContent.logo.href,
       ...footerContent.navLinks.map((link) => link.href),
       ...footerContent.primaryLinks
@@ -156,7 +156,9 @@ describe("internal page links", () => {
   });
 
   it("keeps pending internal links listed until they are ready", () => {
-    expect(headerIconLinks.some((link) => link.href === "/search")).toBe(true);
+    expect(
+      headerIconLinks.some((link) => "href" in link && link.href === "/search")
+    ).toBe(true);
     expect(isHeaderIconLinkVisible("Search")).toBe(false);
   });
 

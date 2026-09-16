@@ -32,9 +32,9 @@ export const headerIconLinks = [
     href: "/account/login",
     iconSrc: "/assets/icons/icon-user.svg",
   },
+  // カートはページを持たない。ヘッダーのアイコンはポップアップを開くボタン。
   {
     label: "Cart",
-    href: "/cart",
     iconSrc: "/assets/icons/icon-cart.svg",
   },
 ] as const;

@@ -1,9 +1,10 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
+import { headerIconLinks } from "@/data/navigation";
 import {
   TEST_AREA_ROOT_PATH,
   channelPath,
@@ -113,9 +114,12 @@ describe("テスト領域の保護", () => {
   });
 });
 
-describe("カートの画面は 2 系統に分けない", () => {
-  it("公開ページとテスト領域が同じコンポーネントを使う", () => {
-    expect(readSource("app/cart/page.tsx")).toContain("CartPageContent");
+describe("カートページはテスト領域だけに置く", () => {
+  it("公開ページ側の /cart は持たない", () => {
+    expect(existsSync(join(rootDir, "app/cart"))).toBe(false);
+  });
+
+  it("テスト領域の確認用ページは残す", () => {
     expect(readSource("app/shopify-test/cart/page.tsx")).toContain(
       "CartPageContent"
     );
@@ -144,17 +148,16 @@ describe("カートへの入口", () => {
     const source = readSource("components/layout/Header.tsx");
 
     expect(source).toContain("isHeaderIconLinkVisibleInChannel(link.label, channel)");
-    expect(source).toContain("channelPath(channel, link.href)");
   });
 
-  // アイコンを消すだけでは URL 直打ちで入れてしまう
-  it("公開ページの /cart は閉じ、テスト領域は開いたまま", () => {
-    const source = readSource("app/cart/layout.tsx");
-
-    expect(source).toContain('isWebPurchaseEnabled("public")');
-    expect(source).toContain("notFound()");
-    expect(readSource("app/shopify-test/cart/page.tsx")).not.toContain(
-      "notFound"
+  // 遷移先を持たせると ⌘クリックや新しいタブで存在しないページに飛べてしまう
+  it("ヘッダーのカートはリンクではなくポップアップを開くボタン", () => {
+    expect(headerIconLinks.some((link) => link.label === "Cart")).toBe(true);
+    expect(
+      headerIconLinks.some((link) => link.label === "Cart" && "href" in link)
+    ).toBe(false);
+    expect(readSource("components/layout/Header.tsx")).toContain(
+      'aria-haspopup="dialog"'
     );
   });
 });

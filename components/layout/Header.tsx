@@ -10,17 +10,13 @@ import {
   headerMenuButton,
 } from "@/data/navigation";
 import { useCart } from "@/components/commerce/CartProvider";
-import { shouldOpenCartPopup } from "@/components/commerce/dialog-panel";
 import { useCustomer } from "@/components/commerce/CustomerProvider";
 import { usePurchaseChannel } from "@/components/commerce/PurchaseChannelProvider";
 import {
   isHeaderIconLinkVisibleInChannel,
   isMembershipLinkVisible,
 } from "@/lib/site-navigation-visibility";
-import {
-  channelPath,
-  type PurchaseChannel,
-} from "@/lib/commerce/purchase-channel";
+import { type PurchaseChannel } from "@/lib/commerce/purchase-channel";
 import { HeaderMobileMenu } from "@/components/layout/HeaderMobileMenu";
 import { SiteNavLink } from "@/components/layout/SiteNavLink";
 import { hoverUnderlineActiveClassName, hoverUnderlineHoverClassName } from "@/components/ui/TextLink";
@@ -173,45 +169,50 @@ function HeaderBar({
         <div className="flex items-center justify-end gap-[var(--header-icon-gap)]">
           {headerIconLinks
             .filter((link) => isHeaderIconLinkVisibleInChannel(link.label, channel))
-            .map((link) => (
-              <Link
-                key={link.href}
-                href={
-                  link.label === "User" && customer
-                    ? "/account"
-                    : link.label === "Cart"
-                      ? channelPath(channel, link.href)
-                      : link.href
-                }
-                aria-label={link.label}
-                aria-haspopup={link.label === "Cart" ? "dialog" : undefined}
-                tabIndex={isHidden ? -1 : undefined}
-                onClick={
-                  link.label === "Cart"
-                    ? (event) => {
-                        if (!shouldOpenCartPopup(event)) {
-                          return;
-                        }
-
-                        event.preventDefault();
-                        openCart();
-                      }
-                    : undefined
-                }
-                className={`relative items-center justify-center ${
-                  link.label === "Search" ? "hidden min-[1025px]:inline-flex" : "inline-flex"
-                }`}
-              >
+            .map((link) => {
+              const iconClassName = `relative items-center justify-center ${
+                link.label === "Search" ? "hidden min-[1025px]:inline-flex" : "inline-flex"
+              }`;
+              const icon = (
                 <HeaderMaskGraphic src={link.iconSrc} className={headerIconClassName} />
-                {link.label === "Cart" && cartQuantity ? (
-                  <span
-                    className={`font-ui-en absolute top-[-10px] right-[-10px] flex size-[20px] items-center justify-center rounded-full text-[10px] leading-[10px] ${badgeClassName}`}
+              );
+
+              // カートはページを持たずポップアップだけで完結するので、リンクではなくボタン。
+              if (link.label === "Cart") {
+                return (
+                  <button
+                    key={link.label}
+                    type="button"
+                    aria-label={link.label}
+                    aria-haspopup="dialog"
+                    tabIndex={isHidden ? -1 : undefined}
+                    onClick={openCart}
+                    className={`${iconClassName} cursor-pointer`}
                   >
-                    {Math.min(cartQuantity, 99)}
-                  </span>
-                ) : null}
-              </Link>
-            ))}
+                    {icon}
+                    {cartQuantity ? (
+                      <span
+                        className={`font-ui-en absolute top-[-10px] right-[-10px] flex size-[20px] items-center justify-center rounded-full text-[10px] leading-[10px] ${badgeClassName}`}
+                      >
+                        {Math.min(cartQuantity, 99)}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              }
+
+              return (
+                <Link
+                  key={link.label}
+                  href={link.label === "User" && customer ? "/account" : link.href}
+                  aria-label={link.label}
+                  tabIndex={isHidden ? -1 : undefined}
+                  className={iconClassName}
+                >
+                  {icon}
+                </Link>
+              );
+            })}
 
           <button
             type="button"

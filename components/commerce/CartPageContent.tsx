@@ -22,8 +22,8 @@ function formatMoney(amount: string, currencyCode: string) {
 }
 
 /**
- * `/cart` とテスト領域の `/shopify-test/cart` で共有する。
- * 見た目を 2 系統に分けないため、差分は購入系統の判定だけに閉じる。
+ * 購入導線はカートポップアップだけで完結するため、公開ページにカートページはない。
+ * これはテスト領域の `/shopify-test/cart` 専用の確認用ページ。
  */
 export function CartPageContent() {
   const { cart, error, isLoading, removeLine, updateLine } = useCart();

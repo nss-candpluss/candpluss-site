@@ -4,7 +4,7 @@ import { TEST_AREA_ROOT_PATH } from "@/lib/commerce/purchase-channel";
 import { absoluteUrl } from "@/lib/site-metadata";
 import { siteConfig } from "@/lib/site";
 
-/** 検索対象にする固定ページ。confirm / cart / account / リダイレクトは含めない */
+/** 検索対象にする固定ページ。confirm / account / リダイレクトは含めない */
 export const sitemapStaticPaths = [
   "/",
   "/products",
@@ -24,7 +24,6 @@ export const sitemapStaticPaths = [
 
 /** 公開後もクロールさせないパス */
 export const robotsDisallowPaths = [
-  "/cart",
   TEST_AREA_ROOT_PATH,
   "/account",
   "/contact/confirm",

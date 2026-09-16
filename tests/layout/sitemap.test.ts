@@ -34,7 +34,7 @@ function collectStaticRoutes(dir = join(rootDir, "app"), route = ""): string[] {
 const staticRoutes = collectStaticRoutes().sort();
 
 /**
- * noindex はページ側 metadata か、`/cart` のように layout 側で指定される。
+ * noindex はページ側 metadata か、`/shopify-test` のように layout 側で指定される。
  * ルートの app/layout.tsx は allowSearchIndexing 次第で外れるため対象にしない。
  */
 function hasNoindex(route: string): boolean {
@@ -101,7 +101,6 @@ describe("sitemap and robots", () => {
       allow: "/",
     });
     expect(openRules?.disallow).toEqual([...robotsDisallowPaths]);
-    expect(openRules?.disallow).toContain("/cart");
     expect(openRules?.disallow).toContain("/shopify-test");
     expect(openRules?.disallow).toContain("/account");
     expect(openRules?.disallow).toContain("/api/");
