@@ -118,18 +118,12 @@ export type CustomerOrderDetail = {
   };
 };
 
-export type CustomerStoreCreditAccount = {
-  id: string;
-  balance: CustomerMoney;
-};
-
 /** 取れなかった理由も画面に出したいので、失敗を投げずに持ち回る */
 export type CustomerSection<T> = { data: T | null; error: string | null };
 
 export type CustomerAccountSnapshot = {
   profile: CustomerAccount;
   orders: CustomerSection<CustomerOrderDetail[]>;
-  storeCreditAccounts: CustomerSection<CustomerStoreCreditAccount[]>;
   relatedRecordCounts: CustomerSection<{
     companyContacts: number;
     subscriptionContracts: number;
@@ -347,13 +341,15 @@ async function loadSection<T>(load: () => Promise<T>): Promise<CustomerSection<T
 /**
  * 会員画面の確認用に、取得できる情報をまとめて集める。
  *
- * 注文・ストアクレジット・B2B / 定期購入はそれぞれ別のアクセススコープに
- * 依存するので、1 つ失敗しても他が道連れにならないようクエリを分ける。
+ * 注文と B2B / 定期購入はそれぞれ別のアクセススコープに依存するので、
+ * 1 つ失敗しても他が道連れにならないようクエリを分ける。
+ *
+ * ストアクレジットは Headless の顧客トークンでは許可されないため扱わない。
  */
 export async function fetchCustomerAccountSnapshot(
   accessToken: string
 ): Promise<CustomerAccountSnapshot> {
-  const [profile, orders, storeCreditAccounts, relatedRecordCounts] =
+  const [profile, orders, relatedRecordCounts] =
     await Promise.all([
       fetchCustomerAccount(accessToken),
       loadSection(async () => {
@@ -425,24 +421,6 @@ export async function fetchCustomerAccountSnapshot(
       loadSection(async () => {
         const data = await customerAccountRequest<{
           customer?: {
-            storeCreditAccounts: { nodes: CustomerStoreCreditAccount[] };
-          } | null;
-        }>(
-          accessToken,
-          `query CustomerStoreCredit {
-            customer {
-              storeCreditAccounts(first: 10) {
-                nodes { id balance { amount currencyCode } }
-              }
-            }
-          }`
-        );
-
-        return data.customer?.storeCreditAccounts.nodes ?? [];
-      }),
-      loadSection(async () => {
-        const data = await customerAccountRequest<{
-          customer?: {
             companyContacts: { nodes: Array<{ id: string }> };
             subscriptionContracts: { nodes: Array<{ id: string }> };
             draftOrders: { nodes: Array<{ id: string }> };
@@ -467,7 +445,7 @@ export async function fetchCustomerAccountSnapshot(
       }),
     ]);
 
-  return { profile, orders, storeCreditAccounts, relatedRecordCounts };
+  return { profile, orders, relatedRecordCounts };
 }
 
 async function customerAccountRequest<T>(

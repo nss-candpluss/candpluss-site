@@ -451,25 +451,6 @@ export async function AccountPageContent() {
             />
           </Section>
 
-          <Section title="STORE CREDIT">
-            <SectionBody
-              section={snapshot.storeCreditAccounts}
-              empty="ストアクレジットはありません。"
-              isEmpty={(accounts) => accounts.length === 0}
-              render={(accounts) => (
-                <FieldList>
-                  {accounts.map((account) => (
-                    <Field
-                      key={account.id}
-                      label={account.balance.currencyCode}
-                      value={formatMoney(account.balance)}
-                    />
-                  ))}
-                </FieldList>
-              )}
-            />
-          </Section>
-
           <Section title="RELATED RECORDS">
             <SectionBody
               section={snapshot.relatedRecordCounts}
