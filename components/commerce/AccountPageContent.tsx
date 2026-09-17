@@ -88,6 +88,29 @@ function FieldList({ children }: { children: React.ReactNode }) {
   return <dl className="border-t border-[#eee]">{children}</dl>;
 }
 
+/** 追跡は開けないと意味がないので、URL の項目だけリンクにする */
+function LinkField({ label, url }: { label: string; url?: string | null }) {
+  if (!url) {
+    return <Field label={label} value={NOT_REGISTERED} />;
+  }
+
+  return (
+    <div className="grid gap-1 border-b border-[#eee] py-3 min-[640px]:grid-cols-[200px_minmax(0,1fr)] min-[640px]:gap-4">
+      <dt className="font-body-ja text-xs text-[var(--color-muted)]">{label}</dt>
+      <dd className="font-body-ja text-sm break-all">
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline"
+        >
+          {url}
+        </a>
+      </dd>
+    </div>
+  );
+}
+
 function AddressFields({
   address,
   prefix,
@@ -192,8 +215,99 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
         <Field label="送料" value={formatMoney(order.totalShipping)} />
         <Field label="返金額" value={formatMoney(order.totalRefunded)} />
         <Field label="合計" value={formatMoney(order.totalPrice)} />
-        <Field label="ステータスページ" value={order.statusPageUrl} />
+        <LinkField label="ステータスページ" url={order.statusPageUrl} />
       </FieldList>
+
+      <div className="mt-8">
+        <h4 className="font-ui-en text-sm font-semibold">FULFILLMENTS</h4>
+        {order.fulfillments.nodes.length ? (
+          <ul className="mt-3 flex flex-col gap-6">
+            {order.fulfillments.nodes.map((fulfillment) => (
+              <li key={fulfillment.id}>
+                <FieldList>
+                  <Field label="発送 ID" value={fulfillment.id} />
+                  <Field
+                    label="発送状態"
+                    value={formatText(fulfillment.status)}
+                  />
+                  <Field
+                    label="最新の配送状況"
+                    value={formatText(fulfillment.latestShipmentStatus)}
+                  />
+                  <Field
+                    label="配達予定日時"
+                    value={formatDateTime(fulfillment.estimatedDeliveryAt)}
+                  />
+                  <Field
+                    label="発送日時"
+                    value={formatDateTime(fulfillment.createdAt)}
+                  />
+                  <Field
+                    label="更新日時"
+                    value={formatDateTime(fulfillment.updatedAt)}
+                  />
+                  <Field
+                    label="店頭受け取り済み"
+                    value={formatBoolean(fulfillment.isPickedUp)}
+                  />
+                  <Field
+                    label="配送が必要"
+                    value={formatBoolean(fulfillment.requiresShipping)}
+                  />
+                </FieldList>
+
+                <div className="mt-6">
+                  <h5 className="font-ui-en text-xs font-semibold">TRACKING</h5>
+                  {fulfillment.trackingInformation.length ? (
+                    <div className="mt-2 flex flex-col gap-4">
+                      {fulfillment.trackingInformation.map((tracking) => (
+                        <FieldList key={`${tracking.number}-${tracking.url}`}>
+                          <Field
+                            label="配送業者"
+                            value={formatText(tracking.company)}
+                          />
+                          <Field
+                            label="追跡番号"
+                            value={formatText(tracking.number)}
+                          />
+                          <LinkField label="追跡 URL" url={tracking.url} />
+                        </FieldList>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-2 font-body-ja text-sm text-[var(--color-muted)]">
+                      {NOT_REGISTERED}
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-6">
+                  <h5 className="font-ui-en text-xs font-semibold">EVENTS</h5>
+                  {fulfillment.events.nodes.length ? (
+                    <FieldList>
+                      {fulfillment.events.nodes.map((event) => (
+                        <Field
+                          key={event.id}
+                          label={formatDateTime(event.happenedAt)}
+                          value={event.status}
+                        />
+                      ))}
+                    </FieldList>
+                  ) : (
+                    <p className="mt-2 font-body-ja text-sm text-[var(--color-muted)]">
+                      {NOT_REGISTERED}
+                    </p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-3 font-body-ja text-sm text-[var(--color-muted)]">
+            {NOT_REGISTERED}
+          </p>
+        )}
+      </div>
 
       <div className="mt-8">
         <h4 className="font-ui-en text-sm font-semibold">SHIPPING ADDRESS</h4>
@@ -253,10 +367,7 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
                     label="割引額"
                     value={formatMoney(lineItem.totalDiscount)}
                   />
-                  <Field
-                    label="画像 URL"
-                    value={formatText(lineItem.image?.url)}
-                  />
+                  <LinkField label="画像 URL" url={lineItem.image?.url} />
                   <Field
                     label="画像 alt"
                     value={formatText(lineItem.image?.altText)}

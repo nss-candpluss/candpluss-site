@@ -66,6 +66,23 @@ export type CustomerAccount = {
   addresses: { nodes: CustomerAddressDetail[] };
 };
 
+export type CustomerFulfillmentDetail = {
+  id: string;
+  status?: string | null;
+  latestShipmentStatus?: string | null;
+  estimatedDeliveryAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  isPickedUp: boolean;
+  requiresShipping: boolean;
+  trackingInformation: Array<{
+    company?: string | null;
+    number?: string | null;
+    url?: string | null;
+  }>;
+  events: { nodes: Array<{ id: string; status: string; happenedAt: string }> };
+};
+
 export type CustomerOrderDetail = {
   id: string;
   name: string;
@@ -97,6 +114,7 @@ export type CustomerOrderDetail = {
   totalPrice: CustomerMoney;
   shippingAddress?: CustomerAddressDetail | null;
   billingAddress?: CustomerAddressDetail | null;
+  fulfillments: { nodes: CustomerFulfillmentDetail[] };
   lineItems: {
     nodes: Array<{
       id: string;
@@ -391,6 +409,22 @@ export async function fetchCustomerAccountSnapshot(
                   totalPrice { amount currencyCode }
                   shippingAddress { ${ADDRESS_FIELDS} }
                   billingAddress { ${ADDRESS_FIELDS} }
+                  fulfillments(first: 10) {
+                    nodes {
+                      id
+                      status
+                      latestShipmentStatus
+                      estimatedDeliveryAt
+                      createdAt
+                      updatedAt
+                      isPickedUp
+                      requiresShipping
+                      trackingInformation { company number url }
+                      events(first: 20, reverse: true) {
+                        nodes { id status happenedAt }
+                      }
+                    }
+                  }
                   lineItems(first: 20) {
                     nodes {
                       id
