@@ -172,6 +172,25 @@ describe("会員画面はリリースまでテスト領域だけで開く", () =
     );
   });
 
+  // Shopify のサインイン画面は置き換えられず、メールもそちらで入力する。
+  // 自前の案内ページを挟むと同じ入力を二度させることになる。
+  it("未ログインは案内ページを挟まず Shopify へ直接送る", () => {
+    expect(
+      readSource("components/commerce/AccountPageContent.tsx")
+    ).toContain("redirect(ACCOUNT_LOGIN_START_PATH)");
+  });
+
+  // クライアントのログイン判定を待つと、読み込み直後に押したとき
+  // ログイン済みでも Shopify を経由して戻る遠回りになる
+  it("ユーザーアイコンの行き先はログイン状態によらずマイページ", () => {
+    const source = readSource("components/layout/Header.tsx");
+
+    expect(source).toContain("href={ACCOUNT_BASE_PATH}");
+    expect(source).not.toContain("useCustomer");
+    // 判定のためだけに毎回サーバーへ行かせない
+    expect(source).toContain("prefetch={false}");
+  });
+
   it("テスト領域の会員画面は閉じない", () => {
     expect(
       existsSync(join(rootDir, "app/shopify-test/account/layout.tsx"))

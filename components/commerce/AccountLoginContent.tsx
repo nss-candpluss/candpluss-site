@@ -14,8 +14,12 @@ type AccountLoginContentProps = {
 };
 
 /**
- * 公開ページの `/account/login` とテスト領域の `/shopify-test/account/login`
- * で共有する。会員機能のリリース前は公開側が閉じているだけ。
+ * ログインの案内ページ。公開ページの `/account/login` とテスト領域の
+ * `/shopify-test/account/login` で共有する。
+ *
+ * 通常のログインはここを通さず Shopify のサインイン画面へ直接送る。
+ * ここに来るのはログイン設定に不備があって差し戻されたときと、URL を直接
+ * 開いたときだけなので、メール入力は手動のフォールバックとして残している。
  */
 export async function AccountLoginContent({
   returnTo: requestedReturnTo,

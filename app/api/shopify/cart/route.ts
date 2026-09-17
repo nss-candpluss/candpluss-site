@@ -14,7 +14,7 @@ import {
   saveCartIdToSession,
 } from "@/lib/shopify/cart-session";
 import { evaluateCartMerchandisePolicy } from "@/lib/commerce/cart-policy";
-import { getCustomerTokenSession } from "@/lib/shopify/customer-session";
+import { getLiveCustomerTokenSession } from "@/lib/shopify/customer-session";
 
 export const runtime = "nodejs";
 
@@ -57,8 +57,7 @@ function errorResponse(error: unknown) {
 }
 
 async function isCustomerAuthenticated() {
-  const customerSession = await getCustomerTokenSession();
-  return Boolean(customerSession && customerSession.expiresAt > Date.now());
+  return Boolean(await getLiveCustomerTokenSession());
 }
 
 export async function GET(request: Request) {

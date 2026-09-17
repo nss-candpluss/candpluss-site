@@ -32,6 +32,13 @@ export async function getCustomerTokenSession() {
   );
 }
 
+/** 期限切れは未ログインとして扱う。Server Component からも使う */
+export async function getLiveCustomerTokenSession() {
+  const session = await getCustomerTokenSession();
+
+  return session && session.expiresAt > Date.now() ? session : null;
+}
+
 export async function saveCustomerTokenSession(session: CustomerTokenSession) {
   const cookieStore = await cookies();
   cookieStore.set(CUSTOMER_SESSION_COOKIE, encryptSession(session), {

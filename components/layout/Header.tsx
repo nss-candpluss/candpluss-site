@@ -10,16 +10,12 @@ import {
   headerMenuButton,
 } from "@/data/navigation";
 import { useCart } from "@/components/commerce/CartProvider";
-import { useCustomer } from "@/components/commerce/CustomerProvider";
 import { usePurchaseChannel } from "@/components/commerce/PurchaseChannelProvider";
 import {
   isHeaderIconLinkVisibleInChannel,
   isMembershipLinkVisible,
 } from "@/lib/site-navigation-visibility";
-import {
-  ACCOUNT_BASE_PATH,
-  ACCOUNT_LOGIN_PATH,
-} from "@/lib/commerce/account-login";
+import { ACCOUNT_BASE_PATH } from "@/lib/commerce/account-login";
 import { type PurchaseChannel } from "@/lib/commerce/purchase-channel";
 import { HeaderMobileMenu } from "@/components/layout/HeaderMobileMenu";
 import { SiteNavLink } from "@/components/layout/SiteNavLink";
@@ -99,7 +95,6 @@ type HeaderBarProps = {
   isScrollVisible: boolean;
   isMobileMenuOpen: boolean;
   cartQuantity: number;
-  customer: unknown;
   openCart: () => void;
   openMobileMenu: () => void;
 };
@@ -113,7 +108,6 @@ function HeaderBar({
   isScrollVisible,
   isMobileMenuOpen,
   cartQuantity,
-  customer,
   openCart,
   openMobileMenu,
 }: HeaderBarProps) {
@@ -205,16 +199,29 @@ function HeaderBar({
                 );
               }
 
+              // 行き先は常にマイページ。未ログインかどうかはサーバー側で見て
+              // Shopify のサインイン画面へ送る。クライアントのログイン判定を
+              // 待たないので、読み込み直後に押しても遠回りしない。
+              // prefetch すると判定のためだけに毎回サーバーへ行くので止める。
+              if (link.label === "User") {
+                return (
+                  <Link
+                    key={link.label}
+                    href={ACCOUNT_BASE_PATH}
+                    prefetch={false}
+                    aria-label={link.label}
+                    tabIndex={isHidden ? -1 : undefined}
+                    className={iconClassName}
+                  >
+                    {icon}
+                  </Link>
+                );
+              }
+
               return (
                 <Link
                   key={link.label}
-                  href={
-                    link.label === "User"
-                      ? customer
-                        ? ACCOUNT_BASE_PATH
-                        : ACCOUNT_LOGIN_PATH
-                      : link.href
-                  }
+                  href={link.href}
                   aria-label={link.label}
                   tabIndex={isHidden ? -1 : undefined}
                   className={iconClassName}
@@ -246,7 +253,6 @@ export function Header() {
   const pathname = usePathname();
   const channel = usePurchaseChannel();
   const { cart, openCart } = useCart();
-  const { customer } = useCustomer();
   const pageHeaderRef = useRef<HTMLElement>(null);
   const scrollHeaderRef = useRef<HTMLElement>(null);
   const scrollYRef = useRef(0);
@@ -381,7 +387,6 @@ export function Header() {
     isScrollVisible: isScrollHeaderVisible,
     isMobileMenuOpen,
     cartQuantity,
-    customer,
     openCart,
     openMobileMenu,
   };

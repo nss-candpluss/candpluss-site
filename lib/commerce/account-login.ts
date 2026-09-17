@@ -26,7 +26,19 @@ export function isAccountEnabled(channel: PurchaseChannel): boolean {
 export const ACCOUNT_BASE_PATH = PUBLIC_ACCOUNT_ENABLED
   ? "/account"
   : `${TEST_AREA_ROOT_PATH}/account`;
+
+/**
+ * ログインの案内ページ。
+ *
+ * Shopify のサインイン画面は自前の画面に置き換えられず、メールアドレスも
+ * そちらで入力する。同じ入力を二度させないため、通常のログインはこのページを
+ * 通さず `ACCOUNT_LOGIN_START_PATH` から直接 Shopify へ送る。
+ * ここはログイン設定の不備を知らせる受け皿として残している。
+ */
 export const ACCOUNT_LOGIN_PATH = `${ACCOUNT_BASE_PATH}/login`;
+
+/** OAuth を開始するルートハンドラ。Shopify のサインイン画面へ転送する */
+export const ACCOUNT_LOGIN_START_PATH = "/account/login/start";
 
 export function safeAccountReturnTo(value: string | null | undefined) {
   return value?.startsWith("/") && !value.startsWith("//")

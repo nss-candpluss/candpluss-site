@@ -28,34 +28,133 @@ export type CustomerTokenSession = {
   expiresAt: number;
 };
 
-export type CustomerAccount = {
+export type CustomerMoney = { amount: string; currencyCode: string };
+
+export type CustomerAddressDetail = {
   id: string;
+  name?: string | null;
   firstName?: string | null;
   lastName?: string | null;
-  emailAddress?: { emailAddress: string } | null;
-  defaultAddress?: {
-    id: string;
-    firstName?: string | null;
-    lastName?: string | null;
-    address1?: string | null;
-    address2?: string | null;
-    city?: string | null;
-    zoneCode?: string | null;
-    territoryCode?: string | null;
-    zip?: string | null;
-    formatted: string[];
+  company?: string | null;
+  zip?: string | null;
+  country?: string | null;
+  territoryCode?: string | null;
+  province?: string | null;
+  zoneCode?: string | null;
+  city?: string | null;
+  address1?: string | null;
+  address2?: string | null;
+  phoneNumber?: string | null;
+  formattedArea?: string | null;
+  formatted: string[];
+};
+
+export type CustomerAccount = {
+  id: string;
+  displayName: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  imageUrl: string;
+  creationDate: string;
+  tags: string[];
+  emailAddress?: {
+    emailAddress?: string | null;
+    marketingState: string;
   } | null;
-  orders: {
+  phoneNumber?: { phoneNumber: string } | null;
+  defaultAddress?: CustomerAddressDetail | null;
+  addresses: { nodes: CustomerAddressDetail[] };
+};
+
+export type CustomerOrderDetail = {
+  id: string;
+  name: string;
+  number: number;
+  confirmationNumber?: string | null;
+  processedAt: string;
+  createdAt: string;
+  updatedAt: string;
+  cancelledAt?: string | null;
+  cancelReason?: string | null;
+  edited: boolean;
+  email?: string | null;
+  phone?: string | null;
+  note?: string | null;
+  poNumber?: string | null;
+  customerLocale?: string | null;
+  locationName?: string | null;
+  currencyCode: string;
+  financialStatus?: string | null;
+  fulfillmentStatus: string;
+  requiresShipping: boolean;
+  statusPageUrl: string;
+  subtotal?: CustomerMoney | null;
+  totalTax?: CustomerMoney | null;
+  totalTip?: CustomerMoney | null;
+  totalDuties?: CustomerMoney | null;
+  totalShipping: CustomerMoney;
+  totalRefunded: CustomerMoney;
+  totalPrice: CustomerMoney;
+  shippingAddress?: CustomerAddressDetail | null;
+  billingAddress?: CustomerAddressDetail | null;
+  lineItems: {
     nodes: Array<{
       id: string;
       name: string;
-      processedAt: string;
-      financialStatus?: string | null;
-      fulfillmentStatus?: string | null;
-      totalPrice: { amount: string; currencyCode: string };
+      title: string;
+      variantTitle?: string | null;
+      sku?: string | null;
+      vendor?: string | null;
+      productType?: string | null;
+      quantity: number;
+      refundableQuantity: number;
+      requiresShipping: boolean;
+      giftCard: boolean;
+      price?: CustomerMoney | null;
+      totalPrice?: CustomerMoney | null;
+      totalDiscount: CustomerMoney;
+      image?: { url: string; altText?: string | null } | null;
     }>;
   };
 };
+
+export type CustomerStoreCreditAccount = {
+  id: string;
+  balance: CustomerMoney;
+};
+
+/** 取れなかった理由も画面に出したいので、失敗を投げずに持ち回る */
+export type CustomerSection<T> = { data: T | null; error: string | null };
+
+export type CustomerAccountSnapshot = {
+  profile: CustomerAccount;
+  orders: CustomerSection<CustomerOrderDetail[]>;
+  storeCreditAccounts: CustomerSection<CustomerStoreCreditAccount[]>;
+  relatedRecordCounts: CustomerSection<{
+    companyContacts: number;
+    subscriptionContracts: number;
+    draftOrders: number;
+  }>;
+};
+
+const ADDRESS_FIELDS = `
+  id
+  name
+  firstName
+  lastName
+  company
+  zip
+  country
+  territoryCode
+  province
+  zoneCode
+  city
+  address1
+  address2
+  phoneNumber
+  formattedArea
+  formatted
+`;
 
 function getCustomerAccountConfig(): CustomerAccountConfig {
   const accountUrl =
@@ -212,31 +311,16 @@ export async function fetchCustomerAccount(accessToken: string) {
     `query CustomerAccount {
       customer {
         id
+        displayName
         firstName
         lastName
-        emailAddress { emailAddress }
-        defaultAddress {
-          id
-          firstName
-          lastName
-          address1
-          address2
-          city
-          zoneCode
-          territoryCode
-          zip
-          formatted
-        }
-        orders(first: 20, reverse: true) {
-          nodes {
-            id
-            name
-            processedAt
-            financialStatus
-            fulfillmentStatus
-            totalPrice { amount currencyCode }
-          }
-        }
+        imageUrl
+        creationDate
+        tags
+        emailAddress { emailAddress marketingState }
+        phoneNumber { phoneNumber }
+        defaultAddress { ${ADDRESS_FIELDS} }
+        addresses(first: 20) { nodes { ${ADDRESS_FIELDS} } }
       }
     }`
   );
@@ -246,6 +330,144 @@ export async function fetchCustomerAccount(accessToken: string) {
   }
 
   return data.customer;
+}
+
+function sectionError(cause: unknown): string {
+  return cause instanceof Error ? cause.message : "取得に失敗しました。";
+}
+
+async function loadSection<T>(load: () => Promise<T>): Promise<CustomerSection<T>> {
+  try {
+    return { data: await load(), error: null };
+  } catch (cause) {
+    return { data: null, error: sectionError(cause) };
+  }
+}
+
+/**
+ * 会員画面の確認用に、取得できる情報をまとめて集める。
+ *
+ * 注文・ストアクレジット・B2B / 定期購入はそれぞれ別のアクセススコープに
+ * 依存するので、1 つ失敗しても他が道連れにならないようクエリを分ける。
+ */
+export async function fetchCustomerAccountSnapshot(
+  accessToken: string
+): Promise<CustomerAccountSnapshot> {
+  const [profile, orders, storeCreditAccounts, relatedRecordCounts] =
+    await Promise.all([
+      fetchCustomerAccount(accessToken),
+      loadSection(async () => {
+        const data = await customerAccountRequest<{
+          customer?: { orders: { nodes: CustomerOrderDetail[] } } | null;
+        }>(
+          accessToken,
+          `query CustomerOrders {
+            customer {
+              orders(first: 20, reverse: true) {
+                nodes {
+                  id
+                  name
+                  number
+                  confirmationNumber
+                  processedAt
+                  createdAt
+                  updatedAt
+                  cancelledAt
+                  cancelReason
+                  edited
+                  email
+                  phone
+                  note
+                  poNumber
+                  customerLocale
+                  locationName
+                  currencyCode
+                  financialStatus
+                  fulfillmentStatus
+                  requiresShipping
+                  statusPageUrl
+                  subtotal { amount currencyCode }
+                  totalTax { amount currencyCode }
+                  totalTip { amount currencyCode }
+                  totalDuties { amount currencyCode }
+                  totalShipping { amount currencyCode }
+                  totalRefunded { amount currencyCode }
+                  totalPrice { amount currencyCode }
+                  shippingAddress { ${ADDRESS_FIELDS} }
+                  billingAddress { ${ADDRESS_FIELDS} }
+                  lineItems(first: 20) {
+                    nodes {
+                      id
+                      name
+                      title
+                      variantTitle
+                      sku
+                      vendor
+                      productType
+                      quantity
+                      refundableQuantity
+                      requiresShipping
+                      giftCard
+                      price { amount currencyCode }
+                      totalPrice { amount currencyCode }
+                      totalDiscount { amount currencyCode }
+                      image { url altText }
+                    }
+                  }
+                }
+              }
+            }
+          }`
+        );
+
+        return data.customer?.orders.nodes ?? [];
+      }),
+      loadSection(async () => {
+        const data = await customerAccountRequest<{
+          customer?: {
+            storeCreditAccounts: { nodes: CustomerStoreCreditAccount[] };
+          } | null;
+        }>(
+          accessToken,
+          `query CustomerStoreCredit {
+            customer {
+              storeCreditAccounts(first: 10) {
+                nodes { id balance { amount currencyCode } }
+              }
+            }
+          }`
+        );
+
+        return data.customer?.storeCreditAccounts.nodes ?? [];
+      }),
+      loadSection(async () => {
+        const data = await customerAccountRequest<{
+          customer?: {
+            companyContacts: { nodes: Array<{ id: string }> };
+            subscriptionContracts: { nodes: Array<{ id: string }> };
+            draftOrders: { nodes: Array<{ id: string }> };
+          } | null;
+        }>(
+          accessToken,
+          `query CustomerRelatedRecords {
+            customer {
+              companyContacts(first: 10) { nodes { id } }
+              subscriptionContracts(first: 10) { nodes { id } }
+              draftOrders(first: 10) { nodes { id } }
+            }
+          }`
+        );
+
+        return {
+          companyContacts: data.customer?.companyContacts.nodes.length ?? 0,
+          subscriptionContracts:
+            data.customer?.subscriptionContracts.nodes.length ?? 0,
+          draftOrders: data.customer?.draftOrders.nodes.length ?? 0,
+        };
+      }),
+    ]);
+
+  return { profile, orders, storeCreditAccounts, relatedRecordCounts };
 }
 
 async function customerAccountRequest<T>(
