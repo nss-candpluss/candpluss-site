@@ -344,6 +344,82 @@ export async function fetchCustomerAccount(accessToken: string) {
   return data.customer;
 }
 
+export type CustomerReceiptOrder = {
+  id: string;
+  name: string;
+  processedAt: string;
+  currencyCode: string;
+  financialStatus?: string | null;
+  subtotal?: CustomerMoney | null;
+  totalTax?: CustomerMoney | null;
+  totalShipping: CustomerMoney;
+  totalRefunded: CustomerMoney;
+  totalPrice: CustomerMoney;
+  billingAddress?: CustomerAddressDetail | null;
+  paymentInformation?: {
+    paymentStatus?: string | null;
+    totalPaidAmount: CustomerMoney;
+  } | null;
+  lineItems: {
+    nodes: Array<{
+      id: string;
+      name: string;
+      variantTitle?: string | null;
+      quantity: number;
+      price?: CustomerMoney | null;
+      totalPrice?: CustomerMoney | null;
+      totalDiscount: CustomerMoney;
+    }>;
+  };
+};
+
+/**
+ * 領収書に使う 1 件分の注文。
+ *
+ * Customer Account API のトークンはログイン中の顧客に紐づくため、ID を
+ * 指定しても他人の注文は返らない。
+ */
+export async function fetchCustomerOrder(accessToken: string, orderId: string) {
+  const data = await customerAccountRequest<{
+    order?: CustomerReceiptOrder | null;
+  }>(
+    accessToken,
+    `query CustomerReceiptOrder($id: ID!) {
+      order(id: $id) {
+        id
+        name
+        processedAt
+        currencyCode
+        financialStatus
+        subtotal { amount currencyCode }
+        totalTax { amount currencyCode }
+        totalShipping { amount currencyCode }
+        totalRefunded { amount currencyCode }
+        totalPrice { amount currencyCode }
+        billingAddress { ${ADDRESS_FIELDS} }
+        paymentInformation {
+          paymentStatus
+          totalPaidAmount { amount currencyCode }
+        }
+        lineItems(first: 100) {
+          nodes {
+            id
+            name
+            variantTitle
+            quantity
+            price { amount currencyCode }
+            totalPrice { amount currencyCode }
+            totalDiscount { amount currencyCode }
+          }
+        }
+      }
+    }`,
+    { id: orderId }
+  );
+
+  return data.order ?? null;
+}
+
 function sectionError(cause: unknown): string {
   return cause instanceof Error ? cause.message : "取得に失敗しました。";
 }

@@ -386,3 +386,15 @@ body:has([data-home-hero-background]) footer {
   }
 }
 
+/** 領収書: 印刷では領収書だけを出す。ヘッダー・フッターと上下余白は落とす */
+@media print {
+  body:has([data-receipt-page]) header,
+  body:has([data-receipt-page]) footer {
+    display: none;
+  }
+
+  [data-receipt-page] {
+    padding: 0;
+  }
+}
+

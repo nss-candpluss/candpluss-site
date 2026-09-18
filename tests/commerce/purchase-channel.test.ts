@@ -191,6 +191,16 @@ describe("会員画面はリリースまでテスト領域だけで開く", () =
     expect(source).toContain("prefetch={false}");
   });
 
+  // 領収書も公開側とテスト領域で同じものを使う
+  it("領収書は両系統にあり、同じコンポーネントを使う", () => {
+    expect(readSource("app/account/receipt/page.tsx")).toContain(
+      "AccountReceiptContent"
+    );
+    expect(
+      readSource("app/shopify-test/account/receipt/page.tsx")
+    ).toContain("AccountReceiptContent");
+  });
+
   it("テスト領域の会員画面は閉じない", () => {
     expect(
       existsSync(join(rootDir, "app/shopify-test/account/layout.tsx"))

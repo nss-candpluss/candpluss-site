@@ -40,6 +40,13 @@ export const ACCOUNT_LOGIN_PATH = `${ACCOUNT_BASE_PATH}/login`;
 /** OAuth を開始するルートハンドラ。Shopify のサインイン画面へ転送する */
 export const ACCOUNT_LOGIN_START_PATH = "/account/login/start";
 
+/** 注文ごとの領収書。対象の注文は `order` クエリで渡す */
+export const ACCOUNT_RECEIPT_PATH = `${ACCOUNT_BASE_PATH}/receipt`;
+
+export function accountReceiptHref(orderId: string) {
+  return `${ACCOUNT_RECEIPT_PATH}?order=${encodeURIComponent(orderId)}`;
+}
+
 export function safeAccountReturnTo(value: string | null | undefined) {
   return value?.startsWith("/") && !value.startsWith("//")
     ? value

@@ -1,6 +1,10 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { ACCOUNT_LOGIN_START_PATH } from "@/lib/commerce/account-login";
+import {
+  ACCOUNT_LOGIN_START_PATH,
+  accountReceiptHref,
+} from "@/lib/commerce/account-login";
 import {
   fetchCustomerAccountSnapshot,
   type CustomerAddressDetail,
@@ -175,7 +179,15 @@ function SectionError({ error }: { error: string }) {
 function OrderCard({ order }: { order: CustomerOrderDetail }) {
   return (
     <li className="border border-[#ddd] p-6">
-      <FieldList>
+      <Link
+        href={accountReceiptHref(order.id)}
+        className="inline-flex border-b border-current font-ui-en text-sm"
+      >
+        VIEW RECEIPT
+      </Link>
+
+      <div className="mt-6">
+        <FieldList>
         <Field label="注文番号" value={order.name} />
         <Field label="連番" value={String(order.number)} />
         <Field
@@ -216,7 +228,8 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
         <Field label="返金額" value={formatMoney(order.totalRefunded)} />
         <Field label="合計" value={formatMoney(order.totalPrice)} />
         <LinkField label="ステータスページ" url={order.statusPageUrl} />
-      </FieldList>
+        </FieldList>
+      </div>
 
       <div className="mt-8">
         <h4 className="font-ui-en text-sm font-semibold">FULFILLMENTS</h4>
