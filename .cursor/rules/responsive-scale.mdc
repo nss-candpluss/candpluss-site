@@ -112,4 +112,4 @@ SP / PC 切替の対:
 
 ## 個別管理（共通スケール非適用）
 
-ボタン内padding、バッジ位置、テキスト下線間隔（4px）、特殊レイアウト
+ボタン内padding、バッジ位置、テキスト下線間隔（本文リンク 2px = `bodyLinkUnderlineClassName` / ナビの hover 下線 4px）、特殊レイアウト

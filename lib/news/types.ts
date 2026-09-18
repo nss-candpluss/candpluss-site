@@ -1,3 +1,10 @@
+/** 本文中の語句に付けるインラインリンク */
+export type NewsArticleInlineLink = {
+  /** content 内の対象語句。最初の一致だけリンクになる */
+  text: string;
+  href: string;
+};
+
 /** Shopify Storefront API Article へ差し替えやすい共通型 */
 export type NewsArticle = {
   id: string;
@@ -21,6 +28,11 @@ export type NewsArticle = {
   publishedAt: string;
   handle: string;
   content: string;
+  /**
+   * 詳細本文中の語句に付けるリンク（任意）。
+   * 一覧・TOP のカードはカード全体がリンクなので本文はテキストのまま表示する。
+   */
+  inlineLinks?: readonly NewsArticleInlineLink[];
   /** 詳細本文末尾の内部リンク（任意） */
   contentLink?: {
     label: string;

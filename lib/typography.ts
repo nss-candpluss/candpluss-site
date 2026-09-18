@@ -124,6 +124,14 @@ export const productDetailSectionTitleClassName =
 export const productFeatureItemTitleClassName =
   "min-w-0 font-body-ja text-[clamp(16px,calc(18px*var(--text-scale)),18px)] leading-[clamp(22px,calc(26px*var(--text-scale)),26px)] font-bold text-[var(--foreground)]";
 
+/**
+ * 本文中に置くリンクの下線: 15px のとき 2px（em 基準なので Text Scale に追従）。
+ * 文章の一部として読ませたいので、下線をベースラインへ寄せる。
+ * ナビの hover 下線（TextLink の 4/14em）とは別管理。
+ */
+export const bodyLinkUnderlineClassName =
+  "underline decoration-solid underline-offset-[calc(2/15*1em)]";
+
 /** UIテキスト: font-size = line-height（Text Scale 適用、11–20px は下限あり） */
 export function uiText(sizePx: UiTextSizePx): string {
   return UI_TEXT_PX[sizePx];

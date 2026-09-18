@@ -13,6 +13,27 @@ import type { NewsArticle } from "@/lib/news/types";
  */
 export const newsItems = [
   {
+    id: "004",
+    title: "FIELDSTYLE EXPO 2026出展決定！",
+    tag: "Information",
+    excerpt:
+      "FIELDSTYLE EXPO 2026（2026年11月14日〜15日／AICHI SKY EXPO）への出展が決定しました。ドームシェルター「MOYA500」「MOYA420」、タープ「NOKUTA」ほか多数の製品を展示予定です。",
+    image: "/images/news/news-20260918-01.webp",
+    imageAlt:
+      "FIELDSTYLE EXPO 2026 の告知ビジュアル。OUTDOOR & LIFESTYLE FESTA FIELDSTYLE EXPO 2026 11.14sat 15sun Aichi Sky Expo",
+    ogImage: "/images/news/og/news-20260918-01.jpg",
+    publishedAt: "2026-09-18",
+    handle: "fieldstyle-expo-2026",
+    content:
+      "ドームシェルター「MOYA500」「MOYA420」、そしてタープ「NOKUTA」など、多数の製品を展示予定です。\n\n近づいてわかる、生地の質感。\nそこから広がる、次のキャンプのイメージ。\n写真では伝えきれない魅力を、ぜひ会場でお確かめください。\n\nC AND+Sブースでのイベント内容は現在企画中。\n詳細はC AND+Sインスタアカウントで順次お届けします。\n是非フォローして続報をお待ちください。\n\n■FIELDSTYLE EXPO 2026\n開催：2026年11月14日（土）〜15日（日）\n会場：AICHI SKY EXPO（愛知国際展示場）",
+    inlineLinks: [
+      {
+        text: "C AND+Sインスタアカウント",
+        href: "https://www.instagram.com/c_and_plus_s?igsh=MXI0bDJ6Znp3bm81dw==",
+      },
+    ],
+  },
+  {
     id: "001",
     title: "MOYA500販売開始日のお知らせ",
     tag: "Information",

@@ -33,14 +33,19 @@ describe("News の公開日", () => {
 
     expect(publishedAtByHandle["moya500-order-information"]).toBe("2026-09-15");
     expect(publishedAtByHandle["official-website-open"]).toBe("2026-09-15");
+    expect(publishedAtByHandle["fieldstyle-expo-2026"]).toBe("2026-09-18");
   });
 
-  it("最新順に並べたとき先頭が MOYA500 のお知らせになる", () => {
+  it("最新順に並べたとき先頭が FIELDSTYLE EXPO 2026 のお知らせになる", () => {
     // 同一日付は data/news.ts の配列順（上ほど新しい）で並ぶ。
     const sorted = [...newsItems].sort((a, b) =>
       b.publishedAt.localeCompare(a.publishedAt)
     );
 
-    expect(sorted[0]?.handle).toBe("moya500-order-information");
+    expect(sorted.map((item) => item.handle).slice(0, 3)).toEqual([
+      "fieldstyle-expo-2026",
+      "moya500-order-information",
+      "official-website-open",
+    ]);
   });
 });

@@ -5,13 +5,18 @@ import {
   definitionLabelSpanClassName,
   definitionValueSpanClassName,
 } from "@/lib/layout";
-import { bodyText, sectionTitle62ClassName, uiText } from "@/lib/typography";
+import {
+  bodyLinkUnderlineClassName,
+  bodyText,
+  sectionTitle62ClassName,
+  uiText,
+} from "@/lib/typography";
 
 const bodyClassName = `font-body-ja text-[var(--foreground)] ${bodyText(15)}`;
 
 const labelClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(16)}`;
 
-const linkClassName = `underline decoration-solid underline-offset-[calc(4/15*1em)] ${bodyClassName}`;
+const linkClassName = `${bodyLinkUnderlineClassName} ${bodyClassName}`;
 
 const pageTitleClassName = `font-heading text-[var(--foreground)] ${sectionTitle62ClassName}`;
 
