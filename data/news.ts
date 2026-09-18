@@ -25,10 +25,10 @@ export const newsItems = [
     publishedAt: "2026-09-18",
     handle: "fieldstyle-expo-2026",
     content:
-      "ドームシェルター「MOYA500」「MOYA420」、そしてタープ「NOKUTA」など、多数の製品を展示予定です。\n\n近づいてわかる、生地の質感。\nそこから広がる、次のキャンプのイメージ。\n写真では伝えきれない魅力を、ぜひ会場でお確かめください。\n\nC AND+Sブースでのイベント内容は現在企画中。\n詳細はC AND+Sインスタアカウントで順次お届けします。\n是非フォローして続報をお待ちください。\n\n■FIELDSTYLE EXPO 2026\n開催：2026年11月14日（土）〜15日（日）\n会場：AICHI SKY EXPO（愛知国際展示場）",
+      "ドームシェルター「MOYA500」「MOYA420」、そしてタープ「NOKUTA」など、多数の製品を展示予定です。\n\n近づいてわかる、生地の質感。\nそこから広がる、次のキャンプのイメージ。\n写真では伝えきれない魅力を、ぜひ会場でお確かめください。\n\nC AND+Sブースでのイベント内容は現在企画中。\n詳細はC AND+S公式Instagramアカウントで順次お届けします。\n是非フォローして続報をお待ちください。\n\n■FIELDSTYLE EXPO 2026\n開催：2026年11月14日（土）〜15日（日）\n会場：AICHI SKY EXPO（愛知国際展示場）",
     inlineLinks: [
       {
-        text: "C AND+Sインスタアカウント",
+        text: "C AND+S公式Instagramアカウント",
         href: "https://www.instagram.com/c_and_plus_s?igsh=MXI0bDJ6Znp3bm81dw==",
       },
     ],

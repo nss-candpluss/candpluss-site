@@ -7,11 +7,8 @@ import { bodyLinkUnderlineClassName } from "@/lib/typography";
 const bodyClassName =
   "whitespace-pre-line font-body-ja text-[clamp(14px,calc(15px*var(--text-scale)),15px)] leading-[calc(28px*var(--text-scale))] text-[var(--foreground)]";
 
-/** 本文末尾の導線は独立した行なので太字にする */
-const contentLinkClassName = `font-semibold ${bodyLinkUnderlineClassName}`;
-
-/** 本文中のリンクは文章の一部なので、太字にせず下線だけ付ける */
-const inlineLinkClassName = bodyLinkUnderlineClassName;
+/** 本文中・末尾どちらのリンクも、本文の中で見つけやすいよう太字＋下線にする */
+const linkClassName = `font-semibold ${bodyLinkUnderlineClassName}`;
 
 function isExternalHref(href: string) {
   return href.startsWith("http://") || href.startsWith("https://");
@@ -40,7 +37,7 @@ export function NewsArticleContent({ article, className = "" }: NewsArticleConte
               href={segment.href}
               target="_blank"
               rel="noopener noreferrer"
-              className={inlineLinkClassName}
+              className={linkClassName}
             >
               {segment.text}
             </a>
@@ -48,7 +45,7 @@ export function NewsArticleContent({ article, className = "" }: NewsArticleConte
             <Link
               key={`${segment.href}-${index}`}
               href={segment.href}
-              className={inlineLinkClassName}
+              className={linkClassName}
             >
               {segment.text}
             </Link>
@@ -63,12 +60,12 @@ export function NewsArticleContent({ article, className = "" }: NewsArticleConte
               href={contentLink.href}
               target="_blank"
               rel="noopener noreferrer"
-              className={contentLinkClassName}
+              className={linkClassName}
             >
               {contentLink.label}
             </a>
           ) : (
-            <Link href={contentLink.href} className={contentLinkClassName}>
+            <Link href={contentLink.href} className={linkClassName}>
               {contentLink.label}
             </Link>
           )}

@@ -51,7 +51,7 @@ describe("splitContentByInlineLinks", () => {
     expect(segments.filter((segment) => segment.kind === "link")).toEqual([
       {
         kind: "link",
-        text: "C AND+Sインスタアカウント",
+        text: "C AND+S公式Instagramアカウント",
         href: "https://www.instagram.com/c_and_plus_s?igsh=MXI0bDJ6Znp3bm81dw==",
       },
     ]);
