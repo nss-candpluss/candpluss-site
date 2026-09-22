@@ -1,32 +1,77 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { AccountTabs } from "@/components/commerce/AccountTabs";
+import { AccountUpdateForm } from "@/components/commerce/AccountUpdateForm";
+import { Container } from "@/components/ui/Container";
+import { SiteGrid } from "@/components/ui/SiteGrid";
+import { SiteImage } from "@/components/ui/SiteImage";
+import { contactFormCopy } from "@/data/contact";
 import {
   ACCOUNT_LOGIN_START_PATH,
   accountReceiptHref,
 } from "@/lib/commerce/account-login";
+import { japanZones, normalizeJapanZoneCode } from "@/lib/commerce/japan-zone-code";
+import { formHalfSpanClassName } from "@/lib/layout";
+import { accountFieldNotes, accountMemberCopy } from "@/lib/commerce/account-field-notes";
+import {
+  NEW_ACCOUNT_ADDRESS,
+  accountAddressAddHref,
+  accountAddressDeleteHref,
+  accountAddressDeleteIdFromSearch,
+  accountAddressIdFromSearch,
+  accountOrderLineImageAlt,
+  accountOrderLineTitle,
+  accountOrderLineVariantTitle,
+  accountOrderOptionalFields,
+  accountOrderPaymentMethods,
+  accountOrderShipmentDisplay,
+  accountOrderSubtotalWithTax,
+  accountPageNotice,
+  accountPageTabHref,
+  formatAccountAddressLine,
+  formatAccountAddressName,
+  formatAccountDate,
+  formatAccountMoney,
+  formatAccountOrderPaymentStatus,
+  formatAccountOrderDateTime,
+  formatAccountFulfillmentUnitStatus,
+  formatAccountName,
+  formatAccountShipmentStatus,
+  queryStringFromSearchParams,
+  resolveAccountPageTabId,
+} from "@/lib/commerce/account-page";
 import {
   fetchCustomerAccountSnapshot,
+  getShopifyCustomerProfileUrl,
+  isEmailMarketingSubscribed,
+  type CustomerAccount,
   type CustomerAddressDetail,
   type CustomerMoney,
   type CustomerOrderDetail,
   type CustomerSection,
 } from "@/lib/shopify/customer-account";
 import { getLiveCustomerTokenSession } from "@/lib/shopify/customer-session";
-import { inputText } from "@/lib/typography";
+import {
+  bodyLinkUnderlineClassName,
+  bodyText,
+  cartLineTitleClassName,
+  sectionTitle62ClassName,
+  uiText,
+} from "@/lib/typography";
+import { ContactField } from "@/sections/contact/ContactField";
+import {
+  contactSelectChevronClassName,
+  getContactCheckboxClassName,
+  getContactFloatingSelectClassName,
+  getContactFloatingSelectStyle,
+} from "@/sections/contact/contactStyles";
+import { SupportFloatingInput } from "@/sections/support/SupportFloatingField";
 
 const NOT_REGISTERED = "登録なし";
 
 function formatMoney(money?: CustomerMoney | null) {
-  if (!money) {
-    return NOT_REGISTERED;
-  }
-
-  return new Intl.NumberFormat("ja-JP", {
-    style: "currency",
-    currency: money.currencyCode,
-    maximumFractionDigits: 0,
-  }).format(Number(money.amount));
+  return formatAccountMoney(money) ?? NOT_REGISTERED;
 }
 
 function formatDateTime(value?: string | null) {
@@ -48,35 +93,70 @@ function formatText(value?: string | null) {
   return value?.trim() ? value : NOT_REGISTERED;
 }
 
-function formatList(values: readonly string[]) {
-  return values.length ? values.join(", ") : NOT_REGISTERED;
-}
+const readOnlyHeadingClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(16)}`;
+const readOnlyNoteClassName = `mt-[calc(8px*var(--gap-scale-y))] font-body-ja text-[var(--color-muted)] ${uiText(13)}`;
 
-const inputClassName =
-  `mt-2 w-full border border-[#ccc] bg-transparent px-4 py-3 font-body-ja ${inputText(14)}`;
+const addressActionClassName =
+  "cursor-pointer border-b border-current font-body-ja text-sm text-[var(--foreground)]";
 
-function Section({
-  title,
+/** 住所 1 件に対する操作。フォームなので JavaScript なしで動く */
+function AddressIntentButton({
+  addressId,
+  intent,
   children,
 }: {
-  title: string;
-  children: React.ReactNode;
+  addressId: string;
+  intent: "default" | "delete";
+  children: string;
 }) {
   return (
-    <section className="mt-14">
-      <h2 className="font-ui-en text-xl font-semibold">{title}</h2>
-      <div className="mt-6">{children}</div>
-    </section>
+    <form action="/api/shopify/customer/address" method="post">
+      <input type="hidden" name="intent" value={intent} />
+      <input type="hidden" name="addressId" value={addressId} />
+      <button type="submit" className={addressActionClassName}>
+        {children}
+      </button>
+    </form>
   );
 }
 
+function LogoutButton() {
+  return (
+    <form action="/account/logout" method="post">
+      <button
+        type="submit"
+        className="border-b border-current font-ui-en text-sm"
+      >
+        LOGOUT
+      </button>
+    </form>
+  );
+}
+
+const fieldNoteClassName = `mt-1 font-body-ja text-[var(--color-muted)] ${uiText(12)}`;
+
+function FieldNote({ children }: { children: string }) {
+  return <p className={fieldNoteClassName}>{children}</p>;
+}
+
 /** ラベルと値を 1 行で並べる。値が無いものは「登録なし」で埋める */
-function Field({ label, value }: { label: string; value: string }) {
+function Field({
+  label,
+  value,
+  note,
+}: {
+  label: string;
+  value: string;
+  note?: string;
+}) {
   const isEmpty = value === NOT_REGISTERED;
 
   return (
     <div className="grid gap-1 border-b border-[#eee] py-3 min-[640px]:grid-cols-[200px_minmax(0,1fr)] min-[640px]:gap-4">
-      <dt className="font-body-ja text-xs text-[var(--color-muted)]">{label}</dt>
+      <dt className="font-body-ja text-xs text-[var(--color-muted)]">
+        {label}
+        {note ? <FieldNote>{note}</FieldNote> : null}
+      </dt>
       <dd
         className={`font-body-ja text-sm break-words ${
           isEmpty ? "text-[var(--color-muted)]" : ""
@@ -93,14 +173,25 @@ function FieldList({ children }: { children: React.ReactNode }) {
 }
 
 /** 追跡は開けないと意味がないので、URL の項目だけリンクにする */
-function LinkField({ label, url }: { label: string; url?: string | null }) {
+function LinkField({
+  label,
+  url,
+  note,
+}: {
+  label: string;
+  url?: string | null;
+  note: string;
+}) {
   if (!url) {
-    return <Field label={label} value={NOT_REGISTERED} />;
+    return <Field label={label} value={NOT_REGISTERED} note={note} />;
   }
 
   return (
     <div className="grid gap-1 border-b border-[#eee] py-3 min-[640px]:grid-cols-[200px_minmax(0,1fr)] min-[640px]:gap-4">
-      <dt className="font-body-ja text-xs text-[var(--color-muted)]">{label}</dt>
+      <dt className="font-body-ja text-xs text-[var(--color-muted)]">
+        {label}
+        <FieldNote>{note}</FieldNote>
+      </dt>
       <dd className="font-body-ja text-sm break-all">
         <a
           href={url}
@@ -115,55 +206,316 @@ function LinkField({ label, url }: { label: string; url?: string | null }) {
   );
 }
 
-function AddressFields({
+function MemberSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+    return (
+    <section>
+      <h3 className={readOnlyHeadingClassName}>{title}</h3>
+      <div className="mt-[calc(24px*var(--gap-scale-y))] flex flex-col gap-[calc(24px*var(--gap-scale-y))]">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+function ShopifyChangeLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: string;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${bodyLinkUnderlineClassName} font-body-ja font-semibold text-[var(--foreground)]`}
+    >
+      {children}
+    </a>
+  );
+}
+
+function ProfileNameForm({ profile }: { profile: CustomerAccount }) {
+  const { placeholders } = contactFormCopy;
+
+  return (
+    <AccountUpdateForm
+      action="/api/shopify/customer/profile"
+      submitLabel="名前を更新する"
+    >
+      {isEmailMarketingSubscribed(profile.emailAddress?.marketingState) ? (
+        <input type="hidden" name="emailMarketing" value="on" />
+      ) : null}
+      <ContactField
+        label="お名前"
+        requirement="required"
+        note={accountMemberCopy.accountDetails.name}
+        fixedTitleSize
+        groupedContentGap
+      >
+        <SiteGrid className="gap-x-[calc(12px*var(--gap-scale-x))] gap-y-[clamp(14px,calc(18px*var(--gap-scale-y)),18px)]">
+          <div className={formHalfSpanClassName}>
+            <SupportFloatingInput
+              id="account-last-name"
+              name="lastName"
+              type="text"
+              label={`${placeholders.lastName} *`}
+              autoComplete="family-name"
+              defaultValue={profile.lastName ?? ""}
+              maxLength={100}
+              required
+            />
+          </div>
+          <div className={formHalfSpanClassName}>
+            <SupportFloatingInput
+              id="account-first-name"
+              name="firstName"
+              type="text"
+              label={`${placeholders.firstName} *`}
+              autoComplete="given-name"
+              defaultValue={profile.firstName ?? ""}
+              maxLength={100}
+              required
+            />
+          </div>
+        </SiteGrid>
+      </ContactField>
+    </AccountUpdateForm>
+  );
+}
+
+function EmailMarketingForm({ profile }: { profile: CustomerAccount }) {
+  return (
+    <AccountUpdateForm
+      action="/api/shopify/customer/profile"
+      submitLabel="配信設定を更新する"
+    >
+      <input type="hidden" name="lastName" value={profile.lastName ?? ""} />
+      <input type="hidden" name="firstName" value={profile.firstName ?? ""} />
+      <ContactField
+        label="メール配信"
+        requirement="optional"
+        note={accountMemberCopy.notifications.emailMarketing}
+        fixedTitleSize
+        groupedContentGap
+      >
+        <label className="inline-flex cursor-pointer items-center gap-x-[clamp(8px,calc(12px*var(--gap-scale-x)),12px)]">
+          <input
+            type="checkbox"
+            name="emailMarketing"
+            defaultChecked={isEmailMarketingSubscribed(
+              profile.emailAddress?.marketingState
+            )}
+            className={getContactCheckboxClassName()}
+          />
+          <span className={`font-body-ja text-[var(--foreground)] ${uiText(14)}`}>
+            メールマガジンを受け取る
+          </span>
+        </label>
+      </ContactField>
+    </AccountUpdateForm>
+  );
+}
+
+function AddressForm({
   address,
-  prefix,
+  formKey,
+  isDefault,
+}: {
+  address?: CustomerAddressDetail;
+  formKey: string;
+  isDefault: boolean;
+}) {
+  const { fieldLabels, placeholders } = contactFormCopy;
+  const zoneCode = normalizeJapanZoneCode(address?.zoneCode);
+  const fieldId = (name: string) => `account-address-${formKey}-${name}`;
+
+  return (
+    <AccountUpdateForm
+      action="/api/shopify/customer/address"
+      submitLabel={address ? "住所を更新する" : "住所を追加する"}
+    >
+      <input type="hidden" name="intent" value="save" />
+      <input type="hidden" name="addressId" value={address?.id ?? ""} />
+      <input type="hidden" name="territoryCode" value="JP" />
+
+      <ContactField
+        label="お名前"
+        requirement="required"
+        note={accountFieldNotes.address.name}
+        fixedTitleSize
+        groupedContentGap
+      >
+        <SiteGrid className="gap-x-[calc(12px*var(--gap-scale-x))] gap-y-[clamp(14px,calc(18px*var(--gap-scale-y)),18px)]">
+          <div className={formHalfSpanClassName}>
+            <SupportFloatingInput
+              id={fieldId("last-name")}
+              name="lastName"
+              type="text"
+              label={`${placeholders.lastName} *`}
+              autoComplete="family-name"
+              defaultValue={address?.lastName ?? ""}
+              maxLength={100}
+              required
+            />
+          </div>
+          <div className={formHalfSpanClassName}>
+            <SupportFloatingInput
+              id={fieldId("first-name")}
+              name="firstName"
+              type="text"
+              label={`${placeholders.firstName} *`}
+              autoComplete="given-name"
+              defaultValue={address?.firstName ?? ""}
+              maxLength={100}
+              required
+            />
+          </div>
+        </SiteGrid>
+      </ContactField>
+
+      <ContactField
+        label="住所"
+        requirement="required"
+        note={accountFieldNotes.address.block}
+        fixedTitleSize
+        groupedContentGap
+      >
+        <div className="flex flex-col gap-y-[clamp(14px,calc(18px*var(--gap-scale-y)),18px)]">
+          <div>
+            <div className="max-w-[240px]">
+              <SupportFloatingInput
+                id={fieldId("zip")}
+                name="zip"
+                type="text"
+                label={fieldLabels.postalCode}
+                autoComplete="postal-code"
+                inputMode="numeric"
+                defaultValue={address?.zip ?? ""}
+                maxLength={20}
+                required
+              />
+            </div>
+            <FieldNote>{accountFieldNotes.address.zip}</FieldNote>
+          </div>
+
+          <div>
+            <div className="relative">
+              <label htmlFor={fieldId("zone")} className="sr-only">
+                {placeholders.prefecture}
+              </label>
+              <select
+                id={fieldId("zone")}
+                name="zoneCode"
+                defaultValue={zoneCode}
+                required
+                className={getContactFloatingSelectClassName()}
+                style={getContactFloatingSelectStyle(Boolean(zoneCode))}
+              >
+                <option value="">{placeholders.prefecture}</option>
+                {japanZones.map((zone) => (
+                  <option key={zone.zoneCode} value={zone.zoneCode}>
+                    {zone.prefecture}
+                  </option>
+                ))}
+              </select>
+              <span aria-hidden="true" className={contactSelectChevronClassName} />
+            </div>
+            <FieldNote>{accountFieldNotes.address.zone}</FieldNote>
+          </div>
+
+          <div>
+            <SupportFloatingInput
+              id={fieldId("city")}
+              name="city"
+              type="text"
+              label="市区町村"
+              autoComplete="address-level2"
+              defaultValue={address?.city ?? ""}
+              maxLength={100}
+              required
+            />
+            <FieldNote>{accountFieldNotes.address.city}</FieldNote>
+          </div>
+          <div>
+            <SupportFloatingInput
+              id={fieldId("address1")}
+              name="address1"
+              type="text"
+              label="番地"
+              autoComplete="address-line1"
+              defaultValue={address?.address1 ?? ""}
+              maxLength={255}
+              required
+            />
+            <FieldNote>{accountFieldNotes.address.address1}</FieldNote>
+          </div>
+          <div>
+            <SupportFloatingInput
+              id={fieldId("address2")}
+              name="address2"
+              type="text"
+              label={placeholders.addressLine2}
+              autoComplete="address-line2"
+              defaultValue={address?.address2 ?? ""}
+              maxLength={255}
+            />
+            <FieldNote>{accountFieldNotes.address.address2}</FieldNote>
+          </div>
+        </div>
+      </ContactField>
+
+      <ContactField
+        label="既定の住所"
+        requirement="optional"
+        note={accountFieldNotes.address.defaultAddress}
+        fixedTitleSize
+        groupedContentGap
+      >
+        <label className="inline-flex cursor-pointer items-center gap-x-[clamp(8px,calc(12px*var(--gap-scale-x)),12px)]">
+          <input
+            type="checkbox"
+            name="defaultAddress"
+            defaultChecked={isDefault}
+            className={getContactCheckboxClassName()}
+          />
+          <span className={`font-body-ja text-[var(--foreground)] ${uiText(14)}`}>
+            この住所を既定にする
+          </span>
+        </label>
+      </ContactField>
+    </AccountUpdateForm>
+  );
+}
+
+function OrderAddressBlock({
+  address,
 }: {
   address?: CustomerAddressDetail | null;
-  prefix: string;
 }) {
-  if (!address) {
+  const name = address ? formatAccountAddressName(address) : null;
+  const addressLine = address ? formatAccountAddressLine(address) : null;
+
+  if (!name && !addressLine) {
     return (
-      <p className="font-body-ja text-sm text-[var(--color-muted)]">
-        {prefix}: {NOT_REGISTERED}
+      <p className={`mt-3 font-body-ja text-[var(--color-muted)] ${bodyText(15)}`}>
+        {NOT_REGISTERED}
       </p>
     );
   }
 
   return (
-    <FieldList>
-      <Field label={`${prefix} / ID`} value={address.id} />
-      <Field label={`${prefix} / 氏名`} value={formatText(address.name)} />
-      <Field label={`${prefix} / 姓`} value={formatText(address.lastName)} />
-      <Field label={`${prefix} / 名`} value={formatText(address.firstName)} />
-      <Field label={`${prefix} / 会社名`} value={formatText(address.company)} />
-      <Field label={`${prefix} / 郵便番号`} value={formatText(address.zip)} />
-      <Field label={`${prefix} / 国`} value={formatText(address.country)} />
-      <Field
-        label={`${prefix} / 国コード`}
-        value={formatText(address.territoryCode)}
-      />
-      <Field label={`${prefix} / 都道府県`} value={formatText(address.province)} />
-      <Field
-        label={`${prefix} / 都道府県コード`}
-        value={formatText(address.zoneCode)}
-      />
-      <Field label={`${prefix} / 市区町村`} value={formatText(address.city)} />
-      <Field label={`${prefix} / 住所1`} value={formatText(address.address1)} />
-      <Field label={`${prefix} / 住所2`} value={formatText(address.address2)} />
-      <Field
-        label={`${prefix} / 電話番号`}
-        value={formatText(address.phoneNumber)}
-      />
-      <Field
-        label={`${prefix} / エリア表記`}
-        value={formatText(address.formattedArea)}
-      />
-      <Field
-        label={`${prefix} / 整形済み住所`}
-        value={formatList(address.formatted)}
-      />
-    </FieldList>
+    <div className={`mt-3 font-body-ja ${bodyText(15)}`}>
+      {name ? <p>{name}</p> : null}
+      {addressLine ? <p>{addressLine}</p> : null}
+    </div>
   );
 }
 
@@ -176,101 +528,269 @@ function SectionError({ error }: { error: string }) {
   );
 }
 
-function OrderCard({ order }: { order: CustomerOrderDetail }) {
+function hasDiscount(money?: CustomerMoney | null) {
+  return Boolean(money && Number(money.amount) > 0);
+}
+
+function OrderLineItems({
+  lineItems,
+}: {
+  lineItems: CustomerOrderDetail["lineItems"]["nodes"];
+}) {
+  if (!lineItems.length) {
   return (
-    <li className="border border-[#ddd] p-6">
-      <Link
-        href={accountReceiptHref(order.id)}
-        className="inline-flex border-b border-current font-ui-en text-sm"
-      >
-        VIEW RECEIPT
-      </Link>
+      <p className="mt-3 font-body-ja text-sm text-[var(--color-muted)]">
+        購入商品はありません。
+      </p>
+    );
+  }
+
+  return (
+    <ul className="mt-4 divide-y divide-[#ddd] border-y border-[#ddd]">
+      {lineItems.map((lineItem) => {
+        const title = accountOrderLineTitle(lineItem);
+        const variantTitle = accountOrderLineVariantTitle(lineItem);
+        const imageSrc = lineItem.image?.url;
+        const discount = hasDiscount(lineItem.totalDiscount)
+          ? formatMoney(lineItem.totalDiscount)
+          : null;
+
+        return (
+          <li
+            key={lineItem.id}
+            className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-4 py-4 min-[768px]:grid-cols-[auto_minmax(0,1fr)_auto]"
+          >
+            <div className="relative size-[96px] shrink-0 bg-[#eef1f3]">
+              {imageSrc ? (
+                <SiteImage
+                  src={imageSrc}
+                  alt={accountOrderLineImageAlt(lineItem)}
+                  fill
+                  sizes="96px"
+                  className="object-cover"
+                />
+              ) : null}
+            </div>
+
+            <div className="min-w-0">
+              <p
+                className={`font-body-ja font-semibold ${cartLineTitleClassName}`}
+              >
+                {title}
+              </p>
+              {variantTitle ? (
+                <p
+                  className={`mt-2 font-ui-en text-[var(--color-muted)] ${uiText(14)}`}
+                >
+                  {variantTitle}
+                </p>
+              ) : null}
+              <p className={`mt-2 font-body-ja ${uiText(14)}`}>
+                数量 {lineItem.quantity}
+              </p>
+              {discount ? (
+                <p
+                  className={`mt-1 font-body-ja text-[var(--color-muted)] ${uiText(12)}`}
+                >
+                  割引 {discount}
+                </p>
+              ) : null}
+            </div>
+
+            <p className="col-start-2 font-ui-en text-sm font-semibold min-[768px]:col-start-auto">
+              {formatMoney(lineItem.totalPrice ?? lineItem.price)}
+            </p>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function OrderPaymentMethods({
+  transactions,
+}: {
+  transactions: CustomerOrderDetail["transactions"];
+}) {
+  const methods = accountOrderPaymentMethods(transactions ?? []);
+
+  if (!methods.length) {
+    return (
+      <p className={`mt-3 font-body-ja text-[var(--color-muted)] ${bodyText(15)}`}>
+        {NOT_REGISTERED}
+      </p>
+    );
+  }
+
+  return (
+    <ul className="mt-3 flex flex-col gap-2">
+      {methods.map((method) => (
+        <li key={method.id} className="flex items-center gap-2">
+          {method.iconUrl ? (
+            <img
+              src={method.iconUrl}
+              alt={method.iconAlt}
+              width={28}
+              height={18}
+              className="h-[18px] w-[28px] object-contain"
+            />
+          ) : null}
+          <p className={`font-body-ja ${bodyText(15)}`}>{method.label}</p>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function OrderStatusBadge({ children }: { children: string }) {
+  return (
+    <span
+      className={`inline-flex items-center rounded-full border border-[var(--color-divider)] px-[0.75em] py-[0.3em] font-body-ja ${uiText(12)}`}
+    >
+      {children}
+    </span>
+  );
+}
+
+function OrderCard({ order }: { order: CustomerOrderDetail }) {
+  const optional = accountOrderOptionalFields(order);
+  const paymentStatus = formatAccountOrderPaymentStatus(
+    order.financialStatus,
+    order.transactions
+  );
+  const shipmentStatus = accountOrderShipmentDisplay(order);
+  const orderedAt = formatAccountOrderDateTime(order.processedAt);
+
+  return (
+    <li className="rounded-[16px] border border-[var(--color-divider)] bg-white px-[clamp(24px,calc(48px*var(--gap-scale-x)),48px)] py-[clamp(24px,calc(48px*var(--gap-scale-y)),48px)] shadow-[0_0_16px_rgba(0,0,0,0.08)]">
+      <div>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <p className={`font-body-ja font-semibold ${uiText(16)}`}>
+            ご注文番号：{order.name}
+          </p>
+          {paymentStatus ? <OrderStatusBadge>{paymentStatus}</OrderStatusBadge> : null}
+          {shipmentStatus ? (
+            <OrderStatusBadge>{shipmentStatus}</OrderStatusBadge>
+          ) : null}
+        </div>
+        {orderedAt ? (
+          <p className={`mt-2 font-body-ja ${uiText(14)}`}>
+            ご注文日時：{orderedAt}
+          </p>
+        ) : null}
+      </div>
+
+      <div className="mt-6">
+        <h4 className="font-body-ja text-sm font-semibold">購入商品</h4>
+        <FieldNote>{accountFieldNotes.order.lineItems}</FieldNote>
+        <OrderLineItems lineItems={order.lineItems.nodes} />
+      </div>
 
       <div className="mt-6">
         <FieldList>
-        <Field label="注文番号" value={order.name} />
-        <Field label="連番" value={String(order.number)} />
+        {optional.showUpdatedAt ? (
         <Field
-          label="確認番号"
-          value={formatText(order.confirmationNumber)}
-        />
-        <Field label="ID" value={order.id} />
-        <Field label="注文日時" value={formatDateTime(order.processedAt)} />
-        <Field label="作成日時" value={formatDateTime(order.createdAt)} />
-        <Field label="更新日時" value={formatDateTime(order.updatedAt)} />
+            label="更新日時"
+            value={formatDateTime(order.updatedAt)}
+            note={accountFieldNotes.order.updatedAt}
+          />
+        ) : null}
+        {optional.showCancelledAt ? (
         <Field
           label="キャンセル日時"
           value={formatDateTime(order.cancelledAt)}
+            note={accountFieldNotes.order.cancelledAt}
         />
+        ) : null}
+        {optional.showCancelReason ? (
         <Field
           label="キャンセル理由"
           value={formatText(order.cancelReason)}
-        />
-        <Field label="編集済み" value={formatBoolean(order.edited)} />
-        <Field label="支払い状況" value={formatText(order.financialStatus)} />
-        <Field label="配送状況" value={formatText(order.fulfillmentStatus)} />
+            note={accountFieldNotes.order.cancelReason}
+          />
+        ) : null}
+        {optional.showEdited ? (
+          <Field label="編集済み" value="はい" note={accountFieldNotes.order.edited} />
+        ) : null}
+        {optional.showNote ? (
+          <Field label="備考" value={formatText(order.note)} note={accountFieldNotes.order.note} />
+        ) : null}
+        {optional.showPoNumber ? (
         <Field
-          label="配送が必要"
-          value={formatBoolean(order.requiresShipping)}
+            label="発注番号"
+            value={formatText(order.poNumber)}
+            note={accountFieldNotes.order.poNumber}
+          />
+        ) : null}
+        {optional.showLocationName ? (
+          <Field
+            label="出荷元"
+            value={formatText(order.locationName)}
+            note={accountFieldNotes.order.locationName}
+          />
+        ) : null}
+        <Field
+          label="商品の小計"
+          value={formatMoney(accountOrderSubtotalWithTax(order))}
+          note={accountFieldNotes.order.subtotal}
         />
-        <Field label="通貨" value={order.currencyCode} />
-        <Field label="メールアドレス" value={formatText(order.email)} />
-        <Field label="電話番号" value={formatText(order.phone)} />
-        <Field label="備考" value={formatText(order.note)} />
-        <Field label="発注番号" value={formatText(order.poNumber)} />
-        <Field label="ロケール" value={formatText(order.customerLocale)} />
-        <Field label="出荷元" value={formatText(order.locationName)} />
-        <Field label="小計" value={formatMoney(order.subtotal)} />
-        <Field label="税" value={formatMoney(order.totalTax)} />
-        <Field label="チップ" value={formatMoney(order.totalTip)} />
-        <Field label="関税" value={formatMoney(order.totalDuties)} />
-        <Field label="送料" value={formatMoney(order.totalShipping)} />
-        <Field label="返金額" value={formatMoney(order.totalRefunded)} />
-        <Field label="合計" value={formatMoney(order.totalPrice)} />
-        <LinkField label="ステータスページ" url={order.statusPageUrl} />
+        <Field label="配送料" value={formatMoney(order.totalShipping)} note={accountFieldNotes.order.shipping} />
+        {optional.showRefunded ? (
+          <Field
+            label="返金額"
+            value={formatMoney(order.totalRefunded)}
+            note={accountFieldNotes.order.refunded}
+          />
+        ) : null}
+        <Field label="ご請求額" value={formatMoney(order.totalPrice)} note={accountFieldNotes.order.total} />
+        <LinkField label="ステータスページ" url={order.statusPageUrl} note={accountFieldNotes.order.statusPage} />
         </FieldList>
       </div>
 
       <div className="mt-8">
-        <h4 className="font-ui-en text-sm font-semibold">FULFILLMENTS</h4>
+        <h4 className="font-body-ja text-sm font-semibold">発送情報</h4>
+        <FieldNote>{accountFieldNotes.order.fulfillments}</FieldNote>
         {order.fulfillments.nodes.length ? (
           <ul className="mt-3 flex flex-col gap-6">
             {order.fulfillments.nodes.map((fulfillment) => (
               <li key={fulfillment.id}>
                 <FieldList>
-                  <Field label="発送 ID" value={fulfillment.id} />
+                  <Field label="発送 ID" value={fulfillment.id} note={accountFieldNotes.order.fulfillmentId} />
                   <Field
                     label="発送状態"
-                    value={formatText(fulfillment.status)}
+                    value={formatAccountFulfillmentUnitStatus(fulfillment.status) ?? NOT_REGISTERED}
+                    note={accountFieldNotes.order.shipmentStatus}
                   />
                   <Field
-                    label="最新の配送状況"
-                    value={formatText(fulfillment.latestShipmentStatus)}
+                    label="いまの配送状況"
+                    value={formatAccountShipmentStatus(fulfillment.latestShipmentStatus) ?? NOT_REGISTERED}
+                    note={accountFieldNotes.order.latestShipmentStatus}
                   />
                   <Field
                     label="配達予定日時"
                     value={formatDateTime(fulfillment.estimatedDeliveryAt)}
+                    note={accountFieldNotes.order.estimatedDeliveryAt}
                   />
                   <Field
                     label="発送日時"
                     value={formatDateTime(fulfillment.createdAt)}
+                    note={accountFieldNotes.order.fulfillmentCreatedAt}
                   />
                   <Field
                     label="更新日時"
                     value={formatDateTime(fulfillment.updatedAt)}
+                    note={accountFieldNotes.order.fulfillmentUpdatedAt}
                   />
                   <Field
                     label="店頭受け取り済み"
                     value={formatBoolean(fulfillment.isPickedUp)}
-                  />
-                  <Field
-                    label="配送が必要"
-                    value={formatBoolean(fulfillment.requiresShipping)}
+                    note={accountFieldNotes.order.isPickedUp}
                   />
                 </FieldList>
 
                 <div className="mt-6">
-                  <h5 className="font-ui-en text-xs font-semibold">TRACKING</h5>
+                  <h5 className="font-body-ja text-xs font-semibold">追跡情報</h5>
+                  <FieldNote>{accountFieldNotes.order.tracking}</FieldNote>
                   {fulfillment.trackingInformation.length ? (
                     <div className="mt-2 flex flex-col gap-4">
                       {fulfillment.trackingInformation.map((tracking) => (
@@ -278,12 +798,18 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
                           <Field
                             label="配送業者"
                             value={formatText(tracking.company)}
+                            note={accountFieldNotes.order.trackingCompany}
                           />
                           <Field
                             label="追跡番号"
                             value={formatText(tracking.number)}
+                            note={accountFieldNotes.order.trackingNumber}
                           />
-                          <LinkField label="追跡 URL" url={tracking.url} />
+                          <LinkField
+                            label="追跡 URL"
+                            url={tracking.url}
+                            note={accountFieldNotes.order.trackingUrl}
+                          />
                         </FieldList>
                       ))}
                     </div>
@@ -295,14 +821,16 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
                 </div>
 
                 <div className="mt-6">
-                  <h5 className="font-ui-en text-xs font-semibold">EVENTS</h5>
+                  <h5 className="font-body-ja text-xs font-semibold">配送履歴</h5>
+                  <FieldNote>{accountFieldNotes.order.events}</FieldNote>
                   {fulfillment.events.nodes.length ? (
                     <FieldList>
                       {fulfillment.events.nodes.map((event) => (
                         <Field
                           key={event.id}
                           label={formatDateTime(event.happenedAt)}
-                          value={event.status}
+                          value={formatAccountShipmentStatus(event.status) ?? event.status}
+                          note={accountFieldNotes.order.event}
                         />
                       ))}
                     </FieldList>
@@ -323,78 +851,26 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
       </div>
 
       <div className="mt-8">
-        <h4 className="font-ui-en text-sm font-semibold">SHIPPING ADDRESS</h4>
-        <div className="mt-3">
-          <AddressFields address={order.shippingAddress} prefix="配送先" />
-        </div>
+        <h4 className="font-body-ja text-sm font-semibold">お届け先</h4>
+        <OrderAddressBlock address={order.shippingAddress} />
       </div>
 
       <div className="mt-8">
-        <h4 className="font-ui-en text-sm font-semibold">BILLING ADDRESS</h4>
-        <div className="mt-3">
-          <AddressFields address={order.billingAddress} prefix="請求先" />
-        </div>
+        <h4 className="font-body-ja text-sm font-semibold">決済方法</h4>
+        <OrderPaymentMethods transactions={order.transactions} />
       </div>
 
       <div className="mt-8">
-        <h4 className="font-ui-en text-sm font-semibold">LINE ITEMS</h4>
-        {order.lineItems.nodes.length ? (
-          <ul className="mt-3 flex flex-col gap-6">
-            {order.lineItems.nodes.map((lineItem) => (
-              <li key={lineItem.id}>
-                <FieldList>
-                  <Field label="商品名" value={lineItem.name} />
-                  <Field label="タイトル" value={formatText(lineItem.title)} />
-                  <Field
-                    label="バリエーション"
-                    value={formatText(lineItem.variantTitle)}
-                  />
-                  <Field label="SKU" value={formatText(lineItem.sku)} />
-                  <Field
-                    label="ベンダー"
-                    value={formatText(lineItem.vendor)}
-                  />
-                  <Field
-                    label="商品タイプ"
-                    value={formatText(lineItem.productType)}
-                  />
-                  <Field label="数量" value={String(lineItem.quantity)} />
-                  <Field
-                    label="返品可能数"
-                    value={String(lineItem.refundableQuantity)}
-                  />
-                  <Field
-                    label="配送が必要"
-                    value={formatBoolean(lineItem.requiresShipping)}
-                  />
-                  <Field
-                    label="ギフトカード"
-                    value={formatBoolean(lineItem.giftCard)}
-                  />
-                  <Field label="単価" value={formatMoney(lineItem.price)} />
-                  <Field
-                    label="小計"
-                    value={formatMoney(lineItem.totalPrice)}
-                  />
-                  <Field
-                    label="割引額"
-                    value={formatMoney(lineItem.totalDiscount)}
-                  />
-                  <LinkField label="画像 URL" url={lineItem.image?.url} />
-                  <Field
-                    label="画像 alt"
-                    value={formatText(lineItem.image?.altText)}
-                  />
-                </FieldList>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-3 font-body-ja text-sm text-[var(--color-muted)]">
-            {NOT_REGISTERED}
-          </p>
-        )}
+        <h4 className="font-body-ja text-sm font-semibold">ご請求先</h4>
+        <OrderAddressBlock address={order.billingAddress} />
+        <Link
+          href={accountReceiptHref(order.id)}
+          className="mt-3 inline-flex border-b border-current font-body-ja text-sm"
+        >
+          領収書を見る
+        </Link>
       </div>
+
     </li>
   );
 }
@@ -430,7 +906,11 @@ function SectionBody<T>({
  * いまは Customer Account API から何が取れるかを確認するための仮画面なので、
  * 取得できた項目をそのまま並べている。未登録の項目は「登録なし」で埋める。
  */
-export async function AccountPageContent() {
+export async function AccountPageContent({
+  searchParams,
+}: {
+  searchParams?: Record<string, string | string[] | undefined>;
+} = {}) {
   const isStaticExport = process.env.STATIC_EXPORT === "true";
   const session = isStaticExport ? null : await getLiveCustomerTokenSession();
 
@@ -455,31 +935,55 @@ export async function AccountPageContent() {
     }
   }
 
+  const accountName = snapshot ? formatAccountName(snapshot.profile) : "";
+  const accountDate = snapshot
+    ? formatAccountDate(snapshot.profile.creationDate)
+    : null;
+  const search = queryStringFromSearchParams(searchParams);
+  const activeTabId = resolveAccountPageTabId({ search });
+  const notice = accountPageNotice(search);
+  const addresses = snapshot?.profile.addresses.nodes ?? [];
+  const defaultAddressId = snapshot?.profile.defaultAddress?.id;
+  const deleteTargetId = accountAddressDeleteIdFromSearch(search);
+  const isNewAddress =
+    accountAddressIdFromSearch(search) === NEW_ACCOUNT_ADDRESS;
+  const shopifyProfileUrl = await getShopifyCustomerProfileUrl();
+
   return (
     <main
       data-header-theme="onLight"
-      className="px-[var(--container-x)] pt-[calc(var(--header-height)+var(--container-y-top))] pb-[var(--container-y-bottom)]"
+      className="pt-[calc(var(--header-height)+var(--container-y-top))] pb-[var(--container-y-bottom)]"
     >
-      <h1 className="font-heading text-[clamp(38px,calc(24.13px+3.7vw),62px)] leading-none">
-        Account
+      <Container>
+      {snapshot ? (
+        <header>
+          <h1
+            className={`font-body-ja font-semibold text-[var(--foreground)] ${sectionTitle62ClassName}`}
+          >
+            {accountName}
       </h1>
+          {accountDate ? (
+            <time
+              dateTime={snapshot.profile.creationDate}
+              className={`mt-[calc(16px*var(--gap-scale-y))] block font-body-ja text-[var(--color-muted)] ${uiText(14)}`}
+            >
+              {accountDate}
+            </time>
+          ) : null}
+        </header>
+      ) : null}
 
       {snapshotError ? (
-        <div className="mt-12 max-w-[620px]">
+        <div className="mt-12">
           <SectionError error={snapshotError} />
-          <form action="/account/logout" method="post" className="mt-6">
-            <button
-              type="submit"
-              className="border-b border-current font-ui-en text-sm"
-            >
-              LOGOUT
-            </button>
-          </form>
+          <div className="mt-6">
+            <LogoutButton />
+          </div>
         </div>
       ) : null}
 
       {!snapshot && !snapshotError ? (
-        <div className="mt-12 max-w-[620px]">
+        <div>
           <p className="font-body-ja text-sm leading-relaxed">
             Shopifyアカウントでログインすると、プロフィールと注文履歴を確認できます。
           </p>
@@ -490,77 +994,191 @@ export async function AccountPageContent() {
       ) : null}
 
       {snapshot ? (
-        <div className="mt-12 max-w-[860px]">
-          <p className="font-body-ja text-sm text-[var(--color-muted)]">
-            Customer Account API から取得できる項目を並べた確認用の画面です。
-            未登録の項目は「{NOT_REGISTERED}」と表示しています。
-          </p>
-          <form action="/account/logout" method="post" className="mt-6">
-            <button
-              type="submit"
-              className="border-b border-current font-ui-en text-sm"
-            >
-              LOGOUT
-            </button>
-          </form>
+        <div className="mt-[calc(32px*var(--gap-scale-y))]">
+          <div className="flex flex-wrap items-end justify-end gap-4">
+            <LogoutButton />
+          </div>
 
-          <Section title="PROFILE">
+          {notice ? (
+            <p
+              role="status"
+              className={`mt-[calc(24px*var(--gap-scale-y))] font-body-ja text-sm ${
+                notice.tone === "error"
+                  ? "text-[#9b1b30]"
+                  : "text-[var(--foreground)]"
+              }`}
+            >
+              {notice.message}
+            </p>
+          ) : null}
+
+          <AccountTabs activeTabId={activeTabId} search={search}>
+              {activeTabId === "profile" ? (
+                <div className="flex flex-col gap-[calc(62px*var(--gap-scale-y))]">
+                  <MemberSection title={accountMemberCopy.accountDetails.title}>
+                    <ProfileNameForm profile={snapshot.profile} />
+
             <FieldList>
-              <Field label="ID" value={snapshot.profile.id} />
-              <Field label="表示名" value={formatText(snapshot.profile.displayName)} />
-              <Field label="姓" value={formatText(snapshot.profile.lastName)} />
-              <Field label="名" value={formatText(snapshot.profile.firstName)} />
               <Field
                 label="メールアドレス"
-                value={formatText(snapshot.profile.emailAddress?.emailAddress)}
-              />
-              <Field
-                label="メール配信状態"
-                value={formatText(snapshot.profile.emailAddress?.marketingState)}
+                        value={formatText(
+                          snapshot.profile.emailAddress?.emailAddress
+                        )}
+                        note={accountMemberCopy.accountDetails.email}
               />
               <Field
                 label="電話番号"
-                value={formatText(snapshot.profile.phoneNumber?.phoneNumber)}
-              />
-              <Field
-                label="アカウント作成日時"
-                value={formatDateTime(snapshot.profile.creationDate)}
-              />
-              <Field label="タグ" value={formatList(snapshot.profile.tags)} />
-              <Field
-                label="アバター画像 URL"
-                value={formatText(snapshot.profile.imageUrl)}
+                        value={formatText(
+                          snapshot.profile.phoneNumber?.phoneNumber
+                        )}
+                        note={accountMemberCopy.accountDetails.phone}
               />
             </FieldList>
-          </Section>
 
-          <Section title="DEFAULT ADDRESS">
-            <AddressFields
-              address={snapshot.profile.defaultAddress}
-              prefix="既定の住所"
-            />
-          </Section>
+                    {shopifyProfileUrl ? (
+                      <p className={readOnlyNoteClassName}>
+                        <ShopifyChangeLink href={shopifyProfileUrl}>
+                          {accountMemberCopy.accountDetails.emailChange}
+                        </ShopifyChangeLink>
+                        {" / "}
+                        <ShopifyChangeLink href={shopifyProfileUrl}>
+                          {accountMemberCopy.accountDetails.phoneChange}
+                        </ShopifyChangeLink>
+                      </p>
+                    ) : null}
 
-          <Section title="ADDRESSES">
-            {snapshot.profile.addresses.nodes.length ? (
-              <ul className="flex flex-col gap-8">
-                {snapshot.profile.addresses.nodes.map((address, index) => (
-                  <li key={address.id}>
-                    <AddressFields
+                    <p className={readOnlyNoteClassName}>
+                      {accountMemberCopy.accountDetails.login}
+                    </p>
+                  </MemberSection>
+
+                  <MemberSection title={accountMemberCopy.notifications.title}>
+                    <EmailMarketingForm profile={snapshot.profile} />
+                  </MemberSection>
+
+                  <MemberSection title={accountMemberCopy.payments.title}>
+                    <p className={readOnlyNoteClassName}>
+                      {shopifyProfileUrl
+                        ? accountMemberCopy.payments.body
+                        : accountMemberCopy.payments.unavailable}
+                    </p>
+                    {shopifyProfileUrl ? (
+                      <p>
+                        <ShopifyChangeLink href={shopifyProfileUrl}>
+                          {accountMemberCopy.payments.link}
+                        </ShopifyChangeLink>
+                      </p>
+                    ) : null}
+                  </MemberSection>
+
+                  <MemberSection title={accountMemberCopy.privacy.title}>
+                    <p className={readOnlyNoteClassName}>
+                      {accountMemberCopy.privacy.body}
+                    </p>
+                    <p>
+                      <Link
+                        href={accountMemberCopy.privacy.href}
+                        className={`${bodyLinkUnderlineClassName} font-body-ja font-semibold text-[var(--foreground)]`}
+                      >
+                        {accountMemberCopy.privacy.link}
+                      </Link>
+                    </p>
+                  </MemberSection>
+                </div>
+              ) : null}
+              {activeTabId === "addresses" ? (
+                <div className="flex flex-col gap-[calc(62px*var(--gap-scale-y))]">
+                  {addresses.map((address, index) => (
+                    <div key={address.id}>
+                      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                        <p className="font-body-ja text-sm font-bold">
+                          住所 {index + 1}
+                          {address.id === defaultAddressId ? "（既定）" : ""}
+                        </p>
+                        {address.id === defaultAddressId ? null : (
+                          <div>
+                            <AddressIntentButton
+                              addressId={address.id}
+                              intent="default"
+                            >
+                              既定にする
+                            </AddressIntentButton>
+                            <FieldNote>{accountFieldNotes.address.setDefault}</FieldNote>
+                          </div>
+                        )}
+                        {deleteTargetId === address.id ? null : (
+                          <div>
+                            <Link
+                              href={accountAddressDeleteHref(address.id)}
+                              scroll={false}
+                              prefetch={false}
+                              className={addressActionClassName}
+                            >
+                              削除する
+                            </Link>
+                            <FieldNote>{accountFieldNotes.address.remove}</FieldNote>
+                          </div>
+                        )}
+                      </div>
+
+                      {deleteTargetId === address.id ? (
+                        <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3 border border-[#ddd] p-4">
+                          <p className="font-body-ja text-sm">
+                            この住所を削除しますか？
+                          </p>
+                          <AddressIntentButton
+                            addressId={address.id}
+                            intent="delete"
+                          >
+                            削除する
+                          </AddressIntentButton>
+                          <Link
+                            href={accountPageTabHref("addresses")}
+                            scroll={false}
+                            prefetch={false}
+                            className={addressActionClassName}
+                          >
+                            やめる
+                          </Link>
+                        </div>
+                      ) : null}
+
+                      <div className="mt-[calc(24px*var(--gap-scale-y))]">
+                        <AddressForm
                       address={address}
-                      prefix={`住所 ${index + 1}`}
-                    />
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="font-body-ja text-sm text-[var(--color-muted)]">
-                {NOT_REGISTERED}
-              </p>
-            )}
-          </Section>
+                          formKey={String(index + 1)}
+                          isDefault={address.id === defaultAddressId}
+                        />
+                      </div>
+                    </div>
+                  ))}
 
-          <Section title="ORDERS">
+                  {isNewAddress ? (
+                    <div>
+                      <p className="font-body-ja text-sm font-bold">住所を追加</p>
+                      <div className="mt-[calc(24px*var(--gap-scale-y))]">
+                        <AddressForm
+                          formKey="new"
+                          isDefault={addresses.length === 0}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <Link
+                        href={accountAddressAddHref()}
+                        scroll={false}
+                        prefetch={false}
+                        className={addressActionClassName}
+                      >
+                        住所を追加する
+                      </Link>
+                      <FieldNote>{accountFieldNotes.address.add}</FieldNote>
+                    </div>
+                  )}
+                </div>
+              ) : null}
+              {activeTabId === "orders" ? (
             <SectionBody
               section={snapshot.orders}
               empty="注文履歴はありません。"
@@ -573,9 +1191,8 @@ export async function AccountPageContent() {
                 </ul>
               )}
             />
-          </Section>
-
-          <Section title="RELATED RECORDS">
+              ) : null}
+              {activeTabId === "related-records" ? (
             <SectionBody
               section={snapshot.relatedRecordCounts}
               empty="関連レコードはありません。"
@@ -585,138 +1202,26 @@ export async function AccountPageContent() {
                   <Field
                     label="法人担当者 (B2B)"
                     value={`${counts.companyContacts} 件`}
+                          note={accountFieldNotes.related.companyContacts}
                   />
                   <Field
                     label="定期購入契約"
                     value={`${counts.subscriptionContracts} 件`}
+                          note={accountFieldNotes.related.subscriptionContracts}
                   />
                   <Field
                     label="下書き注文"
                     value={`${counts.draftOrders} 件`}
+                          note={accountFieldNotes.related.draftOrders}
                   />
                 </FieldList>
               )}
             />
-          </Section>
-
-          <Section title="UPDATE PROFILE">
-            <form
-              action="/api/shopify/customer/profile"
-              method="post"
-              className="grid gap-5 min-[640px]:grid-cols-2"
-            >
-              <label className="font-body-ja text-sm">
-                姓
-                <input
-                  name="lastName"
-                  defaultValue={snapshot.profile.lastName ?? ""}
-                  maxLength={100}
-                  className={inputClassName}
-                />
-              </label>
-              <label className="font-body-ja text-sm">
-                名
-                <input
-                  name="firstName"
-                  defaultValue={snapshot.profile.firstName ?? ""}
-                  maxLength={100}
-                  className={inputClassName}
-                />
-              </label>
-              <button
-                type="submit"
-                className="bg-[var(--foreground)] px-6 py-4 font-ui-en text-sm text-white min-[640px]:col-span-2 min-[640px]:w-fit"
-              >
-                UPDATE PROFILE
-              </button>
-            </form>
-          </Section>
-
-          <Section title="UPDATE ADDRESS">
-            <form
-              action="/api/shopify/customer/address"
-              method="post"
-              className="grid gap-5 min-[640px]:grid-cols-2"
-            >
-              <input
-                type="hidden"
-                name="addressId"
-                value={snapshot.profile.defaultAddress?.id ?? ""}
-              />
-              <input type="hidden" name="territoryCode" value="JP" />
-              <label className="font-body-ja text-sm">
-                姓
-                <input
-                  name="lastName"
-                  defaultValue={snapshot.profile.defaultAddress?.lastName ?? ""}
-                  required
-                  className={inputClassName}
-                />
-              </label>
-              <label className="font-body-ja text-sm">
-                名
-                <input
-                  name="firstName"
-                  defaultValue={snapshot.profile.defaultAddress?.firstName ?? ""}
-                  required
-                  className={inputClassName}
-                />
-              </label>
-              <label className="font-body-ja text-sm">
-                郵便番号
-                <input
-                  name="zip"
-                  defaultValue={snapshot.profile.defaultAddress?.zip ?? ""}
-                  required
-                  className={inputClassName}
-                />
-              </label>
-              <label className="font-body-ja text-sm">
-                都道府県コード
-                <input
-                  name="zoneCode"
-                  defaultValue={snapshot.profile.defaultAddress?.zoneCode ?? ""}
-                  placeholder="JP-40"
-                  required
-                  className={inputClassName}
-                />
-              </label>
-              <label className="font-body-ja text-sm min-[640px]:col-span-2">
-                市区町村
-                <input
-                  name="city"
-                  defaultValue={snapshot.profile.defaultAddress?.city ?? ""}
-                  required
-                  className={inputClassName}
-                />
-              </label>
-              <label className="font-body-ja text-sm min-[640px]:col-span-2">
-                住所1
-                <input
-                  name="address1"
-                  defaultValue={snapshot.profile.defaultAddress?.address1 ?? ""}
-                  required
-                  className={inputClassName}
-                />
-              </label>
-              <label className="font-body-ja text-sm min-[640px]:col-span-2">
-                住所2
-                <input
-                  name="address2"
-                  defaultValue={snapshot.profile.defaultAddress?.address2 ?? ""}
-                  className={inputClassName}
-                />
-              </label>
-              <button
-                type="submit"
-                className="bg-[var(--foreground)] px-6 py-4 font-ui-en text-sm text-white min-[640px]:col-span-2 min-[640px]:w-fit"
-              >
-                UPDATE ADDRESS
-              </button>
-            </form>
-          </Section>
+              ) : null}
+          </AccountTabs>
         </div>
       ) : null}
+      </Container>
     </main>
   );
 }

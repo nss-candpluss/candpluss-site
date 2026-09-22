@@ -60,3 +60,42 @@ export function loginHintFromEmail(value: string | null | undefined) {
   }
   return email;
 }
+
+/**
+ * ngrok 経由では request.url が localhost のままになる。
+ * 公開ホストは X-Forwarded-* を優先する。
+ */
+export function publicOriginFromRequest(
+  requestUrl: string | URL,
+  requestHeaders?: Headers
+) {
+  const url = typeof requestUrl === "string" ? new URL(requestUrl) : requestUrl;
+  const host =
+    requestHeaders?.get("x-forwarded-host")?.split(",")[0]?.trim() ||
+    requestHeaders?.get("host")?.split(",")[0]?.trim() ||
+    url.host;
+  const protocol =
+    requestHeaders?.get("x-forwarded-proto")?.split(",")[0]?.trim() ||
+    url.protocol.replace(/:$/, "");
+
+  return `${protocol}://${host}`;
+}
+
+/**
+ * 本番以外（localhost / ngrok など）では、ログイン Cookie と同じオリジンへ戻す。
+ * 本番ホストのときは Shopify に登録済みのコールバック URL を使う。
+ */
+export function resolveCustomerAccountCallbackUrl(
+  configuredCallbackUrl: string,
+  requestUrl: string | URL,
+  requestHeaders?: Headers
+) {
+  const configured = new URL(configuredCallbackUrl);
+  const origin = new URL(publicOriginFromRequest(requestUrl, requestHeaders));
+
+  if (origin.hostname === configured.hostname) {
+    return configuredCallbackUrl;
+  }
+
+  return `${origin.origin}/account/authorize`;
+}

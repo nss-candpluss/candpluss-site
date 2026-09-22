@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, type CSSProperties, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 
 import { SiteGrid } from "@/components/ui/SiteGrid";
 import {
@@ -20,7 +20,6 @@ import {
   CONTACT_FORM_TOUCHABLE_FIELDS,
   getContactFieldStatus,
   getContactFormFieldErrors,
-  type ContactFieldStatus,
 } from "@/lib/contact/field-status";
 import { writeContactFormDraft } from "@/lib/contact/form-storage";
 import { normalizeContactNumberInput } from "@/lib/contact/input-normalization";
@@ -31,7 +30,11 @@ import { CONTACT_ERROR_SCROLL_ANCHORS, scrollToFirstContactFormError } from "@/l
 import { useContactFormDraft } from "@/lib/contact/use-contact-form-draft";
 import { validateContactForm } from "@/lib/contact/validate-form";
 import { ContactField } from "@/sections/contact/ContactField";
-import { getContactSelectClassName } from "@/sections/contact/contactStyles";
+import {
+  contactFormShellClassName,
+  getContactFloatingSelectClassName,
+  getContactFloatingSelectStyle,
+} from "@/sections/contact/contactStyles";
 import {
   SupportFloatingInput,
   SupportTextarea,
@@ -44,21 +47,6 @@ import {
   type ContactFormData,
   type ContactFormFieldKey,
 } from "@/types/contact";
-
-function getSupportStyleSelectClassName(status: ContactFieldStatus): string {
-  return `${getContactSelectClassName(status)} rounded-[8px] pl-[clamp(12px,calc(20px*var(--gap-scale-x)),20px)] pt-[clamp(12px,calc(20px*var(--gap-scale-y)),20px)] pb-[clamp(10px,calc(16px*var(--gap-scale-y)),16px)]`;
-}
-
-function getSupportStyleSelectInlineStyle(hasValue: boolean): CSSProperties {
-  return {
-    color: "var(--foreground)",
-    fontSize: "16px",
-    lineHeight: "1.3",
-    fontWeight: hasValue ? 600 : 400,
-    minHeight:
-      "calc(26px + clamp(12px, calc(20px * var(--gap-scale-y)), 20px) + clamp(10px, calc(16px * var(--gap-scale-y)), 16px))",
-  };
-}
 
 export function ContactForm() {
   const router = useRouter();
@@ -175,7 +163,7 @@ export function ContactForm() {
       noValidate
       data-contact-form
       onSubmit={handleSubmit}
-      className="mt-[calc(48px*var(--gap-scale-y))] border border-[var(--color-divider)] [&>div]:border-b-0 [&>div]:px-[clamp(20px,calc(48px*var(--gap-scale-x)),48px)] [&>div]:py-[clamp(12px,calc(24px*var(--gap-scale-y)),24px)] [&>div:first-child]:pt-[clamp(20px,calc(48px*var(--gap-scale-x)),48px)] [&>div:last-child]:pb-[clamp(20px,calc(48px*var(--gap-scale-x)),48px)] [&>div>div:first-child>span]:hidden"
+      className={`mt-[calc(48px*var(--gap-scale-y))] ${contactFormShellClassName}`}
     >
       <ContactField
         label={`${fieldLabels.category} *`}
@@ -192,8 +180,8 @@ export function ContactForm() {
             name="category"
             value={activeForm.category}
             onChange={(event) => updateField("category", event.target.value as ContactCategory | "")}
-            className={getSupportStyleSelectClassName(getFieldStatus("category"))}
-            style={getSupportStyleSelectInlineStyle(Boolean(activeForm.category))}
+            className={getContactFloatingSelectClassName(getFieldStatus("category"))}
+            style={getContactFloatingSelectStyle(Boolean(activeForm.category))}
             aria-required="true"
             aria-invalid={getFieldStatus("category") === "invalid"}
           >
@@ -392,8 +380,8 @@ export function ContactForm() {
                   name="prefecture"
                   value={activeForm.prefecture}
                   onChange={(event) => updateField("prefecture", event.target.value)}
-                  className={getSupportStyleSelectClassName(getFieldStatus("prefecture"))}
-                  style={getSupportStyleSelectInlineStyle(Boolean(activeForm.prefecture))}
+                  className={getContactFloatingSelectClassName(getFieldStatus("prefecture"))}
+                  style={getContactFloatingSelectStyle(Boolean(activeForm.prefecture))}
                   aria-invalid={getFieldStatus("prefecture") === "invalid"}
                 >
                   <option value="">{placeholders.prefecture}</option>

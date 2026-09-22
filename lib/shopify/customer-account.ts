@@ -2,6 +2,9 @@ import "server-only";
 
 import { z } from "zod";
 
+import { resolveCustomerAccountCallbackUrl } from "@/lib/commerce/account-login";
+import { shopifyCustomerProfileUrlFromAccountUrl } from "@/lib/commerce/account-page";
+
 const customerAccountConfigSchema = z.object({
   clientId: z.string().min(1),
   clientSecret: z.string().optional(),
@@ -83,6 +86,16 @@ export type CustomerFulfillmentDetail = {
   events: { nodes: Array<{ id: string; status: string; happenedAt: string }> };
 };
 
+export type CustomerOrderTransaction = {
+  id: string;
+  type: string;
+  kind?: string | null;
+  status?: string | null;
+  typeDetails?: { name?: string | null; message?: string | null } | null;
+  paymentDetails?: { cardBrand?: string | null; last4?: string | null } | null;
+  paymentIcon?: { url: string; altText?: string | null } | null;
+};
+
 export type CustomerOrderDetail = {
   id: string;
   name: string;
@@ -107,13 +120,12 @@ export type CustomerOrderDetail = {
   statusPageUrl: string;
   subtotal?: CustomerMoney | null;
   totalTax?: CustomerMoney | null;
-  totalTip?: CustomerMoney | null;
-  totalDuties?: CustomerMoney | null;
   totalShipping: CustomerMoney;
   totalRefunded: CustomerMoney;
   totalPrice: CustomerMoney;
   shippingAddress?: CustomerAddressDetail | null;
   billingAddress?: CustomerAddressDetail | null;
+  transactions: CustomerOrderTransaction[];
   fulfillments: { nodes: CustomerFulfillmentDetail[] };
   lineItems: {
     nodes: Array<{
@@ -192,6 +204,14 @@ function getCustomerAccountConfig(): CustomerAccountConfig {
   };
 }
 
+export function customerAccountCallbackUrlForRequest(request: Request) {
+  return resolveCustomerAccountCallbackUrl(
+    getCustomerAccountConfig().callbackUrl,
+    request.url,
+    request.headers
+  );
+}
+
 async function discoverCustomerAccount() {
   const config = getCustomerAccountConfig();
   const [openidResponse, apiResponse] = await Promise.all([
@@ -220,18 +240,20 @@ export async function createCustomerAuthorizationUrl({
   returnTo,
   loginHint,
   locale,
+  callbackUrl,
 }: {
   state: string;
   codeChallenge: string;
   returnTo?: string;
   loginHint?: string;
   locale?: string;
+  callbackUrl: string;
 }) {
   const { config, openid } = await discoverCustomerAccount();
   const url = new URL(openid.authorization_endpoint);
   url.searchParams.set("client_id", config.clientId);
   url.searchParams.set("response_type", "code");
-  url.searchParams.set("redirect_uri", config.callbackUrl);
+  url.searchParams.set("redirect_uri", callbackUrl);
   url.searchParams.set("scope", "openid email customer-account-api:full");
   url.searchParams.set("state", state);
   url.searchParams.set("code_challenge", codeChallenge);
@@ -295,14 +317,14 @@ async function requestToken(parameters: URLSearchParams) {
 
 export function exchangeCustomerAuthorizationCode(
   code: string,
-  codeVerifier: string
+  codeVerifier: string,
+  callbackUrl: string
 ) {
-  const config = getCustomerAccountConfig();
   return requestToken(
     new URLSearchParams({
       grant_type: "authorization_code",
       code,
-      redirect_uri: config.callbackUrl,
+      redirect_uri: callbackUrl,
       code_verifier: codeVerifier,
     })
   );
@@ -478,13 +500,25 @@ export async function fetchCustomerAccountSnapshot(
                   statusPageUrl
                   subtotal { amount currencyCode }
                   totalTax { amount currencyCode }
-                  totalTip { amount currencyCode }
-                  totalDuties { amount currencyCode }
                   totalShipping { amount currencyCode }
                   totalRefunded { amount currencyCode }
                   totalPrice { amount currencyCode }
                   shippingAddress { ${ADDRESS_FIELDS} }
                   billingAddress { ${ADDRESS_FIELDS} }
+                  transactions {
+                    id
+                    type
+                    kind
+                    status
+                    typeDetails { name message }
+                    paymentDetails {
+                      ... on CardPaymentDetails {
+                        cardBrand
+                        last4
+                      }
+                    }
+                    paymentIcon { url altText }
+                  }
                   fulfillments(first: 10) {
                     nodes {
                       id
@@ -628,9 +662,12 @@ export async function saveCustomerAddress(
   {
     addressId,
     address,
+    defaultAddress = false,
   }: {
     addressId?: string;
     address: Record<string, string>;
+    /** 既定にするかは呼び出し側で決める。既定の住所を勝手に移さない */
+    defaultAddress?: boolean;
   }
 ) {
   if (addressId) {
@@ -644,17 +681,18 @@ export async function saveCustomerAddress(
       `mutation CustomerAddressUpdate(
         $addressId: ID!
         $address: CustomerAddressInput
+        $defaultAddress: Boolean
       ) {
         customerAddressUpdate(
           addressId: $addressId
           address: $address
-          defaultAddress: true
+          defaultAddress: $defaultAddress
         ) {
           customerAddress { id }
           userErrors { field message }
         }
       }`,
-      { addressId, address }
+      { addressId, address, defaultAddress }
     );
     return assertCustomerMutation(data.customerAddressUpdate).customerAddress;
   }
@@ -666,18 +704,141 @@ export async function saveCustomerAddress(
     };
   }>(
     accessToken,
-    `mutation CustomerAddressCreate($address: CustomerAddressInput!) {
-      customerAddressCreate(address: $address, defaultAddress: true) {
+    `mutation CustomerAddressCreate(
+      $address: CustomerAddressInput!
+      $defaultAddress: Boolean
+    ) {
+      customerAddressCreate(address: $address, defaultAddress: $defaultAddress) {
         customerAddress { id }
         userErrors { field message }
       }
     }`,
-    { address }
+    { address, defaultAddress }
   );
   return assertCustomerMutation(data.customerAddressCreate).customerAddress;
 }
 
-export async function getCustomerLogoutUrl(idToken?: string) {
+/** 住所の中身は変えず、既定の住所だけ切り替える */
+export async function setDefaultCustomerAddress(
+  accessToken: string,
+  addressId: string
+) {
+  const data = await customerAccountRequest<{
+    customerAddressUpdate: {
+      customerAddress?: { id: string } | null;
+      userErrors: Array<{ message: string }>;
+    };
+  }>(
+    accessToken,
+    `mutation CustomerAddressSetDefault($addressId: ID!) {
+      customerAddressUpdate(addressId: $addressId, defaultAddress: true) {
+        customerAddress { id }
+        userErrors { field message }
+      }
+    }`,
+    { addressId }
+  );
+
+  return assertCustomerMutation(data.customerAddressUpdate).customerAddress;
+}
+
+export async function deleteCustomerAddress(
+  accessToken: string,
+  addressId: string
+) {
+  const data = await customerAccountRequest<{
+    customerAddressDelete: {
+      deletedAddressId?: string | null;
+      userErrors: Array<{ message: string }>;
+    };
+  }>(
+    accessToken,
+    `mutation CustomerAddressDelete($addressId: ID!) {
+      customerAddressDelete(addressId: $addressId) {
+        deletedAddressId
+        userErrors { field message }
+      }
+    }`,
+    { addressId }
+  );
+
+  return assertCustomerMutation(data.customerAddressDelete).deletedAddressId;
+}
+
+/**
+ * メール配信の購読・解除。
+ *
+ * Customer Account API ではメールアドレス自体は変更できず、
+ * 配信状態だけをこの 2 つの mutation で切り替える。
+ */
+export async function setCustomerEmailMarketing(
+  accessToken: string,
+  subscribed: boolean
+) {
+  if (subscribed) {
+    const data = await customerAccountRequest<{
+      customerEmailMarketingSubscribe: {
+        emailAddress?: { marketingState: string } | null;
+        userErrors: Array<{ message: string }>;
+      };
+    }>(
+      accessToken,
+      `mutation CustomerEmailMarketingSubscribe {
+        customerEmailMarketingSubscribe {
+          emailAddress { emailAddress marketingState }
+          userErrors { field message }
+        }
+      }`
+    );
+
+    return assertCustomerMutation(data.customerEmailMarketingSubscribe)
+      .emailAddress;
+  }
+
+  const data = await customerAccountRequest<{
+    customerEmailMarketingUnsubscribe: {
+      emailAddress?: { marketingState: string } | null;
+      userErrors: Array<{ message: string }>;
+    };
+  }>(
+    accessToken,
+    `mutation CustomerEmailMarketingUnsubscribe {
+      customerEmailMarketingUnsubscribe {
+        emailAddress { emailAddress marketingState }
+        userErrors { field message }
+      }
+    }`
+  );
+
+  return assertCustomerMutation(data.customerEmailMarketingUnsubscribe)
+    .emailAddress;
+}
+
+/** 「購読中」と扱うのは SUBSCRIBED だけ。PENDING は二重オプトイン待ち */
+export function isEmailMarketingSubscribed(marketingState?: string | null) {
+  return marketingState === "SUBSCRIBED";
+}
+
+/** メール変更など、Shopify 標準の会員画面へ案内するときの URL */
+export async function getShopifyCustomerProfileUrl() {
+  try {
+    const { config, openid } = await discoverCustomerAccount();
+    return (
+      shopifyCustomerProfileUrlFromAccountUrl(config.accountUrl) ??
+      shopifyCustomerProfileUrlFromAccountUrl(openid.authorization_endpoint)
+    );
+  } catch {
+    const accountUrl = process.env.SHOPIFY_CUSTOMER_ACCOUNT_URL;
+    return accountUrl
+      ? shopifyCustomerProfileUrlFromAccountUrl(accountUrl)
+      : null;
+  }
+}
+
+export async function getCustomerLogoutUrl(
+  idToken?: string,
+  postLogoutRedirectUri?: string
+) {
   const { config, openid } = await discoverCustomerAccount();
   if (!openid.end_session_endpoint) {
     return null;
@@ -687,6 +848,9 @@ export async function getCustomerLogoutUrl(idToken?: string) {
   if (idToken) {
     url.searchParams.set("id_token_hint", idToken);
   }
-  url.searchParams.set("post_logout_redirect_uri", new URL("/", config.callbackUrl).toString());
+  url.searchParams.set(
+    "post_logout_redirect_uri",
+    postLogoutRedirectUri ?? new URL("/", config.callbackUrl).toString()
+  );
   return url;
 }

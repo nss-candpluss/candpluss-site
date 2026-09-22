@@ -16,6 +16,7 @@ export type CustomerOAuthAttempt = {
   codeVerifier: string;
   returnTo: string;
   createdAt: number;
+  callbackUrl?: string;
 };
 
 const cookieOptions = {

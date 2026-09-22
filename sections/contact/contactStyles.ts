@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 import type { ContactFieldStatus } from "@/lib/contact/field-status";
 import { bodyText, inputText, uiText } from "@/lib/typography";
 
@@ -17,6 +19,29 @@ export function getContactFieldClassName(status: ContactFieldStatus = "idle"): s
 export function getContactSelectClassName(status: ContactFieldStatus = "idle"): string {
   return `${getContactFieldClassName(status)} appearance-none bg-[length:16px_16px] bg-[right_calc(16px*var(--gap-scale-x))]_center bg-no-repeat pr-[calc(40px*var(--gap-scale-x))]`;
 }
+
+/** フローティング入力欄と高さ・角丸を揃えたセレクト。会員の住所更新でも使う */
+export function getContactFloatingSelectClassName(
+  status: ContactFieldStatus = "idle"
+): string {
+  return `${getContactSelectClassName(status)} rounded-[8px] pl-[clamp(12px,calc(20px*var(--gap-scale-x)),20px)] pt-[clamp(12px,calc(20px*var(--gap-scale-y)),20px)] pb-[clamp(10px,calc(16px*var(--gap-scale-y)),16px)]`;
+}
+
+/** 未選択のときだけ細字にして、プレースホルダーのように見せる */
+export function getContactFloatingSelectStyle(hasValue: boolean): CSSProperties {
+  return {
+    color: "var(--foreground)",
+    fontSize: "16px",
+    lineHeight: "1.3",
+    fontWeight: hasValue ? 600 : 400,
+    minHeight:
+      "calc(26px + clamp(12px, calc(20px * var(--gap-scale-y)), 20px) + clamp(10px, calc(16px * var(--gap-scale-y)), 16px))",
+  };
+}
+
+/** セレクト右端の山形。position: relative な親の中に置く */
+export const contactSelectChevronClassName =
+  "pointer-events-none absolute top-1/2 right-[clamp(14px,calc(20px*var(--gap-scale-x)),20px)] size-[calc(10px*var(--text-scale))] -translate-y-[70%] rotate-45 border-r border-b border-[var(--foreground)]";
 
 export function getContactCheckboxClassName(status: ContactFieldStatus = "idle"): string {
   const base =
@@ -68,6 +93,10 @@ export const contactConfirmRowClassName =
 
 export const contactFormRowClassName =
   "border-b border-[var(--color-divider)] px-[calc(16px*var(--gap-scale-x))] py-[calc(24px*var(--gap-scale-y))] md:px-[calc(24px*var(--gap-scale-x))]";
+
+/** 問い合わせフォームの外枠 */
+export const contactFormShellClassName =
+  "border border-[var(--color-divider)] [&>div]:border-b-0 [&>div]:px-[clamp(20px,calc(48px*var(--gap-scale-x)),48px)] [&>div]:py-[clamp(12px,calc(24px*var(--gap-scale-y)),24px)] [&>div:first-child]:pt-[clamp(20px,calc(48px*var(--gap-scale-x)),48px)] [&>div:last-child]:pb-[clamp(20px,calc(48px*var(--gap-scale-x)),48px)] [&>div>div:first-child>span]:hidden";
 
 export const contactArrowPrimaryButtonClassName = `inline-flex w-full cursor-pointer items-center justify-center gap-x-[calc(8px*var(--gap-scale-x))] bg-[var(--foreground)] px-[calc(32px*var(--gap-scale-x))] py-[calc(24px*var(--gap-scale-y))] font-body-ja font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50 ${uiText(16)}`;
 

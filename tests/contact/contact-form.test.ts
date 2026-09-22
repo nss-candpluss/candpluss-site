@@ -112,12 +112,10 @@ describe("contact form", () => {
     expect(formSource).not.toContain("contactFormSectionClassName");
     expect(formSource).not.toContain("contactSelectChevronStyle");
     expect(formSource).not.toContain("getContactCheckboxClassName");
-    expect(formSource).toContain("border border-[var(--color-divider)]");
-    expect(formSource).toContain("[&>div]:border-b-0");
-    expect(formSource).toContain(
-      "[&>div]:px-[clamp(20px,calc(48px*var(--gap-scale-x)),48px)]"
+    expect(formSource).toContain("contactFormShellClassName");
+    expect(source("sections/contact/contactStyles.ts")).toContain(
+      "[&>div>div:first-child>span]:hidden"
     );
-    expect(formSource).toContain("[&>div>div:first-child>span]:hidden");
     expect(formSource).toContain('label="お名前"');
     expect(formSource).toContain('label="ご連絡先"');
     expect(formSource).toContain('label="住所"');

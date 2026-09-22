@@ -4,9 +4,13 @@ import {
   ACCOUNT_BASE_PATH,
   ACCOUNT_LOGIN_PATH,
   loginHintFromEmail,
+  publicOriginFromRequest,
   safeAccountReturnTo,
 } from "@/lib/commerce/account-login";
-import { createCustomerAuthorizationUrl } from "@/lib/shopify/customer-account";
+import {
+  createCustomerAuthorizationUrl,
+  customerAccountCallbackUrlForRequest,
+} from "@/lib/shopify/customer-account";
 import { saveCustomerOAuthAttempt } from "@/lib/shopify/customer-session";
 
 export const runtime = "nodejs";
@@ -30,6 +34,7 @@ async function startCustomerLogin(request: Request) {
 
   const returnTo = safeAccountReturnTo(returnToValue);
   const loginHint = loginHintFromEmail(emailValue);
+  const origin = publicOriginFromRequest(request.url, request.headers);
 
   try {
     const state = randomBytes(24).toString("base64url");
@@ -37,6 +42,7 @@ async function startCustomerLogin(request: Request) {
     const codeChallenge = createHash("sha256")
       .update(codeVerifier)
       .digest("base64url");
+    const callbackUrl = customerAccountCallbackUrlForRequest(request);
 
     const authorizationUrl = await createCustomerAuthorizationUrl({
       state,
@@ -44,6 +50,7 @@ async function startCustomerLogin(request: Request) {
       returnTo,
       loginHint,
       locale: "ja",
+      callbackUrl,
     });
 
     await saveCustomerOAuthAttempt({
@@ -51,11 +58,12 @@ async function startCustomerLogin(request: Request) {
       codeVerifier,
       returnTo,
       createdAt: Date.now(),
+      callbackUrl,
     });
 
     return Response.redirect(authorizationUrl);
   } catch {
-    const loginUrl = new URL(ACCOUNT_LOGIN_PATH, request.url);
+    const loginUrl = new URL(ACCOUNT_LOGIN_PATH, origin);
     loginUrl.searchParams.set("error", "config");
     if (returnTo !== ACCOUNT_BASE_PATH) {
       loginUrl.searchParams.set("returnTo", returnTo);
