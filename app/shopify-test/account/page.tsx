@@ -10,10 +10,6 @@ export const metadata = createPageMetadata({
   index: false,
 });
 
-export default async function ShopifyTestAccountPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  return <AccountPageContent searchParams={await searchParams} />;
+export default function ShopifyTestAccountPage() {
+  return <AccountPageContent />;
 }

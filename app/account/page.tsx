@@ -17,10 +17,6 @@ export const metadata = isAccountEnabled("public")
       description: notFoundContent.body.join(" "),
     };
 
-export default async function AccountPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  return <AccountPageContent searchParams={await searchParams} />;
+export default function AccountPage() {
+  return <AccountPageContent />;
 }

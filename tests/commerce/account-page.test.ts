@@ -32,6 +32,7 @@ import {
   formatAccountShipmentStatus,
   resolveAccountPageTabId,
   shopifyCustomerProfileUrlFromAccountUrl,
+  shouldHandleAccountShallowClick,
 } from "@/lib/commerce/account-page";
 import {
   japanZones,
@@ -536,20 +537,74 @@ describe("会員ページの画面構成", () => {
     expect(source).toContain("AccountTabs");
   });
 
-  it("タブ切替は ?tab= のリンクでサーバー側に渡す", () => {
+  // 4 タブ分を 1 回で取得しているので、タブを移るたびに取り直す必要がない
+  it("タブ切替はサーバーへ取りに行かず、表示だけを切り替える", () => {
     const contentSource = readSource("components/commerce/AccountPageContent.tsx");
     const tabsSource = readSource("components/commerce/AccountTabs.tsx");
     const testPageSource = readSource("app/shopify-test/account/page.tsx");
     const publicPageSource = readSource("app/account/page.tsx");
 
-    expect(testPageSource).toContain("searchParams={await searchParams}");
-    expect(publicPageSource).toContain("searchParams={await searchParams}");
-    expect(contentSource).toContain("activeTabId={activeTabId}");
+    expect(tabsSource).toContain('"use client"');
+    expect(tabsSource).toContain("useSearchParams");
     expect(tabsSource).toContain("accountPageTabHref");
     expect(tabsSource).toContain("justify-center");
-    expect(tabsSource).toContain("scroll={false}");
-    expect(tabsSource).not.toContain('"use client"');
-    expect(contentSource).not.toContain("AccountTabPanel");
+    expect(tabsSource).toContain("hidden={tab.id !== activeTabId}");
+    expect(contentSource).toContain("<OrdersPanel");
+    expect(contentSource).toContain("<ProfilePanel");
+    expect(contentSource).toContain("<AddressesPanel");
+    expect(contentSource).toContain("<RelatedRecordsPanel");
+    expect(contentSource).not.toContain("activeTabId");
+    expect(testPageSource).not.toContain("searchParams");
+    expect(publicPageSource).not.toContain("searchParams");
+  });
+
+  // リンクのまま残すことで、JavaScript が動く前のクリックでも同じ場所へ行ける
+  it("表示だけ切り替えるリンクは通常の遷移も残す", () => {
+    const linkSource = readSource("components/commerce/AccountShallowLink.tsx");
+
+    expect(linkSource).toContain("href={href}");
+    expect(linkSource).toContain("window.history.pushState");
+    expect(linkSource).toContain("shouldHandleAccountShallowClick");
+  });
+
+  it("修飾キー付きや中クリックはブラウザに任せる", () => {
+    const plainClick = {
+      button: 0,
+      metaKey: false,
+      ctrlKey: false,
+      shiftKey: false,
+      altKey: false,
+      defaultPrevented: false,
+    };
+
+    expect(shouldHandleAccountShallowClick(plainClick)).toBe(true);
+    expect(
+      shouldHandleAccountShallowClick({ ...plainClick, metaKey: true })
+    ).toBe(false);
+    expect(
+      shouldHandleAccountShallowClick({ ...plainClick, ctrlKey: true })
+    ).toBe(false);
+    expect(
+      shouldHandleAccountShallowClick({ ...plainClick, shiftKey: true })
+    ).toBe(false);
+    expect(shouldHandleAccountShallowClick({ ...plainClick, button: 1 })).toBe(
+      false
+    );
+    expect(
+      shouldHandleAccountShallowClick({ ...plainClick, defaultPrevented: true })
+    ).toBe(false);
+  });
+
+  // タブを移ると URL から updated が外れるので、表示も一緒に消す必要がある
+  it("更新結果の 1 行は URL に追従させる", () => {
+    const noticeSource = readSource("components/commerce/AccountNotice.tsx");
+    const contentSource = readSource("components/commerce/AccountPageContent.tsx");
+
+    expect(noticeSource).toContain('"use client"');
+    expect(noticeSource).toContain("useSearchParams");
+    expect(noticeSource).toContain("accountPageNotice");
+    expect(contentSource).toContain("<AccountNotice />");
+    expect(contentSource).not.toContain("accountPageNotice");
   });
 
   // 会員の更新フォームだけ別デザインになると、同じサイト内で入力の作法が変わる
@@ -581,14 +636,34 @@ describe("会員ページの画面構成", () => {
 
   it("住所タブ内で編集・既定設定・削除でき、削除は確認を挟む", () => {
     const source = readSource("components/commerce/AccountPageContent.tsx");
+    const controlsSource = readSource(
+      "components/commerce/AccountAddressControls.tsx"
+    );
 
     expect(source).toContain("AddressForm");
-    expect(source).toContain('intent="default"');
-    expect(source).toContain('intent="delete"');
-    expect(source).toContain("この住所を削除しますか？");
-    expect(source).toContain("accountAddressDeleteHref");
-    expect(source).toContain("accountAddressAddHref");
-    expect(source).not.toContain("accountAddressEditHref");
+    expect(controlsSource).toContain('intent="default"');
+    expect(controlsSource).toContain('intent="delete"');
+    expect(controlsSource).toContain("この住所を削除しますか？");
+    expect(controlsSource).toContain("accountAddressDeleteHref");
+    expect(controlsSource).toContain("accountAddressAddHref");
+    expect(controlsSource).not.toContain("accountAddressEditHref");
+  });
+
+  // 開け閉てするだけの操作でページを取り直すと、入力途中の内容が消える
+  it("住所の追加フォームと削除確認はサーバーへ取りに行かず開閉する", () => {
+    const controlsSource = readSource(
+      "components/commerce/AccountAddressControls.tsx"
+    );
+    const contentSource = readSource("components/commerce/AccountPageContent.tsx");
+
+    expect(controlsSource).toContain('"use client"');
+    expect(controlsSource).toContain("useSearchParams");
+    expect(controlsSource).toContain("AccountShallowLink");
+    expect(controlsSource).toContain("accountAddressDeleteIdFromSearch");
+    expect(controlsSource).toContain("accountAddressIdFromSearch");
+    expect(contentSource).toContain("<AccountAddressHeader");
+    expect(contentSource).toContain("<AccountAddressAdd>");
+    expect(contentSource).not.toContain("confirmDelete");
   });
 
   it("プロフィールはここで直せる項目と、別画面で直す案内に分ける", () => {

@@ -535,25 +535,6 @@ export function accountPageTabIdFromHash(hash: string) {
   return isAccountPageTabId(id) ? id : undefined;
 }
 
-export function queryStringFromSearchParams(
-  searchParams?: Record<string, string | string[] | undefined>
-) {
-  const params = new URLSearchParams();
-
-  if (!searchParams) {
-    return "";
-  }
-
-  for (const [key, value] of Object.entries(searchParams)) {
-    const normalized = Array.isArray(value) ? value[0] : value;
-    if (typeof normalized === "string" && normalized.length > 0) {
-      params.set(key, normalized);
-    }
-  }
-
-  return params.toString();
-}
-
 export function accountPageTabHref(tabId: AccountPageTabId, currentSearch = "") {
   const query = currentSearch.startsWith("?")
     ? currentSearch.slice(1)
@@ -665,5 +646,32 @@ export function resolveAccountPageTabId({
     accountPageTabIdFromSearch(search) ??
     accountPageTabIdFromHash(hash) ??
     "orders"
+  );
+}
+
+export type AccountShallowClick = {
+  button: number;
+  metaKey: boolean;
+  ctrlKey: boolean;
+  shiftKey: boolean;
+  altKey: boolean;
+  defaultPrevented: boolean;
+};
+
+/**
+ * クエリだけを書き換えるリンクを、自前で処理してよいクリックか判定する。
+ *
+ * 新しいタブで開く操作や中クリックまで奪うと、リンクとして壊れる。
+ */
+export function shouldHandleAccountShallowClick(
+  event: AccountShallowClick
+): boolean {
+  return (
+    event.button === 0 &&
+    !event.metaKey &&
+    !event.ctrlKey &&
+    !event.shiftKey &&
+    !event.altKey &&
+    !event.defaultPrevented
   );
 }

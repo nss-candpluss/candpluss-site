@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import {
+  AccountAddressAdd,
+  AccountAddressHeader,
+} from "@/components/commerce/AccountAddressControls";
+import { FieldNote } from "@/components/commerce/AccountFieldNote";
+import { AccountNotice } from "@/components/commerce/AccountNotice";
 import { AccountTabs } from "@/components/commerce/AccountTabs";
 import { AccountUpdateForm } from "@/components/commerce/AccountUpdateForm";
 import { Container } from "@/components/ui/Container";
@@ -15,11 +21,6 @@ import { japanZones, normalizeJapanZoneCode } from "@/lib/commerce/japan-zone-co
 import { formHalfSpanClassName } from "@/lib/layout";
 import { accountFieldNotes, accountMemberCopy } from "@/lib/commerce/account-field-notes";
 import {
-  NEW_ACCOUNT_ADDRESS,
-  accountAddressAddHref,
-  accountAddressDeleteHref,
-  accountAddressDeleteIdFromSearch,
-  accountAddressIdFromSearch,
   accountOrderLineImageAlt,
   accountOrderLineTitle,
   accountOrderLineVariantTitle,
@@ -27,8 +28,6 @@ import {
   accountOrderPaymentMethods,
   accountOrderShipmentDisplay,
   accountOrderSubtotalWithTax,
-  accountPageNotice,
-  accountPageTabHref,
   formatAccountAddressLine,
   formatAccountAddressName,
   formatAccountDate,
@@ -38,14 +37,13 @@ import {
   formatAccountFulfillmentUnitStatus,
   formatAccountName,
   formatAccountShipmentStatus,
-  queryStringFromSearchParams,
-  resolveAccountPageTabId,
 } from "@/lib/commerce/account-page";
 import {
   fetchCustomerAccountSnapshot,
   getShopifyCustomerProfileUrl,
   isEmailMarketingSubscribed,
   type CustomerAccount,
+  type CustomerAccountSnapshot,
   type CustomerAddressDetail,
   type CustomerMoney,
   type CustomerOrderDetail,
@@ -96,30 +94,6 @@ function formatText(value?: string | null) {
 const readOnlyHeadingClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(16)}`;
 const readOnlyNoteClassName = `mt-[calc(8px*var(--gap-scale-y))] font-body-ja text-[var(--color-muted)] ${uiText(13)}`;
 
-const addressActionClassName =
-  "cursor-pointer border-b border-current font-body-ja text-sm text-[var(--foreground)]";
-
-/** 住所 1 件に対する操作。フォームなので JavaScript なしで動く */
-function AddressIntentButton({
-  addressId,
-  intent,
-  children,
-}: {
-  addressId: string;
-  intent: "default" | "delete";
-  children: string;
-}) {
-  return (
-    <form action="/api/shopify/customer/address" method="post">
-      <input type="hidden" name="intent" value={intent} />
-      <input type="hidden" name="addressId" value={addressId} />
-      <button type="submit" className={addressActionClassName}>
-        {children}
-      </button>
-    </form>
-  );
-}
-
 function LogoutButton() {
   return (
     <form action="/account/logout" method="post">
@@ -131,12 +105,6 @@ function LogoutButton() {
       </button>
     </form>
   );
-}
-
-const fieldNoteClassName = `mt-1 font-body-ja text-[var(--color-muted)] ${uiText(12)}`;
-
-function FieldNote({ children }: { children: string }) {
-  return <p className={fieldNoteClassName}>{children}</p>;
 }
 
 /** ラベルと値を 1 行で並べる。値が無いものは「登録なし」で埋める */
@@ -902,6 +870,168 @@ function SectionBody<T>({
   return <>{render(section.data)}</>;
 }
 
+function ProfilePanel({
+  profile,
+  shopifyProfileUrl,
+}: {
+  profile: CustomerAccount;
+  shopifyProfileUrl: string | null;
+}) {
+  return (
+    <div className="flex flex-col gap-[calc(62px*var(--gap-scale-y))]">
+      <MemberSection title={accountMemberCopy.accountDetails.title}>
+        <ProfileNameForm profile={profile} />
+
+        <FieldList>
+          <Field
+            label="メールアドレス"
+            value={formatText(profile.emailAddress?.emailAddress)}
+            note={accountMemberCopy.accountDetails.email}
+          />
+          <Field
+            label="電話番号"
+            value={formatText(profile.phoneNumber?.phoneNumber)}
+            note={accountMemberCopy.accountDetails.phone}
+          />
+        </FieldList>
+
+        {shopifyProfileUrl ? (
+          <p className={readOnlyNoteClassName}>
+            <ShopifyChangeLink href={shopifyProfileUrl}>
+              {accountMemberCopy.accountDetails.emailChange}
+            </ShopifyChangeLink>
+            {" / "}
+            <ShopifyChangeLink href={shopifyProfileUrl}>
+              {accountMemberCopy.accountDetails.phoneChange}
+            </ShopifyChangeLink>
+          </p>
+        ) : null}
+
+        <p className={readOnlyNoteClassName}>
+          {accountMemberCopy.accountDetails.login}
+        </p>
+      </MemberSection>
+
+      <MemberSection title={accountMemberCopy.notifications.title}>
+        <EmailMarketingForm profile={profile} />
+      </MemberSection>
+
+      <MemberSection title={accountMemberCopy.payments.title}>
+        <p className={readOnlyNoteClassName}>
+          {shopifyProfileUrl
+            ? accountMemberCopy.payments.body
+            : accountMemberCopy.payments.unavailable}
+        </p>
+        {shopifyProfileUrl ? (
+          <p>
+            <ShopifyChangeLink href={shopifyProfileUrl}>
+              {accountMemberCopy.payments.link}
+            </ShopifyChangeLink>
+          </p>
+        ) : null}
+      </MemberSection>
+
+      <MemberSection title={accountMemberCopy.privacy.title}>
+        <p className={readOnlyNoteClassName}>{accountMemberCopy.privacy.body}</p>
+        <p>
+          <Link
+            href={accountMemberCopy.privacy.href}
+            className={`${bodyLinkUnderlineClassName} font-body-ja font-semibold text-[var(--foreground)]`}
+          >
+            {accountMemberCopy.privacy.link}
+          </Link>
+        </p>
+      </MemberSection>
+    </div>
+  );
+}
+
+function AddressesPanel({
+  addresses,
+  defaultAddressId,
+}: {
+  addresses: CustomerAddressDetail[];
+  defaultAddressId?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-[calc(62px*var(--gap-scale-y))]">
+      {addresses.map((address, index) => (
+        <div key={address.id}>
+          <AccountAddressHeader
+            addressId={address.id}
+            title={`住所 ${index + 1}${
+              address.id === defaultAddressId ? "（既定）" : ""
+            }`}
+            isDefault={address.id === defaultAddressId}
+          />
+
+          <div className="mt-[calc(24px*var(--gap-scale-y))]">
+            <AddressForm
+              address={address}
+              formKey={String(index + 1)}
+              isDefault={address.id === defaultAddressId}
+            />
+          </div>
+        </div>
+      ))}
+
+      <AccountAddressAdd>
+        <AddressForm formKey="new" isDefault={addresses.length === 0} />
+      </AccountAddressAdd>
+    </div>
+  );
+}
+
+function OrdersPanel({ orders }: { orders: CustomerAccountSnapshot["orders"] }) {
+  return (
+    <SectionBody
+      section={orders}
+      empty="注文履歴はありません。"
+      isEmpty={(list) => list.length === 0}
+      render={(list) => (
+        <ul className="flex flex-col gap-10">
+          {list.map((order) => (
+            <OrderCard key={order.id} order={order} />
+          ))}
+        </ul>
+      )}
+    />
+  );
+}
+
+function RelatedRecordsPanel({
+  counts,
+}: {
+  counts: CustomerAccountSnapshot["relatedRecordCounts"];
+}) {
+  return (
+    <SectionBody
+      section={counts}
+      empty="関連レコードはありません。"
+      isEmpty={() => false}
+      render={(data) => (
+        <FieldList>
+          <Field
+            label="法人担当者 (B2B)"
+            value={`${data.companyContacts} 件`}
+            note={accountFieldNotes.related.companyContacts}
+          />
+          <Field
+            label="定期購入契約"
+            value={`${data.subscriptionContracts} 件`}
+            note={accountFieldNotes.related.subscriptionContracts}
+          />
+          <Field
+            label="下書き注文"
+            value={`${data.draftOrders} 件`}
+            note={accountFieldNotes.related.draftOrders}
+          />
+        </FieldList>
+      )}
+    />
+  );
+}
+
 /**
  * 公開ページの `/account` とテスト領域の `/shopify-test/account` で共有する。
  * 会員機能のリリース前は公開側が閉じているだけで、画面は 2 系統に分けない。
@@ -909,11 +1039,7 @@ function SectionBody<T>({
  * いまは Customer Account API から何が取れるかを確認するための仮画面なので、
  * 取得できた項目をそのまま並べている。未登録の項目は「登録なし」で埋める。
  */
-export async function AccountPageContent({
-  searchParams,
-}: {
-  searchParams?: Record<string, string | string[] | undefined>;
-} = {}) {
+export async function AccountPageContent() {
   const isStaticExport = process.env.STATIC_EXPORT === "true";
   const session = isStaticExport ? null : await getLiveCustomerTokenSession();
 
@@ -942,14 +1068,8 @@ export async function AccountPageContent({
   const accountDate = snapshot
     ? formatAccountDate(snapshot.profile.creationDate)
     : null;
-  const search = queryStringFromSearchParams(searchParams);
-  const activeTabId = resolveAccountPageTabId({ search });
-  const notice = accountPageNotice(search);
   const addresses = snapshot?.profile.addresses.nodes ?? [];
   const defaultAddressId = snapshot?.profile.defaultAddress?.id;
-  const deleteTargetId = accountAddressDeleteIdFromSearch(search);
-  const isNewAddress =
-    accountAddressIdFromSearch(search) === NEW_ACCOUNT_ADDRESS;
   const shopifyProfileUrl = await getShopifyCustomerProfileUrl();
 
   return (
@@ -1002,226 +1122,28 @@ export async function AccountPageContent({
             <LogoutButton />
           </div>
 
-          {notice ? (
-            <p
-              role="status"
-              className={`mt-[calc(24px*var(--gap-scale-y))] font-body-ja text-sm ${
-                notice.tone === "error"
-                  ? "text-[#9b1b30]"
-                  : "text-[var(--foreground)]"
-              }`}
-            >
-              {notice.message}
-            </p>
-          ) : null}
+          <AccountNotice />
 
-          <AccountTabs activeTabId={activeTabId} search={search}>
-              {activeTabId === "profile" ? (
-                <div className="flex flex-col gap-[calc(62px*var(--gap-scale-y))]">
-                  <MemberSection title={accountMemberCopy.accountDetails.title}>
-                    <ProfileNameForm profile={snapshot.profile} />
-
-            <FieldList>
-              <Field
-                label="メールアドレス"
-                        value={formatText(
-                          snapshot.profile.emailAddress?.emailAddress
-                        )}
-                        note={accountMemberCopy.accountDetails.email}
-              />
-              <Field
-                label="電話番号"
-                        value={formatText(
-                          snapshot.profile.phoneNumber?.phoneNumber
-                        )}
-                        note={accountMemberCopy.accountDetails.phone}
-              />
-            </FieldList>
-
-                    {shopifyProfileUrl ? (
-                      <p className={readOnlyNoteClassName}>
-                        <ShopifyChangeLink href={shopifyProfileUrl}>
-                          {accountMemberCopy.accountDetails.emailChange}
-                        </ShopifyChangeLink>
-                        {" / "}
-                        <ShopifyChangeLink href={shopifyProfileUrl}>
-                          {accountMemberCopy.accountDetails.phoneChange}
-                        </ShopifyChangeLink>
-                      </p>
-                    ) : null}
-
-                    <p className={readOnlyNoteClassName}>
-                      {accountMemberCopy.accountDetails.login}
-                    </p>
-                  </MemberSection>
-
-                  <MemberSection title={accountMemberCopy.notifications.title}>
-                    <EmailMarketingForm profile={snapshot.profile} />
-                  </MemberSection>
-
-                  <MemberSection title={accountMemberCopy.payments.title}>
-                    <p className={readOnlyNoteClassName}>
-                      {shopifyProfileUrl
-                        ? accountMemberCopy.payments.body
-                        : accountMemberCopy.payments.unavailable}
-                    </p>
-                    {shopifyProfileUrl ? (
-                      <p>
-                        <ShopifyChangeLink href={shopifyProfileUrl}>
-                          {accountMemberCopy.payments.link}
-                        </ShopifyChangeLink>
-                      </p>
-                    ) : null}
-                  </MemberSection>
-
-                  <MemberSection title={accountMemberCopy.privacy.title}>
-                    <p className={readOnlyNoteClassName}>
-                      {accountMemberCopy.privacy.body}
-                    </p>
-                    <p>
-                      <Link
-                        href={accountMemberCopy.privacy.href}
-                        className={`${bodyLinkUnderlineClassName} font-body-ja font-semibold text-[var(--foreground)]`}
-                      >
-                        {accountMemberCopy.privacy.link}
-                      </Link>
-                    </p>
-                  </MemberSection>
-                </div>
-              ) : null}
-              {activeTabId === "addresses" ? (
-                <div className="flex flex-col gap-[calc(62px*var(--gap-scale-y))]">
-                  {addresses.map((address, index) => (
-                    <div key={address.id}>
-                      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-                        <p className="font-body-ja text-sm font-bold">
-                          住所 {index + 1}
-                          {address.id === defaultAddressId ? "（既定）" : ""}
-                        </p>
-                        {address.id === defaultAddressId ? null : (
-                          <div>
-                            <AddressIntentButton
-                              addressId={address.id}
-                              intent="default"
-                            >
-                              既定にする
-                            </AddressIntentButton>
-                            <FieldNote>{accountFieldNotes.address.setDefault}</FieldNote>
-                          </div>
-                        )}
-                        {deleteTargetId === address.id ? null : (
-                          <div>
-                            <Link
-                              href={accountAddressDeleteHref(address.id)}
-                              scroll={false}
-                              prefetch={false}
-                              className={addressActionClassName}
-                            >
-                              削除する
-                            </Link>
-                            <FieldNote>{accountFieldNotes.address.remove}</FieldNote>
-                          </div>
-                        )}
-                      </div>
-
-                      {deleteTargetId === address.id ? (
-                        <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3 border border-[#ddd] p-4">
-                          <p className="font-body-ja text-sm">
-                            この住所を削除しますか？
-                          </p>
-                          <AddressIntentButton
-                            addressId={address.id}
-                            intent="delete"
-                          >
-                            削除する
-                          </AddressIntentButton>
-                          <Link
-                            href={accountPageTabHref("addresses")}
-                            scroll={false}
-                            prefetch={false}
-                            className={addressActionClassName}
-                          >
-                            やめる
-                          </Link>
-                        </div>
-                      ) : null}
-
-                      <div className="mt-[calc(24px*var(--gap-scale-y))]">
-                        <AddressForm
-                      address={address}
-                          formKey={String(index + 1)}
-                          isDefault={address.id === defaultAddressId}
-                        />
-                      </div>
-                    </div>
-                  ))}
-
-                  {isNewAddress ? (
-                    <div>
-                      <p className="font-body-ja text-sm font-bold">住所を追加</p>
-                      <div className="mt-[calc(24px*var(--gap-scale-y))]">
-                        <AddressForm
-                          formKey="new"
-                          isDefault={addresses.length === 0}
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <Link
-                        href={accountAddressAddHref()}
-                        scroll={false}
-                        prefetch={false}
-                        className={addressActionClassName}
-                      >
-                        住所を追加する
-                      </Link>
-                      <FieldNote>{accountFieldNotes.address.add}</FieldNote>
-                    </div>
-                  )}
-                </div>
-              ) : null}
-              {activeTabId === "orders" ? (
-            <SectionBody
-              section={snapshot.orders}
-              empty="注文履歴はありません。"
-              isEmpty={(orders) => orders.length === 0}
-              render={(orders) => (
-                <ul className="flex flex-col gap-10">
-                  {orders.map((order) => (
-                    <OrderCard key={order.id} order={order} />
-                  ))}
-                </ul>
-              )}
-            />
-              ) : null}
-              {activeTabId === "related-records" ? (
-            <SectionBody
-              section={snapshot.relatedRecordCounts}
-              empty="関連レコードはありません。"
-              isEmpty={() => false}
-              render={(counts) => (
-                <FieldList>
-                  <Field
-                    label="法人担当者 (B2B)"
-                    value={`${counts.companyContacts} 件`}
-                          note={accountFieldNotes.related.companyContacts}
-                  />
-                  <Field
-                    label="定期購入契約"
-                    value={`${counts.subscriptionContracts} 件`}
-                          note={accountFieldNotes.related.subscriptionContracts}
-                  />
-                  <Field
-                    label="下書き注文"
-                    value={`${counts.draftOrders} 件`}
-                          note={accountFieldNotes.related.draftOrders}
-                  />
-                </FieldList>
-              )}
-            />
-              ) : null}
-          </AccountTabs>
+          <AccountTabs
+            panels={{
+              orders: <OrdersPanel orders={snapshot.orders} />,
+              profile: (
+                <ProfilePanel
+                  profile={snapshot.profile}
+                  shopifyProfileUrl={shopifyProfileUrl}
+                />
+              ),
+              addresses: (
+                <AddressesPanel
+                  addresses={addresses}
+                  defaultAddressId={defaultAddressId}
+                />
+              ),
+              "related-records": (
+                <RelatedRecordsPanel counts={snapshot.relatedRecordCounts} />
+              ),
+            }}
+          />
         </div>
       ) : null}
       </Container>

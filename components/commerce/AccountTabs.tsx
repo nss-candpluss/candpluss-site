@@ -1,26 +1,34 @@
-import Link from "next/link";
+"use client";
+
+import { useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { AccountShallowLink } from "@/components/commerce/AccountShallowLink";
 import {
   ACCOUNT_PAGE_TABS,
   accountPageTabHref,
+  resolveAccountPageTabId,
   type AccountPageTabId,
 } from "@/lib/commerce/account-page";
 import { HoverUnderlineText } from "@/components/ui/TextLink";
 import { uiText } from "@/lib/typography";
 
 type AccountTabsProps = {
-  activeTabId: AccountPageTabId;
-  search: string;
-  children: ReactNode;
+  panels: Record<AccountPageTabId, ReactNode>;
 };
 
-/** クリックで `?tab=` を付けてサーバー側で中身を切り替える */
-export function AccountTabs({
-  activeTabId,
-  search,
-  children,
-}: AccountTabsProps) {
+/**
+ * 開いているタブは URL の `?tab=` で表す。
+ *
+ * 会員情報は 4 タブ分をまとめて 1 回で取っているので、タブを移るたびに
+ * サーバーへ取りに行く必要がない。中身はすべて描画しておき、ここでは
+ * 表示の切り替えだけを行う。
+ */
+export function AccountTabs({ panels }: AccountTabsProps) {
+  const searchParams = useSearchParams();
+  const search = searchParams.toString();
+  const activeTabId = resolveAccountPageTabId({ search });
+
   return (
     <div className="mt-[var(--section-title-gap)]">
       <nav aria-label="アカウントメニュー" className="flex justify-center overflow-x-auto">
@@ -30,10 +38,8 @@ export function AccountTabs({
 
             return (
               <li key={tab.id} className="shrink-0">
-                <Link
+                <AccountShallowLink
                   href={accountPageTabHref(tab.id, search)}
-                  scroll={false}
-                  prefetch={false}
                   aria-current={isActive ? "page" : undefined}
                   className={`whitespace-nowrap transition-colors duration-300 ${
                     isActive
@@ -47,14 +53,20 @@ export function AccountTabs({
                   >
                     {tab.label}
                   </HoverUnderlineText>
-                </Link>
+                </AccountShallowLink>
               </li>
             );
           })}
         </ul>
       </nav>
 
-      <div className="mt-[calc(52px*var(--gap-scale-y))]">{children}</div>
+      <div className="mt-[calc(52px*var(--gap-scale-y))]">
+        {ACCOUNT_PAGE_TABS.map((tab) => (
+          <div key={tab.id} hidden={tab.id !== activeTabId}>
+            {panels[tab.id]}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
