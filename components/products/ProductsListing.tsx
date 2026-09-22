@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useState } from "react";
 
 import { ProductCard } from "@/components/products/ProductCard";
 import { SiteGrid } from "@/components/ui/SiteGrid";
@@ -14,33 +14,52 @@ type ProductsListingProps = {
   products: Product[];
 };
 
+/**
+ * URL のハッシュから表示するカテゴリを決める。
+ *
+ * 戻るでハッシュが消えた場合や、知らないハッシュが付いていた場合は
+ * 「全ての商品」に戻す。
+ */
+function categoryFromHash(hash: string): ProductCategorySlug {
+  const categorySlug = hash.startsWith("#") ? hash.slice(1) : hash;
+  const matched = productCategories.find(
+    (category) => category.slug === categorySlug
+  );
+
+  return matched?.slug ?? "all";
+}
+
 export function ProductsListing({ products }: ProductsListingProps) {
   const [activeCategory, setActiveCategory] = useState<ProductCategorySlug>("all");
 
-  useEffect(() => {
+  // サーバーはハッシュを知らないので「全ての商品」で描画される。
+  // 描画直後に同期して、絞り込み前の一覧が見えないようにする。
+  useLayoutEffect(() => {
     const syncCategoryFromHash = () => {
-      const categorySlug = window.location.hash.slice(1);
-      const categoryExists = productCategories.some(
-        (category) => category.slug === categorySlug
-      );
-
-      if (categoryExists) {
-        setActiveCategory(categorySlug as ProductCategorySlug);
-      }
+      setActiveCategory(categoryFromHash(window.location.hash));
     };
-    const timeoutId = window.setTimeout(syncCategoryFromHash, 0);
 
+    syncCategoryFromHash();
+
+    // hashchange はハッシュが変わったとき、popstate は戻る・進むのとき。
+    // ハッシュなしの履歴どうしを行き来する場合は popstate しか発火しない。
     window.addEventListener("hashchange", syncCategoryFromHash);
+    window.addEventListener("popstate", syncCategoryFromHash);
 
     return () => {
-      window.clearTimeout(timeoutId);
       window.removeEventListener("hashchange", syncCategoryFromHash);
+      window.removeEventListener("popstate", syncCategoryFromHash);
     };
   }, []);
 
   const handleCategorySelect = (categorySlug: ProductCategorySlug) => {
+    if (categorySlug === activeCategory) {
+      return;
+    }
+
     setActiveCategory(categorySlug);
-    window.history.replaceState(
+    // 履歴を積んで、戻るで前のカテゴリに戻れるようにする。
+    window.history.pushState(
       null,
       "",
       `${window.location.pathname}${window.location.search}#${categorySlug}`
