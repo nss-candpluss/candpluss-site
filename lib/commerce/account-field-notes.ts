@@ -155,12 +155,4 @@ export const accountFieldNotes = {
     imageUrl: "注文時点の商品画像 URL。",
     imageAlt: "商品画像の代替テキスト。",
   },
-  related: {
-    companyContacts:
-      "B2B の会社担当者として紐づいている件数。通常の個人購入では 0 が多い。",
-    subscriptionContracts:
-      "定期購入契約の件数。定期購入アプリを使っていないと 0 が多い。",
-    draftOrders:
-      "店舗側が作った未確定の下書き注文の件数。お客様がカートから確定した注文とは別。",
-  },
 } as const;

@@ -999,39 +999,6 @@ function OrdersPanel({ orders }: { orders: CustomerAccountSnapshot["orders"] }) 
   );
 }
 
-function RelatedRecordsPanel({
-  counts,
-}: {
-  counts: CustomerAccountSnapshot["relatedRecordCounts"];
-}) {
-  return (
-    <SectionBody
-      section={counts}
-      empty="関連レコードはありません。"
-      isEmpty={() => false}
-      render={(data) => (
-        <FieldList>
-          <Field
-            label="法人担当者 (B2B)"
-            value={`${data.companyContacts} 件`}
-            note={accountFieldNotes.related.companyContacts}
-          />
-          <Field
-            label="定期購入契約"
-            value={`${data.subscriptionContracts} 件`}
-            note={accountFieldNotes.related.subscriptionContracts}
-          />
-          <Field
-            label="下書き注文"
-            value={`${data.draftOrders} 件`}
-            note={accountFieldNotes.related.draftOrders}
-          />
-        </FieldList>
-      )}
-    />
-  );
-}
-
 /**
  * 公開ページの `/account` とテスト領域の `/shopify-test/account` で共有する。
  * 会員機能のリリース前は公開側が閉じているだけで、画面は 2 系統に分けない。
@@ -1138,9 +1105,6 @@ export async function AccountPageContent() {
                   addresses={addresses}
                   defaultAddressId={defaultAddressId}
                 />
-              ),
-              "related-records": (
-                <RelatedRecordsPanel counts={snapshot.relatedRecordCounts} />
               ),
             }}
           />

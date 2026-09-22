@@ -154,11 +154,6 @@ export type CustomerSection<T> = { data: T | null; error: string | null };
 export type CustomerAccountSnapshot = {
   profile: CustomerAccount;
   orders: CustomerSection<CustomerOrderDetail[]>;
-  relatedRecordCounts: CustomerSection<{
-    companyContacts: number;
-    subscriptionContracts: number;
-    draftOrders: number;
-  }>;
 };
 
 const ADDRESS_FIELDS = `
@@ -455,17 +450,17 @@ async function loadSection<T>(load: () => Promise<T>): Promise<CustomerSection<T
 }
 
 /**
- * 会員画面の確認用に、取得できる情報をまとめて集める。
+ * 会員画面に出す情報をまとめて集める。
  *
- * 注文と B2B / 定期購入はそれぞれ別のアクセススコープに依存するので、
- * 1 つ失敗しても他が道連れにならないようクエリを分ける。
+ * 注文はプロフィールと別のアクセススコープに依存するので、片方が失敗しても
+ * 道連れにならないようクエリを分ける。
  *
  * ストアクレジットは Headless の顧客トークンでは許可されないため扱わない。
  */
 export async function fetchCustomerAccountSnapshot(
   accessToken: string
 ): Promise<CustomerAccountSnapshot> {
-  const [profile, orders, relatedRecordCounts] =
+  const [profile, orders] =
     await Promise.all([
       fetchCustomerAccount(accessToken),
       loadSection(async () => {
@@ -562,34 +557,9 @@ export async function fetchCustomerAccountSnapshot(
 
         return data.customer?.orders.nodes ?? [];
       }),
-      loadSection(async () => {
-        const data = await customerAccountRequest<{
-          customer?: {
-            companyContacts: { nodes: Array<{ id: string }> };
-            subscriptionContracts: { nodes: Array<{ id: string }> };
-            draftOrders: { nodes: Array<{ id: string }> };
-          } | null;
-        }>(
-          accessToken,
-          `query CustomerRelatedRecords {
-            customer {
-              companyContacts(first: 10) { nodes { id } }
-              subscriptionContracts(first: 10) { nodes { id } }
-              draftOrders(first: 10) { nodes { id } }
-            }
-          }`
-        );
-
-        return {
-          companyContacts: data.customer?.companyContacts.nodes.length ?? 0,
-          subscriptionContracts:
-            data.customer?.subscriptionContracts.nodes.length ?? 0,
-          draftOrders: data.customer?.draftOrders.nodes.length ?? 0,
-        };
-      }),
     ]);
 
-  return { profile, orders, relatedRecordCounts };
+  return { profile, orders };
 }
 
 async function customerAccountRequest<T>(

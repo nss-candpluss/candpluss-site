@@ -8,7 +8,6 @@ export const ACCOUNT_PAGE_TABS = [
   { id: "orders", label: "注文履歴" },
   { id: "profile", label: "プロフィール" },
   { id: "addresses", label: "住所" },
-  { id: "related-records", label: "関連レコード" },
 ] as const;
 
 export type AccountPageTabId = (typeof ACCOUNT_PAGE_TABS)[number]["id"];

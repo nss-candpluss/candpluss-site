@@ -390,7 +390,6 @@ describe("会員ページのタブ", () => {
       "注文履歴",
       "プロフィール",
       "住所",
-      "関連レコード",
     ]);
     expect(ACCOUNT_PAGE_TABS.map((tab) => tab.id)).not.toContain("update-profile");
     expect(ACCOUNT_PAGE_TABS.map((tab) => tab.id)).not.toContain("update-address");
@@ -537,7 +536,7 @@ describe("会員ページの画面構成", () => {
     expect(source).toContain("AccountTabs");
   });
 
-  // 4 タブ分を 1 回で取得しているので、タブを移るたびに取り直す必要がない
+  // 全タブ分を 1 回で取得しているので、タブを移るたびに取り直す必要がない
   it("タブ切替はサーバーへ取りに行かず、表示だけを切り替える", () => {
     const contentSource = readSource("components/commerce/AccountPageContent.tsx");
     const tabsSource = readSource("components/commerce/AccountTabs.tsx");
@@ -552,7 +551,6 @@ describe("会員ページの画面構成", () => {
     expect(contentSource).toContain("<OrdersPanel");
     expect(contentSource).toContain("<ProfilePanel");
     expect(contentSource).toContain("<AddressesPanel");
-    expect(contentSource).toContain("<RelatedRecordsPanel");
     expect(contentSource).not.toContain("activeTabId");
     expect(testPageSource).not.toContain("searchParams");
     expect(publicPageSource).not.toContain("searchParams");
@@ -690,7 +688,6 @@ describe("会員ページの画面構成", () => {
     expect(accountFieldNotes.address.name).toContain("宛名");
     expect(accountFieldNotes.order.lineItems).toContain("購入した商品");
     expect(accountFieldNotes.order.shippingAddress).toContain("注文時点");
-    expect(accountFieldNotes.related.draftOrders).toContain("下書き");
   });
 
   it("本文幅をリーガルの max-width ではなく Home と同じ Container にする", () => {
