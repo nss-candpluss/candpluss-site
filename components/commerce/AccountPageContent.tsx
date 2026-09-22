@@ -627,6 +627,9 @@ function OrderPaymentMethods({
       {methods.map((method) => (
         <li key={method.id} className="flex items-center gap-2">
           {method.iconUrl ? (
+            /* 決済アイコンは Shopify 以外のホストから返ることがあり、
+               next/image の remotePatterns に列挙できない */
+            /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={method.iconUrl}
               alt={method.iconAlt}
