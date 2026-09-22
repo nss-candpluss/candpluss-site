@@ -55,4 +55,12 @@ describe("site chrome uses SiteNavLink", () => {
     expect(readSource("components/layout/Footer.tsx")).toContain("SiteNavLink");
     expect(readSource("components/layout/HeaderMobileMenu.tsx")).toContain("SiteNavLink");
   });
+
+  it("tells hash-driven views that the hash was removed", () => {
+    const scrollSource = readSource("lib/scroll-to-page-top.ts");
+    const listingSource = readSource("components/products/ProductsListing.tsx");
+
+    expect(scrollSource).toContain('new HashChangeEvent("hashchange"');
+    expect(listingSource).toContain('window.addEventListener("hashchange"');
+  });
 });
