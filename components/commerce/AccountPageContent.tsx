@@ -714,7 +714,7 @@ function OrderAmountSummary({
 
 /** 待ちは薄いグレー、動き出したら濃いグレー、終わったら黒、要対応は赤 */
 const ORDER_STATUS_BADGE_TONE: Record<AccountStatusTone, string> = {
-  active: "bg-[#cfcfcf] text-[var(--foreground)]",
+  active: "bg-[var(--color-muted)] text-white",
   alert: "bg-[#fbeaed] text-[#9b1b30]",
   done: "bg-[var(--foreground)] text-white",
   waiting: "bg-[#f1f1f1] text-[var(--foreground)]",
