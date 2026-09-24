@@ -158,8 +158,9 @@ function MemberSection({
   title: string;
   children: React.ReactNode;
 }) {
-    return (
-    <section>
+  return (
+    // 区画の間に線を引く。間隔を線の前後で半分ずつに分け、線が寄らないようにする
+    <section className="border-t border-[var(--color-divider)] py-[calc(31px*var(--gap-scale-y))] first:border-t-0 first:pt-0 last:pb-0">
       <h3 className={readOnlyHeadingClassName}>{title}</h3>
       <div className="mt-[calc(24px*var(--gap-scale-y))] flex flex-col gap-[calc(24px*var(--gap-scale-y))]">
         {children}
@@ -1186,7 +1187,7 @@ function AccountSettingsPanel({
   shopifyProfileUrl: string | null;
 }) {
   return (
-    <div className="flex flex-col gap-[calc(62px*var(--gap-scale-y))]">
+    <div className="flex flex-col">
       <MemberSection title={accountMemberCopy.accountDetails.title}>
         <ProfileNameForm profile={profile} />
 

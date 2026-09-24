@@ -1000,6 +1000,10 @@ describe("会員ページの画面構成", () => {
     expect(source).toContain("EmailMarketingForm");
     expect(source).toContain('name="emailMarketing"');
     expect(source).toContain("isEmailMarketingSubscribed");
+    // 区画の間には区切り線を引く
+    expect(source).toContain(
+      'className="border-t border-[var(--color-divider)] py-[calc(31px*var(--gap-scale-y))] first:border-t-0 first:pt-0 last:pb-0"'
+    );
     // チェックボックスはお問い合わせフォームと同じ見た目にする
     expect(source).not.toContain("getContactCheckboxClassName");
     expect(source.match(/className="peer sr-only"/g)).toHaveLength(2);
