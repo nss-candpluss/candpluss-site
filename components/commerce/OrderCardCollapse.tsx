@@ -110,7 +110,7 @@ export function OrderCardCollapse({ children }: { children: ReactNode }) {
             aria-controls={contentId}
             aria-expanded={isOpen}
             onClick={() => setIsOpen((open) => !open)}
-            className={`border-b border-current font-body-ja ${uiText(14)}`}
+            className={`border-b border-current font-body-ja font-semibold ${uiText(16)}`}
           >
             {isOpen ? "閉じる" : "すべて表示"}
           </button>

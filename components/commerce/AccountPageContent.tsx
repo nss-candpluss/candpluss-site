@@ -23,6 +23,8 @@ import { japanZones, normalizeJapanZoneCode } from "@/lib/commerce/japan-zone-co
 import { formHalfSpanClassName } from "@/lib/layout";
 import { accountFieldNotes, accountMemberCopy } from "@/lib/commerce/account-field-notes";
 import {
+  ACCOUNT_CANCELLED_BADGE,
+  accountOrderHasReceipt,
   accountOrderLineImageAlt,
   accountOrderLineTitle,
   accountOrderLineVariantTitle,
@@ -38,6 +40,7 @@ import {
   accountOrderShipmentDisplay,
   formatAccountAddressLine,
   formatAccountAddressName,
+  formatAccountCancelReason,
   formatAccountCarrierName,
   formatAccountDate,
   formatAccountMoney,
@@ -939,8 +942,13 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
     order.financialStatus,
     order.transactions
   );
-  const shipmentStatus = accountOrderShipmentDisplay(order);
   const orderedAt = formatAccountOrderDateTime(order.processedAt);
+  const isCancelled = Boolean(order.cancelledAt);
+  // 取り消した注文に発送状況を出すと、まだ届く見込みがあるように読める
+  const shipmentStatus = isCancelled
+    ? ACCOUNT_CANCELLED_BADGE
+    : accountOrderShipmentDisplay(order);
+  const showFulfillments = !isCancelled || order.fulfillments.nodes.length > 0;
 
   return (
     <li className="rounded-[16px] border border-[var(--color-divider)] bg-white px-[clamp(24px,calc(48px*var(--gap-scale-x)),48px)] py-[clamp(24px,calc(48px*var(--gap-scale-y)),48px)] shadow-[0_0_16px_rgba(0,0,0,0.08)]">
@@ -985,6 +993,18 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
               showRefunded={optional.showRefunded}
             />
 
+            {/* 代金を受け取った注文だけ。金額の話のすぐ後に置く */}
+            {accountOrderHasReceipt(order) ? (
+              <OrderSidebarSection>
+                <Link
+                  href={accountReceiptHref(order.id)}
+                  className={`inline-flex border-b border-current font-body-ja ${uiText(14)}`}
+                >
+                  領収書を見る
+                </Link>
+              </OrderSidebarSection>
+            ) : null}
+
             {optional.showAnyDetail ? (
               <OrderSidebarSection>
                 <SidebarFieldList>
@@ -1003,7 +1023,10 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
                   {optional.showCancelReason ? (
                     <SidebarField
                       label="キャンセル理由"
-                      value={formatText(order.cancelReason)}
+                      value={
+                        formatAccountCancelReason(order.cancelReason) ??
+                        formatText(order.cancelReason)
+                      }
                     />
                   ) : null}
                   {optional.showEdited ? (
@@ -1028,9 +1051,11 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
               </OrderSidebarSection>
             ) : null}
 
-            <OrderSidebarSection title="発送情報">
-              <OrderFulfillments fulfillments={order.fulfillments.nodes} />
-            </OrderSidebarSection>
+            {showFulfillments ? (
+              <OrderSidebarSection title="発送情報">
+                <OrderFulfillments fulfillments={order.fulfillments.nodes} />
+              </OrderSidebarSection>
+            ) : null}
 
             <OrderSidebarSection title="お届け先">
               <OrderAddressBlock address={order.shippingAddress} />
@@ -1042,12 +1067,6 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
 
             <OrderSidebarSection title="ご請求先">
               <OrderAddressBlock address={order.billingAddress} />
-              <Link
-                href={accountReceiptHref(order.id)}
-                className={`mt-3 inline-flex border-b border-current font-body-ja ${uiText(14)}`}
-              >
-                領収書を見る
-              </Link>
             </OrderSidebarSection>
           </div>
         </div>

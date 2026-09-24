@@ -5,8 +5,10 @@ import { fileURLToPath } from "node:url";
 
 import { accountFieldNotes, accountMemberCopy } from "@/lib/commerce/account-field-notes";
 import {
+  ACCOUNT_CANCELLED_BADGE,
   ACCOUNT_PAGE_TABS,
   accountAddressDeleteHref,
+  accountOrderHasReceipt,
   accountAddressEditHref,
   accountAddressIdFromSearch,
   accountPageNotice,
@@ -25,6 +27,7 @@ import {
   formatAccountCarrierName,
   formatAccountAddressLine,
   formatAccountAddressName,
+  formatAccountCancelReason,
   formatAccountDate,
   formatAccountFinancialStatus,
   formatAccountMoney,
@@ -497,6 +500,62 @@ describe("注文履歴の商品行", () => {
     expect(source).not.toContain(' / 整形済み住所"');
   });
 
+  it("キャンセルした注文は発送状況を出さず、キャンセル済とだけ伝える", () => {
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+
+    expect(ACCOUNT_CANCELLED_BADGE).toEqual({
+      label: "キャンセル済",
+      tone: "alert",
+    });
+    // バッジも発送情報の区画も、取り消した注文には出さない
+    expect(source).toContain("ACCOUNT_CANCELLED_BADGE");
+    expect(source).toContain("const showFulfillments = !isCancelled");
+    expect(source).toContain("{showFulfillments ? (");
+
+    // キャンセル理由は Shopify の enum のままにしない
+    expect(formatAccountCancelReason("CUSTOMER")).toBe("お客様のご希望");
+    expect(formatAccountCancelReason("INVENTORY")).toBe(
+      "在庫を確保できなかったため"
+    );
+    expect(formatAccountCancelReason("DECLINED")).toBe(
+      "決済が承認されなかったため"
+    );
+    expect(formatAccountCancelReason("STAFF")).toBe("当店の都合");
+    expect(formatAccountCancelReason(null)).toBeNull();
+    expect(source).toContain("formatAccountCancelReason(order.cancelReason)");
+  });
+
+  it("代金を受け取った注文だけ領収書を出す", () => {
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+
+    expect(accountOrderHasReceipt({ financialStatus: "PAID" })).toBe(true);
+    // 受け取った事実は残るので、一部返金でも出す
+    expect(accountOrderHasReceipt({ financialStatus: "PARTIALLY_REFUNDED" })).toBe(
+      true
+    );
+    expect(accountOrderHasReceipt({ financialStatus: "PENDING" })).toBe(false);
+    expect(accountOrderHasReceipt({ financialStatus: "AUTHORIZED" })).toBe(false);
+    expect(accountOrderHasReceipt({ financialStatus: "PARTIALLY_PAID" })).toBe(
+      false
+    );
+    expect(accountOrderHasReceipt({ financialStatus: "REFUNDED" })).toBe(false);
+    expect(
+      accountOrderHasReceipt({
+        financialStatus: "PAID",
+        cancelledAt: "2026-09-20T10:00:00Z",
+      })
+    ).toBe(false);
+
+    expect(source).toContain("accountOrderHasReceipt(order)");
+    // 金額の話のすぐ後、発送情報より前に置く
+    expect(source.indexOf("領収書を見る")).toBeGreaterThan(
+      source.indexOf("<OrderAmountSummary")
+    );
+    expect(source.indexOf("領収書を見る")).toBeLessThan(
+      source.indexOf('title="発送情報"')
+    );
+  });
+
   it("注文カードは既定で折りたたみ、続きがあることを見せる", () => {
     const card = readSource("components/commerce/AccountPageContent.tsx");
     const collapse = readSource("components/commerce/OrderCardCollapse.tsx");
@@ -518,6 +577,7 @@ describe("注文履歴の商品行", () => {
     expect(collapse).toContain("linear-gradient(to_bottom,transparent,#fff)");
     expect(collapse).toContain("すべて表示");
     expect(collapse).toContain("閉じる");
+    expect(collapse).toContain("font-semibold ${uiText(16)}");
     expect(collapse).toContain("aria-expanded");
     // 画面幅で画像の大きさが変わるので測り直す
     expect(collapse).toContain("ResizeObserver");

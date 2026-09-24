@@ -563,6 +563,45 @@ export function formatAccountFulfillmentUnitStatus(value?: string | null) {
   return formatShopifyStatusLabel(value, ACCOUNT_FULFILLMENT_UNIT_STATUS_JA);
 }
 
+/** キャンセル理由。誰の都合で取り消したのかが分かる言い方にする */
+const ACCOUNT_CANCEL_REASON_JA: Record<string, string> = {
+  CUSTOMER: "お客様のご希望",
+  DECLINED: "決済が承認されなかったため",
+  FRAUD: "不正利用の疑いがあったため",
+  INVENTORY: "在庫を確保できなかったため",
+  OTHER: "その他の理由",
+  STAFF: "当店の都合",
+};
+
+export function formatAccountCancelReason(value?: string | null) {
+  return formatShopifyStatusLabel(value, ACCOUNT_CANCEL_REASON_JA);
+}
+
+/** 取り消された注文はこのバッジだけにして、発送状況は出さない */
+export const ACCOUNT_CANCELLED_BADGE: AccountStatusDisplay = {
+  label: "キャンセル済",
+  tone: "alert",
+};
+
+/**
+ * 領収書を出してよいか。
+ *
+ * 入金が済んでいない注文で領収書が出ると、支払いの証明として使われてしまう。
+ * 代金を受け取った注文だけに絞る。一部返金は受け取った事実が残るので出す。
+ */
+export function accountOrderHasReceipt(order: {
+  cancelledAt?: string | null;
+  financialStatus?: string | null;
+}) {
+  if (order.cancelledAt) {
+    return false;
+  }
+
+  const status = order.financialStatus?.trim().toUpperCase();
+
+  return status === "PAID" || status === "PARTIALLY_REFUNDED";
+}
+
 /**
  * 注文カードの配送状況バッジ。
  *
