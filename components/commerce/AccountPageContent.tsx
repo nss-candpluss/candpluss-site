@@ -660,30 +660,28 @@ function OrderStatusBadge({ children }: { children: string }) {
 }
 
 /**
- * 注文カード右側の列。幅が狭いのでラベルを値の上に積む。
+ * 注文カード右側の列。「ラベル：値」を 1 行で読ませる。
  *
- * 区切り線はカテゴリの境目だけに引くので、項目どうしは余白で分ける。
+ * dt / dd を inline にしているので、値が長いときはラベルからの続きとして
+ * そのまま折り返る。区切り線はカテゴリの境目だけに引く。
  */
 function SidebarField({ label, value }: { label: string; value: string }) {
   const isEmpty = value === NOT_REGISTERED;
 
   return (
-    <div>
-      <dt className={`font-body-ja text-[var(--color-muted)] ${uiText(12)}`}>
-        {label}
-      </dt>
-      <dd
-        className={`mt-1 font-body-ja break-words ${uiText(14)} ${
-          isEmpty ? "text-[var(--color-muted)]" : ""
-        }`}
-      >
+    <div className={`font-body-ja break-words ${bodyText(15)}`}>
+      <dt className="inline text-[var(--color-muted)]">{label}：</dt>
+      <dd className={`inline ${isEmpty ? "text-[var(--color-muted)]" : ""}`}>
         {value}
       </dd>
     </div>
   );
 }
 
-/** URL をそのまま出すと狭い列で折り返し続けるので、短い文字でリンクにする */
+/**
+ * URL をそのまま出すと狭い列で折り返し続けるので、短い文字でリンクにする。
+ * 行き先がない項目は行ごと出さない。
+ */
 function SidebarLinkField({
   label,
   url,
@@ -694,20 +692,18 @@ function SidebarLinkField({
   linkText: string;
 }) {
   if (!url) {
-    return <SidebarField label={label} value={NOT_REGISTERED} />;
+    return null;
   }
 
   return (
-    <div>
-      <dt className={`font-body-ja text-[var(--color-muted)] ${uiText(12)}`}>
-        {label}
-      </dt>
-      <dd className="mt-1">
+    <div className={`font-body-ja break-words ${bodyText(15)}`}>
+      <dt className="inline text-[var(--color-muted)]">{label}：</dt>
+      <dd className="inline">
         <a
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className={`inline-flex border-b border-current font-body-ja ${uiText(14)}`}
+          className="border-b border-current"
         >
           {linkText}
         </a>
@@ -717,7 +713,7 @@ function SidebarLinkField({
 }
 
 function SidebarFieldList({ children }: { children: React.ReactNode }) {
-  return <dl className="mt-3 flex flex-col gap-3">{children}</dl>;
+  return <dl className="mt-3 flex flex-col gap-2">{children}</dl>;
 }
 
 /**
@@ -742,7 +738,13 @@ function OrderSidebarSection({
   );
 }
 
-/** 発送ごとの配送状況。社内管理用の項目は出さない */
+/**
+ * 発送ごとの配送状況。社内管理用の項目は出さない。
+ *
+ * 発送が 1 件もないのは、Shopify 側でまだ発送を登録していない状態なので
+ * 「登録なし」ではなく発送準備中として伝える。発送の中で値が取れていない
+ * 項目（運送会社が予定日を返さないなど）は、行ごと出さない。
+ */
 function OrderFulfillments({
   fulfillments,
 }: {
@@ -750,9 +752,7 @@ function OrderFulfillments({
 }) {
   if (!fulfillments.length) {
     return (
-      <p className={`mt-3 font-body-ja text-[var(--color-muted)] ${bodyText(15)}`}>
-        {NOT_REGISTERED}
-      </p>
+      <p className={`mt-3 font-body-ja ${bodyText(15)}`}>発送準備中</p>
     );
   }
 
@@ -761,31 +761,34 @@ function OrderFulfillments({
       {fulfillments.map((fulfillment) => (
         <li key={fulfillment.id}>
           <SidebarFieldList>
-            <SidebarField
-              label="いまの配送状況"
-              value={
-                formatAccountShipmentStatus(fulfillment.latestShipmentStatus) ??
-                NOT_REGISTERED
-              }
-            />
-            <SidebarField
-              label="配達予定日時"
-              value={formatDateTime(fulfillment.estimatedDeliveryAt)}
-            />
+            {fulfillment.latestShipmentStatus ? (
+              <SidebarField
+                label="配送状況"
+                value={
+                  formatAccountShipmentStatus(
+                    fulfillment.latestShipmentStatus
+                  ) ?? fulfillment.latestShipmentStatus
+                }
+              />
+            ) : null}
+            {fulfillment.estimatedDeliveryAt ? (
+              <SidebarField
+                label="配達予定日時"
+                value={formatDateTime(fulfillment.estimatedDeliveryAt)}
+              />
+            ) : null}
             <SidebarField
               label="発送日時"
               value={formatDateTime(fulfillment.createdAt)}
             />
             {fulfillment.trackingInformation.map((tracking) => (
               <Fragment key={`${tracking.number}-${tracking.url}`}>
-                <SidebarField
-                  label="配送業者"
-                  value={formatText(tracking.company)}
-                />
-                <SidebarField
-                  label="追跡番号"
-                  value={formatText(tracking.number)}
-                />
+                {tracking.company ? (
+                  <SidebarField label="配送業者" value={tracking.company} />
+                ) : null}
+                {tracking.number ? (
+                  <SidebarField label="追跡番号" value={tracking.number} />
+                ) : null}
                 <SidebarLinkField
                   label="追跡ページ"
                   url={tracking.url}

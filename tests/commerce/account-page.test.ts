@@ -299,6 +299,9 @@ describe("注文履歴の商品行", () => {
     expect(source).not.toContain("formatMoney(order.totalPrice)");
     expect(source).toContain("formatAccountMoney");
     expect(source).toContain("発送情報");
+    // 発送が未登録なのは「値がない」ではなく、まだ発送手配が済んでいない状態
+    expect(source).toContain("発送準備中");
+    expect(source).toContain('label="配送状況"');
     expect(source).toContain('label="配送業者"');
     expect(source).toContain('label="追跡番号"');
     expect(source).toContain("配送状況を追跡する");
