@@ -54,7 +54,6 @@ import {
   bodyLinkUnderlineClassName,
   bodyText,
   cartLineTitleClassName,
-  sectionTitle62ClassName,
   uiText,
 } from "@/lib/typography";
 import { ContactField } from "@/sections/contact/ContactField";
@@ -514,7 +513,7 @@ function OrderLineItems({
   }
 
   return (
-    <ul className="mt-4 divide-y divide-[#ddd] border-y border-[#ddd]">
+    <ul className="mt-4 flex flex-col gap-[calc(24px*var(--gap-scale-y))]">
       {lineItems.map((lineItem) => {
         const title = accountOrderLineTitle(lineItem);
         const variantTitle = accountOrderLineVariantTitle(lineItem);
@@ -526,7 +525,7 @@ function OrderLineItems({
         return (
           <li
             key={lineItem.id}
-            className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-4 py-4 min-[768px]:grid-cols-[auto_minmax(0,1fr)_auto]"
+            className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-4"
           >
             <div className="relative size-[96px] shrink-0 bg-[#eef1f3]">
               {imageSrc ? (
@@ -563,11 +562,10 @@ function OrderLineItems({
                   割引 {discount}
                 </p>
               ) : null}
+              <p className="mt-2 font-ui-en text-sm font-semibold">
+                {formatMoney(lineItem.totalPrice ?? lineItem.price)}
+              </p>
             </div>
-
-            <p className="col-start-2 font-ui-en text-sm font-semibold min-[768px]:col-start-auto">
-              {formatMoney(lineItem.totalPrice ?? lineItem.price)}
-            </p>
           </li>
         );
       })}
@@ -613,6 +611,54 @@ function OrderPaymentMethods({
   );
 }
 
+function OrderAmountRow({
+  label,
+  value,
+  emphasized = false,
+}: {
+  label: string;
+  value: string;
+  emphasized?: boolean;
+}) {
+  return (
+    <div
+      className={`flex items-baseline justify-between gap-4 ${
+        emphasized ? "border-t border-[#ddd] pt-3 font-semibold" : ""
+      }`}
+    >
+      <dt className={`font-body-ja ${uiText(14)}`}>{label}</dt>
+      <dd className={`text-right font-body-ja ${uiText(14)}`}>{value}</dd>
+    </div>
+  );
+}
+
+/** 購入商品の隣に置く金額まとめ。狭い列に収めるため注釈は出さない。 */
+function OrderAmountSummary({
+  order,
+  showRefunded,
+}: {
+  order: CustomerOrderDetail;
+  showRefunded: boolean;
+}) {
+  return (
+    <dl className="flex flex-col gap-3">
+      <OrderAmountRow
+        label="商品の小計"
+        value={formatMoney(accountOrderSubtotalWithTax(order))}
+      />
+      <OrderAmountRow label="配送料" value={formatMoney(order.totalShipping)} />
+      {showRefunded ? (
+        <OrderAmountRow label="返金額" value={formatMoney(order.totalRefunded)} />
+      ) : null}
+      <OrderAmountRow
+        label="ご請求額"
+        value={formatMoney(order.totalPrice)}
+        emphasized
+      />
+    </dl>
+  );
+}
+
 function OrderStatusBadge({ children }: { children: string }) {
   return (
     <span
@@ -651,10 +697,14 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
         ) : null}
       </div>
 
-      <div className="mt-6">
-        <h4 className="font-body-ja text-sm font-semibold">購入商品</h4>
-        <FieldNote>{accountFieldNotes.order.lineItems}</FieldNote>
-        <OrderLineItems lineItems={order.lineItems.nodes} />
+      <div className="mt-6 grid gap-x-[clamp(24px,calc(48px*var(--gap-scale-x)),48px)] gap-y-[calc(32px*var(--gap-scale-y))] min-[1025px]:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
+        <div>
+          <h4 className="font-body-ja text-sm font-semibold">購入商品</h4>
+          <FieldNote>{accountFieldNotes.order.lineItems}</FieldNote>
+          <OrderLineItems lineItems={order.lineItems.nodes} />
+        </div>
+
+        <OrderAmountSummary order={order} showRefunded={optional.showRefunded} />
       </div>
 
       <div className="mt-6">
@@ -700,20 +750,6 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
             note={accountFieldNotes.order.locationName}
           />
         ) : null}
-        <Field
-          label="商品の小計"
-          value={formatMoney(accountOrderSubtotalWithTax(order))}
-          note={accountFieldNotes.order.subtotal}
-        />
-        <Field label="配送料" value={formatMoney(order.totalShipping)} note={accountFieldNotes.order.shipping} />
-        {optional.showRefunded ? (
-          <Field
-            label="返金額"
-            value={formatMoney(order.totalRefunded)}
-            note={accountFieldNotes.order.refunded}
-          />
-        ) : null}
-        <Field label="ご請求額" value={formatMoney(order.totalPrice)} note={accountFieldNotes.order.total} />
         <LinkField label="ステータスページ" url={order.statusPageUrl} note={accountFieldNotes.order.statusPage} />
         </FieldList>
       </div>
@@ -1048,17 +1084,17 @@ export async function AccountPageContent() {
       {snapshot ? (
         <header>
           <h1
-            className={`font-body-ja font-semibold text-[var(--foreground)] ${sectionTitle62ClassName}`}
+            className={`font-body-ja font-semibold text-[var(--foreground)] ${uiText(32)}`}
           >
             {accountName}
-      </h1>
+          </h1>
           {accountDate ? (
-            <time
-              dateTime={snapshot.profile.creationDate}
-              className={`mt-[calc(16px*var(--gap-scale-y))] block font-body-ja text-[var(--color-muted)] ${uiText(14)}`}
+            <p
+              className={`mt-[calc(16px*var(--gap-scale-y))] font-body-ja text-[var(--color-muted)] ${uiText(15)}`}
             >
-              {accountDate}
-            </time>
+              <time dateTime={snapshot.profile.creationDate}>{accountDate}</time>
+              から会員
+            </p>
           ) : null}
         </header>
       ) : null}
