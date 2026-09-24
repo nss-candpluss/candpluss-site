@@ -953,51 +953,48 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
         <div className="flex flex-col border-t border-[var(--color-divider)] pt-[clamp(20px,calc(32px*var(--gap-scale-y)),32px)] min-[1025px]:border-t-0 min-[1025px]:pt-0">
           <OrderAmountSummary order={order} showRefunded={optional.showRefunded} />
 
-          <OrderSidebarSection>
-            <SidebarFieldList>
-              {optional.showUpdatedAt ? (
-                <SidebarField
-                  label="更新日時"
-                  value={formatDateTime(order.updatedAt)}
-                />
-              ) : null}
-              {optional.showCancelledAt ? (
-                <SidebarField
-                  label="キャンセル日時"
-                  value={formatDateTime(order.cancelledAt)}
-                />
-              ) : null}
-              {optional.showCancelReason ? (
-                <SidebarField
-                  label="キャンセル理由"
-                  value={formatText(order.cancelReason)}
-                />
-              ) : null}
-              {optional.showEdited ? (
-                <SidebarField label="編集済み" value="はい" />
-              ) : null}
-              {optional.showNote ? (
-                <SidebarField label="備考" value={formatText(order.note)} />
-              ) : null}
-              {optional.showPoNumber ? (
-                <SidebarField
-                  label="発注番号"
-                  value={formatText(order.poNumber)}
-                />
-              ) : null}
-              {optional.showLocationName ? (
-                <SidebarField
-                  label="出荷元"
-                  value={formatText(order.locationName)}
-                />
-              ) : null}
-              <SidebarLinkField
-                label="ステータスページ"
-                url={order.statusPageUrl}
-                linkText="注文状況を見る"
-              />
-            </SidebarFieldList>
-          </OrderSidebarSection>
+          {optional.showAnyDetail ? (
+            <OrderSidebarSection>
+              <SidebarFieldList>
+                {optional.showUpdatedAt ? (
+                  <SidebarField
+                    label="更新日時"
+                    value={formatDateTime(order.updatedAt)}
+                  />
+                ) : null}
+                {optional.showCancelledAt ? (
+                  <SidebarField
+                    label="キャンセル日時"
+                    value={formatDateTime(order.cancelledAt)}
+                  />
+                ) : null}
+                {optional.showCancelReason ? (
+                  <SidebarField
+                    label="キャンセル理由"
+                    value={formatText(order.cancelReason)}
+                  />
+                ) : null}
+                {optional.showEdited ? (
+                  <SidebarField label="編集済み" value="はい" />
+                ) : null}
+                {optional.showNote ? (
+                  <SidebarField label="備考" value={formatText(order.note)} />
+                ) : null}
+                {optional.showPoNumber ? (
+                  <SidebarField
+                    label="発注番号"
+                    value={formatText(order.poNumber)}
+                  />
+                ) : null}
+                {optional.showLocationName ? (
+                  <SidebarField
+                    label="出荷元"
+                    value={formatText(order.locationName)}
+                  />
+                ) : null}
+              </SidebarFieldList>
+            </OrderSidebarSection>
+          ) : null}
 
           <OrderSidebarSection title="発送情報">
             <OrderFulfillments fulfillments={order.fulfillments.nodes} />
@@ -1022,6 +1019,19 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
           </OrderSidebarSection>
         </div>
       </div>
+
+      <p
+        className={`mt-[clamp(24px,calc(48px*var(--gap-scale-y)),48px)] font-body-ja text-[var(--color-muted)] ${bodyText(14)}`}
+      >
+        ご購入いただいた商品のキャンセルまたは返品についてのお問い合わせは、ご注文番号を記載の上、
+        <Link
+          href="/contact"
+          className={`${bodyLinkUnderlineClassName} text-[var(--foreground)]`}
+        >
+          こちら
+        </Link>
+        よりお問い合わせください。
+      </p>
     </li>
   );
 }

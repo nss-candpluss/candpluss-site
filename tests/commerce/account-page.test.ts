@@ -276,6 +276,7 @@ describe("注文履歴の商品行", () => {
       showRefunded: false,
       showPoNumber: false,
       showLocationName: false,
+      showAnyDetail: false,
     });
     expect(
       accountOrderOptionalFields({
@@ -296,10 +297,23 @@ describe("注文履歴の商品行", () => {
       showRefunded: true,
       showPoNumber: true,
       showLocationName: true,
+      showAnyDetail: true,
     });
+    // 返金額はサマリーに出すので、この区画だけのためには開かない
+    expect(
+      accountOrderOptionalFields({
+        edited: false,
+        cancelledAt: null,
+        cancelReason: null,
+        note: null,
+        poNumber: null,
+        locationName: null,
+        totalRefunded: { amount: "1000" },
+      }).showAnyDetail
+    ).toBe(false);
   });
 
-  it("配送状況は発送後の最新ステータスを優先する", () => {
+  it("配送状況は個口すべてが同じときだけ運送会社の状況を出す", () => {
     expect(formatAccountFinancialStatus("PAID")).toBe("お支払い済み");
     expect(formatAccountFinancialStatus("PENDING")).toBe("お支払い待ち");
     expect(
@@ -312,29 +326,43 @@ describe("注文履歴の商品行", () => {
       formatAccountOrderPaymentStatus("PAID", [{ type: "BANK_DEPOSIT" }])
     ).toBe("お支払い済み");
     expect(formatAccountShipmentStatus("IN_TRANSIT")).toBe("輸送中");
+    // 発送前はバッジも発送情報の欄と同じ言い方にする
     expect(
       accountOrderShipmentDisplay({
         fulfillmentStatus: "UNFULFILLED",
         fulfillments: { nodes: [] },
       })
-    ).toBe("未発送");
+    ).toBe("発送準備中");
+    expect(
+      accountOrderShipmentDisplay({
+        fulfillmentStatus: "FULFILLED",
+        fulfillments: { nodes: [{ latestShipmentStatus: "OUT_FOR_DELIVERY" }] },
+      })
+    ).toBe("配達中");
+    // 個口ごとに状況が違うなら、注文全体の発送状態で伝える
+    expect(
+      accountOrderShipmentDisplay({
+        fulfillmentStatus: "PARTIALLY_FULFILLED",
+        fulfillments: {
+          nodes: [
+            { latestShipmentStatus: "DELIVERED" },
+            { latestShipmentStatus: "IN_TRANSIT" },
+          ],
+        },
+      })
+    ).toBe("一部発送");
+    // 全部の個口が同じ状況なら、その状況を出してよい
     expect(
       accountOrderShipmentDisplay({
         fulfillmentStatus: "FULFILLED",
         fulfillments: {
           nodes: [
-            {
-              latestShipmentStatus: "CONFIRMED",
-              updatedAt: "2026-03-15T10:00:00.000Z",
-            },
-            {
-              latestShipmentStatus: "OUT_FOR_DELIVERY",
-              updatedAt: "2026-03-16T10:00:00.000Z",
-            },
+            { latestShipmentStatus: "DELIVERED" },
+            { latestShipmentStatus: "DELIVERED" },
           ],
         },
       })
-    ).toBe("配達中");
+    ).toBe("配達済み");
   });
 
   it("注文履歴から内部用の常時表示項目を外す", () => {
@@ -372,6 +400,10 @@ describe("注文履歴の商品行", () => {
     expect(source).toContain('label="追跡番号"');
     expect(source).toContain("配送状況を追跡する");
     expect(source).toContain("配送履歴");
+    // 同じ内容を Shopify のページで見せ直さず、問い合わせ導線だけ置く
+    expect(source).not.toContain("statusPageUrl");
+    expect(source).toContain("キャンセルまたは返品についてのお問い合わせ");
+    expect(source).toContain('href="/contact"');
     // 発送の社内管理項目はお客様には出さない
     expect(source).not.toContain('label="発送 ID"');
     expect(source).not.toContain('label="発送状態"');

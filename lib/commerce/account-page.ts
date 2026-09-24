@@ -343,16 +343,17 @@ const ACCOUNT_FINANCIAL_STATUS_JA: Record<string, string> = {
   VOIDED: "無効",
 };
 
+/** 発送前は、発送情報の欄と同じ「発送準備中」で揃える */
 const ACCOUNT_FULFILLMENT_STATUS_JA: Record<string, string> = {
   FULFILLED: "発送済み",
   IN_PROGRESS: "発送準備中",
   ON_HOLD: "保留",
-  OPEN: "未発送",
+  OPEN: "発送準備中",
   PARTIALLY_FULFILLED: "一部発送",
   PENDING_FULFILLMENT: "発送準備中",
   RESTOCKED: "在庫戻し",
   SCHEDULED: "発送予定",
-  UNFULFILLED: "未発送",
+  UNFULFILLED: "発送準備中",
 };
 
 const ACCOUNT_SHIPMENT_STATUS_JA: Record<string, string> = {
@@ -488,22 +489,30 @@ export function formatAccountFulfillmentUnitStatus(value?: string | null) {
   return formatShopifyStatusLabel(value, ACCOUNT_FULFILLMENT_UNIT_STATUS_JA);
 }
 
-/** 発送後は配送会社の最新状況、それ以前は注文の発送状態 */
+/**
+ * 注文カードの配送状況バッジ。
+ *
+ * 個口が分かれていて状況もばらばらのときに、どれか 1 つの個口を選んで出すと
+ * 「配達済み」なのにまだ届いていない個口がある、という誤解になる。全部の
+ * 個口が同じ状況のときだけ運送会社の状況を出し、それ以外は注文全体の
+ * 発送状態（発送済み / 一部発送など）で伝える。
+ */
 export function accountOrderShipmentDisplay(order: {
   fulfillmentStatus: string;
   fulfillments: {
-    nodes: Array<{
-      latestShipmentStatus?: string | null;
-      updatedAt: string;
-    }>;
+    nodes: Array<{ latestShipmentStatus?: string | null }>;
   };
 }) {
-  const latestShipment = [...order.fulfillments.nodes]
-    .sort((left, right) => Date.parse(right.updatedAt) - Date.parse(left.updatedAt))
-    .find((fulfillment) => fulfillment.latestShipmentStatus?.trim());
+  const shipmentStatuses = order.fulfillments.nodes.map((fulfillment) =>
+    fulfillment.latestShipmentStatus?.trim().toUpperCase()
+  );
+  const sharedStatus = shipmentStatuses[0];
+  const isShared =
+    Boolean(sharedStatus) &&
+    shipmentStatuses.every((status) => status === sharedStatus);
 
   return (
-    formatAccountShipmentStatus(latestShipment?.latestShipmentStatus) ??
+    (isShared ? formatAccountShipmentStatus(sharedStatus) : null) ??
     formatAccountFulfillmentStatus(order.fulfillmentStatus)
   );
 }
@@ -517,6 +526,8 @@ export type AccountOrderOptionalFields = {
   showRefunded: boolean;
   showPoNumber: boolean;
   showLocationName: boolean;
+  /** どれか 1 つでも出るか。1 つも無ければ区画ごと出さない */
+  showAnyDetail: boolean;
 };
 
 /** 通常は隠して、該当する状況のときだけ出す注文項目 */
@@ -530,8 +541,7 @@ export function accountOrderOptionalFields(order: {
   totalRefunded?: { amount: string } | null;
 }): AccountOrderOptionalFields {
   const isCancelled = Boolean(order.cancelledAt);
-
-  return {
+  const fields = {
     showUpdatedAt: order.edited,
     showCancelledAt: isCancelled,
     showCancelReason: isCancelled && Boolean(order.cancelReason?.trim()),
@@ -540,6 +550,14 @@ export function accountOrderOptionalFields(order: {
     showRefunded: hasPositiveAmount(order.totalRefunded?.amount),
     showPoNumber: Boolean(order.poNumber?.trim()),
     showLocationName: Boolean(order.locationName?.trim()),
+  };
+
+  return {
+    ...fields,
+    // 返金額はサマリーに出すので、この区画の有無には関係しない
+    showAnyDetail: Object.entries(fields).some(
+      ([key, shown]) => key !== "showRefunded" && shown
+    ),
   };
 }
 

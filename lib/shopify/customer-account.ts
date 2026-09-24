@@ -125,7 +125,6 @@ export type CustomerOrderDetail = {
   financialStatus?: string | null;
   fulfillmentStatus: string;
   requiresShipping: boolean;
-  statusPageUrl: string;
   subtotal?: CustomerMoney | null;
   totalTax?: CustomerMoney | null;
   totalShipping: CustomerMoney;
@@ -500,7 +499,6 @@ export async function fetchCustomerAccountSnapshot(
                   financialStatus
                   fulfillmentStatus
                   requiresShipping
-                  statusPageUrl
                   subtotal { amount currencyCode }
                   totalTax { amount currencyCode }
                   totalShipping { amount currencyCode }
