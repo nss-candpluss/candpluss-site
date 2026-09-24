@@ -83,6 +83,18 @@ export type CustomerFulfillmentDetail = {
     number?: string | null;
     url?: string | null;
   }>;
+  /** 分割発送のとき、この小口に入っている商品 */
+  fulfillmentLineItems: {
+    nodes: Array<{
+      id: string;
+      quantity?: number | null;
+      lineItem: {
+        name: string;
+        title?: string | null;
+        variantTitle?: string | null;
+      };
+    }>;
+  };
   events: { nodes: Array<{ id: string; status: string; happenedAt: string }> };
 };
 
@@ -525,6 +537,13 @@ export async function fetchCustomerAccountSnapshot(
                       isPickedUp
                       requiresShipping
                       trackingInformation { company number url }
+                      fulfillmentLineItems(first: 20) {
+                        nodes {
+                          id
+                          quantity
+                          lineItem { name title variantTitle }
+                        }
+                      }
                       events(first: 20, reverse: true) {
                         nodes { id status happenedAt }
                       }

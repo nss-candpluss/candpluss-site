@@ -302,6 +302,12 @@ describe("注文履歴の商品行", () => {
     // 発送が未登録なのは「値がない」ではなく、まだ発送手配が済んでいない状態
     expect(source).toContain("発送準備中");
     expect(source).toContain('label="配送状況"');
+    // 小口の内訳は分割発送のときだけ出す
+    expect(source).toContain("fulfillments.length > 1");
+    expect(source).toContain("つ目の発送");
+    expect(readSource("lib/shopify/customer-account.ts")).toContain(
+      "fulfillmentLineItems(first: 20)"
+    );
     expect(source).toContain('label="配送業者"');
     expect(source).toContain('label="追跡番号"');
     expect(source).toContain("配送状況を追跡する");

@@ -46,6 +46,7 @@ import {
   type CustomerAccount,
   type CustomerAccountSnapshot,
   type CustomerAddressDetail,
+  type CustomerFulfillmentDetail,
   type CustomerMoney,
   type CustomerOrderDetail,
   type CustomerSection,
@@ -738,6 +739,33 @@ function OrderSidebarSection({
   );
 }
 
+/** 分割発送のとき、どの小口に何が入っているかを出す */
+function FulfillmentContents({
+  lineItems,
+}: {
+  lineItems: CustomerFulfillmentDetail["fulfillmentLineItems"]["nodes"];
+}) {
+  if (!lineItems.length) {
+    return null;
+  }
+
+  return (
+    <ul className="mt-2 flex flex-col gap-1">
+      {lineItems.map((item) => {
+        const variantTitle = accountOrderLineVariantTitle(item.lineItem);
+
+        return (
+          <li key={item.id} className={`font-body-ja ${bodyText(15)}`}>
+            {accountOrderLineTitle(item.lineItem)}
+            {variantTitle ? `（${variantTitle}）` : ""}
+            {item.quantity ? ` × ${item.quantity}` : ""}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 /**
  * 発送ごとの配送状況。社内管理用の項目は出さない。
  *
@@ -756,10 +784,23 @@ function OrderFulfillments({
     );
   }
 
+  // 1 件だけなら「1つ目の発送」も中身の内訳も要らない
+  const isSplit = fulfillments.length > 1;
+
   return (
     <ul className="flex flex-col gap-[calc(24px*var(--gap-scale-y))]">
-      {fulfillments.map((fulfillment) => (
+      {fulfillments.map((fulfillment, index) => (
         <li key={fulfillment.id}>
+          {isSplit ? (
+            <>
+              <h5 className={`font-body-ja font-semibold ${uiText(13)}`}>
+                {index + 1}つ目の発送
+              </h5>
+              <FulfillmentContents
+                lineItems={fulfillment.fulfillmentLineItems.nodes}
+              />
+            </>
+          ) : null}
           <SidebarFieldList>
             {fulfillment.latestShipmentStatus ? (
               <SidebarField
