@@ -677,7 +677,7 @@ function OrderAmountSummary({
 function OrderStatusBadge({ children }: { children: string }) {
   return (
     <span
-      className={`inline-flex items-center rounded-full border border-[var(--color-divider)] px-[0.75em] py-[0.3em] font-body-ja ${uiText(12)}`}
+      className={`inline-flex items-center rounded-full border border-[var(--color-divider)] px-[10px] py-[8px] font-body-ja ${uiText(13)}`}
     >
       {children}
     </span>
@@ -931,12 +931,19 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
     <li className="rounded-[16px] border border-[var(--color-divider)] bg-white px-[clamp(24px,calc(48px*var(--gap-scale-x)),48px)] py-[clamp(24px,calc(48px*var(--gap-scale-y)),48px)] shadow-[0_0_16px_rgba(0,0,0,0.08)]">
       <div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          <p className={`font-body-ja font-semibold ${uiText(16)}`}>
+          <p className={`font-body-ja font-semibold ${uiText(20)}`}>
             ご注文番号：{order.name}
           </p>
-          {paymentStatus ? <OrderStatusBadge>{paymentStatus}</OrderStatusBadge> : null}
-          {shipmentStatus ? (
-            <OrderStatusBadge>{shipmentStatus}</OrderStatusBadge>
+          {/* 入りきらないときはバッジだけ 1 つの塊で次の行へ送る */}
+          {paymentStatus || shipmentStatus ? (
+            <div className="flex items-center gap-x-3">
+              {paymentStatus ? (
+                <OrderStatusBadge>{paymentStatus}</OrderStatusBadge>
+              ) : null}
+              {shipmentStatus ? (
+                <OrderStatusBadge>{shipmentStatus}</OrderStatusBadge>
+              ) : null}
+            </div>
           ) : null}
         </div>
         {orderedAt ? (
