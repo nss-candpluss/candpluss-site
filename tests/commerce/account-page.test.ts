@@ -995,6 +995,14 @@ describe("会員ページの画面構成", () => {
     expect(source).toContain('name="emailMarketing"');
     expect(source).toContain("isEmailMarketingSubscribed");
     expect(source).toContain("getShopifyCustomerProfileUrl");
+    // 区画の見出しは、注文カードのご注文番号と同じ大きさで揃える
+    expect(source).toContain(
+      "const readOnlyHeadingClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(20)}`"
+    );
+    // 会員ページは横に広いので、入力欄は読める幅で止める
+    expect(readSource("components/commerce/AccountUpdateForm.tsx")).toContain(
+      "max-w-[560px]"
+    );
     expect(source).toContain("accountMemberCopy.accountDetails.title");
     // 会員情報の電話番号は Shopify のプロフィールに欄が無く、API でも変えられない
     expect(source).not.toContain("profile.phoneNumber");

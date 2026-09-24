@@ -102,7 +102,7 @@ function formatText(value?: string | null) {
   return value?.trim() ? value : NOT_REGISTERED;
 }
 
-const readOnlyHeadingClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(16)}`;
+const readOnlyHeadingClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(20)}`;
 const readOnlyNoteClassName = `mt-[calc(8px*var(--gap-scale-y))] font-body-ja text-[var(--color-muted)] ${uiText(13)}`;
 
 function LogoutButton() {
@@ -352,7 +352,8 @@ function AddressForm({
           </div>
 
           <div>
-            <div className="relative">
+            {/* 都道府県名は短いので、郵便番号と同じ幅で足りる */}
+            <div className="relative max-w-[240px]">
               <label htmlFor={fieldId("zone")} className="sr-only">
                 {placeholders.prefecture}
               </label>
@@ -377,16 +378,18 @@ function AddressForm({
           </div>
 
           <div>
-            <SupportFloatingInput
-              id={fieldId("city")}
-              name="city"
-              type="text"
-              label="市区町村"
-              autoComplete="address-level2"
-              defaultValue={address?.city ?? ""}
-              maxLength={100}
-              required
-            />
+            <div className="max-w-[320px]">
+              <SupportFloatingInput
+                id={fieldId("city")}
+                name="city"
+                type="text"
+                label="市区町村"
+                autoComplete="address-level2"
+                defaultValue={address?.city ?? ""}
+                maxLength={100}
+                required
+              />
+            </div>
             <FieldNote>{accountFieldNotes.address.city}</FieldNote>
           </div>
           <div>
@@ -424,16 +427,18 @@ function AddressForm({
         fixedTitleSize
         groupedContentGap
       >
-        <SupportFloatingInput
-          id={fieldId("phone")}
-          name="phoneNumber"
-          type="tel"
-          label="電話番号"
-          autoComplete="tel"
-          inputMode="tel"
-          defaultValue={formatJapanPhoneNumberInput(address?.phoneNumber)}
-          maxLength={20}
-        />
+        <div className="max-w-[240px]">
+          <SupportFloatingInput
+            id={fieldId("phone")}
+            name="phoneNumber"
+            type="tel"
+            label="電話番号"
+            autoComplete="tel"
+            inputMode="tel"
+            defaultValue={formatJapanPhoneNumberInput(address?.phoneNumber)}
+            maxLength={20}
+          />
+        </div>
       </ContactField>
 
       <ContactField

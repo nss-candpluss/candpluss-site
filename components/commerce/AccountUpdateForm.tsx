@@ -5,9 +5,12 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { arrowMaskStyle } from "@/lib/maskStyle";
 import { supportContactButtonClassName } from "@/sections/support/supportContactStyles";
 
-/** 外枠と枠内余白は置かない。入力欄自体の枠だけ残す */
+/**
+ * 外枠と枠内余白は置かない。入力欄自体の枠だけ残す。
+ * 会員ページは横に広いので、入力欄が間延びしない幅で止める。
+ */
 const accountUpdateFormClassName =
-  "flex flex-col gap-[calc(32px*var(--gap-scale-y))] [&>div]:border-b-0 [&>div]:px-0 [&>div]:py-0 [&>div:first-child]:pt-0 [&>div:last-child]:pb-0 [&>div>div:first-child>span]:hidden";
+  "flex max-w-[560px] flex-col gap-[calc(32px*var(--gap-scale-y))] [&>div]:border-b-0 [&>div]:px-0 [&>div]:py-0 [&>div:first-child]:pt-0 [&>div:last-child]:pb-0 [&>div>div:first-child>span]:hidden";
 
 type AccountUpdateFormProps = {
   action: string;
