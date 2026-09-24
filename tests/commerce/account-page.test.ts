@@ -1093,6 +1093,18 @@ describe("会員ページの画面構成", () => {
     // 履歴を増やすと戻るボタンの行き先が変わる
     expect(hookSource).toContain("window.history.replaceState");
     expect(noticeSource).toContain("window.history.replaceState");
+    /*
+      表示し終えてから外すと、表示中のリロードでまた出てしまう。
+      受け取った時点で外し、出し続けるために自分で覚えておく。
+    */
+    expect(hookSource.indexOf("replaceState")).toBeLessThan(
+      hookSource.indexOf("setTimeout")
+    );
+    expect(noticeSource.indexOf("replaceState")).toBeLessThan(
+      noticeSource.indexOf("setTimeout(")
+    );
+    expect(hookSource).toContain("const [wasSaved] = useState(");
+    expect(noticeSource).toContain("const [savedNotice] = useState(");
   });
 
   /*
