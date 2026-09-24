@@ -849,8 +849,10 @@ describe("会員ページの画面構成", () => {
     expect(contentSource).toContain("<AccountSettingsPanel");
     // プロフィールの内容の下に住所を置く
     expect(contentSource.indexOf('<MemberSection title="住所">')).toBeGreaterThan(
-      contentSource.indexOf("accountMemberCopy.privacy.link")
+      contentSource.indexOf("accountMemberCopy.payments.body")
     );
+    // プライバシーポリシーはフッターから辿れるので、会員ページには出さない
+    expect(contentSource).not.toContain("accountMemberCopy.privacy");
     expect(contentSource).not.toContain("activeTabId");
     expect(testPageSource).not.toContain("searchParams");
     expect(publicPageSource).not.toContain("searchParams");
@@ -973,6 +975,9 @@ describe("会員ページの画面構成", () => {
     expect(source).toContain("isEmailMarketingSubscribed");
     expect(source).toContain("getShopifyCustomerProfileUrl");
     expect(source).toContain("accountMemberCopy.accountDetails.title");
+    // Shopify のプロフィールに欄が無く、API でも変えられないので出さない
+    expect(source).not.toContain('label="電話番号"');
+    expect(source).not.toContain("phoneChange");
     expect(source).toContain("accountMemberCopy.payments.title");
     // 保存カードを管理する画面は存在しないので、案内先も作らない
     expect(accountMemberCopy.payments.body).toContain("保管することはありません");

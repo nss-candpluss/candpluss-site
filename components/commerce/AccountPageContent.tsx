@@ -1169,21 +1169,12 @@ function AccountSettingsPanel({
             value={formatText(profile.emailAddress?.emailAddress)}
             note={accountMemberCopy.accountDetails.email}
           />
-          <Field
-            label="電話番号"
-            value={formatText(profile.phoneNumber?.phoneNumber)}
-            note={accountMemberCopy.accountDetails.phone}
-          />
         </FieldList>
 
         {shopifyProfileUrl ? (
           <p className={readOnlyNoteClassName}>
             <ShopifyChangeLink href={shopifyProfileUrl}>
               {accountMemberCopy.accountDetails.emailChange}
-            </ShopifyChangeLink>
-            {" / "}
-            <ShopifyChangeLink href={shopifyProfileUrl}>
-              {accountMemberCopy.accountDetails.phoneChange}
             </ShopifyChangeLink>
           </p>
         ) : null}
@@ -1200,18 +1191,6 @@ function AccountSettingsPanel({
       <MemberSection title={accountMemberCopy.payments.title}>
         <p className={readOnlyNoteClassName}>
           {accountMemberCopy.payments.body}
-        </p>
-      </MemberSection>
-
-      <MemberSection title={accountMemberCopy.privacy.title}>
-        <p className={readOnlyNoteClassName}>{accountMemberCopy.privacy.body}</p>
-        <p>
-          <Link
-            href={accountMemberCopy.privacy.href}
-            className={`${bodyLinkUnderlineClassName} font-body-ja font-semibold text-[var(--foreground)]`}
-          >
-            {accountMemberCopy.privacy.link}
-          </Link>
         </p>
       </MemberSection>
 
