@@ -18,13 +18,13 @@ import {
   accountOrderOptionalFields,
   accountOrderPaymentMethods,
   accountOrderShipmentDisplay,
-  accountOrderSubtotalWithTax,
   formatAccountCardBrand,
   formatAccountAddressLine,
   formatAccountAddressName,
   formatAccountDate,
   formatAccountFinancialStatus,
   formatAccountMoney,
+  formatAccountMoneyAmount,
   formatAccountOrderPaymentStatus,
   formatAccountName,
   formatAccountOrderDateTime,
@@ -289,11 +289,14 @@ describe("注文履歴の商品行", () => {
     expect(source).not.toContain('label="注文番号"');
     expect(source).not.toContain('label="注文日時"');
     expect(source).not.toContain('label="支払い状況"');
-    expect(source).toContain('label="商品の小計"');
+    expect(source).toContain("サマリー");
+    expect(source).toContain('label="小計"');
     expect(source).toContain('label="配送料"');
+    expect(source).toContain('label="消費税"');
     expect(source).toContain('label="ご請求額"');
-    expect(source).not.toContain('label="税"');
-    expect(source).toContain("accountOrderSubtotalWithTax");
+    // 税はサマリーの独立した行にするので、金額に税込を付けない
+    expect(source).toContain("formatAmount(order.totalPrice)");
+    expect(source).not.toContain("formatMoney(order.totalPrice)");
     expect(source).toContain("formatAccountMoney");
     expect(source).toContain("発送情報");
     expect(source).toContain('label="配送業者"');
@@ -372,16 +375,14 @@ describe("注文履歴の商品行", () => {
     ).toBe("〒100-0000 東京都 中央区千代田町 1-2-3 ハイツ未来 101号室");
   });
 
-  it("小計は税を足して税込にする", () => {
-    expect(
-      accountOrderSubtotalWithTax({
-        subtotal: { amount: "10000", currencyCode: "JPY" },
-        totalTax: { amount: "1000", currencyCode: "JPY" },
-      })
-    ).toEqual({ amount: "11000", currencyCode: "JPY" });
+  it("金額は税込の注記を付ける版と、金額だけの版を出し分ける", () => {
     expect(
       formatAccountMoney({ amount: "426230", currencyCode: "JPY" })
     ).toBe("￥426,230 税込");
+    expect(
+      formatAccountMoneyAmount({ amount: "426230", currencyCode: "JPY" })
+    ).toBe("￥426,230");
+    expect(formatAccountMoneyAmount(null)).toBeNull();
   });
 
   it("決済方法は銀行振込か、カードブランドと下4桁を出す", () => {

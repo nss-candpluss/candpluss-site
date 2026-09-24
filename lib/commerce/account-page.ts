@@ -300,40 +300,32 @@ function hasPositiveAmount(amount?: string | null) {
   return Number(amount ?? 0) > 0;
 }
 
-/** 小計は税別で来るので、税を足して税込にする */
-export function accountOrderSubtotalWithTax(order: {
-  subtotal?: { amount: string; currencyCode: string } | null;
-  totalTax?: { amount: string; currencyCode: string } | null;
-}) {
-  const currencyCode =
-    order.subtotal?.currencyCode ?? order.totalTax?.currencyCode;
-
-  if (!currencyCode) {
-    return null;
-  }
-
-  return {
-    amount: String(
-      Number(order.subtotal?.amount ?? 0) + Number(order.totalTax?.amount ?? 0)
-    ),
-    currencyCode,
-  };
-}
-
-export function formatAccountMoney(
+/**
+ * 金額だけを整形する。
+ *
+ * サマリーのように税を別の行で出す場所や、税込の注記を本体と違う大きさで
+ * 並べたい場所で使う。
+ */
+export function formatAccountMoneyAmount(
   money?: { amount: string; currencyCode: string } | null
 ) {
   if (!money) {
     return null;
   }
 
-  const amount = new Intl.NumberFormat("ja-JP", {
+  return new Intl.NumberFormat("ja-JP", {
     style: "currency",
     currency: money.currencyCode,
     maximumFractionDigits: 0,
   }).format(Number(money.amount));
+}
 
-  return `${amount} 税込`;
+export function formatAccountMoney(
+  money?: { amount: string; currencyCode: string } | null
+) {
+  const amount = formatAccountMoneyAmount(money);
+
+  return amount === null ? null : `${amount} 税込`;
 }
 
 function formatShopifyStatusLabel(

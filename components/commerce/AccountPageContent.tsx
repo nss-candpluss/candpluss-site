@@ -29,11 +29,11 @@ import {
   accountOrderOptionalFields,
   accountOrderPaymentMethods,
   accountOrderShipmentDisplay,
-  accountOrderSubtotalWithTax,
   formatAccountAddressLine,
   formatAccountAddressName,
   formatAccountDate,
   formatAccountMoney,
+  formatAccountMoneyAmount,
   formatAccountOrderPaymentStatus,
   formatAccountOrderDateTime,
   formatAccountName,
@@ -54,7 +54,6 @@ import { getLiveCustomerTokenSession } from "@/lib/shopify/customer-session";
 import {
   bodyLinkUnderlineClassName,
   bodyText,
-  cartLineTitleClassName,
   uiText,
 } from "@/lib/typography";
 import { ContactField } from "@/sections/contact/ContactField";
@@ -70,6 +69,11 @@ const NOT_REGISTERED = "登録なし";
 
 function formatMoney(money?: CustomerMoney | null) {
   return formatAccountMoney(money) ?? NOT_REGISTERED;
+}
+
+/** サマリーは税を別の行に出すので、金額に税込を付けない */
+function formatAmount(money?: CustomerMoney | null) {
+  return formatAccountMoneyAmount(money) ?? NOT_REGISTERED;
 }
 
 function formatDateTime(value?: string | null) {
@@ -484,28 +488,31 @@ function OrderLineItems({
         const discount = hasDiscount(lineItem.totalDiscount)
           ? formatMoney(lineItem.totalDiscount)
           : null;
+        const price = formatAccountMoneyAmount(
+          lineItem.totalPrice ?? lineItem.price
+        );
 
         return (
           <li
             key={lineItem.id}
             className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-4"
           >
-            <div className="relative size-[96px] shrink-0 bg-[#eef1f3]">
+            {/* 画面幅に合わせて 96px から 280px まで広げる */}
+            <div className="relative size-[clamp(96px,calc(280px*var(--layout-scale-x)),280px)] shrink-0 bg-[#eef1f3]">
               {imageSrc ? (
                 <SiteImage
                   src={imageSrc}
                   alt={accountOrderLineImageAlt(lineItem)}
                   fill
-                  sizes="96px"
+                  sizes="(min-width: 1025px) 280px, 160px"
                   className="object-cover"
                 />
               ) : null}
             </div>
 
+            {/* 文字の大きさは商品一覧のカードに揃える */}
             <div className="min-w-0">
-              <p
-                className={`font-body-ja font-semibold ${cartLineTitleClassName}`}
-              >
+              <p className={`font-body-ja font-semibold ${uiText(16)}`}>
                 {title}
               </p>
               {variantTitle ? (
@@ -525,8 +532,13 @@ function OrderLineItems({
                   割引 {discount}
                 </p>
               ) : null}
-              <p className="mt-2 font-ui-en text-sm font-semibold">
-                {formatMoney(lineItem.totalPrice ?? lineItem.price)}
+              <p className="mt-2 inline-flex items-baseline gap-x-[calc(4px*var(--gap-scale-x))]">
+                <span className={`font-ui-en font-semibold ${uiText(14)}`}>
+                  {price ?? NOT_REGISTERED}
+                </span>
+                {price ? (
+                  <span className={`font-body-ja ${uiText(11)}`}>税込</span>
+                ) : null}
               </p>
             </div>
           </li>
@@ -589,13 +601,18 @@ function OrderAmountRow({
         emphasized ? "border-t border-[#ddd] pt-3 font-semibold" : ""
       }`}
     >
-      <dt className={`font-body-ja ${uiText(14)}`}>{label}</dt>
-      <dd className={`text-right font-body-ja ${uiText(14)}`}>{value}</dd>
+      <dt className={`font-body-ja ${bodyText(15)}`}>{label}</dt>
+      <dd className={`text-right font-body-ja ${bodyText(15)}`}>{value}</dd>
     </div>
   );
 }
 
-/** 購入商品の隣に置く金額まとめ。狭い列に収めるため注釈は出さない。 */
+/**
+ * 購入商品の隣に置く金額まとめ。
+ *
+ * 税を独立した行に出すので、各行の金額には税込を付けない。
+ * 狭い列に収めるため項目ごとの注釈も出さない。
+ */
 function OrderAmountSummary({
   order,
   showRefunded,
@@ -604,21 +621,24 @@ function OrderAmountSummary({
   showRefunded: boolean;
 }) {
   return (
-    <dl className="flex flex-col gap-3">
-      <OrderAmountRow
-        label="商品の小計"
-        value={formatMoney(accountOrderSubtotalWithTax(order))}
-      />
-      <OrderAmountRow label="配送料" value={formatMoney(order.totalShipping)} />
-      {showRefunded ? (
-        <OrderAmountRow label="返金額" value={formatMoney(order.totalRefunded)} />
-      ) : null}
-      <OrderAmountRow
-        label="ご請求額"
-        value={formatMoney(order.totalPrice)}
-        emphasized
-      />
-    </dl>
+    <OrderSidebarSection title="サマリー">
+      <dl className="mt-3 flex flex-col gap-3">
+        <OrderAmountRow label="小計" value={formatAmount(order.subtotal)} />
+        <OrderAmountRow label="配送料" value={formatAmount(order.totalShipping)} />
+        <OrderAmountRow label="消費税" value={formatAmount(order.totalTax)} />
+        {showRefunded ? (
+          <OrderAmountRow
+            label="返金額"
+            value={formatAmount(order.totalRefunded)}
+          />
+        ) : null}
+        <OrderAmountRow
+          label="ご請求額"
+          value={formatAmount(order.totalPrice)}
+          emphasized
+        />
+      </dl>
+    </OrderSidebarSection>
   );
 }
 
@@ -699,7 +719,7 @@ function OrderSidebarSection({
   return (
     <section>
       {title ? (
-        <h4 className={`font-body-ja font-semibold ${uiText(14)}`}>{title}</h4>
+        <h4 className={`font-body-ja font-semibold ${uiText(16)}`}>{title}</h4>
       ) : null}
       {children}
     </section>
@@ -813,7 +833,7 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
 
       <div className="mt-6 grid gap-x-[clamp(24px,calc(48px*var(--gap-scale-x)),48px)] gap-y-[calc(32px*var(--gap-scale-y))] min-[1025px]:grid-cols-[minmax(0,1fr)_minmax(0,380px)]">
         <div>
-          <h4 className={`font-body-ja font-semibold ${uiText(14)}`}>購入商品</h4>
+          <h4 className={`font-body-ja font-semibold ${uiText(16)}`}>購入商品</h4>
           <FieldNote>{accountFieldNotes.order.lineItems}</FieldNote>
           <OrderLineItems lineItems={order.lineItems.nodes} />
         </div>
