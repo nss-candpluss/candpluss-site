@@ -593,7 +593,7 @@ function OrderPaymentMethods({
   transactions,
 }: {
   /** バッジと同じ支払い状況。どの手段がどうなっているかを 1 行で読ませる */
-  status?: string;
+  status?: AccountStatusDisplay | null;
   transactions: CustomerOrderDetail["transactions"];
 }) {
   const methods = accountOrderPaymentMethods(transactions ?? []);
@@ -606,27 +606,45 @@ function OrderPaymentMethods({
     );
   }
 
+  // 手が必要な状況は目に留まるよう、手段の下に赤で置く
+  const alert = status?.tone === "alert" ? status.label : null;
+
   return (
     <ul className="mt-3 flex flex-col gap-2">
-      {methods.map((method) => (
-        <li key={method.id} className="flex items-center gap-2">
-          {method.iconUrl ? (
-            /* 決済アイコンは Shopify 以外のホストから返ることがあり、
-               next/image の remotePatterns に列挙できない */
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={method.iconUrl}
-              alt={method.iconAlt}
-              width={28}
-              height={18}
-              className="h-[18px] w-[28px] object-contain"
-            />
-          ) : null}
-          <p className={`font-body-ja ${bodyText(15)}`}>
-            {status ? `${method.label}：${status}` : method.label}
-          </p>
-        </li>
-      ))}
+      {methods.map((method) => {
+        // カードは決済が通っていれば、状況をわざわざ書かない
+        const inlineStatus =
+          alert || !status || (method.isCard && status.tone === "done")
+            ? null
+            : status.label;
+
+        return (
+          <li key={method.id} className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              {method.iconUrl ? (
+                /* 決済アイコンは Shopify 以外のホストから返ることがあり、
+                   next/image の remotePatterns に列挙できない */
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={method.iconUrl}
+                  alt={method.iconAlt}
+                  width={28}
+                  height={18}
+                  className="h-[18px] w-[28px] object-contain"
+                />
+              ) : null}
+              <p className={`font-body-ja ${bodyText(15)}`}>
+                {inlineStatus ? `${method.label}：${inlineStatus}` : method.label}
+              </p>
+            </div>
+            {alert ? (
+              <p className={`font-body-ja text-[#9b1b30] ${bodyText(15)}`}>
+                {alert}
+              </p>
+            ) : null}
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -1068,7 +1086,7 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
 
             <OrderSidebarSection title="決済方法">
               <OrderPaymentMethods
-                status={paymentStatus?.label}
+                status={paymentStatus}
                 transactions={order.transactions}
               />
             </OrderSidebarSection>

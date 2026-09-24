@@ -245,6 +245,8 @@ export type AccountPaymentMethodDisplay = {
   label: string;
   iconUrl?: string | null;
   iconAlt: string;
+  /** カードは決済が済めば状況を書く必要がない。振込は入金の有無が気になる */
+  isCard: boolean;
 };
 
 export function accountOrderPaymentMethods(
@@ -284,6 +286,7 @@ export function accountOrderPaymentMethods(
         label: "銀行振込",
         iconUrl: transaction.paymentIcon?.url,
         iconAlt: "銀行振込",
+        isCard: false,
       };
     }
 
@@ -296,6 +299,7 @@ export function accountOrderPaymentMethods(
         label: `${brand}••••${last4}`,
         iconUrl: transaction.paymentIcon?.url,
         iconAlt: brand,
+        isCard: true,
       };
     }
 
@@ -307,6 +311,7 @@ export function accountOrderPaymentMethods(
         transaction.type,
       iconUrl: transaction.paymentIcon?.url,
       iconAlt: brand || "決済方法",
+      isCard: Boolean(brand),
     };
   });
 }
@@ -567,7 +572,7 @@ export function formatAccountFulfillmentUnitStatus(value?: string | null) {
 const ACCOUNT_CANCEL_REASON_JA: Record<string, string> = {
   CUSTOMER: "お客様のご希望",
   DECLINED: "決済が承認されなかったため",
-  FRAUD: "不正利用の疑いがあったため",
+  FRAUD: "確認が取れなかったため",
   INVENTORY: "在庫を確保できなかったため",
   OTHER: "その他の理由",
   STAFF: "当店の都合",

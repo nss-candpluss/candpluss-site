@@ -462,8 +462,12 @@ describe("注文履歴の商品行", () => {
     expect(source).toContain("決済方法");
     expect(source).toContain("accountOrderPaymentMethods");
     // 決済方法は「銀行振込：ご入金確認中」のように支払い状況まで見せる
-    expect(source).toContain("`${method.label}：${status}`");
-    expect(source).toContain("status={paymentStatus?.label}");
+    expect(source).toContain("`${method.label}：${inlineStatus}`");
+    expect(source).toContain("status={paymentStatus}");
+    // 通ったカードに状況は要らない。手が必要なときだけ下に赤で出す
+    expect(source).toContain('method.isCard && status.tone === "done"');
+    expect(source).toContain('status?.tone === "alert"');
+    expect(source).toContain("text-[#9b1b30]");
     expect(source).toContain("ご請求先");
     expect(source).toContain("order.billingAddress");
     expect(source).not.toContain(">請求先<");
@@ -524,6 +528,7 @@ describe("注文履歴の商品行", () => {
       "決済が承認されなかったため"
     );
     expect(formatAccountCancelReason("STAFF")).toBe("当店の都合");
+    expect(formatAccountCancelReason("FRAUD")).toBe("確認が取れなかったため");
     expect(formatAccountCancelReason(null)).toBeNull();
     expect(source).toContain("formatAccountCancelReason(order.cancelReason)");
   });
@@ -634,7 +639,11 @@ describe("注文履歴の商品行", () => {
         },
       ])
     ).toEqual([
-      expect.objectContaining({ id: "tx-bank", label: "銀行振込" }),
+      expect.objectContaining({
+        id: "tx-bank",
+        label: "銀行振込",
+        isCard: false,
+      }),
     ]);
     expect(
       accountOrderPaymentMethods([
@@ -657,6 +666,7 @@ describe("注文履歴の商品行", () => {
       expect.objectContaining({
         id: "tx-card",
         label: "JapanCreditBureau••••0399",
+        isCard: true,
       }),
     ]);
   });
