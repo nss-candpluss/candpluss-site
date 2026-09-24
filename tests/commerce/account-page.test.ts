@@ -16,6 +16,8 @@ import {
   accountOrderLineVariantTitle,
   accountOrderLinesByAmount,
   accountOrderOptionalFields,
+  accountOrderParcelLabel,
+  accountOrderParcels,
   accountOrderPaymentMethods,
   accountOrderShipmentDisplay,
   formatAccountCardBrand,
@@ -186,12 +188,57 @@ describe("注文履歴の商品行", () => {
     ]);
   });
 
+  it("個口ごとに注文行を振り分け、未発送の残りを分けて返す", () => {
+    const lineItems = [
+      { id: "tent", quantity: 1, price: { amount: "48000" } },
+      { id: "peg", quantity: 3, price: { amount: "1200" } },
+      { id: "rope", quantity: 2, price: { amount: "800" } },
+    ];
+    const { parcels, pending } = accountOrderParcels(lineItems, [
+      {
+        id: "f1",
+        fulfillmentLineItems: {
+          nodes: [
+            { quantity: 2, lineItem: { id: "peg" } },
+            { quantity: 1, lineItem: { id: "tent" } },
+          ],
+        },
+      },
+      {
+        id: "f2",
+        fulfillmentLineItems: { nodes: [{ quantity: 1, lineItem: { id: "peg" } }] },
+      },
+    ]);
+
+    // 個口の中も金額の高い順
+    expect(
+      parcels.map((parcel) =>
+        parcel.lines.map((entry) => [entry.line.id, entry.quantity])
+      )
+    ).toEqual([
+      [
+        ["tent", 1],
+        ["peg", 2],
+      ],
+      [["peg", 1]],
+    ]);
+    // どの個口にも入っていない分だけが残る
+    expect(pending.map((entry) => [entry.line.id, entry.quantity])).toEqual([
+      ["rope", 2],
+    ]);
+  });
+
+  it("個口の見出しは左右で同じ呼び方にする", () => {
+    expect(accountOrderParcelLabel(0, 3)).toBe("全3個口の1個口目");
+    expect(accountOrderParcelLabel(2, 3)).toBe("全3個口の3個口目");
+  });
+
   it("注文履歴はサムネイルと商品名で出す", () => {
     const source = readSource("components/commerce/AccountPageContent.tsx");
 
     expect(source).toContain("SiteImage");
     expect(source).toContain("accountOrderLineTitle");
-    expect(source).toContain("accountOrderLinesByAmount(lineItems)");
+    expect(source).toContain("accountOrderLinesByAmount(order.lineItems.nodes)");
     expect(source).toContain("購入商品");
     expect(source).not.toContain('label="画像 URL"');
     expect(source).not.toContain("LINE ITEMS");
@@ -302,9 +349,10 @@ describe("注文履歴の商品行", () => {
     // 発送が未登録なのは「値がない」ではなく、まだ発送手配が済んでいない状態
     expect(source).toContain("発送準備中");
     expect(source).toContain('label="配送状況"');
-    // 小口の内訳は分割発送のときだけ出す
+    // 個口の見分けは左右で同じ呼び方にし、中身は左の購入商品だけで出す
+    expect(source).toContain("accountOrderParcelLabel");
     expect(source).toContain("fulfillments.length > 1");
-    expect(source).toContain("つ目の発送");
+    expect(source).not.toContain("つ目の発送");
     expect(readSource("lib/shopify/customer-account.ts")).toContain(
       "fulfillmentLineItems(first: 20)"
     );

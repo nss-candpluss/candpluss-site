@@ -27,6 +27,9 @@ import {
   accountOrderLineVariantTitle,
   accountOrderLinesByAmount,
   accountOrderOptionalFields,
+  accountOrderParcelLabel,
+  accountOrderParcels,
+  type AccountOrderLineEntry,
   accountOrderPaymentMethods,
   accountOrderShipmentDisplay,
   formatAccountAddressLine,
@@ -46,7 +49,6 @@ import {
   type CustomerAccount,
   type CustomerAccountSnapshot,
   type CustomerAddressDetail,
-  type CustomerFulfillmentDetail,
   type CustomerMoney,
   type CustomerOrderDetail,
   type CustomerSection,
@@ -467,13 +469,40 @@ function hasDiscount(money?: CustomerMoney | null) {
   return Boolean(money && Number(money.amount) > 0);
 }
 
+type OrderLineItem = CustomerOrderDetail["lineItems"]["nodes"][number];
+
+/**
+ * 表示する金額。
+ *
+ * 注文行がまるごと 1 つの個口に入っているときは Shopify が計算した合計を
+ * そのまま使い、個口に分かれているときだけ単価から計算し直す。
+ */
+function orderLineEntryPrice(lineItem: OrderLineItem, quantity: number) {
+  if (quantity === lineItem.quantity) {
+    return lineItem.totalPrice ?? lineItem.price;
+  }
+
+  const unitPrice = lineItem.price;
+
+  return unitPrice
+    ? {
+        amount: String(Number(unitPrice.amount) * quantity),
+        currencyCode: unitPrice.currencyCode,
+      }
+    : null;
+}
+
+/**
+ * 注文行の一覧。個口ごとに出すときは個数が注文行と変わるので、
+ * 表示する金額もその個数分で計算し直す。
+ */
 function OrderLineItems({
-  lineItems,
+  entries,
 }: {
-  lineItems: CustomerOrderDetail["lineItems"]["nodes"];
+  entries: AccountOrderLineEntry<OrderLineItem>[];
 }) {
-  if (!lineItems.length) {
-  return (
+  if (!entries.length) {
+    return (
       <p className="mt-3 font-body-ja text-sm text-[var(--color-muted)]">
         購入商品はありません。
       </p>
@@ -482,7 +511,7 @@ function OrderLineItems({
 
   return (
     <ul className="mt-4 flex flex-col gap-[calc(24px*var(--gap-scale-y))]">
-      {accountOrderLinesByAmount(lineItems).map((lineItem) => {
+      {entries.map(({ line: lineItem, quantity }) => {
         const title = accountOrderLineTitle(lineItem);
         const variantTitle = accountOrderLineVariantTitle(lineItem);
         const imageSrc = lineItem.image?.url;
@@ -490,12 +519,12 @@ function OrderLineItems({
           ? formatMoney(lineItem.totalDiscount)
           : null;
         const price = formatAccountMoneyAmount(
-          lineItem.totalPrice ?? lineItem.price
+          orderLineEntryPrice(lineItem, quantity)
         );
 
         return (
           <li
-            key={lineItem.id}
+            key={`${lineItem.id}-${quantity}`}
             className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-[26px] gap-y-4"
           >
             {/* 画面幅に合わせて 96px から 280px まで広げる */}
@@ -530,7 +559,7 @@ function OrderLineItems({
                     variantTitle ? "mt-2" : ""
                   }`}
                 >
-                  数量 {lineItem.quantity}
+                  数量 {quantity}
                 </p>
               </div>
               {discount ? (
@@ -739,33 +768,6 @@ function OrderSidebarSection({
   );
 }
 
-/** 分割発送のとき、どの小口に何が入っているかを出す */
-function FulfillmentContents({
-  lineItems,
-}: {
-  lineItems: CustomerFulfillmentDetail["fulfillmentLineItems"]["nodes"];
-}) {
-  if (!lineItems.length) {
-    return null;
-  }
-
-  return (
-    <ul className="mt-2 flex flex-col gap-1">
-      {lineItems.map((item) => {
-        const variantTitle = accountOrderLineVariantTitle(item.lineItem);
-
-        return (
-          <li key={item.id} className={`font-body-ja ${bodyText(15)}`}>
-            {accountOrderLineTitle(item.lineItem)}
-            {variantTitle ? `（${variantTitle}）` : ""}
-            {item.quantity ? ` × ${item.quantity}` : ""}
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
-
 /**
  * 発送ごとの配送状況。社内管理用の項目は出さない。
  *
@@ -784,22 +786,21 @@ function OrderFulfillments({
     );
   }
 
-  // 1 件だけなら「1つ目の発送」も中身の内訳も要らない
+  // 1 件だけなら個口の見出しは要らない。中身は左の購入商品で分かる
   const isSplit = fulfillments.length > 1;
 
   return (
-    <ul className="flex flex-col gap-[calc(24px*var(--gap-scale-y))]">
+    <ul
+      className={`flex flex-col gap-[calc(32px*var(--gap-scale-y))] ${
+        isSplit ? "mt-[calc(24px*var(--gap-scale-y))]" : ""
+      }`}
+    >
       {fulfillments.map((fulfillment, index) => (
         <li key={fulfillment.id}>
           {isSplit ? (
-            <>
-              <h5 className={`font-body-ja font-semibold ${uiText(13)}`}>
-                {index + 1}つ目の発送
-              </h5>
-              <FulfillmentContents
-                lineItems={fulfillment.fulfillmentLineItems.nodes}
-              />
-            </>
+            <h5 className={`font-body-ja font-semibold ${uiText(14)}`}>
+              {accountOrderParcelLabel(index, fulfillments.length)}
+            </h5>
           ) : null}
           <SidebarFieldList>
             {fulfillment.latestShipmentStatus ? (
@@ -863,6 +864,55 @@ function OrderFulfillments({
   );
 }
 
+/**
+ * 注文カード左側の購入商品。
+ *
+ * 複数の個口に分かれている注文は、個口ごとに見出しを付けて分ける。
+ * 個口の見出しがあれば何の一覧かは分かるので「ご購入商品」は出さない。
+ */
+function OrderPurchasedItems({ order }: { order: CustomerOrderDetail }) {
+  const { parcels, pending } = accountOrderParcels(
+    order.lineItems.nodes,
+    order.fulfillments.nodes
+  );
+
+  if (parcels.length < 2) {
+    return (
+      <div>
+        <h4 className={`font-body-ja font-semibold ${uiText(16)}`}>
+          ご購入商品
+        </h4>
+        <OrderLineItems
+          entries={accountOrderLinesByAmount(order.lineItems.nodes).map(
+            (line) => ({ line, quantity: line.quantity })
+          )}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-[calc(48px*var(--gap-scale-y))]">
+      {parcels.map((parcel, index) => (
+        <div key={parcel.id}>
+          <h4 className={`font-body-ja font-semibold ${uiText(16)}`}>
+            {accountOrderParcelLabel(index, parcels.length)}
+          </h4>
+          <OrderLineItems entries={parcel.lines} />
+        </div>
+      ))}
+      {pending.length ? (
+        <div>
+          <h4 className={`font-body-ja font-semibold ${uiText(16)}`}>
+            発送準備中
+          </h4>
+          <OrderLineItems entries={pending} />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function OrderCard({ order }: { order: CustomerOrderDetail }) {
   const optional = accountOrderOptionalFields(order);
   const paymentStatus = formatAccountOrderPaymentStatus(
@@ -892,12 +942,7 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
       </div>
 
       <div className="mt-6 grid gap-x-[clamp(24px,calc(48px*var(--gap-scale-x)),48px)] gap-y-[calc(32px*var(--gap-scale-y))] min-[1025px]:grid-cols-[minmax(0,1fr)_minmax(0,380px)]">
-        <div>
-          <h4 className={`font-body-ja font-semibold ${uiText(16)}`}>
-            ご購入商品
-          </h4>
-          <OrderLineItems lineItems={order.lineItems.nodes} />
-        </div>
+        <OrderPurchasedItems order={order} />
 
         {/* 1 列に畳んだときは、ご購入商品との境目にも線を引く */}
         <div className="flex flex-col border-t border-[var(--color-divider)] pt-[clamp(20px,calc(32px*var(--gap-scale-y)),32px)] min-[1025px]:border-t-0 min-[1025px]:pt-0">

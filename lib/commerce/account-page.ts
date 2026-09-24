@@ -76,6 +76,89 @@ export function accountOrderLinesByAmount<T extends AccountOrderLineAmount>(
   );
 }
 
+/** 分割発送の見出し。左の購入商品と右の発送情報で同じ呼び方にする */
+export function accountOrderParcelLabel(index: number, total: number) {
+  return `全${total}個口の${index + 1}個口目`;
+}
+
+/** 購入商品 1 行分の表示単位。個口ごとに出すときは個数が注文行と変わる */
+export type AccountOrderLineEntry<T> = { line: T; quantity: number };
+
+type AccountOrderParcelLine = AccountOrderLineAmount & {
+  id: string;
+  quantity: number;
+};
+
+type AccountOrderParcelSource = {
+  id: string;
+  fulfillmentLineItems: {
+    nodes: Array<{ quantity?: number | null; lineItem: { id: string } }>;
+  };
+};
+
+function accountOrderEntryAmount<T extends AccountOrderLineAmount>(
+  entry: AccountOrderLineEntry<T>
+) {
+  const unitPrice = Number(entry.line.price?.amount ?? 0);
+
+  return Number.isFinite(unitPrice) ? unitPrice * entry.quantity : 0;
+}
+
+function accountOrderEntriesByAmount<T extends AccountOrderLineAmount>(
+  entries: AccountOrderLineEntry<T>[]
+) {
+  return entries.sort(
+    (a, b) => accountOrderEntryAmount(b) - accountOrderEntryAmount(a)
+  );
+}
+
+/**
+ * 注文を個口ごとに分ける。
+ *
+ * 1 つの注文行が複数の個口に分かれることがあるので、個数は注文行の数量では
+ * なく、その個口に入っている数を使う。どの個口にも入っていない残りは
+ * まだ発送されていない分として `pending` に回す。
+ */
+export function accountOrderParcels<T extends AccountOrderParcelLine>(
+  lineItems: readonly T[],
+  fulfillments: readonly AccountOrderParcelSource[]
+) {
+  const lineById = new Map(lineItems.map((line) => [line.id, line]));
+  const shippedQuantity = new Map<string, number>();
+
+  const parcels = fulfillments.map((fulfillment) => {
+    const lines: AccountOrderLineEntry<T>[] = [];
+
+    for (const item of fulfillment.fulfillmentLineItems.nodes) {
+      const line = lineById.get(item.lineItem.id);
+      const quantity = item.quantity ?? 0;
+
+      if (!line || quantity <= 0) {
+        continue;
+      }
+
+      shippedQuantity.set(
+        line.id,
+        (shippedQuantity.get(line.id) ?? 0) + quantity
+      );
+      lines.push({ line, quantity });
+    }
+
+    return { id: fulfillment.id, lines: accountOrderEntriesByAmount(lines) };
+  });
+
+  const pending = accountOrderEntriesByAmount(
+    lineItems
+      .map((line) => ({
+        line,
+        quantity: line.quantity - (shippedQuantity.get(line.id) ?? 0),
+      }))
+      .filter((entry) => entry.quantity > 0)
+  );
+
+  return { parcels, pending };
+}
+
 export function formatAccountPostalCode(value?: string | null) {
   const zip = value?.trim().replace(/^〒\s*/, "");
 
