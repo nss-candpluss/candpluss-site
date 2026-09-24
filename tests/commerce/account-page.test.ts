@@ -7,7 +7,10 @@ import { accountMemberCopy } from "@/lib/commerce/account-field-notes";
 import {
   ACCOUNT_CANCELLED_BADGE,
   ACCOUNT_PAGE_TABS,
+  ACCOUNT_SAVED_NOTICE,
   accountAddressDeleteHref,
+  accountAddressNoticeKey,
+  accountSavedNoticeKey,
   accountOrderHasReceipt,
   accountAddressEditHref,
   accountAddressIdFromSearch,
@@ -940,15 +943,91 @@ describe("会員ページの画面構成", () => {
     const formSource = readSource("components/commerce/AccountUpdateForm.tsx");
 
     expect(source).toContain("AccountUpdateForm");
-    expect(source).toContain("ContactField");
     expect(source).toContain("SupportFloatingInput");
+    expect(source).toContain("getContactFloatingSelectClassName");
+    expect(source).toContain("contactCheckboxBoxClassName");
+    /*
+      行の並びだけは問い合わせフォームと違う。
+      会員ページは「ラベル：入力欄」の横並びなので、専用の行を持つ。
+    */
+    expect(source).not.toContain("ContactField");
+    expect(source).toContain("function AccountField(");
     expect(formSource).not.toContain("contactFormShellClassName");
     expect(formSource).not.toContain("border border-[var(--color-divider)]");
-    expect(formSource).toContain("supportContactButtonClassName");
-    expect(formSource).toContain("arrowMaskStyle");
-    expect(formSource).toContain("disabled={!isChanged}");
     expect(source).not.toContain("border border-[#ccc]");
     expect(source).not.toContain("inputText(");
+  });
+
+  it("見出しと入力欄を「ラベル：入力欄」の形で横に並べる", () => {
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+
+    // ラベルの太さは入力欄より目立たせない
+    expect(source).toContain(
+      "const accountFieldLabelClassName = `font-body-ja font-normal text-[var(--foreground)] ${uiText(16)}`"
+    );
+    expect(source).toContain("const title = `${label}：`");
+    // いちばん長い「メール配信：」に合わせて、入力欄の左端を揃える
+    expect(source).toContain(
+      "min-[640px]:grid-cols-[calc(100px*var(--text-scale))_minmax(0,1fr)]"
+    );
+    expect(source).not.toContain("min-[640px]:grid-cols-[200px_minmax(0,1fr)]");
+  });
+
+  it("保存ボタンは直したときだけ出し、文字は「保存」で揃える", () => {
+    const formSource = readSource("components/commerce/AccountUpdateForm.tsx");
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+
+    expect(formSource).toContain("{isChanged || showSaved ?");
+    expect(formSource).toContain(">\n              保存\n            </button>");
+    expect(formSource).not.toContain("disabled={!isChanged}");
+    expect(formSource).not.toContain("submitLabel");
+    expect(formSource).toContain("accountPrimaryButtonClassName");
+    // 1 項目だけのフォームは、ボタンを入力欄の右へ並べる
+    expect(formSource).toContain("inlineSubmit");
+    expect(source.match(/inlineSubmit/g)).toHaveLength(2);
+  });
+
+  it("住所の操作は角丸ボタンで出す", () => {
+    const controlsSource = readSource(
+      "components/commerce/AccountAddressControls.tsx"
+    );
+    const buttonSource = readSource(
+      "components/commerce/accountButtonStyles.ts"
+    );
+
+    expect(buttonSource).toContain("rounded-full");
+    expect(controlsSource).toContain("accountPrimaryButtonClassName");
+    expect(controlsSource).toContain("accountSecondaryButtonClassName");
+    // 下線テキストのままだと、隣の角丸ボタンと作法が揃わない
+    expect(controlsSource).not.toContain("addressActionClassName");
+  });
+
+  it("保存できたことは押した場所に数秒だけ出す", () => {
+    const hookSource = readSource(
+      "components/commerce/useAccountSavedNotice.ts"
+    );
+    const formSource = readSource("components/commerce/AccountUpdateForm.tsx");
+    const noticeSource = readSource("components/commerce/AccountNotice.tsx");
+
+    expect(ACCOUNT_SAVED_NOTICE).toBe("変更が保存されました。");
+    expect(accountSavedNoticeKey("?saved=profile-name")).toBe("profile-name");
+    expect(accountSavedNoticeKey("?updated=profile")).toBeUndefined();
+    // 住所はフォームが件数分あるので、どの住所かで見分ける
+    expect(accountAddressNoticeKey("gid://1")).toBe("address-gid://1");
+    expect(accountAddressNoticeKey()).toBe("address-new");
+    // タブを移ったら結果表示も持ち越さない
+    expect(accountPageTabHref("account", "tab=account&saved=profile-name")).toBe(
+      "?tab=account"
+    );
+
+    expect(hookSource).toContain("setTimeout");
+    expect(formSource).toContain("useAccountSavedNotice");
+    expect(formSource).toContain('name="notice"');
+    // 上にまとめて出していた「プロフィールを更新しました。」は出し続けない
+    expect(noticeSource).toContain("setTimeout");
+    expect(
+      readSource("app/api/shopify/customer/profile/route.ts")
+    ).toContain('searchParams.set(\n      "saved"');
   });
 
   // コード直接入力は住所を書き間違えるので、問い合わせと同じ選択式にする

@@ -23,6 +23,7 @@ import { formHalfSpanClassName } from "@/lib/layout";
 import { accountMemberCopy } from "@/lib/commerce/account-field-notes";
 import {
   ACCOUNT_CANCELLED_BADGE,
+  accountAddressNoticeKey,
   accountOrderHasReceipt,
   accountOrderLineImageAlt,
   accountOrderLineTitle,
@@ -66,7 +67,6 @@ import {
   bodyText,
   uiText,
 } from "@/lib/typography";
-import { ContactField } from "@/sections/contact/ContactField";
 import {
   contactCheckboxBoxClassName,
   contactSelectChevronClassName,
@@ -117,36 +117,6 @@ function LogoutButton() {
   );
 }
 
-/** ラベルと値を 1 行で並べる。値が無いものは「登録なし」で埋める */
-function Field({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  const isEmpty = value === NOT_REGISTERED;
-
-  return (
-    <div className="grid gap-1 min-[640px]:grid-cols-[200px_minmax(0,1fr)] min-[640px]:gap-4">
-      <dt className="font-body-ja text-xs text-[var(--color-muted)]">
-        {label}
-      </dt>
-      <dd
-        className={`font-body-ja text-sm break-words ${
-          isEmpty ? "text-[var(--color-muted)]" : ""
-        }`}
-      >
-        {value}
-      </dd>
-    </div>
-  );
-}
-
-function FieldList({ children }: { children: React.ReactNode }) {
-  return <dl>{children}</dl>;
-}
-
 function MemberSection({
   title,
   children,
@@ -162,6 +132,50 @@ function MemberSection({
         {children}
       </div>
     </section>
+  );
+}
+
+/*
+  「お名前：入力欄」の形で横に並べる。
+  ラベルの列幅は「メール配信：」に合わせて固定し、
+  どの区画でも入力欄の左端が同じ位置から始まるようにする。
+*/
+const accountFieldLabelClassName = `font-body-ja font-normal text-[var(--foreground)] ${uiText(16)}`;
+const accountFieldRowClassName =
+  "grid gap-y-2 min-[640px]:grid-cols-[calc(100px*var(--text-scale))_minmax(0,1fr)] min-[640px]:gap-x-[calc(8px*var(--gap-scale-x))] min-[640px]:gap-y-0";
+
+function AccountField({
+  label,
+  htmlFor,
+  alignTop = false,
+  children,
+}: {
+  label: string;
+  htmlFor?: string;
+  /** 入力欄が複数行になる項目は、ラベルを 1 行目に合わせる */
+  alignTop?: boolean;
+  children: React.ReactNode;
+}) {
+  const title = `${label}：`;
+  const labelClassName = alignTop
+    ? `${accountFieldLabelClassName} min-[640px]:pt-[clamp(12px,calc(20px*var(--gap-scale-y)),20px)]`
+    : accountFieldLabelClassName;
+
+  return (
+    <div
+      className={`${accountFieldRowClassName} ${
+        alignTop ? "min-[640px]:items-start" : "min-[640px]:items-center"
+      }`}
+    >
+      {htmlFor ? (
+        <label htmlFor={htmlFor} className={labelClassName}>
+          {title}
+        </label>
+      ) : (
+        <p className={labelClassName}>{title}</p>
+      )}
+      <div className="min-w-0">{children}</div>
+    </div>
   );
 }
 
@@ -190,17 +204,13 @@ function ProfileNameForm({ profile }: { profile: CustomerAccount }) {
   return (
     <AccountUpdateForm
       action="/api/shopify/customer/profile"
-      submitLabel="名前を更新する"
+      noticeKey="profile-name"
+      inlineSubmit
     >
       {isEmailMarketingSubscribed(profile.emailAddress?.marketingState) ? (
         <input type="hidden" name="emailMarketing" value="on" />
       ) : null}
-      <ContactField
-        label="お名前"
-        requirement="required"
-        fixedTitleSize
-        groupedContentGap
-      >
+      <AccountField label="お名前">
         <SiteGrid className="gap-x-[calc(12px*var(--gap-scale-x))] gap-y-[clamp(14px,calc(18px*var(--gap-scale-y)),18px)]">
           <div className={formHalfSpanClassName}>
             <SupportFloatingInput
@@ -227,7 +237,7 @@ function ProfileNameForm({ profile }: { profile: CustomerAccount }) {
             />
           </div>
         </SiteGrid>
-      </ContactField>
+      </AccountField>
     </AccountUpdateForm>
   );
 }
@@ -236,16 +246,12 @@ function EmailMarketingForm({ profile }: { profile: CustomerAccount }) {
   return (
     <AccountUpdateForm
       action="/api/shopify/customer/profile"
-      submitLabel="配信設定を更新する"
+      noticeKey="profile-marketing"
+      inlineSubmit
     >
       <input type="hidden" name="lastName" value={profile.lastName ?? ""} />
       <input type="hidden" name="firstName" value={profile.firstName ?? ""} />
-      <ContactField
-        label="メール配信"
-        requirement="optional"
-        fixedTitleSize
-        groupedContentGap
-      >
+      <AccountField label="メール配信">
         <label className="inline-flex cursor-pointer items-center gap-x-[clamp(8px,calc(12px*var(--gap-scale-x)),12px)]">
           <input
             type="checkbox"
@@ -260,7 +266,7 @@ function EmailMarketingForm({ profile }: { profile: CustomerAccount }) {
             メールマガジンを受け取る
           </span>
         </label>
-      </ContactField>
+      </AccountField>
     </AccountUpdateForm>
   );
 }
@@ -281,18 +287,13 @@ function AddressForm({
   return (
     <AccountUpdateForm
       action="/api/shopify/customer/address"
-      submitLabel={address ? "住所を更新する" : "住所を追加する"}
+      noticeKey={accountAddressNoticeKey(address?.id)}
     >
       <input type="hidden" name="intent" value="save" />
       <input type="hidden" name="addressId" value={address?.id ?? ""} />
       <input type="hidden" name="territoryCode" value="JP" />
 
-      <ContactField
-        label="お名前"
-        requirement="required"
-        fixedTitleSize
-        groupedContentGap
-      >
+      <AccountField label="お名前">
         <SiteGrid className="gap-x-[calc(12px*var(--gap-scale-x))] gap-y-[clamp(14px,calc(18px*var(--gap-scale-y)),18px)]">
           <div className={formHalfSpanClassName}>
             <SupportFloatingInput
@@ -319,14 +320,9 @@ function AddressForm({
             />
           </div>
         </SiteGrid>
-      </ContactField>
+      </AccountField>
 
-      <ContactField
-        label="住所"
-        requirement="required"
-        fixedTitleSize
-        groupedContentGap
-      >
+      <AccountField label="住所" alignTop>
         <div className="flex flex-col gap-y-[clamp(14px,calc(18px*var(--gap-scale-y)),18px)]">
           <div className="max-w-[240px]">
             <SupportFloatingInput
@@ -399,14 +395,9 @@ function AddressForm({
             maxLength={255}
           />
         </div>
-      </ContactField>
+      </AccountField>
 
-      <ContactField
-        label="電話番号"
-        requirement="optional"
-        fixedTitleSize
-        groupedContentGap
-      >
+      <AccountField label="電話番号">
         <div className="max-w-[240px]">
           <SupportFloatingInput
             id={fieldId("phone")}
@@ -419,14 +410,9 @@ function AddressForm({
             maxLength={20}
           />
         </div>
-      </ContactField>
+      </AccountField>
 
-      <ContactField
-        label="既定の住所"
-        requirement="optional"
-        fixedTitleSize
-        groupedContentGap
-      >
+      <AccountField label="既定の住所">
         <label className="inline-flex cursor-pointer items-center gap-x-[clamp(8px,calc(12px*var(--gap-scale-x)),12px)]">
           <input
             type="checkbox"
@@ -439,7 +425,7 @@ function AddressForm({
             この住所を既定にする
           </span>
         </label>
-      </ContactField>
+      </AccountField>
     </AccountUpdateForm>
   );
 }
@@ -1168,12 +1154,11 @@ function AccountSettingsPanel({
       <MemberSection title={accountMemberCopy.accountDetails.title}>
         <ProfileNameForm profile={profile} />
 
-        <FieldList>
-          <Field
-            label="メールアドレス"
-            value={formatText(profile.emailAddress?.emailAddress)}
-          />
-        </FieldList>
+        <AccountField label="メールアドレス">
+          <p className={`font-body-ja ${bodyText(15)}`}>
+            {formatText(profile.emailAddress?.emailAddress)}
+          </p>
+        </AccountField>
 
         {shopifyProfileUrl ? (
           <p className={readOnlyNoteClassName}>

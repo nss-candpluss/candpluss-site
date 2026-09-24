@@ -7,6 +7,7 @@ import {
 } from "@/lib/commerce/account-login";
 import {
   accountAddressEditHref,
+  accountAddressNoticeKey,
   toShopifyJapanPhoneNumber,
 } from "@/lib/commerce/account-page";
 import {
@@ -92,7 +93,14 @@ export async function POST(request: Request) {
       defaultAddress: formData.get("defaultAddress") === "on",
     });
 
-    listUrl.searchParams.set("updated", "address");
+    // 押したフォームのその場に結果を出すので、どのフォームだったかを返す
+    const notice = formData.get("notice");
+    listUrl.searchParams.set(
+      "saved",
+      typeof notice === "string" && notice
+        ? notice
+        : accountAddressNoticeKey(savedAddressId)
+    );
     return Response.redirect(listUrl, 303);
   } catch {
     // 入力内容を直せるよう、編集していた住所のフォームへ戻す

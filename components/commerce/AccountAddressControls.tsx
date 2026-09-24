@@ -3,34 +3,41 @@
 import { useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { AccountShallowLink } from "@/components/commerce/AccountShallowLink";
 import {
+  accountPrimaryButtonClassName,
+  accountSecondaryButtonClassName,
+} from "@/components/commerce/accountButtonStyles";
+import { AccountShallowLink } from "@/components/commerce/AccountShallowLink";
+import { useAccountSavedNotice } from "@/components/commerce/useAccountSavedNotice";
+import {
+  ACCOUNT_SAVED_NOTICE,
   NEW_ACCOUNT_ADDRESS,
   accountAddressAddHref,
   accountAddressDeleteHref,
   accountAddressDeleteIdFromSearch,
   accountAddressIdFromSearch,
+  accountAddressNoticeKey,
   accountPageTabHref,
 } from "@/lib/commerce/account-page";
-
-const addressActionClassName =
-  "cursor-pointer border-b border-current font-body-ja text-sm text-[var(--foreground)]";
+import { uiText } from "@/lib/typography";
 
 /** 住所 1 件に対する操作。フォームなので JavaScript なしで動く */
 function AddressIntentButton({
   addressId,
   intent,
+  className = accountSecondaryButtonClassName,
   children,
 }: {
   addressId: string;
   intent: "default" | "delete";
+  className?: string;
   children: string;
 }) {
   return (
     <form action="/api/shopify/customer/address" method="post">
       <input type="hidden" name="intent" value={intent} />
       <input type="hidden" name="addressId" value={addressId} />
-      <button type="submit" className={addressActionClassName}>
+      <button type="submit" className={className}>
         {children}
       </button>
     </form>
@@ -69,7 +76,7 @@ export function AccountAddressHeader({
         {isConfirmingDelete ? null : (
           <AccountShallowLink
             href={accountAddressDeleteHref(addressId)}
-            className={addressActionClassName}
+            className={accountSecondaryButtonClassName}
           >
             削除する
           </AccountShallowLink>
@@ -79,12 +86,16 @@ export function AccountAddressHeader({
       {isConfirmingDelete ? (
         <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3 border border-[#ddd] p-4">
           <p className="font-body-ja text-sm">この住所を削除しますか？</p>
-          <AddressIntentButton addressId={addressId} intent="delete">
+          <AddressIntentButton
+            addressId={addressId}
+            intent="delete"
+            className={accountPrimaryButtonClassName}
+          >
             削除する
           </AddressIntentButton>
           <AccountShallowLink
             href={accountPageTabHref("account", search)}
-            className={addressActionClassName}
+            className={accountSecondaryButtonClassName}
           >
             やめる
           </AccountShallowLink>
@@ -103,6 +114,11 @@ export function AccountAddressAdd({ children }: { children: ReactNode }) {
   const searchParams = useSearchParams();
   const isOpen =
     accountAddressIdFromSearch(searchParams.toString()) === NEW_ACCOUNT_ADDRESS;
+  /*
+    追加した住所のフォームは保存後に閉じるので、結果を出す場所が無くなる。
+    追加ボタンの横に出して、どの操作の結果か分かるようにする。
+  */
+  const showSaved = useAccountSavedNotice(accountAddressNoticeKey());
 
   if (isOpen) {
     return (
@@ -114,13 +130,21 @@ export function AccountAddressAdd({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div>
+    <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
       <AccountShallowLink
         href={accountAddressAddHref()}
-        className={addressActionClassName}
+        className={accountPrimaryButtonClassName}
       >
         住所を追加する
       </AccountShallowLink>
+      {showSaved ? (
+        <p
+          role="status"
+          className={`font-body-ja text-[var(--color-muted)] ${uiText(14)}`}
+        >
+          {ACCOUNT_SAVED_NOTICE}
+        </p>
+      ) : null}
     </div>
   );
 }

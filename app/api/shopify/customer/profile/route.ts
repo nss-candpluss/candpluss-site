@@ -52,7 +52,12 @@ export async function POST(request: Request) {
       await setCustomerEmailMarketing(session.accessToken, wantsEmailMarketing);
     }
 
-    redirectUrl.searchParams.set("updated", "profile");
+    // 押したフォームのその場に結果を出すので、どのフォームだったかを返す
+    const notice = formData.get("notice");
+    redirectUrl.searchParams.set(
+      "saved",
+      typeof notice === "string" && notice ? notice : "profile"
+    );
     return Response.redirect(redirectUrl, 303);
   } catch {
     redirectUrl.searchParams.set("error", "profile");

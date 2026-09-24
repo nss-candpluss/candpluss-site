@@ -812,12 +812,30 @@ export function accountPageTabHref(tabId: AccountPageTabId, currentSearch = "") 
     : currentSearch;
   const params = new URLSearchParams(query);
   params.delete("updated");
+  params.delete("saved");
   params.delete("error");
   // 編集中の住所はタブを移ったら持ち越さない
   params.delete("address");
   params.delete("confirmDelete");
   params.set("tab", tabId);
   return `?${params.toString()}`;
+}
+
+/**
+ * 保存できたことは、ページの先頭にまとめて出すのではなく、
+ * 押したフォームのその場に短く出す。
+ */
+export const ACCOUNT_SAVED_NOTICE = "変更が保存されました。";
+
+/** どのフォームの保存だったかを URL から取り出す */
+export function accountSavedNoticeKey(search = "") {
+  const query = search.startsWith("?") ? search.slice(1) : search;
+  return new URLSearchParams(query).get("saved") ?? undefined;
+}
+
+/** 住所フォームは件数分あるので、どの住所を保存したかで見分ける */
+export function accountAddressNoticeKey(addressId?: string) {
+  return `address-${addressId ?? NEW_ACCOUNT_ADDRESS}`;
 }
 
 /** 全角を半角に寄せて、数字と先頭の + だけ残す */

@@ -2,19 +2,28 @@
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
-import { arrowMaskStyle } from "@/lib/maskStyle";
-import { supportContactButtonClassName } from "@/sections/support/supportContactStyles";
+import { accountPrimaryButtonClassName } from "@/components/commerce/accountButtonStyles";
+import { useAccountSavedNotice } from "@/components/commerce/useAccountSavedNotice";
+import { ACCOUNT_SAVED_NOTICE } from "@/lib/commerce/account-page";
+import { uiText } from "@/lib/typography";
 
 /**
  * 外枠と枠内余白は置かない。入力欄自体の枠だけ残す。
  * 会員ページは横に広いので、入力欄が間延びしない幅で止める。
  */
-const accountUpdateFormClassName =
-  "flex max-w-[560px] flex-col gap-[calc(32px*var(--gap-scale-y))] [&>div]:border-b-0 [&>div]:px-0 [&>div]:py-0 [&>div:first-child]:pt-0 [&>div:last-child]:pb-0 [&>div>div:first-child>span]:hidden";
+const stackedFormClassName =
+  "flex max-w-[560px] flex-col gap-[calc(32px*var(--gap-scale-y))]";
+
+/** 1 項目だけのフォームは、保存ボタンを入力欄の右へ並べる */
+const inlineFormClassName =
+  "flex flex-col gap-[calc(16px*var(--gap-scale-y))] min-[640px]:flex-row min-[640px]:items-center min-[640px]:gap-x-[calc(24px*var(--gap-scale-x))]";
 
 type AccountUpdateFormProps = {
   action: string;
-  submitLabel: string;
+  /** 保存できたことを、このフォームの場所に出すための合図 */
+  noticeKey: string;
+  /** 1 行で収まるフォームは、保存ボタンを右に並べる */
+  inlineSubmit?: boolean;
   children: ReactNode;
 };
 
@@ -31,17 +40,19 @@ function serializeForm(form: HTMLFormElement) {
 /**
  * 表示と編集を 1 つの画面にまとめるためのフォーム。
  *
- * 常に入力済みの状態で出しておき、実際に値が変わったときだけ更新ボタンを
- * 押せるようにする。元の値に戻したときは、また押せない状態へ戻す。
+ * 常に入力済みの状態で出しておき、実際に値が変わったときだけ保存ボタンを出す。
+ * 元の値に戻したときは、またボタンを隠す。
  */
 export function AccountUpdateForm({
   action,
-  submitLabel,
+  noticeKey,
+  inlineSubmit = false,
   children,
 }: AccountUpdateFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const initialValuesRef = useRef("");
   const [isChanged, setIsChanged] = useState(false);
+  const showSaved = useAccountSavedNotice(noticeKey);
 
   const syncChanged = useCallback(() => {
     const form = formRef.current;
@@ -69,24 +80,33 @@ export function AccountUpdateForm({
       method="post"
       onInput={syncChanged}
       onChange={syncChanged}
-      className={accountUpdateFormClassName}
+      className={inlineSubmit ? inlineFormClassName : stackedFormClassName}
     >
-      {children}
+      <input type="hidden" name="notice" value={noticeKey} />
 
-      <div>
-        <button
-          type="submit"
-          disabled={!isChanged}
-          className={`${supportContactButtonClassName} cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`}
-        >
-          <span
-            aria-hidden="true"
-            className="size-[calc(24px*var(--text-scale))] shrink-0 bg-current"
-            style={arrowMaskStyle}
-          />
-          {submitLabel}
-        </button>
-      </div>
+      {inlineSubmit ? (
+        <div className="min-w-0 flex-1 min-[640px]:max-w-[560px]">{children}</div>
+      ) : (
+        children
+      )}
+
+      {/* 直したときだけ保存ボタンを出し、押したあとは同じ場所で結果を知らせる */}
+      {isChanged || showSaved ? (
+        <div className="shrink-0">
+          {isChanged ? (
+            <button type="submit" className={accountPrimaryButtonClassName}>
+              保存
+            </button>
+          ) : (
+            <p
+              role="status"
+              className={`font-body-ja text-[var(--color-muted)] ${uiText(14)}`}
+            >
+              {ACCOUNT_SAVED_NOTICE}
+            </p>
+          )}
+        </div>
+      ) : null}
     </form>
   );
 }
