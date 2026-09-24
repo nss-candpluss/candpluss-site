@@ -29,7 +29,10 @@ import {
   accountOrderOptionalFields,
   accountOrderParcelLabel,
   accountOrderParcels,
+  accountOrderPaymentDisplay,
   type AccountOrderLineEntry,
+  type AccountStatusDisplay,
+  type AccountStatusTone,
   accountOrderPaymentMethods,
   accountOrderShipmentDisplay,
   formatAccountAddressLine,
@@ -38,7 +41,6 @@ import {
   formatAccountDate,
   formatAccountMoney,
   formatAccountMoneyAmount,
-  formatAccountOrderPaymentStatus,
   formatAccountOrderDateTime,
   formatAccountName,
   formatAccountShipmentStatus,
@@ -674,12 +676,21 @@ function OrderAmountSummary({
   );
 }
 
-function OrderStatusBadge({ children }: { children: string }) {
+/** 終わったものは黒、確認が要るものは赤、進行中は薄いグレー */
+const ORDER_STATUS_BADGE_TONE: Record<AccountStatusTone, string> = {
+  alert: "bg-[#fbeaed] text-[#9b1b30]",
+  done: "bg-[var(--foreground)] text-white",
+  neutral: "bg-[#f1f1f1] text-[var(--foreground)]",
+};
+
+function OrderStatusBadge({ status }: { status: AccountStatusDisplay }) {
   return (
     <span
-      className={`inline-flex items-center rounded-full border border-[var(--color-divider)] px-[10px] py-[8px] font-body-ja ${uiText(13)}`}
+      className={`inline-flex items-center rounded-full px-[10px] py-[8px] font-body-ja ${uiText(13)} ${
+        ORDER_STATUS_BADGE_TONE[status.tone]
+      }`}
     >
-      {children}
+      {status.label}
     </span>
   );
 }
@@ -920,7 +931,7 @@ function OrderPurchasedItems({ order }: { order: CustomerOrderDetail }) {
 
 function OrderCard({ order }: { order: CustomerOrderDetail }) {
   const optional = accountOrderOptionalFields(order);
-  const paymentStatus = formatAccountOrderPaymentStatus(
+  const paymentStatus = accountOrderPaymentDisplay(
     order.financialStatus,
     order.transactions
   );
@@ -929,28 +940,33 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
 
   return (
     <li className="rounded-[16px] border border-[var(--color-divider)] bg-white px-[clamp(24px,calc(48px*var(--gap-scale-x)),48px)] py-[clamp(24px,calc(48px*var(--gap-scale-y)),48px)] shadow-[0_0_16px_rgba(0,0,0,0.08)]">
-      {/* 入りきらないときは、バッジ 2 つがひと塊で注文日時の下へ回る */}
-      <div className="flex flex-wrap items-center gap-x-[32px] gap-y-4">
-        <div>
+      {/*
+        カードの幅で切り替える。横に入るときは注文番号とバッジを同じ行で
+        上下中央に、入らないときは注文番号・注文日時・バッジの順に積む。
+      */}
+      <div className="@container">
+        <div className="flex flex-col @min-[520px]:grid @min-[520px]:grid-cols-[auto_minmax(0,1fr)] @min-[520px]:items-center @min-[520px]:gap-x-[32px]">
           <p className={`font-body-ja font-semibold ${uiText(20)}`}>
             ご注文番号：{order.name}
           </p>
+          {paymentStatus || shipmentStatus ? (
+            <div className="order-2 mt-4 flex items-center gap-x-2 @min-[520px]:order-none @min-[520px]:mt-0 @min-[520px]:justify-self-start">
+              {paymentStatus ? (
+                <OrderStatusBadge status={paymentStatus} />
+              ) : null}
+              {shipmentStatus ? (
+                <OrderStatusBadge status={shipmentStatus} />
+              ) : null}
+            </div>
+          ) : null}
           {orderedAt ? (
-            <p className={`mt-2 font-body-ja ${uiText(14)}`}>
+            <p
+              className={`order-1 mt-2 font-body-ja ${uiText(14)} @min-[520px]:order-none`}
+            >
               ご注文日時：{orderedAt}
             </p>
           ) : null}
         </div>
-        {paymentStatus || shipmentStatus ? (
-          <div className="flex items-center gap-x-2">
-            {paymentStatus ? (
-              <OrderStatusBadge>{paymentStatus}</OrderStatusBadge>
-            ) : null}
-            {shipmentStatus ? (
-              <OrderStatusBadge>{shipmentStatus}</OrderStatusBadge>
-            ) : null}
-          </div>
-        ) : null}
       </div>
 
       {/* 見出しと中身の間は、枠とコンテンツの間と同じだけ空ける */}

@@ -18,6 +18,7 @@ import {
   accountOrderOptionalFields,
   accountOrderParcelLabel,
   accountOrderParcels,
+  accountOrderPaymentDisplay,
   accountOrderPaymentMethods,
   accountOrderShipmentDisplay,
   formatAccountCardBrand,
@@ -332,13 +333,13 @@ describe("注文履歴の商品行", () => {
         fulfillmentStatus: "UNFULFILLED",
         fulfillments: { nodes: [] },
       })
-    ).toBe("発送準備中");
+    ).toEqual({ label: "発送準備中", tone: "neutral" });
     expect(
       accountOrderShipmentDisplay({
         fulfillmentStatus: "FULFILLED",
         fulfillments: { nodes: [{ latestShipmentStatus: "OUT_FOR_DELIVERY" }] },
       })
-    ).toBe("配達中");
+    ).toEqual({ label: "配達中", tone: "neutral" });
     // 個口ごとに状況が違うなら、注文全体の発送状態で伝える
     expect(
       accountOrderShipmentDisplay({
@@ -350,7 +351,7 @@ describe("注文履歴の商品行", () => {
           ],
         },
       })
-    ).toBe("一部発送");
+    ).toEqual({ label: "一部発送", tone: "neutral" });
     // 全部の個口が同じ状況なら、その状況を出してよい
     expect(
       accountOrderShipmentDisplay({
@@ -362,7 +363,31 @@ describe("注文履歴の商品行", () => {
           ],
         },
       })
-    ).toBe("配達済み");
+    ).toEqual({ label: "配達済み", tone: "done" });
+  });
+
+  it("バッジの色は Shopify のコードで決める", () => {
+    expect(accountOrderPaymentDisplay("PAID", [])).toEqual({
+      label: "お支払い済み",
+      tone: "done",
+    });
+    expect(
+      accountOrderPaymentDisplay("PENDING", [{ type: "BANK_DEPOSIT" }])
+    ).toEqual({ label: "ご入金確認中", tone: "neutral" });
+    expect(accountOrderPaymentDisplay("VOIDED", [])).toEqual({
+      label: "無効",
+      tone: "alert",
+    });
+    expect(accountOrderPaymentDisplay(null, [])).toBeNull();
+    // 配達を試みたまま止まっているのは、お客様に動いてほしい状態
+    expect(
+      accountOrderShipmentDisplay({
+        fulfillmentStatus: "FULFILLED",
+        fulfillments: {
+          nodes: [{ latestShipmentStatus: "ATTEMPTED_DELIVERY" }],
+        },
+      })
+    ).toEqual({ label: "配達を試みました", tone: "alert" });
   });
 
   it("注文履歴から内部用の常時表示項目を外す", () => {

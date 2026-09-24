@@ -457,6 +457,48 @@ export function formatAccountFinancialStatus(value?: string | null) {
   return formatShopifyStatusLabel(value, ACCOUNT_FINANCIAL_STATUS_JA);
 }
 
+/**
+ * バッジの色分け。
+ *
+ * done は終わって手が離れたもの、alert は確認や対応が要るもの、
+ * neutral は進行中。Shopify のコードで判定するので、日本語を変えても
+ * 色は変わらない。
+ */
+export type AccountStatusTone = "done" | "alert" | "neutral";
+
+export type AccountStatusDisplay = { label: string; tone: AccountStatusTone };
+
+const ACCOUNT_DONE_STATUSES = new Set([
+  "DELIVERED",
+  "FULFILLED",
+  "PAID",
+  "PICKED_UP",
+]);
+
+const ACCOUNT_ALERT_STATUSES = new Set([
+  "ATTEMPTED_DELIVERY",
+  "DELAYED",
+  "EXPIRED",
+  "FAILURE",
+  "ON_HOLD",
+  "RESTOCKED",
+  "VOIDED",
+]);
+
+function accountStatusTone(code?: string | null): AccountStatusTone {
+  const key = code?.trim().toUpperCase();
+
+  if (!key) {
+    return "neutral";
+  }
+
+  if (ACCOUNT_DONE_STATUSES.has(key)) {
+    return "done";
+  }
+
+  return ACCOUNT_ALERT_STATUSES.has(key) ? "alert" : "neutral";
+}
+
 /** 銀行振込で入金確認前は「ご入金確認中」。それ以外の PENDING は「お支払い待ち」 */
 export function formatAccountOrderPaymentStatus(
   financialStatus?: string | null,
@@ -475,6 +517,18 @@ export function formatAccountOrderPaymentStatus(
   }
 
   return formatAccountFinancialStatus(financialStatus);
+}
+
+export function accountOrderPaymentDisplay(
+  financialStatus: string | null | undefined,
+  transactions: Array<{
+    type: string;
+    typeDetails?: { name?: string | null } | null;
+  }>
+): AccountStatusDisplay | null {
+  const label = formatAccountOrderPaymentStatus(financialStatus, transactions);
+
+  return label ? { label, tone: accountStatusTone(financialStatus) } : null;
 }
 
 export function formatAccountFulfillmentStatus(value?: string | null) {
@@ -502,19 +556,21 @@ export function accountOrderShipmentDisplay(order: {
   fulfillments: {
     nodes: Array<{ latestShipmentStatus?: string | null }>;
   };
-}) {
+}): AccountStatusDisplay | null {
   const shipmentStatuses = order.fulfillments.nodes.map((fulfillment) =>
     fulfillment.latestShipmentStatus?.trim().toUpperCase()
   );
   const sharedStatus = shipmentStatuses[0];
-  const isShared =
+  const usesShipmentStatus =
     Boolean(sharedStatus) &&
     shipmentStatuses.every((status) => status === sharedStatus);
 
-  return (
-    (isShared ? formatAccountShipmentStatus(sharedStatus) : null) ??
-    formatAccountFulfillmentStatus(order.fulfillmentStatus)
-  );
+  const code = usesShipmentStatus ? sharedStatus! : order.fulfillmentStatus;
+  const label = usesShipmentStatus
+    ? formatAccountShipmentStatus(code)
+    : formatAccountFulfillmentStatus(code);
+
+  return label ? { label, tone: accountStatusTone(code) } : null;
 }
 
 export type AccountOrderOptionalFields = {
