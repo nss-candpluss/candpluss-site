@@ -5,7 +5,10 @@ import {
   ACCOUNT_LOGIN_PATH,
   publicOriginFromRequest,
 } from "@/lib/commerce/account-login";
-import { accountAddressEditHref } from "@/lib/commerce/account-page";
+import {
+  accountAddressEditHref,
+  toShopifyJapanPhoneNumber,
+} from "@/lib/commerce/account-page";
 import {
   deleteCustomerAddress,
   saveCustomerAddress,
@@ -25,6 +28,7 @@ const addressSchema = z.object({
   city: z.string().trim().max(100),
   address1: z.string().trim().max(255),
   address2: z.string().trim().max(255).optional(),
+  phoneNumber: z.string().trim().max(20).optional(),
 });
 
 /** 一覧の「既定に設定」「削除」と、編集フォームの保存を 1 つの口で受ける */
@@ -76,12 +80,14 @@ export async function POST(request: Request) {
       city: formData.get("city"),
       address1: formData.get("address1"),
       address2: formData.get("address2") || undefined,
+      phoneNumber: formData.get("phoneNumber") || undefined,
     });
-    const { addressId: savedAddressId, ...address } = parsed;
+    const { addressId: savedAddressId, phoneNumber, ...address } = parsed;
 
     await saveCustomerAddress(session.accessToken, {
       addressId: savedAddressId,
-      address,
+      // 空で送られたら null。消したいときに消せるようにする
+      address: { ...address, phoneNumber: toShopifyJapanPhoneNumber(phoneNumber) },
       // 既定にするかはフォームのチェックで決める（1 件目は既定で入る）
       defaultAddress: formData.get("defaultAddress") === "on",
     });

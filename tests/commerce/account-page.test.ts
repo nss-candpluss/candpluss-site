@@ -38,7 +38,9 @@ import {
   formatAccountPostalCode,
   formatAccountPrefecture,
   formatAccountShipmentStatus,
+  formatJapanPhoneNumberInput,
   resolveAccountPageTabId,
+  toShopifyJapanPhoneNumber,
   shopifyCustomerProfileUrlFromAccountUrl,
   shouldHandleAccountShallowClick,
 } from "@/lib/commerce/account-page";
@@ -766,6 +768,25 @@ describe("住所の編集導線", () => {
     ).toBe("gid://a");
   });
 
+  it("住所の電話番号は入力しやすい国内表記と E.164 を行き来する", () => {
+    // Shopify は E.164 でしか受け取らないので、保存前に国番号を足す
+    expect(toShopifyJapanPhoneNumber("090-1234-5678")).toBe("+819012345678");
+    expect(toShopifyJapanPhoneNumber("09012345678")).toBe("+819012345678");
+    expect(toShopifyJapanPhoneNumber("092 504 7370")).toBe("+81925047370");
+    expect(toShopifyJapanPhoneNumber("０９０１２３４５６７８")).toBe(
+      "+819012345678"
+    );
+    // すでに国際表記なら国外の番号として触らない
+    expect(toShopifyJapanPhoneNumber("+16135551111")).toBe("+16135551111");
+    // 空欄は null。番号を消せるようにする
+    expect(toShopifyJapanPhoneNumber("  ")).toBeNull();
+    expect(toShopifyJapanPhoneNumber(undefined)).toBeNull();
+
+    expect(formatJapanPhoneNumberInput("+819012345678")).toBe("09012345678");
+    expect(formatJapanPhoneNumberInput("+16135551111")).toBe("+16135551111");
+    expect(formatJapanPhoneNumberInput(null)).toBe("");
+  });
+
   it("更新結果を日本語の 1 行に変える", () => {
     expect(accountPageNotice("?updated=address")?.tone).toBe("success");
     expect(accountPageNotice("?updated=address-deleted")?.message).toBe(
@@ -975,9 +996,12 @@ describe("会員ページの画面構成", () => {
     expect(source).toContain("isEmailMarketingSubscribed");
     expect(source).toContain("getShopifyCustomerProfileUrl");
     expect(source).toContain("accountMemberCopy.accountDetails.title");
-    // Shopify のプロフィールに欄が無く、API でも変えられないので出さない
-    expect(source).not.toContain('label="電話番号"');
+    // 会員情報の電話番号は Shopify のプロフィールに欄が無く、API でも変えられない
+    expect(source).not.toContain("profile.phoneNumber");
     expect(source).not.toContain("phoneChange");
+    // 住所の電話番号は Customer Account API で保存できるので、こちらは出す
+    expect(source).toContain('name="phoneNumber"');
+    expect(source).toContain("formatJapanPhoneNumberInput(address?.phoneNumber)");
     expect(source).toContain("accountMemberCopy.payments.title");
     // 保存カードを管理する画面は存在しないので、案内先も作らない
     expect(accountMemberCopy.payments.body).toContain("保管することはありません");

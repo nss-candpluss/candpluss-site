@@ -820,6 +820,41 @@ export function accountPageTabHref(tabId: AccountPageTabId, currentSearch = "") 
   return `?${params.toString()}`;
 }
 
+/** 全角を半角に寄せて、数字と先頭の + だけ残す */
+function normalizePhoneDigits(value?: string | null) {
+  return (value ?? "")
+    .replace(/[０-９＋]/g, (char) =>
+      String.fromCharCode(char.charCodeAt(0) - 0xfee0)
+    )
+    .replace(/[^\d+]/g, "");
+}
+
+/**
+ * Shopify は電話番号を E.164（+819012345678）でしか受け取らない。
+ * お客様は 090-1234-5678 のように書くので、保存前に国番号を足す。
+ * すでに + で始まっていれば国外の番号として、そのまま送る。
+ */
+export function toShopifyJapanPhoneNumber(value?: string | null) {
+  const digits = normalizePhoneDigits(value);
+
+  if (!digits) {
+    return null;
+  }
+
+  if (digits.startsWith("+")) {
+    return digits;
+  }
+
+  return digits.startsWith("0") ? `+81${digits.slice(1)}` : `+81${digits}`;
+}
+
+/** 入力欄に戻すときは、読み慣れた国内表記にする */
+export function formatJapanPhoneNumberInput(value?: string | null) {
+  const digits = normalizePhoneDigits(value);
+
+  return digits.startsWith("+81") ? `0${digits.slice(3)}` : digits;
+}
+
 /** 住所を新しく登録するときに `address` へ入れる値 */
 export const NEW_ACCOUNT_ADDRESS = "new";
 

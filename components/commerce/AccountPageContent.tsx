@@ -41,6 +41,7 @@ import {
   formatAccountAddressLine,
   formatAccountAddressName,
   formatAccountCancelReason,
+  formatJapanPhoneNumberInput,
   formatAccountCarrierName,
   formatAccountDate,
   formatAccountMoney,
@@ -414,6 +415,25 @@ function AddressForm({
             <FieldNote>{accountFieldNotes.address.address2}</FieldNote>
           </div>
         </div>
+      </ContactField>
+
+      <ContactField
+        label="電話番号"
+        requirement="optional"
+        note={accountFieldNotes.address.phone}
+        fixedTitleSize
+        groupedContentGap
+      >
+        <SupportFloatingInput
+          id={fieldId("phone")}
+          name="phoneNumber"
+          type="tel"
+          label="電話番号"
+          autoComplete="tel"
+          inputMode="tel"
+          defaultValue={formatJapanPhoneNumberInput(address?.phoneNumber)}
+          maxLength={20}
+        />
       </ContactField>
 
       <ContactField

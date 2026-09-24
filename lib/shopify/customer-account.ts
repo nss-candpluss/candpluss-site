@@ -648,7 +648,8 @@ export async function saveCustomerAddress(
     defaultAddress = false,
   }: {
     addressId?: string;
-    address: Record<string, string>;
+    /** null は「この項目を空にする」の意味で送る */
+    address: Record<string, string | null | undefined>;
     /** 既定にするかは呼び出し側で決める。既定の住所を勝手に移さない */
     defaultAddress?: boolean;
   }
