@@ -970,7 +970,9 @@ describe("会員ページの画面構成", () => {
     expect(source).toContain("getShopifyCustomerProfileUrl");
     expect(source).toContain("accountMemberCopy.accountDetails.title");
     expect(source).toContain("accountMemberCopy.payments.title");
-    expect(source).toContain("accountMemberCopy.payments.link");
+    // 保存カードを管理する画面は存在しないので、案内先も作らない
+    expect(accountMemberCopy.payments.body).toContain("保管することはありません");
+    expect(source).not.toContain("accountMemberCopy.payments.link");
     expect(source).not.toContain("このページで変更できない情報は");
     expect(source).not.toContain("label=\"アバター画像 URL\"");
   });

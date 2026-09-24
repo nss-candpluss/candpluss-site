@@ -1194,17 +1194,8 @@ function ProfilePanel({
 
       <MemberSection title={accountMemberCopy.payments.title}>
         <p className={readOnlyNoteClassName}>
-          {shopifyProfileUrl
-            ? accountMemberCopy.payments.body
-            : accountMemberCopy.payments.unavailable}
+          {accountMemberCopy.payments.body}
         </p>
-        {shopifyProfileUrl ? (
-          <p>
-            <ShopifyChangeLink href={shopifyProfileUrl}>
-              {accountMemberCopy.payments.link}
-            </ShopifyChangeLink>
-          </p>
-        ) : null}
       </MemberSection>
 
       <MemberSection title={accountMemberCopy.privacy.title}>
