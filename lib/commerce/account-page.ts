@@ -5,9 +5,9 @@ import { prefectureFromJapanZoneCode } from "@/lib/commerce/japan-zone-code";
  * 変更したときだけ更新ボタンを押せるようにする。
  */
 export const ACCOUNT_PAGE_TABS = [
-  { id: "orders", label: "注文履歴" },
-  { id: "profile", label: "プロフィール" },
-  { id: "addresses", label: "住所" },
+  { id: "orders", label: "ご注文履歴" },
+  // プロフィールと住所は、どちらも会員自身の登録内容なので 1 つにまとめる
+  { id: "account", label: "アカウント設定" },
 ] as const;
 
 export type AccountPageTabId = (typeof ACCOUNT_PAGE_TABS)[number]["id"];
@@ -794,12 +794,8 @@ export function accountPageTabIdFromSearch(search: string) {
   // 更新後のリダイレクトで tab が付いていないときの受け皿
   const key = params.get("updated") ?? params.get("error");
 
-  if (key === "profile") {
-    return "profile" satisfies AccountPageTabId;
-  }
-
-  if (key?.startsWith("address")) {
-    return "addresses" satisfies AccountPageTabId;
+  if (key === "profile" || key?.startsWith("address")) {
+    return "account" satisfies AccountPageTabId;
   }
 
   return undefined;
@@ -827,9 +823,9 @@ export function accountPageTabHref(tabId: AccountPageTabId, currentSearch = "") 
 /** 住所を新しく登録するときに `address` へ入れる値 */
 export const NEW_ACCOUNT_ADDRESS = "new";
 
-/** 住所タブの末尾に、空の追加フォームを出すリンク */
+/** 住所一覧の末尾に、空の追加フォームを出すリンク */
 export function accountAddressAddHref() {
-  return `?tab=addresses&address=${NEW_ACCOUNT_ADDRESS}`;
+  return `?tab=account&address=${NEW_ACCOUNT_ADDRESS}`;
 }
 
 /**
@@ -840,7 +836,7 @@ export function accountAddressEditHref(addressId?: string) {
     return accountAddressAddHref();
   }
 
-  return `?tab=addresses`;
+  return `?tab=account`;
 }
 
 export function accountAddressIdFromSearch(search: string) {
@@ -854,7 +850,7 @@ export function accountAddressIdFromSearch(search: string) {
  */
 export function accountAddressDeleteHref(addressId: string) {
   const params = new URLSearchParams({
-    tab: "addresses",
+    tab: "account",
     confirmDelete: addressId,
   });
   return `?${params.toString()}`;

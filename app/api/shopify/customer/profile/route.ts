@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   }
 
   const redirectUrl = new URL(
-    `${ACCOUNT_BASE_PATH}?tab=profile`,
+    `${ACCOUNT_BASE_PATH}?tab=account`,
     origin
   );
 

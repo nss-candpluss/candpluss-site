@@ -91,7 +91,7 @@ export function AccountAddressHeader({
             削除する
           </AddressIntentButton>
           <AccountShallowLink
-            href={accountPageTabHref("addresses", search)}
+            href={accountPageTabHref("account", search)}
             className={addressActionClassName}
           >
             やめる

@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     return Response.redirect(new URL(ACCOUNT_LOGIN_PATH, origin), 303);
   }
 
-  const listUrl = new URL(`${ACCOUNT_BASE_PATH}?tab=addresses`, origin);
+  const listUrl = new URL(`${ACCOUNT_BASE_PATH}?tab=account`, origin);
   const formData = await request.formData();
   const intent = intentSchema.parse(formData.get("intent"));
   const addressId = formData.get("addressId");

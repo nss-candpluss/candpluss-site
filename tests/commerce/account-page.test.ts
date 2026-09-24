@@ -682,50 +682,51 @@ describe("注文履歴の商品行", () => {
 
 describe("会員ページのタブ", () => {
   it("閲覧と編集を分けず、既存セクションだけをタブにする", () => {
+    // プロフィールと住所はどちらも会員自身の登録内容なので 1 タブにまとめる
     expect(ACCOUNT_PAGE_TABS.map((tab) => tab.label)).toEqual([
-      "注文履歴",
-      "プロフィール",
-      "住所",
+      "ご注文履歴",
+      "アカウント設定",
     ]);
     expect(ACCOUNT_PAGE_TABS.map((tab) => tab.id)).not.toContain("update-profile");
     expect(ACCOUNT_PAGE_TABS.map((tab) => tab.id)).not.toContain("update-address");
   });
 
   it("更新リダイレクトは同じタブへ戻す", () => {
+    // プロフィールも住所も、戻り先はアカウント設定の 1 タブ
     expect(resolveAccountPageTabId({ search: "?updated=profile" })).toBe(
-      "profile"
+      "account"
     );
     expect(resolveAccountPageTabId({ search: "?error=address" })).toBe(
-      "addresses"
+      "account"
     );
   });
 
   it("tab クエリで開き、なければ注文履歴", () => {
-    expect(resolveAccountPageTabId({ search: "?tab=profile" })).toBe("profile");
+    expect(resolveAccountPageTabId({ search: "?tab=account" })).toBe("account");
     expect(resolveAccountPageTabId({})).toBe("orders");
   });
 
   it("タブリンクは ?tab= を付け、更新クエリと編集中の住所は外す", () => {
     expect(accountPageTabHref("orders")).toBe("?tab=orders");
-    expect(accountPageTabHref("profile", "updated=profile&tab=profile")).toBe(
-      "?tab=profile"
+    expect(accountPageTabHref("account", "updated=profile&tab=account")).toBe(
+      "?tab=account"
     );
     expect(
-      accountPageTabHref("addresses", "tab=addresses&address=gid&confirmDelete=gid")
-    ).toBe("?tab=addresses");
+      accountPageTabHref("account", "tab=account&address=gid&confirmDelete=gid")
+    ).toBe("?tab=account");
   });
 
   it("tab があれば更新クエリより優先する", () => {
     expect(
-      resolveAccountPageTabId({ search: "?tab=addresses&updated=address" })
-    ).toBe("addresses");
+      resolveAccountPageTabId({ search: "?tab=account&updated=address" })
+    ).toBe("account");
     expect(resolveAccountPageTabId({ search: "?updated=address-deleted" })).toBe(
-      "addresses"
+      "account"
     );
   });
 
   it("ハッシュがあればそのタブを開き、なければ注文履歴", () => {
-    expect(resolveAccountPageTabId({ hash: "#profile" })).toBe("profile");
+    expect(resolveAccountPageTabId({ hash: "#account" })).toBe("account");
     expect(resolveAccountPageTabId({})).toBe("orders");
   });
 });
@@ -752,16 +753,16 @@ describe("住所の都道府県コード", () => {
 });
 
 describe("住所の編集導線", () => {
-  it("保存失敗は住所タブへ戻し、新規だけ追加フォームを開く", () => {
+  it("保存失敗はアカウント設定へ戻し、新規だけ追加フォームを開く", () => {
     expect(accountAddressEditHref("gid://shopify/CustomerAddress/1")).toBe(
-      "?tab=addresses"
+      "?tab=account"
     );
-    expect(accountAddressEditHref()).toBe("?tab=addresses&address=new");
+    expect(accountAddressEditHref()).toBe("?tab=account&address=new");
     expect(accountAddressDeleteHref("gid://shopify/CustomerAddress/1")).toBe(
-      "?tab=addresses&confirmDelete=gid%3A%2F%2Fshopify%2FCustomerAddress%2F1"
+      "?tab=account&confirmDelete=gid%3A%2F%2Fshopify%2FCustomerAddress%2F1"
     );
     expect(
-      accountAddressIdFromSearch("tab=addresses&address=gid%3A%2F%2Fa")
+      accountAddressIdFromSearch("tab=account&address=gid%3A%2F%2Fa")
     ).toBe("gid://a");
   });
 
@@ -845,8 +846,11 @@ describe("会員ページの画面構成", () => {
     expect(tabsSource).toContain("justify-center");
     expect(tabsSource).toContain("hidden={tab.id !== activeTabId}");
     expect(contentSource).toContain("<OrdersPanel");
-    expect(contentSource).toContain("<ProfilePanel");
-    expect(contentSource).toContain("<AddressesPanel");
+    expect(contentSource).toContain("<AccountSettingsPanel");
+    // プロフィールの内容の下に住所を置く
+    expect(contentSource.indexOf('<MemberSection title="住所">')).toBeGreaterThan(
+      contentSource.indexOf("accountMemberCopy.privacy.link")
+    );
     expect(contentSource).not.toContain("activeTabId");
     expect(testPageSource).not.toContain("searchParams");
     expect(publicPageSource).not.toContain("searchParams");

@@ -1146,10 +1146,15 @@ function SectionBody<T>({
   return <>{render(section.data)}</>;
 }
 
-function ProfilePanel({
+/** プロフィールの内容を並べ、その下に住所をぶら下げる */
+function AccountSettingsPanel({
+  addresses,
+  defaultAddressId,
   profile,
   shopifyProfileUrl,
 }: {
+  addresses: CustomerAddressDetail[];
+  defaultAddressId?: string;
   profile: CustomerAccount;
   shopifyProfileUrl: string | null;
 }) {
@@ -1209,42 +1214,32 @@ function ProfilePanel({
           </Link>
         </p>
       </MemberSection>
-    </div>
-  );
-}
 
-function AddressesPanel({
-  addresses,
-  defaultAddressId,
-}: {
-  addresses: CustomerAddressDetail[];
-  defaultAddressId?: string;
-}) {
-  return (
-    <div className="flex flex-col gap-[calc(62px*var(--gap-scale-y))]">
-      {addresses.map((address, index) => (
-        <div key={address.id}>
-          <AccountAddressHeader
-            addressId={address.id}
-            title={`住所 ${index + 1}${
-              address.id === defaultAddressId ? "（既定）" : ""
-            }`}
-            isDefault={address.id === defaultAddressId}
-          />
-
-          <div className="mt-[calc(24px*var(--gap-scale-y))]">
-            <AddressForm
-              address={address}
-              formKey={String(index + 1)}
+      <MemberSection title="住所">
+        {addresses.map((address, index) => (
+          <div key={address.id}>
+            <AccountAddressHeader
+              addressId={address.id}
+              title={`住所 ${index + 1}${
+                address.id === defaultAddressId ? "（既定）" : ""
+              }`}
               isDefault={address.id === defaultAddressId}
             />
-          </div>
-        </div>
-      ))}
 
-      <AccountAddressAdd>
-        <AddressForm formKey="new" isDefault={addresses.length === 0} />
-      </AccountAddressAdd>
+            <div className="mt-[calc(24px*var(--gap-scale-y))]">
+              <AddressForm
+                address={address}
+                formKey={String(index + 1)}
+                isDefault={address.id === defaultAddressId}
+              />
+            </div>
+          </div>
+        ))}
+
+        <AccountAddressAdd>
+          <AddressForm formKey="new" isDefault={addresses.length === 0} />
+        </AccountAddressAdd>
+      </MemberSection>
     </div>
   );
 }
@@ -1361,16 +1356,12 @@ export async function AccountPageContent() {
           <AccountTabs
             panels={{
               orders: <OrdersPanel orders={snapshot.orders} />,
-              profile: (
-                <ProfilePanel
-                  profile={snapshot.profile}
-                  shopifyProfileUrl={shopifyProfileUrl}
-                />
-              ),
-              addresses: (
-                <AddressesPanel
+              account: (
+                <AccountSettingsPanel
                   addresses={addresses}
                   defaultAddressId={defaultAddressId}
+                  profile={snapshot.profile}
+                  shopifyProfileUrl={shopifyProfileUrl}
                 />
               ),
             }}
