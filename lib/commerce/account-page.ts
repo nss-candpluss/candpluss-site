@@ -379,6 +379,34 @@ const ACCOUNT_FULFILLMENT_UNIT_STATUS_JA: Record<string, string> = {
   SUCCESS: "発送完了",
 };
 
+/**
+ * Shopify が返す配送業者名。
+ *
+ * 日本の運送会社でも「Sagawa (JA)」のように英語表記で来るものがあるので、
+ * 日本語に置き換える。西濃運輸などもとから日本語で来るものや、海外の
+ * 運送会社はそのまま出す。
+ * https://shopify.dev/docs/api/admin-rest/latest/resources/fulfillment
+ */
+const ACCOUNT_CARRIER_NAME_JA: Record<string, string> = {
+  "japan post (en)": "日本郵便",
+  "japan post (ja)": "日本郵便",
+  other: "その他",
+  "sagawa (en)": "佐川急便",
+  "sagawa (ja)": "佐川急便",
+  "yamato (en)": "ヤマト運輸",
+  "yamato (ja)": "ヤマト運輸",
+};
+
+export function formatAccountCarrierName(value?: string | null) {
+  const name = value?.trim();
+
+  if (!name) {
+    return null;
+  }
+
+  return ACCOUNT_CARRIER_NAME_JA[name.toLowerCase()] ?? name;
+}
+
 function hasPositiveAmount(amount?: string | null) {
   return Number(amount ?? 0) > 0;
 }

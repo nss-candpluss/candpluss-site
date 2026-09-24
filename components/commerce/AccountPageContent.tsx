@@ -34,6 +34,7 @@ import {
   accountOrderShipmentDisplay,
   formatAccountAddressLine,
   formatAccountAddressName,
+  formatAccountCarrierName,
   formatAccountDate,
   formatAccountMoney,
   formatAccountMoneyAmount,
@@ -545,38 +546,32 @@ function OrderLineItems({
               <p className={`font-body-ja font-semibold ${uiText(16)}`}>
                 {title}
               </p>
-              {/* カラーと数量はひとまとまりとして、前後を広めに空ける */}
-              <div className="mt-4">
-                {variantTitle ? (
-                  <p
-                    className={`font-ui-en text-[var(--color-muted)] ${uiText(14)}`}
-                  >
-                    {variantTitle}
-                  </p>
-                ) : null}
+              {variantTitle ? (
                 <p
-                  className={`font-body-ja ${uiText(14)} ${
-                    variantTitle ? "mt-2" : ""
-                  }`}
+                  className={`mt-2 font-ui-en text-[var(--color-muted)] ${uiText(14)}`}
                 >
-                  数量 {quantity}
-                </p>
-              </div>
-              {discount ? (
-                <p
-                  className={`mt-1 font-body-ja text-[var(--color-muted)] ${uiText(12)}`}
-                >
-                  割引 {discount}
+                  {variantTitle}
                 </p>
               ) : null}
-              <p className="mt-4 inline-flex items-baseline gap-x-[calc(4px*var(--gap-scale-x))]">
-                <span className={`font-ui-en font-semibold ${uiText(14)}`}>
-                  {price ?? NOT_REGISTERED}
-                </span>
-                {price ? (
-                  <span className={`font-body-ja ${uiText(11)}`}>税込</span>
+              {/* 商品名とカラーの組から、数量と金額の組を離す */}
+              <div className="mt-4">
+                <p className={`font-body-ja ${uiText(14)}`}>数量 {quantity}</p>
+                {discount ? (
+                  <p
+                    className={`mt-1 font-body-ja text-[var(--color-muted)] ${uiText(12)}`}
+                  >
+                    割引 {discount}
+                  </p>
                 ) : null}
-              </p>
+                <p className="mt-2 inline-flex items-baseline gap-x-[calc(4px*var(--gap-scale-x))]">
+                  <span className={`font-ui-en font-semibold ${uiText(14)}`}>
+                    {price ?? NOT_REGISTERED}
+                  </span>
+                  {price ? (
+                    <span className={`font-body-ja ${uiText(11)}`}>税込</span>
+                  ) : null}
+                </p>
+              </div>
             </div>
           </li>
         );
@@ -798,7 +793,9 @@ function OrderFulfillments({
       {fulfillments.map((fulfillment, index) => (
         <li key={fulfillment.id}>
           {isSplit ? (
-            <h5 className={`font-body-ja font-semibold ${uiText(14)}`}>
+            <h5
+              className={`font-body-ja font-semibold text-[var(--color-muted)] ${uiText(14)}`}
+            >
               {accountOrderParcelLabel(index, fulfillments.length)}
             </h5>
           ) : null}
@@ -823,21 +820,25 @@ function OrderFulfillments({
               label="発送日時"
               value={formatDateTime(fulfillment.createdAt)}
             />
-            {fulfillment.trackingInformation.map((tracking) => (
-              <Fragment key={`${tracking.number}-${tracking.url}`}>
-                {tracking.company ? (
-                  <SidebarField label="配送業者" value={tracking.company} />
-                ) : null}
-                {tracking.number ? (
-                  <SidebarField label="追跡番号" value={tracking.number} />
-                ) : null}
-                <SidebarLinkField
-                  label="追跡ページ"
-                  url={tracking.url}
-                  linkText="配送状況を追跡する"
-                />
-              </Fragment>
-            ))}
+            {fulfillment.trackingInformation.map((tracking) => {
+              const carrier = formatAccountCarrierName(tracking.company);
+
+              return (
+                <Fragment key={`${tracking.number}-${tracking.url}`}>
+                  {carrier ? (
+                    <SidebarField label="配送業者" value={carrier} />
+                  ) : null}
+                  {tracking.number ? (
+                    <SidebarField label="追跡番号" value={tracking.number} />
+                  ) : null}
+                  <SidebarLinkField
+                    label="追跡ページ"
+                    url={tracking.url}
+                    linkText="配送状況を追跡する"
+                  />
+                </Fragment>
+              );
+            })}
           </SidebarFieldList>
 
           {fulfillment.events.nodes.length ? (
@@ -864,11 +865,22 @@ function OrderFulfillments({
   );
 }
 
+/** 個口の見出し。何の一覧かは並んでいる商品で分かるので控えめに置く */
+function ParcelHeading({ children }: { children: string }) {
+  return (
+    <h4
+      className={`font-body-ja font-semibold text-[var(--color-muted)] ${uiText(16)}`}
+    >
+      {children}
+    </h4>
+  );
+}
+
 /**
  * 注文カード左側の購入商品。
  *
  * 複数の個口に分かれている注文は、個口ごとに見出しを付けて分ける。
- * 個口の見出しがあれば何の一覧かは分かるので「ご購入商品」は出さない。
+ * 分かれていない注文は商品を並べるだけで、見出しは付けない。
  */
 function OrderPurchasedItems({ order }: { order: CustomerOrderDetail }) {
   const { parcels, pending } = accountOrderParcels(
@@ -878,16 +890,11 @@ function OrderPurchasedItems({ order }: { order: CustomerOrderDetail }) {
 
   if (parcels.length < 2) {
     return (
-      <div>
-        <h4 className={`font-body-ja font-semibold ${uiText(16)}`}>
-          ご購入商品
-        </h4>
-        <OrderLineItems
-          entries={accountOrderLinesByAmount(order.lineItems.nodes).map(
-            (line) => ({ line, quantity: line.quantity })
-          )}
-        />
-      </div>
+      <OrderLineItems
+        entries={accountOrderLinesByAmount(order.lineItems.nodes).map(
+          (line) => ({ line, quantity: line.quantity })
+        )}
+      />
     );
   }
 
@@ -895,17 +902,15 @@ function OrderPurchasedItems({ order }: { order: CustomerOrderDetail }) {
     <div className="flex flex-col gap-[calc(48px*var(--gap-scale-y))]">
       {parcels.map((parcel, index) => (
         <div key={parcel.id}>
-          <h4 className={`font-body-ja font-semibold ${uiText(16)}`}>
+          <ParcelHeading>
             {accountOrderParcelLabel(index, parcels.length)}
-          </h4>
+          </ParcelHeading>
           <OrderLineItems entries={parcel.lines} />
         </div>
       ))}
       {pending.length ? (
         <div>
-          <h4 className={`font-body-ja font-semibold ${uiText(16)}`}>
-            発送準備中
-          </h4>
+          <ParcelHeading>発送準備中</ParcelHeading>
           <OrderLineItems entries={pending} />
         </div>
       ) : null}
@@ -944,7 +949,7 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
       <div className="mt-6 grid gap-x-[clamp(24px,calc(48px*var(--gap-scale-x)),48px)] gap-y-[calc(32px*var(--gap-scale-y))] min-[1025px]:grid-cols-[minmax(0,1fr)_minmax(0,380px)]">
         <OrderPurchasedItems order={order} />
 
-        {/* 1 列に畳んだときは、ご購入商品との境目にも線を引く */}
+        {/* 1 列に畳んだときは、購入商品との境目にも線を引く */}
         <div className="flex flex-col border-t border-[var(--color-divider)] pt-[clamp(20px,calc(32px*var(--gap-scale-y)),32px)] min-[1025px]:border-t-0 min-[1025px]:pt-0">
           <OrderAmountSummary order={order} showRefunded={optional.showRefunded} />
 

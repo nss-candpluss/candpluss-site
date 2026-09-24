@@ -21,6 +21,7 @@ import {
   accountOrderPaymentMethods,
   accountOrderShipmentDisplay,
   formatAccountCardBrand,
+  formatAccountCarrierName,
   formatAccountAddressLine,
   formatAccountAddressName,
   formatAccountDate,
@@ -233,13 +234,24 @@ describe("注文履歴の商品行", () => {
     expect(accountOrderParcelLabel(2, 3)).toBe("全3個口の3個口目");
   });
 
+  it("配送業者は日本語にし、知らない会社はそのまま出す", () => {
+    expect(formatAccountCarrierName("Sagawa (JA)")).toBe("佐川急便");
+    expect(formatAccountCarrierName("Yamato (EN)")).toBe("ヤマト運輸");
+    expect(formatAccountCarrierName("Japan Post (JA)")).toBe("日本郵便");
+    // もとから日本語で来る運送会社と、海外の運送会社は触らない
+    expect(formatAccountCarrierName("西濃運輸")).toBe("西濃運輸");
+    expect(formatAccountCarrierName("DHL Express")).toBe("DHL Express");
+    expect(formatAccountCarrierName("  ")).toBeNull();
+  });
+
   it("注文履歴はサムネイルと商品名で出す", () => {
     const source = readSource("components/commerce/AccountPageContent.tsx");
 
     expect(source).toContain("SiteImage");
     expect(source).toContain("accountOrderLineTitle");
     expect(source).toContain("accountOrderLinesByAmount(order.lineItems.nodes)");
-    expect(source).toContain("購入商品");
+    // 何の一覧かは商品を見れば分かるので、個口で分かれないときは見出しなし
+    expect(source).not.toContain("ご購入商品");
     expect(source).not.toContain('label="画像 URL"');
     expect(source).not.toContain("LINE ITEMS");
   });
