@@ -45,18 +45,16 @@ function AddressIntentButton({
 }
 
 /**
- * 住所 1 件の見出しと操作。
+ * 住所 1 件に対する操作。入力欄を読んだあとに押すものなので、フォームの下に置く。
  *
  * 削除の確認は JavaScript のダイアログではなく URL の `confirmDelete` で表す。
  * 開け閉てするだけなのでサーバーへは取りに行かない。
  */
-export function AccountAddressHeader({
+export function AccountAddressActions({
   addressId,
-  title,
   isDefault,
 }: {
   addressId: string;
-  title: string;
   isDefault: boolean;
 }) {
   const searchParams = useSearchParams();
@@ -64,44 +62,41 @@ export function AccountAddressHeader({
   const isConfirmingDelete =
     accountAddressDeleteIdFromSearch(search) === addressId;
 
-  return (
-    <>
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-        <p className="font-body-ja text-sm font-bold">{title}</p>
-        {isDefault ? null : (
-          <AddressIntentButton addressId={addressId} intent="default">
-            既定にする
-          </AddressIntentButton>
-        )}
-        {isConfirmingDelete ? null : (
-          <AccountShallowLink
-            href={accountAddressDeleteHref(addressId)}
-            className={accountSecondaryButtonClassName}
-          >
-            削除する
-          </AccountShallowLink>
-        )}
+  if (isConfirmingDelete) {
+    return (
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border border-[#ddd] p-4">
+        <p className="font-body-ja text-sm">この住所を削除しますか？</p>
+        <AddressIntentButton
+          addressId={addressId}
+          intent="delete"
+          className={accountPrimaryButtonClassName}
+        >
+          削除する
+        </AddressIntentButton>
+        <AccountShallowLink
+          href={accountPageTabHref("account", search)}
+          className={accountSecondaryButtonClassName}
+        >
+          やめる
+        </AccountShallowLink>
       </div>
+    );
+  }
 
-      {isConfirmingDelete ? (
-        <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3 border border-[#ddd] p-4">
-          <p className="font-body-ja text-sm">この住所を削除しますか？</p>
-          <AddressIntentButton
-            addressId={addressId}
-            intent="delete"
-            className={accountPrimaryButtonClassName}
-          >
-            削除する
-          </AddressIntentButton>
-          <AccountShallowLink
-            href={accountPageTabHref("account", search)}
-            className={accountSecondaryButtonClassName}
-          >
-            やめる
-          </AccountShallowLink>
-        </div>
-      ) : null}
-    </>
+  return (
+    <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+      {isDefault ? null : (
+        <AddressIntentButton addressId={addressId} intent="default">
+          既定にする
+        </AddressIntentButton>
+      )}
+      <AccountShallowLink
+        href={accountAddressDeleteHref(addressId)}
+        className={accountSecondaryButtonClassName}
+      >
+        削除する
+      </AccountShallowLink>
+    </div>
   );
 }
 

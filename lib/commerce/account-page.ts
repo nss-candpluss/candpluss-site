@@ -813,6 +813,7 @@ export function accountPageTabHref(tabId: AccountPageTabId, currentSearch = "") 
   const params = new URLSearchParams(query);
   params.delete("updated");
   params.delete("saved");
+  params.delete("savedAt");
   params.delete("error");
   // 編集中の住所はタブを移ったら持ち越さない
   params.delete("address");
@@ -831,6 +832,18 @@ export const ACCOUNT_SAVED_NOTICE = "変更が保存されました。";
 export function accountSavedNoticeKey(search = "") {
   const query = search.startsWith("?") ? search.slice(1) : search;
   return new URLSearchParams(query).get("saved") ?? undefined;
+}
+
+/**
+ * 保存後の戻り先に、どのフォームだったかと保存した時刻を付ける。
+ *
+ * 時刻を入れて毎回違う URL にする。2 回続けて同じ項目を保存すると
+ * 戻り先が前回とまったく同じ URL になり、ブラウザが前の描画を使い回して
+ * 保存前の値が残ることがある。
+ */
+export function applyAccountSavedParams(url: URL, noticeKey: string) {
+  url.searchParams.set("saved", noticeKey);
+  url.searchParams.set("savedAt", String(Date.now()));
 }
 
 /** 住所フォームは件数分あるので、どの住所を保存したかで見分ける */

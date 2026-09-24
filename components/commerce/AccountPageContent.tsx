@@ -3,8 +3,8 @@ import { redirect } from "next/navigation";
 import { Fragment } from "react";
 
 import {
+  AccountAddressActions,
   AccountAddressAdd,
-  AccountAddressHeader,
 } from "@/components/commerce/AccountAddressControls";
 import { AccountNotice } from "@/components/commerce/AccountNotice";
 import { AccountTabs } from "@/components/commerce/AccountTabs";
@@ -119,16 +119,25 @@ function LogoutButton() {
 
 function MemberSection({
   title,
+  wideGap = false,
   children,
 }: {
   title: string;
+  /** 住所のように 1 件ずつが大きいものは、間をはっきり空ける */
+  wideGap?: boolean;
   children: React.ReactNode;
 }) {
   return (
     // 区画の間に線を引く。線の上下に同じ余白を取り、どちらかに寄らないようにする
     <section className="border-t border-[var(--color-divider)] py-[clamp(42px,calc(72px*var(--gap-scale-y)),72px)] first:border-t-0 first:pt-0 last:pb-0">
       <h3 className={readOnlyHeadingClassName}>{title}</h3>
-      <div className="mt-[calc(24px*var(--gap-scale-y))] flex flex-col gap-[calc(24px*var(--gap-scale-y))]">
+      <div
+        className={`mt-[clamp(28px,calc(48px*var(--gap-scale-y)),48px)] flex flex-col ${
+          wideGap
+            ? "gap-[clamp(48px,calc(80px*var(--gap-scale-y)),80px)]"
+            : "gap-[calc(24px*var(--gap-scale-y))]"
+        }`}
+      >
         {children}
       </div>
     </section>
@@ -137,12 +146,20 @@ function MemberSection({
 
 /*
   「お名前：入力欄」の形で横に並べる。
-  ラベルの列幅は「メール配信：」に合わせて固定し、
+  ラベルの列幅はいちばん長い「メールアドレス：」（全角 8 文字）に合わせて固定し、
   どの区画でも入力欄の左端が同じ位置から始まるようにする。
 */
-const accountFieldLabelClassName = `font-body-ja font-normal text-[var(--foreground)] ${uiText(16)}`;
+const accountFieldLabelClassName = `font-body-ja font-normal whitespace-nowrap text-[var(--foreground)] ${uiText(16)}`;
 const accountFieldRowClassName =
-  "grid gap-y-2 min-[640px]:grid-cols-[calc(100px*var(--text-scale))_minmax(0,1fr)] min-[640px]:gap-x-[calc(8px*var(--gap-scale-x))] min-[640px]:gap-y-0";
+  "grid gap-y-2 min-[640px]:grid-cols-[calc(128px*var(--text-scale))_minmax(0,1fr)] min-[640px]:gap-x-[calc(8px*var(--gap-scale-x))] min-[640px]:gap-y-0";
+
+/** 読むだけの値も、入力欄の中の文字と同じ大きさ・太さで出す */
+const accountFieldValueClassName =
+  "font-body-ja text-[16px] leading-[1.3] font-semibold text-[var(--foreground)]";
+
+/** チェックボックスの説明は大きさだけ入力欄に合わせ、太さは上げない */
+const accountFieldChoiceClassName =
+  "font-body-ja text-[16px] leading-[1.3] font-normal text-[var(--foreground)]";
 
 function AccountField({
   label,
@@ -262,7 +279,7 @@ function EmailMarketingForm({ profile }: { profile: CustomerAccount }) {
             className="peer sr-only"
           />
           <span aria-hidden="true" className={contactCheckboxBoxClassName} />
-          <span className={`font-body-ja text-[var(--foreground)] ${uiText(14)}`}>
+          <span className={accountFieldChoiceClassName}>
             メールマガジンを受け取る
           </span>
         </label>
@@ -421,7 +438,7 @@ function AddressForm({
             className="peer sr-only"
           />
           <span aria-hidden="true" className={contactCheckboxBoxClassName} />
-          <span className={`font-body-ja text-[var(--foreground)] ${uiText(14)}`}>
+          <span className={accountFieldChoiceClassName}>
             この住所を既定にする
           </span>
         </label>
@@ -1155,18 +1172,18 @@ function AccountSettingsPanel({
         <ProfileNameForm profile={profile} />
 
         <AccountField label="メールアドレス">
-          <p className={`font-body-ja ${bodyText(15)}`}>
-            {formatText(profile.emailAddress?.emailAddress)}
-          </p>
+          {/* 変更は Shopify の会員画面でしかできないので、値のすぐ横から飛ばす */}
+          <div className="flex flex-wrap items-center gap-x-[calc(24px*var(--gap-scale-x))] gap-y-2">
+            <p className={accountFieldValueClassName}>
+              {formatText(profile.emailAddress?.emailAddress)}
+            </p>
+            {shopifyProfileUrl ? (
+              <ShopifyChangeLink href={shopifyProfileUrl}>
+                {accountMemberCopy.accountDetails.emailChange}
+              </ShopifyChangeLink>
+            ) : null}
+          </div>
         </AccountField>
-
-        {shopifyProfileUrl ? (
-          <p className={readOnlyNoteClassName}>
-            <ShopifyChangeLink href={shopifyProfileUrl}>
-              {accountMemberCopy.accountDetails.emailChange}
-            </ShopifyChangeLink>
-          </p>
-        ) : null}
 
         <p className={readOnlyNoteClassName}>
           {accountMemberCopy.accountDetails.login}
@@ -1177,24 +1194,28 @@ function AccountSettingsPanel({
         <EmailMarketingForm profile={profile} />
       </MemberSection>
 
-      <MemberSection title="配送先住所">
+      <MemberSection title="配送先住所" wideGap>
         {addresses.map((address, index) => (
-          <div key={address.id}>
-            <AccountAddressHeader
-              addressId={address.id}
-              title={`住所 ${index + 1}${
+          <div
+            key={address.id}
+            className="flex flex-col gap-[clamp(24px,calc(40px*var(--gap-scale-y)),40px)]"
+          >
+            <p className="font-body-ja text-sm font-bold">
+              {`住所 ${index + 1}${
                 address.id === defaultAddressId ? "（既定）" : ""
               }`}
+            </p>
+
+            <AddressForm
+              address={address}
+              formKey={String(index + 1)}
               isDefault={address.id === defaultAddressId}
             />
 
-            <div className="mt-[calc(24px*var(--gap-scale-y))]">
-              <AddressForm
-                address={address}
-                formKey={String(index + 1)}
-                isDefault={address.id === defaultAddressId}
-              />
-            </div>
+            <AccountAddressActions
+              addressId={address.id}
+              isDefault={address.id === defaultAddressId}
+            />
           </div>
         ))}
 

@@ -5,6 +5,7 @@ import {
   ACCOUNT_LOGIN_PATH,
   publicOriginFromRequest,
 } from "@/lib/commerce/account-login";
+import { applyAccountSavedParams } from "@/lib/commerce/account-page";
 import {
   fetchCustomerAccount,
   isEmailMarketingSubscribed,
@@ -54,8 +55,8 @@ export async function POST(request: Request) {
 
     // 押したフォームのその場に結果を出すので、どのフォームだったかを返す
     const notice = formData.get("notice");
-    redirectUrl.searchParams.set(
-      "saved",
+    applyAccountSavedParams(
+      redirectUrl,
       typeof notice === "string" && notice ? notice : "profile"
     );
     return Response.redirect(redirectUrl, 303);

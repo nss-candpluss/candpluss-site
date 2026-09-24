@@ -4,7 +4,7 @@
 export const accountMemberCopy = {
   accountDetails: {
     title: "アカウント情報",
-    emailChange: "メールアドレスを変更する",
+    emailChange: "編集",
     /*
       電話番号は出さない。Shopify の会員プロフィールに欄が無く、
       Customer Account API でも変えられないので、見せても直せない。

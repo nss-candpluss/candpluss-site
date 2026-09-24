@@ -8,6 +8,7 @@ import {
 import {
   accountAddressEditHref,
   accountAddressNoticeKey,
+  applyAccountSavedParams,
   toShopifyJapanPhoneNumber,
 } from "@/lib/commerce/account-page";
 import {
@@ -95,8 +96,8 @@ export async function POST(request: Request) {
 
     // 押したフォームのその場に結果を出すので、どのフォームだったかを返す
     const notice = formData.get("notice");
-    listUrl.searchParams.set(
-      "saved",
+    applyAccountSavedParams(
+      listUrl,
       typeof notice === "string" && notice
         ? notice
         : accountAddressNoticeKey(savedAddressId)

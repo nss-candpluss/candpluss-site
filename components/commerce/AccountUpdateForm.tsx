@@ -27,6 +27,28 @@ type AccountUpdateFormProps = {
   children: ReactNode;
 };
 
+/**
+ * 入力欄で Enter を押しただけでは送らない。
+ *
+ * 住所のように欄が多いフォームでは、途中で Enter を押すと
+ * 書き終える前に保存されてしまう。保存はボタンを押したときだけにする。
+ */
+function blockImplicitSubmit(event: React.KeyboardEvent<HTMLFormElement>) {
+  if (event.key !== "Enter" || event.shiftKey) {
+    return;
+  }
+
+  const target = event.target;
+  if (
+    target instanceof HTMLTextAreaElement ||
+    (target instanceof HTMLButtonElement && target.type === "submit")
+  ) {
+    return;
+  }
+
+  event.preventDefault();
+}
+
 /** 入力欄の並びを 1 本の文字列にして、初期値と比べられるようにする */
 function serializeForm(form: HTMLFormElement) {
   return new URLSearchParams(
@@ -80,6 +102,7 @@ export function AccountUpdateForm({
       method="post"
       onInput={syncChanged}
       onChange={syncChanged}
+      onKeyDown={blockImplicitSubmit}
       className={inlineSubmit ? inlineFormClassName : stackedFormClassName}
     >
       <input type="hidden" name="notice" value={noticeKey} />

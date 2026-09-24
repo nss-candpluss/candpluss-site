@@ -11,6 +11,7 @@ import {
   accountAddressDeleteHref,
   accountAddressNoticeKey,
   accountSavedNoticeKey,
+  applyAccountSavedParams,
   accountOrderHasReceipt,
   accountAddressEditHref,
   accountAddressIdFromSearch,
@@ -873,7 +874,7 @@ describe("会員ページの画面構成", () => {
     expect(contentSource).toContain("<AccountSettingsPanel");
     // プロフィールの内容の下に配送先住所、その下にお支払い方法を置く
     const addressIndex = contentSource.indexOf(
-      '<MemberSection title="配送先住所">'
+      '<MemberSection title="配送先住所" wideGap>'
     );
     expect(addressIndex).toBeGreaterThan(
       contentSource.indexOf("accountMemberCopy.notifications.title")
@@ -963,14 +964,28 @@ describe("会員ページの画面構成", () => {
 
     // ラベルの太さは入力欄より目立たせない
     expect(source).toContain(
-      "const accountFieldLabelClassName = `font-body-ja font-normal text-[var(--foreground)] ${uiText(16)}`"
+      "const accountFieldLabelClassName = `font-body-ja font-normal whitespace-nowrap text-[var(--foreground)] ${uiText(16)}`"
     );
     expect(source).toContain("const title = `${label}：`");
-    // いちばん長い「メール配信：」に合わせて、入力欄の左端を揃える
+    // いちばん長い「メールアドレス：」は全角 8 文字。折り返さない幅を取る
     expect(source).toContain(
-      "min-[640px]:grid-cols-[calc(100px*var(--text-scale))_minmax(0,1fr)]"
+      "min-[640px]:grid-cols-[calc(128px*var(--text-scale))_minmax(0,1fr)]"
     );
     expect(source).not.toContain("min-[640px]:grid-cols-[200px_minmax(0,1fr)]");
+    // 読む値も選択肢の説明も、入力欄の中の文字と同じ 16px にする
+    expect(source).toContain(
+      'const accountFieldValueClassName =\n  "font-body-ja text-[16px] leading-[1.3] font-semibold text-[var(--foreground)]"'
+    );
+    expect(source).toContain(
+      'const accountFieldChoiceClassName =\n  "font-body-ja text-[16px] leading-[1.3] font-normal text-[var(--foreground)]"'
+    );
+    // 区画の見出しと中身、住所 1 件ずつの間はどちらも広く取る
+    expect(source).toContain(
+      "mt-[clamp(28px,calc(48px*var(--gap-scale-y)),48px)] flex flex-col"
+    );
+    expect(source).toContain(
+      "gap-[clamp(48px,calc(80px*var(--gap-scale-y)),80px)]"
+    );
   });
 
   it("保存ボタンは直したときだけ出し、文字は「保存」で揃える", () => {
@@ -1027,7 +1042,33 @@ describe("会員ページの画面構成", () => {
     expect(noticeSource).toContain("setTimeout");
     expect(
       readSource("app/api/shopify/customer/profile/route.ts")
-    ).toContain('searchParams.set(\n      "saved"');
+    ).toContain("applyAccountSavedParams");
+    expect(
+      readSource("app/api/shopify/customer/address/route.ts")
+    ).toContain("applyAccountSavedParams");
+  });
+
+  // 同じ項目を続けて保存すると戻り先が前回と同じ URL になり、前の描画が残る
+  it("保存の戻り先は毎回違う URL にし、タブ移動では持ち越さない", () => {
+    const url = new URL("https://example.com/account?tab=account");
+    applyAccountSavedParams(url, "profile-name");
+
+    expect(url.searchParams.get("saved")).toBe("profile-name");
+    expect(Number(url.searchParams.get("savedAt"))).toBeGreaterThan(0);
+    expect(
+      accountPageTabHref("account", "tab=account&saved=profile-name&savedAt=1")
+    ).toBe("?tab=account");
+  });
+
+  // 住所は欄が多く、書き終える前に Enter を押してしまう
+  it("入力欄の Enter では保存しない", () => {
+    const formSource = readSource("components/commerce/AccountUpdateForm.tsx");
+
+    expect(formSource).toContain("onKeyDown={blockImplicitSubmit}");
+    expect(formSource).toContain('event.key !== "Enter"');
+    expect(formSource).toContain("event.preventDefault()");
+    // 送信ボタン上での Enter は押したのと同じなので通す
+    expect(formSource).toContain("HTMLButtonElement");
   });
 
   // コード直接入力は住所を書き間違えるので、問い合わせと同じ選択式にする
@@ -1067,9 +1108,13 @@ describe("会員ページの画面構成", () => {
     expect(controlsSource).toContain("AccountShallowLink");
     expect(controlsSource).toContain("accountAddressDeleteIdFromSearch");
     expect(controlsSource).toContain("accountAddressIdFromSearch");
-    expect(contentSource).toContain("<AccountAddressHeader");
+    expect(contentSource).toContain("<AccountAddressActions");
     expect(contentSource).toContain("<AccountAddressAdd>");
     expect(contentSource).not.toContain("confirmDelete");
+    // 操作ボタンは入力欄を読んだあとに押すので、フォームの下に置く
+    expect(contentSource.indexOf("<AccountAddressActions")).toBeGreaterThan(
+      contentSource.indexOf("<AddressForm\n")
+    );
   });
 
   it("プロフィールはここで直せる項目と、別画面で直す案内に分ける", () => {
