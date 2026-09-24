@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { accountFieldNotes, accountMemberCopy } from "@/lib/commerce/account-field-notes";
+import { accountMemberCopy } from "@/lib/commerce/account-field-notes";
 import {
   ACCOUNT_CANCELLED_BADGE,
   ACCOUNT_PAGE_TABS,
@@ -1000,10 +1000,13 @@ describe("会員ページの画面構成", () => {
     expect(source).toContain("EmailMarketingForm");
     expect(source).toContain('name="emailMarketing"');
     expect(source).toContain("isEmailMarketingSubscribed");
-    // 区画の間には区切り線を引く
+    // 区画の間には区切り線を引き、線の上下に同じ余白を取る
     expect(source).toContain(
-      'className="border-t border-[var(--color-divider)] py-[calc(31px*var(--gap-scale-y))] first:border-t-0 first:pt-0 last:pb-0"'
+      'className="border-t border-[var(--color-divider)] py-[clamp(42px,calc(72px*var(--gap-scale-y)),72px)] first:border-t-0 first:pt-0 last:pb-0"'
     );
+    // メールアドレスの行には線を引かない
+    expect(source).not.toContain("border-b border-[#eee]");
+    expect(source).not.toContain('<dl className="border-t border-[#eee]">');
     // チェックボックスはお問い合わせフォームと同じ見た目にする
     expect(source).not.toContain("getContactCheckboxClassName");
     expect(source.match(/className="peer sr-only"/g)).toHaveLength(2);
@@ -1035,15 +1038,21 @@ describe("会員ページの画面構成", () => {
     expect(source).not.toContain("label=\"アバター画像 URL\"");
   });
 
-  it("全タブの項目に役割の注釈を出す", () => {
+  it("項目ごとの役割説明は置かず、案内は区画単位だけにする", () => {
     const source = readSource("components/commerce/AccountPageContent.tsx");
 
-    expect(source).toContain("accountFieldNotes");
     expect(source).toContain("accountMemberCopy");
     expect(accountMemberCopy.accountDetails.login).toContain("パスワードはありません");
-    expect(accountFieldNotes.address.name).toContain("宛名");
-    expect(accountFieldNotes.order.lineItems).toContain("購入した商品");
-    expect(accountFieldNotes.order.shippingAddress).toContain("注文時点");
+    /*
+      項目の説明は、Shopify のどの値かを確かめるための下書きだった。
+      出す項目が決まったので、入力欄の下から全部外す。
+    */
+    expect(source).not.toContain("accountFieldNotes");
+    expect(source).not.toContain("FieldNote");
+    expect(source).not.toContain("note={");
+    expect(
+      readSource("components/commerce/AccountAddressControls.tsx")
+    ).not.toContain("FieldNote");
   });
 
   it("本文幅をリーガルの max-width ではなく Home と同じ Container にする", () => {

@@ -3,9 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { FieldNote } from "@/components/commerce/AccountFieldNote";
 import { AccountShallowLink } from "@/components/commerce/AccountShallowLink";
-import { accountFieldNotes } from "@/lib/commerce/account-field-notes";
 import {
   NEW_ACCOUNT_ADDRESS,
   accountAddressAddHref,
@@ -64,23 +62,17 @@ export function AccountAddressHeader({
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
         <p className="font-body-ja text-sm font-bold">{title}</p>
         {isDefault ? null : (
-          <div>
-            <AddressIntentButton addressId={addressId} intent="default">
-              既定にする
-            </AddressIntentButton>
-            <FieldNote>{accountFieldNotes.address.setDefault}</FieldNote>
-          </div>
+          <AddressIntentButton addressId={addressId} intent="default">
+            既定にする
+          </AddressIntentButton>
         )}
         {isConfirmingDelete ? null : (
-          <div>
-            <AccountShallowLink
-              href={accountAddressDeleteHref(addressId)}
-              className={addressActionClassName}
-            >
-              削除する
-            </AccountShallowLink>
-            <FieldNote>{accountFieldNotes.address.remove}</FieldNote>
-          </div>
+          <AccountShallowLink
+            href={accountAddressDeleteHref(addressId)}
+            className={addressActionClassName}
+          >
+            削除する
+          </AccountShallowLink>
         )}
       </div>
 
@@ -129,7 +121,6 @@ export function AccountAddressAdd({ children }: { children: ReactNode }) {
       >
         住所を追加する
       </AccountShallowLink>
-      <FieldNote>{accountFieldNotes.address.add}</FieldNote>
     </div>
   );
 }

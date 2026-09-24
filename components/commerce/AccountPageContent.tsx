@@ -6,7 +6,6 @@ import {
   AccountAddressAdd,
   AccountAddressHeader,
 } from "@/components/commerce/AccountAddressControls";
-import { FieldNote } from "@/components/commerce/AccountFieldNote";
 import { AccountNotice } from "@/components/commerce/AccountNotice";
 import { AccountTabs } from "@/components/commerce/AccountTabs";
 import { OrderCardCollapse } from "@/components/commerce/OrderCardCollapse";
@@ -21,7 +20,7 @@ import {
 } from "@/lib/commerce/account-login";
 import { japanZones, normalizeJapanZoneCode } from "@/lib/commerce/japan-zone-code";
 import { formHalfSpanClassName } from "@/lib/layout";
-import { accountFieldNotes, accountMemberCopy } from "@/lib/commerce/account-field-notes";
+import { accountMemberCopy } from "@/lib/commerce/account-field-notes";
 import {
   ACCOUNT_CANCELLED_BADGE,
   accountOrderHasReceipt,
@@ -122,19 +121,16 @@ function LogoutButton() {
 function Field({
   label,
   value,
-  note,
 }: {
   label: string;
   value: string;
-  note?: string;
 }) {
   const isEmpty = value === NOT_REGISTERED;
 
   return (
-    <div className="grid gap-1 border-b border-[#eee] py-3 min-[640px]:grid-cols-[200px_minmax(0,1fr)] min-[640px]:gap-4">
+    <div className="grid gap-1 min-[640px]:grid-cols-[200px_minmax(0,1fr)] min-[640px]:gap-4">
       <dt className="font-body-ja text-xs text-[var(--color-muted)]">
         {label}
-        {note ? <FieldNote>{note}</FieldNote> : null}
       </dt>
       <dd
         className={`font-body-ja text-sm break-words ${
@@ -148,7 +144,7 @@ function Field({
 }
 
 function FieldList({ children }: { children: React.ReactNode }) {
-  return <dl className="border-t border-[#eee]">{children}</dl>;
+  return <dl>{children}</dl>;
 }
 
 function MemberSection({
@@ -159,8 +155,8 @@ function MemberSection({
   children: React.ReactNode;
 }) {
   return (
-    // 区画の間に線を引く。間隔を線の前後で半分ずつに分け、線が寄らないようにする
-    <section className="border-t border-[var(--color-divider)] py-[calc(31px*var(--gap-scale-y))] first:border-t-0 first:pt-0 last:pb-0">
+    // 区画の間に線を引く。線の上下に同じ余白を取り、どちらかに寄らないようにする
+    <section className="border-t border-[var(--color-divider)] py-[clamp(42px,calc(72px*var(--gap-scale-y)),72px)] first:border-t-0 first:pt-0 last:pb-0">
       <h3 className={readOnlyHeadingClassName}>{title}</h3>
       <div className="mt-[calc(24px*var(--gap-scale-y))] flex flex-col gap-[calc(24px*var(--gap-scale-y))]">
         {children}
@@ -202,7 +198,6 @@ function ProfileNameForm({ profile }: { profile: CustomerAccount }) {
       <ContactField
         label="お名前"
         requirement="required"
-        note={accountMemberCopy.accountDetails.name}
         fixedTitleSize
         groupedContentGap
       >
@@ -248,7 +243,6 @@ function EmailMarketingForm({ profile }: { profile: CustomerAccount }) {
       <ContactField
         label="メール配信"
         requirement="optional"
-        note={accountMemberCopy.notifications.emailMarketing}
         fixedTitleSize
         groupedContentGap
       >
@@ -296,7 +290,6 @@ function AddressForm({
       <ContactField
         label="お名前"
         requirement="required"
-        note={accountFieldNotes.address.name}
         fixedTitleSize
         groupedContentGap
       >
@@ -331,101 +324,86 @@ function AddressForm({
       <ContactField
         label="住所"
         requirement="required"
-        note={accountFieldNotes.address.block}
         fixedTitleSize
         groupedContentGap
       >
         <div className="flex flex-col gap-y-[clamp(14px,calc(18px*var(--gap-scale-y)),18px)]">
-          <div>
-            <div className="max-w-[240px]">
-              <SupportFloatingInput
-                id={fieldId("zip")}
-                name="zip"
-                type="text"
-                label={fieldLabels.postalCode}
-                autoComplete="postal-code"
-                inputMode="numeric"
-                defaultValue={address?.zip ?? ""}
-                maxLength={20}
-                required
-              />
-            </div>
-            <FieldNote>{accountFieldNotes.address.zip}</FieldNote>
-          </div>
-
-          <div>
-            {/* 都道府県名は短いので、郵便番号と同じ幅で足りる */}
-            <div className="relative max-w-[240px]">
-              <label htmlFor={fieldId("zone")} className="sr-only">
-                {placeholders.prefecture}
-              </label>
-              <select
-                id={fieldId("zone")}
-                name="zoneCode"
-                defaultValue={zoneCode}
-                required
-                className={getContactFloatingSelectClassName()}
-                style={getContactFloatingSelectStyle(Boolean(zoneCode))}
-              >
-                <option value="">{placeholders.prefecture}</option>
-                {japanZones.map((zone) => (
-                  <option key={zone.zoneCode} value={zone.zoneCode}>
-                    {zone.prefecture}
-                  </option>
-                ))}
-              </select>
-              <span aria-hidden="true" className={contactSelectChevronClassName} />
-            </div>
-            <FieldNote>{accountFieldNotes.address.zone}</FieldNote>
-          </div>
-
-          <div>
-            <div className="max-w-[320px]">
-              <SupportFloatingInput
-                id={fieldId("city")}
-                name="city"
-                type="text"
-                label="市区町村"
-                autoComplete="address-level2"
-                defaultValue={address?.city ?? ""}
-                maxLength={100}
-                required
-              />
-            </div>
-            <FieldNote>{accountFieldNotes.address.city}</FieldNote>
-          </div>
-          <div>
+          <div className="max-w-[240px]">
             <SupportFloatingInput
-              id={fieldId("address1")}
-              name="address1"
+              id={fieldId("zip")}
+              name="zip"
               type="text"
-              label="番地"
-              autoComplete="address-line1"
-              defaultValue={address?.address1 ?? ""}
-              maxLength={255}
+              label={fieldLabels.postalCode}
+              autoComplete="postal-code"
+              inputMode="numeric"
+              defaultValue={address?.zip ?? ""}
+              maxLength={20}
               required
             />
-            <FieldNote>{accountFieldNotes.address.address1}</FieldNote>
           </div>
-          <div>
+
+          {/* 都道府県名は短いので、郵便番号と同じ幅で足りる */}
+          <div className="relative max-w-[240px]">
+            <label htmlFor={fieldId("zone")} className="sr-only">
+              {placeholders.prefecture}
+            </label>
+            <select
+              id={fieldId("zone")}
+              name="zoneCode"
+              defaultValue={zoneCode}
+              required
+              className={getContactFloatingSelectClassName()}
+              style={getContactFloatingSelectStyle(Boolean(zoneCode))}
+            >
+              <option value="">{placeholders.prefecture}</option>
+              {japanZones.map((zone) => (
+                <option key={zone.zoneCode} value={zone.zoneCode}>
+                  {zone.prefecture}
+                </option>
+              ))}
+            </select>
+            <span aria-hidden="true" className={contactSelectChevronClassName} />
+          </div>
+
+          <div className="max-w-[320px]">
             <SupportFloatingInput
-              id={fieldId("address2")}
-              name="address2"
+              id={fieldId("city")}
+              name="city"
               type="text"
-              label={placeholders.addressLine2}
-              autoComplete="address-line2"
-              defaultValue={address?.address2 ?? ""}
-              maxLength={255}
+              label="市区町村"
+              autoComplete="address-level2"
+              defaultValue={address?.city ?? ""}
+              maxLength={100}
+              required
             />
-            <FieldNote>{accountFieldNotes.address.address2}</FieldNote>
           </div>
+
+          <SupportFloatingInput
+            id={fieldId("address1")}
+            name="address1"
+            type="text"
+            label="番地"
+            autoComplete="address-line1"
+            defaultValue={address?.address1 ?? ""}
+            maxLength={255}
+            required
+          />
+
+          <SupportFloatingInput
+            id={fieldId("address2")}
+            name="address2"
+            type="text"
+            label={placeholders.addressLine2}
+            autoComplete="address-line2"
+            defaultValue={address?.address2 ?? ""}
+            maxLength={255}
+          />
         </div>
       </ContactField>
 
       <ContactField
         label="電話番号"
         requirement="optional"
-        note={accountFieldNotes.address.phone}
         fixedTitleSize
         groupedContentGap
       >
@@ -446,7 +424,6 @@ function AddressForm({
       <ContactField
         label="既定の住所"
         requirement="optional"
-        note={accountFieldNotes.address.defaultAddress}
         fixedTitleSize
         groupedContentGap
       >
@@ -1195,7 +1172,6 @@ function AccountSettingsPanel({
           <Field
             label="メールアドレス"
             value={formatText(profile.emailAddress?.emailAddress)}
-            note={accountMemberCopy.accountDetails.email}
           />
         </FieldList>
 
