@@ -495,7 +495,7 @@ function OrderLineItems({
         return (
           <li
             key={lineItem.id}
-            className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-4"
+            className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-[26px] gap-y-4"
           >
             {/* 画面幅に合わせて 96px から 280px まで広げる */}
             <div className="relative size-[clamp(96px,calc(280px*var(--layout-scale-x)),280px)] shrink-0 bg-[#eef1f3]">
@@ -511,20 +511,27 @@ function OrderLineItems({
             </div>
 
             {/* 文字の大きさは商品一覧のカードに揃える */}
-            <div className="min-w-0">
+            <div className="mt-[6px] min-w-0">
               <p className={`font-body-ja font-semibold ${uiText(16)}`}>
                 {title}
               </p>
-              {variantTitle ? (
+              {/* カラーと数量はひとまとまりとして、前後を広めに空ける */}
+              <div className="mt-4">
+                {variantTitle ? (
+                  <p
+                    className={`font-ui-en text-[var(--color-muted)] ${uiText(14)}`}
+                  >
+                    {variantTitle}
+                  </p>
+                ) : null}
                 <p
-                  className={`mt-2 font-ui-en text-[var(--color-muted)] ${uiText(14)}`}
+                  className={`font-body-ja ${uiText(14)} ${
+                    variantTitle ? "mt-2" : ""
+                  }`}
                 >
-                  {variantTitle}
+                  数量 {lineItem.quantity}
                 </p>
-              ) : null}
-              <p className={`mt-2 font-body-ja ${uiText(14)}`}>
-                数量 {lineItem.quantity}
-              </p>
+              </div>
               {discount ? (
                 <p
                   className={`mt-1 font-body-ja text-[var(--color-muted)] ${uiText(12)}`}
@@ -532,7 +539,7 @@ function OrderLineItems({
                   割引 {discount}
                 </p>
               ) : null}
-              <p className="mt-2 inline-flex items-baseline gap-x-[calc(4px*var(--gap-scale-x))]">
+              <p className="mt-4 inline-flex items-baseline gap-x-[calc(4px*var(--gap-scale-x))]">
                 <span className={`font-ui-en font-semibold ${uiText(14)}`}>
                   {price ?? NOT_REGISTERED}
                 </span>
@@ -598,7 +605,7 @@ function OrderAmountRow({
   return (
     <div
       className={`flex items-baseline justify-between gap-4 ${
-        emphasized ? "border-t border-[#ddd] pt-3 font-semibold" : ""
+        emphasized ? "font-semibold" : ""
       }`}
     >
       <dt className={`font-body-ja ${bodyText(15)}`}>{label}</dt>
@@ -652,12 +659,16 @@ function OrderStatusBadge({ children }: { children: string }) {
   );
 }
 
-/** 注文カード右側の列。幅が狭いのでラベルを値の上に積む */
+/**
+ * 注文カード右側の列。幅が狭いのでラベルを値の上に積む。
+ *
+ * 区切り線はカテゴリの境目だけに引くので、項目どうしは余白で分ける。
+ */
 function SidebarField({ label, value }: { label: string; value: string }) {
   const isEmpty = value === NOT_REGISTERED;
 
   return (
-    <div className="border-b border-[#eee] py-3">
+    <div>
       <dt className={`font-body-ja text-[var(--color-muted)] ${uiText(12)}`}>
         {label}
       </dt>
@@ -687,7 +698,7 @@ function SidebarLinkField({
   }
 
   return (
-    <div className="border-b border-[#eee] py-3">
+    <div>
       <dt className={`font-body-ja text-[var(--color-muted)] ${uiText(12)}`}>
         {label}
       </dt>
@@ -706,9 +717,14 @@ function SidebarLinkField({
 }
 
 function SidebarFieldList({ children }: { children: React.ReactNode }) {
-  return <dl className="mt-3 border-t border-[#eee]">{children}</dl>;
+  return <dl className="mt-3 flex flex-col gap-3">{children}</dl>;
 }
 
+/**
+ * 区切り線はカテゴリの境目に引く。
+ *
+ * 先頭のカテゴリの上には線を出さないので、`first:` で打ち消している。
+ */
 function OrderSidebarSection({
   title,
   children,
@@ -717,7 +733,7 @@ function OrderSidebarSection({
   children: React.ReactNode;
 }) {
   return (
-    <section>
+    <section className="border-t border-[var(--color-divider)] py-[clamp(20px,calc(32px*var(--gap-scale-y)),32px)] first:border-t-0 first:pt-0 last:pb-0">
       {title ? (
         <h4 className={`font-body-ja font-semibold ${uiText(16)}`}>{title}</h4>
       ) : null}
@@ -833,12 +849,14 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
 
       <div className="mt-6 grid gap-x-[clamp(24px,calc(48px*var(--gap-scale-x)),48px)] gap-y-[calc(32px*var(--gap-scale-y))] min-[1025px]:grid-cols-[minmax(0,1fr)_minmax(0,380px)]">
         <div>
-          <h4 className={`font-body-ja font-semibold ${uiText(16)}`}>購入商品</h4>
-          <FieldNote>{accountFieldNotes.order.lineItems}</FieldNote>
+          <h4 className={`font-body-ja font-semibold ${uiText(16)}`}>
+            ご購入商品
+          </h4>
           <OrderLineItems lineItems={order.lineItems.nodes} />
         </div>
 
-        <div className="flex flex-col gap-[calc(32px*var(--gap-scale-y))]">
+        {/* 1 列に畳んだときは、ご購入商品との境目にも線を引く */}
+        <div className="flex flex-col border-t border-[var(--color-divider)] pt-[clamp(20px,calc(32px*var(--gap-scale-y)),32px)] min-[1025px]:border-t-0 min-[1025px]:pt-0">
           <OrderAmountSummary order={order} showRefunded={optional.showRefunded} />
 
           <OrderSidebarSection>
