@@ -14,6 +14,7 @@ import {
   accountOrderLineImageAlt,
   accountOrderLineTitle,
   accountOrderLineVariantTitle,
+  accountOrderLinesByAmount,
   accountOrderOptionalFields,
   accountOrderPaymentMethods,
   accountOrderShipmentDisplay,
@@ -153,11 +154,44 @@ describe("注文履歴の商品行", () => {
     ).toBe("MOYA500");
   });
 
+  it("金額の高い順に並べ、同額なら Shopify の順を保つ", () => {
+    const lines = [
+      { id: "peg", totalPrice: { amount: "550" } },
+      { id: "tent", totalPrice: { amount: "372000" } },
+      { id: "rope-a", totalPrice: { amount: "2400" } },
+      { id: "rope-b", totalPrice: { amount: "2400" } },
+      { id: "gift", price: { amount: "1680" } },
+    ];
+
+    expect(accountOrderLinesByAmount(lines).map((line) => line.id)).toEqual([
+      "tent",
+      "rope-a",
+      "rope-b",
+      "gift",
+      "peg",
+    ]);
+  });
+
+  it("金額が取れない行は 0 として扱い、並べ替えで落とさない", () => {
+    const lines = [
+      { id: "unknown" },
+      { id: "broken", totalPrice: { amount: "" } },
+      { id: "tarp", totalPrice: { amount: "48000" } },
+    ];
+
+    expect(accountOrderLinesByAmount(lines).map((line) => line.id)).toEqual([
+      "tarp",
+      "unknown",
+      "broken",
+    ]);
+  });
+
   it("注文履歴はサムネイルと商品名で出す", () => {
     const source = readSource("components/commerce/AccountPageContent.tsx");
 
     expect(source).toContain("SiteImage");
     expect(source).toContain("accountOrderLineTitle");
+    expect(source).toContain("accountOrderLinesByAmount(lineItems)");
     expect(source).toContain("購入商品");
     expect(source).not.toContain('label="画像 URL"');
     expect(source).not.toContain("LINE ITEMS");
@@ -262,8 +296,14 @@ describe("注文履歴の商品行", () => {
     expect(source).toContain("accountOrderSubtotalWithTax");
     expect(source).toContain("formatAccountMoney");
     expect(source).toContain("発送情報");
-    expect(source).toContain("追跡情報");
+    expect(source).toContain('label="配送業者"');
+    expect(source).toContain('label="追跡番号"');
+    expect(source).toContain("配送状況を追跡する");
     expect(source).toContain("配送履歴");
+    // 発送の社内管理項目はお客様には出さない
+    expect(source).not.toContain('label="発送 ID"');
+    expect(source).not.toContain('label="発送状態"');
+    expect(source).not.toContain('label="店頭受け取り済み"');
     expect(source).toContain("領収書を見る");
     expect(source).toContain("決済方法");
     expect(source).toContain("accountOrderPaymentMethods");

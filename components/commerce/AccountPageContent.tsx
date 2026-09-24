@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Fragment } from "react";
 
 import {
   AccountAddressAdd,
@@ -24,6 +25,7 @@ import {
   accountOrderLineImageAlt,
   accountOrderLineTitle,
   accountOrderLineVariantTitle,
+  accountOrderLinesByAmount,
   accountOrderOptionalFields,
   accountOrderPaymentMethods,
   accountOrderShipmentDisplay,
@@ -34,7 +36,6 @@ import {
   formatAccountMoney,
   formatAccountOrderPaymentStatus,
   formatAccountOrderDateTime,
-  formatAccountFulfillmentUnitStatus,
   formatAccountName,
   formatAccountShipmentStatus,
 } from "@/lib/commerce/account-page";
@@ -80,10 +81,6 @@ function formatDateTime(value?: string | null) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
-}
-
-function formatBoolean(value: boolean) {
-  return value ? "はい" : "いいえ";
 }
 
 function formatText(value?: string | null) {
@@ -137,40 +134,6 @@ function Field({
 
 function FieldList({ children }: { children: React.ReactNode }) {
   return <dl className="border-t border-[#eee]">{children}</dl>;
-}
-
-/** 追跡は開けないと意味がないので、URL の項目だけリンクにする */
-function LinkField({
-  label,
-  url,
-  note,
-}: {
-  label: string;
-  url?: string | null;
-  note: string;
-}) {
-  if (!url) {
-    return <Field label={label} value={NOT_REGISTERED} note={note} />;
-  }
-
-  return (
-    <div className="grid gap-1 border-b border-[#eee] py-3 min-[640px]:grid-cols-[200px_minmax(0,1fr)] min-[640px]:gap-4">
-      <dt className="font-body-ja text-xs text-[var(--color-muted)]">
-        {label}
-        <FieldNote>{note}</FieldNote>
-      </dt>
-      <dd className="font-body-ja text-sm break-all">
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline"
-        >
-          {url}
-        </a>
-      </dd>
-    </div>
-  );
 }
 
 function MemberSection({
@@ -514,7 +477,7 @@ function OrderLineItems({
 
   return (
     <ul className="mt-4 flex flex-col gap-[calc(24px*var(--gap-scale-y))]">
-      {lineItems.map((lineItem) => {
+      {accountOrderLinesByAmount(lineItems).map((lineItem) => {
         const title = accountOrderLineTitle(lineItem);
         const variantTitle = accountOrderLineVariantTitle(lineItem);
         const imageSrc = lineItem.image?.url;
@@ -669,6 +632,157 @@ function OrderStatusBadge({ children }: { children: string }) {
   );
 }
 
+/** 注文カード右側の列。幅が狭いのでラベルを値の上に積む */
+function SidebarField({ label, value }: { label: string; value: string }) {
+  const isEmpty = value === NOT_REGISTERED;
+
+  return (
+    <div className="border-b border-[#eee] py-3">
+      <dt className={`font-body-ja text-[var(--color-muted)] ${uiText(12)}`}>
+        {label}
+      </dt>
+      <dd
+        className={`mt-1 font-body-ja break-words ${uiText(14)} ${
+          isEmpty ? "text-[var(--color-muted)]" : ""
+        }`}
+      >
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+/** URL をそのまま出すと狭い列で折り返し続けるので、短い文字でリンクにする */
+function SidebarLinkField({
+  label,
+  url,
+  linkText,
+}: {
+  label: string;
+  url?: string | null;
+  linkText: string;
+}) {
+  if (!url) {
+    return <SidebarField label={label} value={NOT_REGISTERED} />;
+  }
+
+  return (
+    <div className="border-b border-[#eee] py-3">
+      <dt className={`font-body-ja text-[var(--color-muted)] ${uiText(12)}`}>
+        {label}
+      </dt>
+      <dd className="mt-1">
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`inline-flex border-b border-current font-body-ja ${uiText(14)}`}
+        >
+          {linkText}
+        </a>
+      </dd>
+    </div>
+  );
+}
+
+function SidebarFieldList({ children }: { children: React.ReactNode }) {
+  return <dl className="mt-3 border-t border-[#eee]">{children}</dl>;
+}
+
+function OrderSidebarSection({
+  title,
+  children,
+}: {
+  title?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      {title ? (
+        <h4 className={`font-body-ja font-semibold ${uiText(14)}`}>{title}</h4>
+      ) : null}
+      {children}
+    </section>
+  );
+}
+
+/** 発送ごとの配送状況。社内管理用の項目は出さない */
+function OrderFulfillments({
+  fulfillments,
+}: {
+  fulfillments: CustomerOrderDetail["fulfillments"]["nodes"];
+}) {
+  if (!fulfillments.length) {
+    return (
+      <p className={`mt-3 font-body-ja text-[var(--color-muted)] ${bodyText(15)}`}>
+        {NOT_REGISTERED}
+      </p>
+    );
+  }
+
+  return (
+    <ul className="flex flex-col gap-[calc(24px*var(--gap-scale-y))]">
+      {fulfillments.map((fulfillment) => (
+        <li key={fulfillment.id}>
+          <SidebarFieldList>
+            <SidebarField
+              label="いまの配送状況"
+              value={
+                formatAccountShipmentStatus(fulfillment.latestShipmentStatus) ??
+                NOT_REGISTERED
+              }
+            />
+            <SidebarField
+              label="配達予定日時"
+              value={formatDateTime(fulfillment.estimatedDeliveryAt)}
+            />
+            <SidebarField
+              label="発送日時"
+              value={formatDateTime(fulfillment.createdAt)}
+            />
+            {fulfillment.trackingInformation.map((tracking) => (
+              <Fragment key={`${tracking.number}-${tracking.url}`}>
+                <SidebarField
+                  label="配送業者"
+                  value={formatText(tracking.company)}
+                />
+                <SidebarField
+                  label="追跡番号"
+                  value={formatText(tracking.number)}
+                />
+                <SidebarLinkField
+                  label="追跡ページ"
+                  url={tracking.url}
+                  linkText="配送状況を追跡する"
+                />
+              </Fragment>
+            ))}
+          </SidebarFieldList>
+
+          {fulfillment.events.nodes.length ? (
+            <div className="mt-[calc(24px*var(--gap-scale-y))]">
+              <h5 className={`font-body-ja font-semibold ${uiText(13)}`}>
+                配送履歴
+              </h5>
+              <SidebarFieldList>
+                {fulfillment.events.nodes.map((event) => (
+                  <SidebarField
+                    key={event.id}
+                    label={formatDateTime(event.happenedAt)}
+                    value={
+                      formatAccountShipmentStatus(event.status) ?? event.status
+                    }
+                  />
+                ))}
+              </SidebarFieldList>
+            </div>
+          ) : null}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function OrderCard({ order }: { order: CustomerOrderDetail }) {
   const optional = accountOrderOptionalFields(order);
   const paymentStatus = formatAccountOrderPaymentStatus(
@@ -697,187 +811,85 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
         ) : null}
       </div>
 
-      <div className="mt-6 grid gap-x-[clamp(24px,calc(48px*var(--gap-scale-x)),48px)] gap-y-[calc(32px*var(--gap-scale-y))] min-[1025px]:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
+      <div className="mt-6 grid gap-x-[clamp(24px,calc(48px*var(--gap-scale-x)),48px)] gap-y-[calc(32px*var(--gap-scale-y))] min-[1025px]:grid-cols-[minmax(0,1fr)_minmax(0,380px)]">
         <div>
-          <h4 className="font-body-ja text-sm font-semibold">購入商品</h4>
+          <h4 className={`font-body-ja font-semibold ${uiText(14)}`}>購入商品</h4>
           <FieldNote>{accountFieldNotes.order.lineItems}</FieldNote>
           <OrderLineItems lineItems={order.lineItems.nodes} />
         </div>
 
-        <OrderAmountSummary order={order} showRefunded={optional.showRefunded} />
+        <div className="flex flex-col gap-[calc(32px*var(--gap-scale-y))]">
+          <OrderAmountSummary order={order} showRefunded={optional.showRefunded} />
+
+          <OrderSidebarSection>
+            <SidebarFieldList>
+              {optional.showUpdatedAt ? (
+                <SidebarField
+                  label="更新日時"
+                  value={formatDateTime(order.updatedAt)}
+                />
+              ) : null}
+              {optional.showCancelledAt ? (
+                <SidebarField
+                  label="キャンセル日時"
+                  value={formatDateTime(order.cancelledAt)}
+                />
+              ) : null}
+              {optional.showCancelReason ? (
+                <SidebarField
+                  label="キャンセル理由"
+                  value={formatText(order.cancelReason)}
+                />
+              ) : null}
+              {optional.showEdited ? (
+                <SidebarField label="編集済み" value="はい" />
+              ) : null}
+              {optional.showNote ? (
+                <SidebarField label="備考" value={formatText(order.note)} />
+              ) : null}
+              {optional.showPoNumber ? (
+                <SidebarField
+                  label="発注番号"
+                  value={formatText(order.poNumber)}
+                />
+              ) : null}
+              {optional.showLocationName ? (
+                <SidebarField
+                  label="出荷元"
+                  value={formatText(order.locationName)}
+                />
+              ) : null}
+              <SidebarLinkField
+                label="ステータスページ"
+                url={order.statusPageUrl}
+                linkText="注文状況を見る"
+              />
+            </SidebarFieldList>
+          </OrderSidebarSection>
+
+          <OrderSidebarSection title="発送情報">
+            <OrderFulfillments fulfillments={order.fulfillments.nodes} />
+          </OrderSidebarSection>
+
+          <OrderSidebarSection title="お届け先">
+            <OrderAddressBlock address={order.shippingAddress} />
+          </OrderSidebarSection>
+
+          <OrderSidebarSection title="決済方法">
+            <OrderPaymentMethods transactions={order.transactions} />
+          </OrderSidebarSection>
+
+          <OrderSidebarSection title="ご請求先">
+            <OrderAddressBlock address={order.billingAddress} />
+            <Link
+              href={accountReceiptHref(order.id)}
+              className={`mt-3 inline-flex border-b border-current font-body-ja ${uiText(14)}`}
+            >
+              領収書を見る
+            </Link>
+          </OrderSidebarSection>
+        </div>
       </div>
-
-      <div className="mt-6">
-        <FieldList>
-        {optional.showUpdatedAt ? (
-        <Field
-            label="更新日時"
-            value={formatDateTime(order.updatedAt)}
-            note={accountFieldNotes.order.updatedAt}
-          />
-        ) : null}
-        {optional.showCancelledAt ? (
-        <Field
-          label="キャンセル日時"
-          value={formatDateTime(order.cancelledAt)}
-            note={accountFieldNotes.order.cancelledAt}
-        />
-        ) : null}
-        {optional.showCancelReason ? (
-        <Field
-          label="キャンセル理由"
-          value={formatText(order.cancelReason)}
-            note={accountFieldNotes.order.cancelReason}
-          />
-        ) : null}
-        {optional.showEdited ? (
-          <Field label="編集済み" value="はい" note={accountFieldNotes.order.edited} />
-        ) : null}
-        {optional.showNote ? (
-          <Field label="備考" value={formatText(order.note)} note={accountFieldNotes.order.note} />
-        ) : null}
-        {optional.showPoNumber ? (
-        <Field
-            label="発注番号"
-            value={formatText(order.poNumber)}
-            note={accountFieldNotes.order.poNumber}
-          />
-        ) : null}
-        {optional.showLocationName ? (
-          <Field
-            label="出荷元"
-            value={formatText(order.locationName)}
-            note={accountFieldNotes.order.locationName}
-          />
-        ) : null}
-        <LinkField label="ステータスページ" url={order.statusPageUrl} note={accountFieldNotes.order.statusPage} />
-        </FieldList>
-      </div>
-
-      <div className="mt-8">
-        <h4 className="font-body-ja text-sm font-semibold">発送情報</h4>
-        <FieldNote>{accountFieldNotes.order.fulfillments}</FieldNote>
-        {order.fulfillments.nodes.length ? (
-          <ul className="mt-3 flex flex-col gap-6">
-            {order.fulfillments.nodes.map((fulfillment) => (
-              <li key={fulfillment.id}>
-                <FieldList>
-                  <Field label="発送 ID" value={fulfillment.id} note={accountFieldNotes.order.fulfillmentId} />
-                  <Field
-                    label="発送状態"
-                    value={formatAccountFulfillmentUnitStatus(fulfillment.status) ?? NOT_REGISTERED}
-                    note={accountFieldNotes.order.shipmentStatus}
-                  />
-                  <Field
-                    label="いまの配送状況"
-                    value={formatAccountShipmentStatus(fulfillment.latestShipmentStatus) ?? NOT_REGISTERED}
-                    note={accountFieldNotes.order.latestShipmentStatus}
-                  />
-                  <Field
-                    label="配達予定日時"
-                    value={formatDateTime(fulfillment.estimatedDeliveryAt)}
-                    note={accountFieldNotes.order.estimatedDeliveryAt}
-                  />
-                  <Field
-                    label="発送日時"
-                    value={formatDateTime(fulfillment.createdAt)}
-                    note={accountFieldNotes.order.fulfillmentCreatedAt}
-                  />
-                  <Field
-                    label="更新日時"
-                    value={formatDateTime(fulfillment.updatedAt)}
-                    note={accountFieldNotes.order.fulfillmentUpdatedAt}
-                  />
-                  <Field
-                    label="店頭受け取り済み"
-                    value={formatBoolean(fulfillment.isPickedUp)}
-                    note={accountFieldNotes.order.isPickedUp}
-                  />
-                </FieldList>
-
-                <div className="mt-6">
-                  <h5 className="font-body-ja text-xs font-semibold">追跡情報</h5>
-                  <FieldNote>{accountFieldNotes.order.tracking}</FieldNote>
-                  {fulfillment.trackingInformation.length ? (
-                    <div className="mt-2 flex flex-col gap-4">
-                      {fulfillment.trackingInformation.map((tracking) => (
-                        <FieldList key={`${tracking.number}-${tracking.url}`}>
-                          <Field
-                            label="配送業者"
-                            value={formatText(tracking.company)}
-                            note={accountFieldNotes.order.trackingCompany}
-                          />
-                          <Field
-                            label="追跡番号"
-                            value={formatText(tracking.number)}
-                            note={accountFieldNotes.order.trackingNumber}
-                          />
-                          <LinkField
-                            label="追跡 URL"
-                            url={tracking.url}
-                            note={accountFieldNotes.order.trackingUrl}
-                          />
-                        </FieldList>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="mt-2 font-body-ja text-sm text-[var(--color-muted)]">
-                      {NOT_REGISTERED}
-                    </p>
-                  )}
-                </div>
-
-                <div className="mt-6">
-                  <h5 className="font-body-ja text-xs font-semibold">配送履歴</h5>
-                  <FieldNote>{accountFieldNotes.order.events}</FieldNote>
-                  {fulfillment.events.nodes.length ? (
-                    <FieldList>
-                      {fulfillment.events.nodes.map((event) => (
-                        <Field
-                          key={event.id}
-                          label={formatDateTime(event.happenedAt)}
-                          value={formatAccountShipmentStatus(event.status) ?? event.status}
-                          note={accountFieldNotes.order.event}
-                        />
-                      ))}
-                    </FieldList>
-                  ) : (
-                    <p className="mt-2 font-body-ja text-sm text-[var(--color-muted)]">
-                      {NOT_REGISTERED}
-                    </p>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-3 font-body-ja text-sm text-[var(--color-muted)]">
-            {NOT_REGISTERED}
-          </p>
-        )}
-      </div>
-
-      <div className="mt-8">
-        <h4 className="font-body-ja text-sm font-semibold">お届け先</h4>
-        <OrderAddressBlock address={order.shippingAddress} />
-      </div>
-
-      <div className="mt-8">
-        <h4 className="font-body-ja text-sm font-semibold">決済方法</h4>
-        <OrderPaymentMethods transactions={order.transactions} />
-      </div>
-
-      <div className="mt-8">
-        <h4 className="font-body-ja text-sm font-semibold">ご請求先</h4>
-        <OrderAddressBlock address={order.billingAddress} />
-        <Link
-          href={accountReceiptHref(order.id)}
-          className="mt-3 inline-flex border-b border-current font-body-ja text-sm"
-        >
-          領収書を見る
-        </Link>
-      </div>
-
     </li>
   );
 }

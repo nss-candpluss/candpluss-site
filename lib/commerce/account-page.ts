@@ -51,6 +51,31 @@ export function accountOrderLineImageAlt(line: AccountOrderLineDisplay) {
   return line.image?.altText?.trim() || accountOrderLineTitle(line);
 }
 
+type AccountOrderLineAmount = {
+  price?: { amount: string } | null;
+  totalPrice?: { amount: string } | null;
+};
+
+function accountOrderLineAmount(line: AccountOrderLineAmount) {
+  const amount = Number((line.totalPrice ?? line.price)?.amount ?? 0);
+
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+/**
+ * 購入商品を金額の高い順に並べる。
+ *
+ * 画面に出しているのは行の合計額なので、並べ替えも同じ金額で揃える。
+ * 同額の行は Shopify から返った順のままにする。
+ */
+export function accountOrderLinesByAmount<T extends AccountOrderLineAmount>(
+  lines: readonly T[]
+): T[] {
+  return [...lines].sort(
+    (a, b) => accountOrderLineAmount(b) - accountOrderLineAmount(a)
+  );
+}
+
 export function formatAccountPostalCode(value?: string | null) {
   const zip = value?.trim().replace(/^〒\s*/, "");
 
