@@ -868,10 +868,16 @@ describe("会員ページの画面構成", () => {
     expect(tabsSource).toContain("hidden={tab.id !== activeTabId}");
     expect(contentSource).toContain("<OrdersPanel");
     expect(contentSource).toContain("<AccountSettingsPanel");
-    // プロフィールの内容の下に住所を置く
-    expect(contentSource.indexOf('<MemberSection title="住所">')).toBeGreaterThan(
-      contentSource.indexOf("accountMemberCopy.payments.body")
+    // プロフィールの内容の下に配送先住所、その下にお支払い方法を置く
+    const addressIndex = contentSource.indexOf(
+      '<MemberSection title="配送先住所">'
     );
+    expect(addressIndex).toBeGreaterThan(
+      contentSource.indexOf("accountMemberCopy.notifications.title")
+    );
+    expect(
+      contentSource.indexOf("accountMemberCopy.payments.title")
+    ).toBeGreaterThan(addressIndex);
     // プライバシーポリシーはフッターから辿れるので、会員ページには出さない
     expect(contentSource).not.toContain("accountMemberCopy.privacy");
     expect(contentSource).not.toContain("activeTabId");

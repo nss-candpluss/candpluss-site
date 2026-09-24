@@ -3,7 +3,7 @@
  */
 export const accountMemberCopy = {
   accountDetails: {
-    title: "アカウントの詳細",
+    title: "アカウント設定",
     name: "会員登録のお名前です。このページで変更できます。",
     email: "ログインとご案内に使うメールアドレスです。",
     emailChange: "メールアドレスを変更する",

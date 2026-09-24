@@ -1213,13 +1213,7 @@ function AccountSettingsPanel({
         <EmailMarketingForm profile={profile} />
       </MemberSection>
 
-      <MemberSection title={accountMemberCopy.payments.title}>
-        <p className={readOnlyNoteClassName}>
-          {accountMemberCopy.payments.body}
-        </p>
-      </MemberSection>
-
-      <MemberSection title="住所">
+      <MemberSection title="配送先住所">
         {addresses.map((address, index) => (
           <div key={address.id}>
             <AccountAddressHeader
@@ -1243,6 +1237,12 @@ function AccountSettingsPanel({
         <AccountAddressAdd>
           <AddressForm formKey="new" isDefault={addresses.length === 0} />
         </AccountAddressAdd>
+      </MemberSection>
+
+      <MemberSection title={accountMemberCopy.payments.title}>
+        <p className={readOnlyNoteClassName}>
+          {accountMemberCopy.payments.body}
+        </p>
       </MemberSection>
     </div>
   );
