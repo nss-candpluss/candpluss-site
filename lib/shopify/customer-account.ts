@@ -617,6 +617,37 @@ function assertCustomerMutation<T extends { userErrors: Array<{ message: string 
   return payload;
 }
 
+/**
+ * 書き込みが読み出しに現れるまでの待ち時間。
+ * 合計 1 秒ほど。保存ボタンを押した直後の待ちなので、これ以上は長くしない。
+ */
+const CUSTOMER_UPDATE_RETRY_MS = [150, 300, 600];
+
+/**
+ * 保存した内容が読み出せるようになるまで、短い間だけ読み直す。
+ *
+ * Shopify は書き込んだ直後の読み出しで前の値を返すことがある。
+ * そのまま画面へ戻すと、保存できたのに古い値が出てしまう。
+ * 待ちきれなかったときは最後に読めた内容をそのまま返す。
+ */
+export async function readAfterCustomerUpdate<T>(
+  read: () => Promise<T>,
+  isApplied: (value: T) => boolean
+): Promise<T> {
+  let latest = await read();
+
+  for (const waitMs of CUSTOMER_UPDATE_RETRY_MS) {
+    if (isApplied(latest)) {
+      return latest;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, waitMs));
+    latest = await read();
+  }
+
+  return latest;
+}
+
 export async function updateCustomerProfile(
   accessToken: string,
   input: { firstName?: string; lastName?: string }

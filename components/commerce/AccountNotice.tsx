@@ -1,9 +1,13 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
-import { accountPageNotice } from "@/lib/commerce/account-page";
+import {
+  ACCOUNT_UPDATED_NOTICE_PARAMS,
+  accountPageNotice,
+  accountSearchWithoutNoticeKeys,
+} from "@/lib/commerce/account-page";
 
 /** うまくいった知らせは読み終わる頃に消す。残り続けると今の操作の結果か分からなくなる */
 const SUCCESS_NOTICE_MS = 4000;
@@ -13,27 +17,35 @@ const SUCCESS_NOTICE_MS = 4000;
  *
  * 保存フォームの結果はフォームのその場に出すので、ここに来るのは
  * 一覧側の操作（既定の変更・削除）と、直し方を伝えたいエラーだけ。
- * タブを移ると URL からそのクエリが外れるので、表示も一緒に消える。
+ * うまくいった知らせは数秒で消し、URL からも外してリロードで再び出さない。
+ * エラーは直すまで読めるように残す。
  */
 export function AccountNotice() {
   const searchParams = useSearchParams();
   const notice = accountPageNotice(searchParams.toString());
   const isSuccess = notice?.tone === "success";
-  const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
     if (!isSuccess) {
       return;
     }
 
-    const timer = window.setTimeout(
-      () => setIsDismissed(true),
-      SUCCESS_NOTICE_MS
-    );
+    const timer = window.setTimeout(() => {
+      const search = accountSearchWithoutNoticeKeys(
+        window.location.search,
+        ACCOUNT_UPDATED_NOTICE_PARAMS
+      );
+      window.history.replaceState(
+        null,
+        "",
+        search || window.location.pathname
+      );
+    }, SUCCESS_NOTICE_MS);
+
     return () => window.clearTimeout(timer);
   }, [isSuccess]);
 
-  if (!notice || (isSuccess && isDismissed)) {
+  if (!notice) {
     return null;
   }
 

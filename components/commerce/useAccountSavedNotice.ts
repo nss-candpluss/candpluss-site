@@ -1,9 +1,13 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
-import { accountSavedNoticeKey } from "@/lib/commerce/account-page";
+import {
+  ACCOUNT_SAVED_NOTICE_PARAMS,
+  accountSavedNoticeKey,
+  accountSearchWithoutNoticeKeys,
+} from "@/lib/commerce/account-page";
 
 /** 読み終わる頃には消したい。残り続けると、今の操作の結果か分からなくなる */
 const SAVED_NOTICE_MS = 4000;
@@ -11,25 +15,32 @@ const SAVED_NOTICE_MS = 4000;
 /**
  * 自分のフォームの保存だったときだけ true を返し、数秒後に false へ戻す。
  *
- * 保存はサーバーへの POST とリダイレクトなので、毎回このページが読み直される。
- * URL が前回と同じでも、部品ごと作り直されるので数え直しは要らない。
+ * 消すときは URL から合図も外す。残したままだとリロードでまた出てしまう。
+ * 履歴は増やさないので、戻るボタンの行き先も変わらない。
  */
 export function useAccountSavedNotice(noticeKey: string) {
   const searchParams = useSearchParams();
   const isSaved = accountSavedNoticeKey(searchParams.toString()) === noticeKey;
-  const [dismissedKey, setDismissedKey] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isSaved) {
       return;
     }
 
-    const timer = window.setTimeout(
-      () => setDismissedKey(noticeKey),
-      SAVED_NOTICE_MS
-    );
-    return () => window.clearTimeout(timer);
-  }, [isSaved, noticeKey]);
+    const timer = window.setTimeout(() => {
+      const search = accountSearchWithoutNoticeKeys(
+        window.location.search,
+        ACCOUNT_SAVED_NOTICE_PARAMS
+      );
+      window.history.replaceState(
+        null,
+        "",
+        search || window.location.pathname
+      );
+    }, SAVED_NOTICE_MS);
 
-  return isSaved && dismissedKey !== noticeKey;
+    return () => window.clearTimeout(timer);
+  }, [isSaved]);
+
+  return isSaved;
 }

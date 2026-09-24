@@ -846,6 +846,33 @@ export function applyAccountSavedParams(url: URL, noticeKey: string) {
   url.searchParams.set("savedAt", String(Date.now()));
 }
 
+/** 保存できた合図のクエリ。出し終えたら URL から外す */
+export const ACCOUNT_SAVED_NOTICE_PARAMS = ["saved", "savedAt"] as const;
+
+/** 一覧側の操作（既定の変更・削除）の合図のクエリ */
+export const ACCOUNT_UPDATED_NOTICE_PARAMS = ["updated"] as const;
+
+/**
+ * 知らせのクエリを落とした「?…」を返す。落とすものが無ければ空文字。
+ *
+ * 合図を URL に残すと、リロードするたびに同じ知らせが出てしまう。
+ * 一度出したら URL からも消す。
+ */
+export function accountSearchWithoutNoticeKeys(
+  search: string,
+  keys: readonly string[]
+) {
+  const query = search.startsWith("?") ? search.slice(1) : search;
+  const params = new URLSearchParams(query);
+
+  for (const key of keys) {
+    params.delete(key);
+  }
+
+  const next = params.toString();
+  return next ? `?${next}` : "";
+}
+
 /** 住所フォームは件数分あるので、どの住所を保存したかで見分ける */
 export function accountAddressNoticeKey(addressId?: string) {
   return `address-${addressId ?? NEW_ACCOUNT_ADDRESS}`;

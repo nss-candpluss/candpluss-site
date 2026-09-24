@@ -9,6 +9,7 @@ import { applyAccountSavedParams } from "@/lib/commerce/account-page";
 import {
   fetchCustomerAccount,
   isEmailMarketingSubscribed,
+  readAfterCustomerUpdate,
   setCustomerEmailMarketing,
   updateCustomerProfile,
 } from "@/lib/shopify/customer-account";
@@ -42,15 +43,28 @@ export async function POST(request: Request) {
     });
     await updateCustomerProfile(session.accessToken, input);
 
+    // 保存した名前が読めるようになってから戻す。すぐ戻すと前の名前が出る
+    const profile = await readAfterCustomerUpdate(
+      () => fetchCustomerAccount(session.accessToken),
+      (current) =>
+        (current.firstName ?? "") === input.firstName &&
+        (current.lastName ?? "") === input.lastName
+    );
+
     // 送信値と今の配信状態を比べ、変わったときだけ購読を切り替える
     const wantsEmailMarketing = formData.get("emailMarketing") === "on";
-    const profile = await fetchCustomerAccount(session.accessToken);
 
     if (
       wantsEmailMarketing !==
       isEmailMarketingSubscribed(profile.emailAddress?.marketingState)
     ) {
       await setCustomerEmailMarketing(session.accessToken, wantsEmailMarketing);
+      await readAfterCustomerUpdate(
+        () => fetchCustomerAccount(session.accessToken),
+        (current) =>
+          isEmailMarketingSubscribed(current.emailAddress?.marketingState) ===
+          wantsEmailMarketing
+      );
     }
 
     // 押したフォームのその場に結果を出すので、どのフォームだったかを返す

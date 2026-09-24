@@ -8,6 +8,9 @@ import {
   ACCOUNT_CANCELLED_BADGE,
   ACCOUNT_PAGE_TABS,
   ACCOUNT_SAVED_NOTICE,
+  ACCOUNT_SAVED_NOTICE_PARAMS,
+  ACCOUNT_UPDATED_NOTICE_PARAMS,
+  accountSearchWithoutNoticeKeys,
   accountAddressDeleteHref,
   accountAddressNoticeKey,
   accountSavedNoticeKey,
@@ -1058,6 +1061,63 @@ describe("会員ページの画面構成", () => {
     expect(
       accountPageTabHref("account", "tab=account&saved=profile-name&savedAt=1")
     ).toBe("?tab=account");
+  });
+
+  // 合図を URL に残すと、リロードするたびに同じ知らせが出てしまう
+  it("出し終えた知らせのクエリは URL から外す", () => {
+    expect(
+      accountSearchWithoutNoticeKeys(
+        "?tab=account&saved=profile-name&savedAt=1",
+        ACCOUNT_SAVED_NOTICE_PARAMS
+      )
+    ).toBe("?tab=account");
+    expect(
+      accountSearchWithoutNoticeKeys(
+        "?updated=address-deleted",
+        ACCOUNT_UPDATED_NOTICE_PARAMS
+      )
+    ).toBe("");
+    // エラーは直すまで読めるように残す
+    expect(
+      accountSearchWithoutNoticeKeys(
+        "?tab=account&error=profile",
+        ACCOUNT_SAVED_NOTICE_PARAMS
+      )
+    ).toBe("?tab=account&error=profile");
+
+    const hookSource = readSource(
+      "components/commerce/useAccountSavedNotice.ts"
+    );
+    const noticeSource = readSource("components/commerce/AccountNotice.tsx");
+
+    // 履歴を増やすと戻るボタンの行き先が変わる
+    expect(hookSource).toContain("window.history.replaceState");
+    expect(noticeSource).toContain("window.history.replaceState");
+  });
+
+  /*
+    Shopify は書き込んだ直後の読み出しで前の値を返すことがある。
+    そのまま戻すと、保存できたのにフォームに前の値が出る。
+  */
+  it("保存した内容が読めるまで待ってから画面へ戻す", () => {
+    const shopifySource = readSource("lib/shopify/customer-account.ts");
+    const profileSource = readSource(
+      "app/api/shopify/customer/profile/route.ts"
+    );
+    const addressSource = readSource(
+      "app/api/shopify/customer/address/route.ts"
+    );
+
+    expect(shopifySource).toContain(
+      "export async function readAfterCustomerUpdate"
+    );
+    // 保存ボタンを押した直後の待ちなので、長く待たせない
+    expect(shopifySource).toContain(
+      "const CUSTOMER_UPDATE_RETRY_MS = [150, 300, 600]"
+    );
+    expect(profileSource).toContain("readAfterCustomerUpdate");
+    expect(profileSource).toContain("=== input.firstName");
+    expect(addressSource).toContain("readAfterCustomerUpdate");
   });
 
   // 住所は欄が多く、書き終える前に Enter を押してしまう

@@ -13,6 +13,8 @@ import {
 } from "@/lib/commerce/account-page";
 import {
   deleteCustomerAddress,
+  fetchCustomerAccount,
+  readAfterCustomerUpdate,
   saveCustomerAddress,
   setDefaultCustomerAddress,
 } from "@/lib/shopify/customer-account";
@@ -59,8 +61,17 @@ export async function POST(request: Request) {
 
       if (intent === "default") {
         await setDefaultCustomerAddress(session.accessToken, addressId);
+        await readAfterCustomerUpdate(
+          () => fetchCustomerAccount(session.accessToken),
+          (current) => current.defaultAddress?.id === addressId
+        );
       } else {
         await deleteCustomerAddress(session.accessToken, addressId);
+        await readAfterCustomerUpdate(
+          () => fetchCustomerAccount(session.accessToken),
+          (current) =>
+            !current.addresses.nodes.some((node) => node.id === addressId)
+        );
       }
 
       listUrl.searchParams.set("updated", updatedKey);
@@ -86,13 +97,30 @@ export async function POST(request: Request) {
     });
     const { addressId: savedAddressId, phoneNumber, ...address } = parsed;
 
-    await saveCustomerAddress(session.accessToken, {
+    const saved = await saveCustomerAddress(session.accessToken, {
       addressId: savedAddressId,
       // 空で送られたら null。消したいときに消せるようにする
       address: { ...address, phoneNumber: toShopifyJapanPhoneNumber(phoneNumber) },
       // 既定にするかはフォームのチェックで決める（1 件目は既定で入る）
       defaultAddress: formData.get("defaultAddress") === "on",
     });
+
+    // 保存した住所が読めるようになってから戻す。すぐ戻すと前の内容が出る
+    const savedId = saved?.id;
+    if (savedId) {
+      await readAfterCustomerUpdate(
+        () => fetchCustomerAccount(session.accessToken),
+        (current) => {
+          const node = current.addresses.nodes.find(
+            (candidate) => candidate.id === savedId
+          );
+          return (
+            (node?.address1 ?? "") === address.address1 &&
+            (node?.zip ?? "") === address.zip
+          );
+        }
+      );
+    }
 
     // 押したフォームのその場に結果を出すので、どのフォームだったかを返す
     const notice = formData.get("notice");
