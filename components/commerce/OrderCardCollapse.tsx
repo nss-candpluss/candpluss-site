@@ -104,7 +104,7 @@ export function OrderCardCollapse({ children }: { children: ReactNode }) {
       </div>
 
       {collapsedHeight === null ? null : (
-        <div className="mt-6 flex justify-center">
+        <div className="mt-[clamp(28px,calc(48px*var(--gap-scale-y)),48px)] flex justify-center">
           <button
             type="button"
             aria-controls={contentId}

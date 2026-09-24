@@ -589,8 +589,11 @@ function OrderLineItems({
 }
 
 function OrderPaymentMethods({
+  status,
   transactions,
 }: {
+  /** バッジと同じ支払い状況。どの手段がどうなっているかを 1 行で読ませる */
+  status?: string;
   transactions: CustomerOrderDetail["transactions"];
 }) {
   const methods = accountOrderPaymentMethods(transactions ?? []);
@@ -619,7 +622,9 @@ function OrderPaymentMethods({
               className="h-[18px] w-[28px] object-contain"
             />
           ) : null}
-          <p className={`font-body-ja ${bodyText(15)}`}>{method.label}</p>
+          <p className={`font-body-ja ${bodyText(15)}`}>
+            {status ? `${method.label}：${status}` : method.label}
+          </p>
         </li>
       ))}
     </ul>
@@ -1062,7 +1067,10 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
             </OrderSidebarSection>
 
             <OrderSidebarSection title="決済方法">
-              <OrderPaymentMethods transactions={order.transactions} />
+              <OrderPaymentMethods
+                status={paymentStatus?.label}
+                transactions={order.transactions}
+              />
             </OrderSidebarSection>
 
             <OrderSidebarSection title="ご請求先">

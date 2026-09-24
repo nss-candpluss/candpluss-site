@@ -461,6 +461,9 @@ describe("注文履歴の商品行", () => {
     expect(source).toContain("領収書を見る");
     expect(source).toContain("決済方法");
     expect(source).toContain("accountOrderPaymentMethods");
+    // 決済方法は「銀行振込：ご入金確認中」のように支払い状況まで見せる
+    expect(source).toContain("`${method.label}：${status}`");
+    expect(source).toContain("status={paymentStatus?.label}");
     expect(source).toContain("ご請求先");
     expect(source).toContain("order.billingAddress");
     expect(source).not.toContain(">請求先<");
