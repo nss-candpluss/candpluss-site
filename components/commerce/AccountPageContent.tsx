@@ -9,6 +9,7 @@ import {
 import { FieldNote } from "@/components/commerce/AccountFieldNote";
 import { AccountNotice } from "@/components/commerce/AccountNotice";
 import { AccountTabs } from "@/components/commerce/AccountTabs";
+import { OrderCardCollapse } from "@/components/commerce/OrderCardCollapse";
 import { AccountUpdateForm } from "@/components/commerce/AccountUpdateForm";
 import { Container } from "@/components/ui/Container";
 import { SiteGrid } from "@/components/ui/SiteGrid";
@@ -528,6 +529,8 @@ function OrderLineItems({
         return (
           <li
             key={`${lineItem.id}-${quantity}`}
+            // 折りたたんだ高さを決めるとき、この行を目印にする
+            data-order-line=""
             className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-[26px] gap-y-4"
           >
             {/* 画面幅に合わせて 96px から 280px まで広げる */}
@@ -970,93 +973,98 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
         </div>
       </div>
 
-      {/* 見出しと中身の間は、枠とコンテンツの間と同じだけ空ける */}
-      <div className="mt-[clamp(24px,calc(48px*var(--gap-scale-y)),48px)] grid gap-x-[clamp(24px,calc(48px*var(--gap-scale-x)),48px)] gap-y-[calc(32px*var(--gap-scale-y))] min-[1025px]:grid-cols-[minmax(0,1fr)_minmax(0,380px)]">
-        <OrderPurchasedItems order={order} />
+      <OrderCardCollapse>
+        {/* 見出しと中身の間は、枠とコンテンツの間と同じだけ空ける */}
+        <div className="mt-[clamp(24px,calc(48px*var(--gap-scale-y)),48px)] grid gap-x-[clamp(24px,calc(48px*var(--gap-scale-x)),48px)] gap-y-[calc(32px*var(--gap-scale-y))] min-[1025px]:grid-cols-[minmax(0,1fr)_minmax(0,380px)]">
+          <OrderPurchasedItems order={order} />
 
-        {/* 1 列に畳んだときは、購入商品との境目にも線を引く */}
-        <div className="flex flex-col border-t border-[var(--color-divider)] pt-[clamp(20px,calc(32px*var(--gap-scale-y)),32px)] min-[1025px]:border-t-0 min-[1025px]:pt-0">
-          <OrderAmountSummary order={order} showRefunded={optional.showRefunded} />
+          {/* 1 列に畳んだときは、購入商品との境目にも線を引く */}
+          <div className="flex flex-col border-t border-[var(--color-divider)] pt-[clamp(20px,calc(32px*var(--gap-scale-y)),32px)] min-[1025px]:border-t-0 min-[1025px]:pt-0">
+            <OrderAmountSummary
+              order={order}
+              showRefunded={optional.showRefunded}
+            />
 
-          {optional.showAnyDetail ? (
-            <OrderSidebarSection>
-              <SidebarFieldList>
-                {optional.showUpdatedAt ? (
-                  <SidebarField
-                    label="更新日時"
-                    value={formatDateTime(order.updatedAt)}
-                  />
-                ) : null}
-                {optional.showCancelledAt ? (
-                  <SidebarField
-                    label="キャンセル日時"
-                    value={formatDateTime(order.cancelledAt)}
-                  />
-                ) : null}
-                {optional.showCancelReason ? (
-                  <SidebarField
-                    label="キャンセル理由"
-                    value={formatText(order.cancelReason)}
-                  />
-                ) : null}
-                {optional.showEdited ? (
-                  <SidebarField label="編集済み" value="はい" />
-                ) : null}
-                {optional.showNote ? (
-                  <SidebarField label="備考" value={formatText(order.note)} />
-                ) : null}
-                {optional.showPoNumber ? (
-                  <SidebarField
-                    label="発注番号"
-                    value={formatText(order.poNumber)}
-                  />
-                ) : null}
-                {optional.showLocationName ? (
-                  <SidebarField
-                    label="出荷元"
-                    value={formatText(order.locationName)}
-                  />
-                ) : null}
-              </SidebarFieldList>
+            {optional.showAnyDetail ? (
+              <OrderSidebarSection>
+                <SidebarFieldList>
+                  {optional.showUpdatedAt ? (
+                    <SidebarField
+                      label="更新日時"
+                      value={formatDateTime(order.updatedAt)}
+                    />
+                  ) : null}
+                  {optional.showCancelledAt ? (
+                    <SidebarField
+                      label="キャンセル日時"
+                      value={formatDateTime(order.cancelledAt)}
+                    />
+                  ) : null}
+                  {optional.showCancelReason ? (
+                    <SidebarField
+                      label="キャンセル理由"
+                      value={formatText(order.cancelReason)}
+                    />
+                  ) : null}
+                  {optional.showEdited ? (
+                    <SidebarField label="編集済み" value="はい" />
+                  ) : null}
+                  {optional.showNote ? (
+                    <SidebarField label="備考" value={formatText(order.note)} />
+                  ) : null}
+                  {optional.showPoNumber ? (
+                    <SidebarField
+                      label="発注番号"
+                      value={formatText(order.poNumber)}
+                    />
+                  ) : null}
+                  {optional.showLocationName ? (
+                    <SidebarField
+                      label="出荷元"
+                      value={formatText(order.locationName)}
+                    />
+                  ) : null}
+                </SidebarFieldList>
+              </OrderSidebarSection>
+            ) : null}
+
+            <OrderSidebarSection title="発送情報">
+              <OrderFulfillments fulfillments={order.fulfillments.nodes} />
             </OrderSidebarSection>
-          ) : null}
 
-          <OrderSidebarSection title="発送情報">
-            <OrderFulfillments fulfillments={order.fulfillments.nodes} />
-          </OrderSidebarSection>
+            <OrderSidebarSection title="お届け先">
+              <OrderAddressBlock address={order.shippingAddress} />
+            </OrderSidebarSection>
 
-          <OrderSidebarSection title="お届け先">
-            <OrderAddressBlock address={order.shippingAddress} />
-          </OrderSidebarSection>
+            <OrderSidebarSection title="決済方法">
+              <OrderPaymentMethods transactions={order.transactions} />
+            </OrderSidebarSection>
 
-          <OrderSidebarSection title="決済方法">
-            <OrderPaymentMethods transactions={order.transactions} />
-          </OrderSidebarSection>
-
-          <OrderSidebarSection title="ご請求先">
-            <OrderAddressBlock address={order.billingAddress} />
-            <Link
-              href={accountReceiptHref(order.id)}
-              className={`mt-3 inline-flex border-b border-current font-body-ja ${uiText(14)}`}
-            >
-              領収書を見る
-            </Link>
-          </OrderSidebarSection>
+            <OrderSidebarSection title="ご請求先">
+              <OrderAddressBlock address={order.billingAddress} />
+              <Link
+                href={accountReceiptHref(order.id)}
+                className={`mt-3 inline-flex border-b border-current font-body-ja ${uiText(14)}`}
+              >
+                領収書を見る
+              </Link>
+            </OrderSidebarSection>
+          </div>
         </div>
-      </div>
 
-      <p
-        className={`mt-[clamp(24px,calc(48px*var(--gap-scale-y)),48px)] font-body-ja text-[var(--color-muted)] ${bodyText(14)}`}
-      >
-        ※ご購入いただいた商品のキャンセル・返品をご希望の場合は、
-        <Link
-          href="/contact"
-          className={`${bodyLinkUnderlineClassName} text-[var(--foreground)]`}
+        <p
+          className={`mt-[clamp(24px,calc(48px*var(--gap-scale-y)),48px)] font-body-ja text-[var(--color-muted)] ${bodyText(14)}`}
         >
-          お問い合わせフォーム
-        </Link>
-        より、ご注文番号を明記のうえお問い合わせください。
-      </p>
+          ※ご購入いただいた商品のキャンセル・返品、その他ご注文に関するお問い合わせは、
+          <Link
+            href="/contact"
+            className={`${bodyLinkUnderlineClassName} text-[var(--foreground)]`}
+          >
+            お問い合わせフォーム
+          </Link>
+          より、ご注文番号を明記のうえご相談ください。
+        </p>
+      </OrderCardCollapse>
     </li>
   );
 }

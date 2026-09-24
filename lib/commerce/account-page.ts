@@ -333,39 +333,47 @@ export function formatAccountAddressLine(address: {
 }
 
 const ACCOUNT_FINANCIAL_STATUS_JA: Record<string, string> = {
-  AUTHORIZED: "与信済み",
-  EXPIRED: "期限切れ",
+  AUTHORIZED: "お支払い確定前",
+  // 銀行振込の入金期限と読み違えられないよう、カードの話だと明示する
+  EXPIRED: "カード決済の期限切れ",
   PAID: "お支払い済み",
   PARTIALLY_PAID: "一部入金",
   PARTIALLY_REFUNDED: "一部返金",
   PENDING: "お支払い待ち",
   REFUNDED: "返金済み",
-  VOIDED: "無効",
+  VOIDED: "お支払い取消",
 };
 
 /** 発送前は、発送情報の欄と同じ「発送準備中」で揃える */
 const ACCOUNT_FULFILLMENT_STATUS_JA: Record<string, string> = {
   FULFILLED: "発送済み",
   IN_PROGRESS: "発送準備中",
-  ON_HOLD: "保留",
+  ON_HOLD: "発送保留中",
   OPEN: "発送準備中",
   PARTIALLY_FULFILLED: "一部発送",
   PENDING_FULFILLMENT: "発送準備中",
-  RESTOCKED: "在庫戻し",
+  RESTOCKED: "ご注文取消",
   SCHEDULED: "発送予定",
   UNFULFILLED: "発送準備中",
 };
 
+/**
+ * 運送会社の配送状況。
+ *
+ * CONFIRMED / LABEL_PURCHASED / LABEL_PRINTED は、お客様から見れば
+ * どれも「出荷情報は登録されたが、まだ集荷されていない」段階なので
+ * 「発送手配済み」にまとめる。
+ */
 const ACCOUNT_SHIPMENT_STATUS_JA: Record<string, string> = {
-  ATTEMPTED_DELIVERY: "配達を試みました",
+  ATTEMPTED_DELIVERY: "ご不在でした",
   CARRIER_PICKED_UP: "集荷済み",
-  CONFIRMED: "配送確認済み",
+  CONFIRMED: "発送手配済み",
   DELAYED: "遅延",
   DELIVERED: "配達済み",
   FAILURE: "配送失敗",
   IN_TRANSIT: "輸送中",
-  LABEL_PRINTED: "伝票発行済み",
-  LABEL_PURCHASED: "伝票購入済み",
+  LABEL_PRINTED: "発送手配済み",
+  LABEL_PURCHASED: "発送手配済み",
   OUT_FOR_DELIVERY: "配達中",
   PICKED_UP: "受け取り済み",
   READY_FOR_PICKUP: "受け取り準備完了",
@@ -484,12 +492,15 @@ const ACCOUNT_DONE_STATUSES = new Set([
   "PICKED_UP",
 ]);
 
+/**
+ * 発送保留は在庫待ちなど運営都合のことも多いので、赤にはしない。
+ * お客様に動いてほしい、または取引が成立しなかったものだけを赤にする。
+ */
 const ACCOUNT_ALERT_STATUSES = new Set([
   "ATTEMPTED_DELIVERY",
   "DELAYED",
   "EXPIRED",
   "FAILURE",
-  "ON_HOLD",
   "RESTOCKED",
   "VOIDED",
 ]);

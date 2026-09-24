@@ -375,9 +375,16 @@ describe("注文履歴の商品行", () => {
       accountOrderPaymentDisplay("PENDING", [{ type: "BANK_DEPOSIT" }])
     ).toEqual({ label: "ご入金確認中", tone: "waiting" });
     expect(accountOrderPaymentDisplay("VOIDED", [])).toEqual({
-      label: "無効",
+      label: "お支払い取消",
       tone: "alert",
     });
+    // 発送保留は在庫待ちなど運営都合が多いので、進行中と同じ扱いにする
+    expect(
+      accountOrderShipmentDisplay({
+        fulfillmentStatus: "ON_HOLD",
+        fulfillments: { nodes: [] },
+      })
+    ).toEqual({ label: "発送保留中", tone: "active" });
     expect(accountOrderPaymentDisplay(null, [])).toBeNull();
     // 配達を試みたまま止まっているのは、お客様に動いてほしい状態
     expect(
@@ -387,7 +394,7 @@ describe("注文履歴の商品行", () => {
           nodes: [{ latestShipmentStatus: "ATTEMPTED_DELIVERY" }],
         },
       })
-    ).toEqual({ label: "配達を試みました", tone: "alert" });
+    ).toEqual({ label: "ご不在でした", tone: "alert" });
     // 運送会社が動き出したら、注文したままの状態とは色を変える
     expect(
       accountOrderShipmentDisplay({
@@ -396,9 +403,13 @@ describe("注文履歴の商品行", () => {
       })
     ).toEqual({ label: "輸送中", tone: "active" });
     expect(accountOrderPaymentDisplay("AUTHORIZED", [])).toEqual({
-      label: "与信済み",
+      label: "お支払い確定前",
       tone: "active",
     });
+    // 集荷前の3つは、お客様から見ると同じ状態なのでまとめる
+    expect(formatAccountShipmentStatus("CONFIRMED")).toBe("発送手配済み");
+    expect(formatAccountShipmentStatus("LABEL_PURCHASED")).toBe("発送手配済み");
+    expect(formatAccountShipmentStatus("LABEL_PRINTED")).toBe("発送手配済み");
   });
 
   it("注文履歴から内部用の常時表示項目を外す", () => {
@@ -438,7 +449,7 @@ describe("注文履歴の商品行", () => {
     expect(source).toContain("配送履歴");
     // 同じ内容を Shopify のページで見せ直さず、問い合わせ導線だけ置く
     expect(source).not.toContain("statusPageUrl");
-    expect(source).toContain("キャンセル・返品をご希望の場合");
+    expect(source).toContain("キャンセル・返品、その他ご注文に関するお問い合わせ");
     expect(source).toContain('href="/contact"');
     // 発送の社内管理項目はお客様には出さない
     expect(source).not.toContain('label="発送 ID"');
@@ -484,6 +495,32 @@ describe("注文履歴の商品行", () => {
     expect(source).not.toContain(' / 都道府県コード"');
     expect(source).not.toContain(' / エリア表記"');
     expect(source).not.toContain(' / 整形済み住所"');
+  });
+
+  it("注文カードは既定で折りたたみ、続きがあることを見せる", () => {
+    const card = readSource("components/commerce/AccountPageContent.tsx");
+    const collapse = readSource("components/commerce/OrderCardCollapse.tsx");
+
+    // 見出しは残したまま、中身だけを畳む
+    expect(card).toContain("<OrderCardCollapse>");
+    expect(card).toContain("data-order-line");
+    expect(card.indexOf("ご注文番号：")).toBeLessThan(
+      card.indexOf("<OrderCardCollapse>")
+    );
+
+    expect(collapse).toContain('"use client"');
+    // 既定は閉じた状態
+    expect(collapse).toContain("useState(false)");
+    // 2 つ目の画像が半分見えるところで切る
+    expect(collapse).toContain("[data-order-line]");
+    expect(collapse).toContain("halfImage");
+    // 切れ目は白へのグラデーションでぼかす
+    expect(collapse).toContain("linear-gradient(to_bottom,transparent,#fff)");
+    expect(collapse).toContain("すべて表示");
+    expect(collapse).toContain("閉じる");
+    expect(collapse).toContain("aria-expanded");
+    // 画面幅で画像の大きさが変わるので測り直す
+    expect(collapse).toContain("ResizeObserver");
   });
 
   it("お届け先は氏名と1行の住所にする", () => {
