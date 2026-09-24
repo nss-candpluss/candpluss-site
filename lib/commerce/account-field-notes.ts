@@ -3,7 +3,7 @@
  */
 export const accountMemberCopy = {
   accountDetails: {
-    title: "アカウント設定",
+    title: "アカウント情報",
     name: "会員登録のお名前です。このページで変更できます。",
     email: "ログインとご案内に使うメールアドレスです。",
     emailChange: "メールアドレスを変更する",
@@ -15,7 +15,7 @@ export const accountMemberCopy = {
       "ログインにパスワードはありません。メールに届く確認コードでサインインします。メールアドレスを変えると、ログイン先も変わります。",
   },
   notifications: {
-    title: "お知らせ",
+    title: "お知らせに関する設定",
     emailMarketing: "お知らせメールの配信設定です。このページで変更できます。",
   },
   /*
