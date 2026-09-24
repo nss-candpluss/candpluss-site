@@ -460,13 +460,22 @@ export function formatAccountFinancialStatus(value?: string | null) {
 /**
  * バッジの色分け。
  *
- * done は終わって手が離れたもの、alert は確認や対応が要るもの、
- * neutral は進行中。Shopify のコードで判定するので、日本語を変えても
- * 色は変わらない。
+ * waiting は注文したままでまだ何も動いていない状態、active は動き出したが
+ * まだ終わっていない状態、done は終わったもの、alert は確認や対応が要るもの。
+ * Shopify のコードで判定するので、日本語を変えても色は変わらない。
  */
-export type AccountStatusTone = "done" | "alert" | "neutral";
+export type AccountStatusTone = "waiting" | "active" | "done" | "alert";
 
 export type AccountStatusDisplay = { label: string; tone: AccountStatusTone };
+
+/** 注文したときのまま動いていない状態 */
+const ACCOUNT_WAITING_STATUSES = new Set([
+  "IN_PROGRESS",
+  "OPEN",
+  "PENDING",
+  "PENDING_FULFILLMENT",
+  "UNFULFILLED",
+]);
 
 const ACCOUNT_DONE_STATUSES = new Set([
   "DELIVERED",
@@ -488,15 +497,15 @@ const ACCOUNT_ALERT_STATUSES = new Set([
 function accountStatusTone(code?: string | null): AccountStatusTone {
   const key = code?.trim().toUpperCase();
 
-  if (!key) {
-    return "neutral";
+  if (!key || ACCOUNT_WAITING_STATUSES.has(key)) {
+    return "waiting";
   }
 
   if (ACCOUNT_DONE_STATUSES.has(key)) {
     return "done";
   }
 
-  return ACCOUNT_ALERT_STATUSES.has(key) ? "alert" : "neutral";
+  return ACCOUNT_ALERT_STATUSES.has(key) ? "alert" : "active";
 }
 
 /** 銀行振込で入金確認前は「ご入金確認中」。それ以外の PENDING は「お支払い待ち」 */

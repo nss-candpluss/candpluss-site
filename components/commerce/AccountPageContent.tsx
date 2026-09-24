@@ -676,11 +676,12 @@ function OrderAmountSummary({
   );
 }
 
-/** 終わったものは黒、確認が要るものは赤、進行中は薄いグレー */
+/** 待ちは薄いグレー、動き出したら濃いグレー、終わったら黒、要対応は赤 */
 const ORDER_STATUS_BADGE_TONE: Record<AccountStatusTone, string> = {
+  active: "bg-[#cfcfcf] text-[var(--foreground)]",
   alert: "bg-[#fbeaed] text-[#9b1b30]",
   done: "bg-[var(--foreground)] text-white",
-  neutral: "bg-[#f1f1f1] text-[var(--foreground)]",
+  waiting: "bg-[#f1f1f1] text-[var(--foreground)]",
 };
 
 function OrderStatusBadge({ status }: { status: AccountStatusDisplay }) {

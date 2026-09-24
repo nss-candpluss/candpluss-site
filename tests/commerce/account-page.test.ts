@@ -333,13 +333,13 @@ describe("注文履歴の商品行", () => {
         fulfillmentStatus: "UNFULFILLED",
         fulfillments: { nodes: [] },
       })
-    ).toEqual({ label: "発送準備中", tone: "neutral" });
+    ).toEqual({ label: "発送準備中", tone: "waiting" });
     expect(
       accountOrderShipmentDisplay({
         fulfillmentStatus: "FULFILLED",
         fulfillments: { nodes: [{ latestShipmentStatus: "OUT_FOR_DELIVERY" }] },
       })
-    ).toEqual({ label: "配達中", tone: "neutral" });
+    ).toEqual({ label: "配達中", tone: "active" });
     // 個口ごとに状況が違うなら、注文全体の発送状態で伝える
     expect(
       accountOrderShipmentDisplay({
@@ -351,7 +351,7 @@ describe("注文履歴の商品行", () => {
           ],
         },
       })
-    ).toEqual({ label: "一部発送", tone: "neutral" });
+    ).toEqual({ label: "一部発送", tone: "active" });
     // 全部の個口が同じ状況なら、その状況を出してよい
     expect(
       accountOrderShipmentDisplay({
@@ -373,7 +373,7 @@ describe("注文履歴の商品行", () => {
     });
     expect(
       accountOrderPaymentDisplay("PENDING", [{ type: "BANK_DEPOSIT" }])
-    ).toEqual({ label: "ご入金確認中", tone: "neutral" });
+    ).toEqual({ label: "ご入金確認中", tone: "waiting" });
     expect(accountOrderPaymentDisplay("VOIDED", [])).toEqual({
       label: "無効",
       tone: "alert",
@@ -388,6 +388,17 @@ describe("注文履歴の商品行", () => {
         },
       })
     ).toEqual({ label: "配達を試みました", tone: "alert" });
+    // 運送会社が動き出したら、注文したままの状態とは色を変える
+    expect(
+      accountOrderShipmentDisplay({
+        fulfillmentStatus: "FULFILLED",
+        fulfillments: { nodes: [{ latestShipmentStatus: "IN_TRANSIT" }] },
+      })
+    ).toEqual({ label: "輸送中", tone: "active" });
+    expect(accountOrderPaymentDisplay("AUTHORIZED", [])).toEqual({
+      label: "与信済み",
+      tone: "active",
+    });
   });
 
   it("注文履歴から内部用の常時表示項目を外す", () => {
