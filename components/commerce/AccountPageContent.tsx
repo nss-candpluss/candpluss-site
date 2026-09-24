@@ -69,8 +69,8 @@ import {
 } from "@/lib/typography";
 import { ContactField } from "@/sections/contact/ContactField";
 import {
+  contactCheckboxBoxClassName,
   contactSelectChevronClassName,
-  getContactCheckboxClassName,
   getContactFloatingSelectClassName,
   getContactFloatingSelectStyle,
 } from "@/sections/contact/contactStyles";
@@ -258,8 +258,9 @@ function EmailMarketingForm({ profile }: { profile: CustomerAccount }) {
             defaultChecked={isEmailMarketingSubscribed(
               profile.emailAddress?.marketingState
             )}
-            className={getContactCheckboxClassName()}
+            className="peer sr-only"
           />
+          <span aria-hidden="true" className={contactCheckboxBoxClassName} />
           <span className={`font-body-ja text-[var(--foreground)] ${uiText(14)}`}>
             メールマガジンを受け取る
           </span>
@@ -453,8 +454,9 @@ function AddressForm({
             type="checkbox"
             name="defaultAddress"
             defaultChecked={isDefault}
-            className={getContactCheckboxClassName()}
+            className="peer sr-only"
           />
+          <span aria-hidden="true" className={contactCheckboxBoxClassName} />
           <span className={`font-body-ja text-[var(--foreground)] ${uiText(14)}`}>
             この住所を既定にする
           </span>

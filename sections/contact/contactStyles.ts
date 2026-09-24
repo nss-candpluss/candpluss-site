@@ -43,6 +43,13 @@ export function getContactFloatingSelectStyle(hasValue: boolean): CSSProperties 
 export const contactSelectChevronClassName =
   "pointer-events-none absolute top-1/2 right-[clamp(14px,calc(20px*var(--gap-scale-x)),20px)] size-[calc(10px*var(--text-scale))] -translate-y-[70%] rotate-45 border-r border-b border-[var(--foreground)]";
 
+/**
+ * お問い合わせフォームのチェックボックスの見た目。
+ * 実際の input は `peer sr-only` で隠し、直後の span にこれを当てる。
+ */
+export const contactCheckboxBoxClassName =
+  "relative size-[max(24px,calc(24px*var(--text-scale)))] shrink-0 rounded-[calc(5px*var(--text-scale))] border border-[var(--color-divider)] bg-white transition-colors after:absolute after:top-[calc(50%-1px)] after:left-1/2 after:h-[58%] after:w-[30%] after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-r-[2px] after:border-b-[2px] after:border-white after:opacity-0 after:content-[''] peer-checked:border-[var(--foreground)] peer-checked:bg-[var(--foreground)] peer-checked:after:opacity-100 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--foreground)]";
+
 export function getContactCheckboxClassName(status: ContactFieldStatus = "idle"): string {
   const base =
     "mt-[calc(4px*var(--gap-scale-y))] size-[calc(16px*var(--text-scale))] shrink-0 accent-[var(--foreground)]";

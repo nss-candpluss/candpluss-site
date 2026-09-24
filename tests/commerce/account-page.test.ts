@@ -1000,6 +1000,13 @@ describe("会員ページの画面構成", () => {
     expect(source).toContain("EmailMarketingForm");
     expect(source).toContain('name="emailMarketing"');
     expect(source).toContain("isEmailMarketingSubscribed");
+    // チェックボックスはお問い合わせフォームと同じ見た目にする
+    expect(source).not.toContain("getContactCheckboxClassName");
+    expect(source.match(/className="peer sr-only"/g)).toHaveLength(2);
+    expect(source.match(/className=\{contactCheckboxBoxClassName\}/g)).toHaveLength(2);
+    expect(readSource("sections/contact/contactStyles.ts")).toContain(
+      "export const contactCheckboxBoxClassName"
+    );
     expect(source).toContain("getShopifyCustomerProfileUrl");
     // 区画の見出しは、注文カードのご注文番号と同じ大きさで揃える
     expect(source).toContain(
