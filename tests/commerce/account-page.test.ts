@@ -402,7 +402,7 @@ describe("注文履歴の商品行", () => {
     expect(source).toContain("配送履歴");
     // 同じ内容を Shopify のページで見せ直さず、問い合わせ導線だけ置く
     expect(source).not.toContain("statusPageUrl");
-    expect(source).toContain("キャンセルまたは返品についてのお問い合わせ");
+    expect(source).toContain("キャンセル・返品をご希望の場合");
     expect(source).toContain('href="/contact"');
     // 発送の社内管理項目はお客様には出さない
     expect(source).not.toContain('label="発送 ID"');

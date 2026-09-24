@@ -929,31 +929,32 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
 
   return (
     <li className="rounded-[16px] border border-[var(--color-divider)] bg-white px-[clamp(24px,calc(48px*var(--gap-scale-x)),48px)] py-[clamp(24px,calc(48px*var(--gap-scale-y)),48px)] shadow-[0_0_16px_rgba(0,0,0,0.08)]">
-      <div>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+      {/* 入りきらないときは、バッジ 2 つがひと塊で注文日時の下へ回る */}
+      <div className="flex flex-wrap items-center gap-x-[32px] gap-y-4">
+        <div>
           <p className={`font-body-ja font-semibold ${uiText(20)}`}>
             ご注文番号：{order.name}
           </p>
-          {/* 入りきらないときはバッジだけ 1 つの塊で次の行へ送る */}
-          {paymentStatus || shipmentStatus ? (
-            <div className="flex items-center gap-x-3">
-              {paymentStatus ? (
-                <OrderStatusBadge>{paymentStatus}</OrderStatusBadge>
-              ) : null}
-              {shipmentStatus ? (
-                <OrderStatusBadge>{shipmentStatus}</OrderStatusBadge>
-              ) : null}
-            </div>
+          {orderedAt ? (
+            <p className={`mt-2 font-body-ja ${uiText(14)}`}>
+              ご注文日時：{orderedAt}
+            </p>
           ) : null}
         </div>
-        {orderedAt ? (
-          <p className={`mt-2 font-body-ja ${uiText(14)}`}>
-            ご注文日時：{orderedAt}
-          </p>
+        {paymentStatus || shipmentStatus ? (
+          <div className="flex items-center gap-x-2">
+            {paymentStatus ? (
+              <OrderStatusBadge>{paymentStatus}</OrderStatusBadge>
+            ) : null}
+            {shipmentStatus ? (
+              <OrderStatusBadge>{shipmentStatus}</OrderStatusBadge>
+            ) : null}
+          </div>
         ) : null}
       </div>
 
-      <div className="mt-6 grid gap-x-[clamp(24px,calc(48px*var(--gap-scale-x)),48px)] gap-y-[calc(32px*var(--gap-scale-y))] min-[1025px]:grid-cols-[minmax(0,1fr)_minmax(0,380px)]">
+      {/* 見出しと中身の間は、枠とコンテンツの間と同じだけ空ける */}
+      <div className="mt-[clamp(24px,calc(48px*var(--gap-scale-y)),48px)] grid gap-x-[clamp(24px,calc(48px*var(--gap-scale-x)),48px)] gap-y-[calc(32px*var(--gap-scale-y))] min-[1025px]:grid-cols-[minmax(0,1fr)_minmax(0,380px)]">
         <OrderPurchasedItems order={order} />
 
         {/* 1 列に畳んだときは、購入商品との境目にも線を引く */}
@@ -1030,14 +1031,14 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
       <p
         className={`mt-[clamp(24px,calc(48px*var(--gap-scale-y)),48px)] font-body-ja text-[var(--color-muted)] ${bodyText(14)}`}
       >
-        ご購入いただいた商品のキャンセルまたは返品についてのお問い合わせは、ご注文番号を記載の上、
+        ※ご購入いただいた商品のキャンセル・返品をご希望の場合は、
         <Link
           href="/contact"
           className={`${bodyLinkUnderlineClassName} text-[var(--foreground)]`}
         >
-          こちら
+          お問い合わせフォーム
         </Link>
-        よりお問い合わせください。
+        より、ご注文番号を明記のうえお問い合わせください。
       </p>
     </li>
   );
