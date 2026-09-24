@@ -606,17 +606,20 @@ function OrderPaymentMethods({
     );
   }
 
-  // 手が必要な状況は目に留まるよう、手段の下に赤で置く
-  const alert = status?.tone === "alert" ? status.label : null;
+  const isAlert = status?.tone === "alert";
 
   return (
     <ul className="mt-3 flex flex-col gap-2">
       {methods.map((method) => {
         // カードは決済が通っていれば、状況をわざわざ書かない
-        const inlineStatus =
-          alert || !status || (method.isCard && status.tone === "done")
-            ? null
-            : status.label;
+        const shownStatus =
+          status && !(method.isCard && status.tone === "done") ? status : null;
+        /*
+          カードは普段どおりなら状況を出さないので、手が必要になったときだけ
+          手段の下に赤で足す。振込は元から状況を並べているので、その行を赤くする。
+        */
+        const statusBelow = shownStatus && isAlert && method.isCard;
+        const inlineStatus = statusBelow ? null : shownStatus?.label;
 
         return (
           <li key={method.id} className="flex flex-col gap-1">
@@ -633,13 +636,17 @@ function OrderPaymentMethods({
                   className="h-[18px] w-[28px] object-contain"
                 />
               ) : null}
-              <p className={`font-body-ja ${bodyText(15)}`}>
+              <p
+                className={`font-body-ja ${bodyText(15)} ${
+                  inlineStatus && isAlert ? "text-[#9b1b30]" : ""
+                }`}
+              >
                 {inlineStatus ? `${method.label}：${inlineStatus}` : method.label}
               </p>
             </div>
-            {alert ? (
+            {statusBelow ? (
               <p className={`font-body-ja text-[#9b1b30] ${bodyText(15)}`}>
-                {alert}
+                {shownStatus.label}
               </p>
             ) : null}
           </li>

@@ -464,9 +464,10 @@ describe("注文履歴の商品行", () => {
     // 決済方法は「銀行振込：ご入金確認中」のように支払い状況まで見せる
     expect(source).toContain("`${method.label}：${inlineStatus}`");
     expect(source).toContain("status={paymentStatus}");
-    // 通ったカードに状況は要らない。手が必要なときだけ下に赤で出す
+    // 通ったカードに状況は要らない。カードだけ、要対応を下に赤で出す
     expect(source).toContain('method.isCard && status.tone === "done"');
     expect(source).toContain('status?.tone === "alert"');
+    expect(source).toContain("shownStatus && isAlert && method.isCard");
     expect(source).toContain("text-[#9b1b30]");
     expect(source).toContain("ご請求先");
     expect(source).toContain("order.billingAddress");
@@ -636,6 +637,13 @@ describe("注文履歴の商品行", () => {
           type: "BANK_DEPOSIT",
           kind: "SALE",
           status: "PENDING",
+        },
+        // 手動の決済は受付と入金確認で取引が 2 件残る。手段は 1 つ
+        {
+          id: "tx-bank-paid",
+          type: "BANK_DEPOSIT",
+          kind: "SALE",
+          status: "SUCCESS",
         },
       ])
     ).toEqual([

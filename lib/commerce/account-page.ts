@@ -279,7 +279,7 @@ export function accountOrderPaymentMethods(
       )
     : visible;
 
-  return payments.map((transaction) => {
+  const methods = payments.map((transaction) => {
     if (isBankTransferTransaction(transaction)) {
       return {
         id: transaction.id,
@@ -314,6 +314,16 @@ export function accountOrderPaymentMethods(
       isCard: Boolean(brand),
     };
   });
+
+  /*
+    知りたいのは「何で払ったか」なので、同じ手段は 1 行にまとめる。
+    銀行振込のような手動の決済では、受付時と入金確認時で取引が 2 件残り、
+    同じ「銀行振込」が並んでしまう。
+  */
+  return methods.filter(
+    (method, index) =>
+      methods.findIndex((other) => other.label === method.label) === index
+  );
 }
 
 export function formatAccountAddressLine(address: {
