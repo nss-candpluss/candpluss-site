@@ -186,6 +186,32 @@ describe("会員画面はリリースまでテスト領域だけで開く", () =
     ).toContain("redirect(ACCOUNT_LOGIN_PATH)");
   });
 
+  /*
+    ログイン状態はサーバーで見るので、押してから中身が決まるまで間がある。
+    その間フッターが繰り上がると、画面が一度潰れて見える。
+  */
+  it("会員まわりは待っている間も画面の高さを保つ", () => {
+    // どのページも `main` を持つので、無い間だけ高さを取る。
+    // `:empty` では見分けられない。React の目印が常に残っている。
+    expect(readSource("app/layout.tsx")).toContain(
+      "not-has-[main]:min-h-svh"
+    );
+    // 公開側とテスト領域のどちらにも置く
+    expect(readSource("app/account/loading.tsx")).toContain(
+      "AccountPageFallback"
+    );
+    expect(readSource("app/shopify-test/account/loading.tsx")).toContain(
+      "AccountPageFallback"
+    );
+    /*
+      目に見える文字は置かない。
+      数百ミリ秒で消えるものが出入りすると、それ自体がちらつきになる。
+    */
+    const fallback = readSource("components/commerce/AccountPageFallback.tsx");
+    expect(fallback).toContain("min-h-svh");
+    expect(fallback).toContain('className="sr-only"');
+  });
+
   it("入口では道を分け、はじめての方だけ規約を読ませてから進める", () => {
     const source = readSource("components/commerce/AccountLoginContent.tsx");
     const gateSource = readSource("components/commerce/AccountConsentGate.tsx");

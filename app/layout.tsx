@@ -101,7 +101,18 @@ export default function RootLayout({
               <SmoothScrollProvider>
                 <HeroReturnHomeSync />
                 <Header />
-                <div className="flex-1">{children}</div>
+                {/*
+                  ページへ移る途中、中身がまだ無い一瞬がある。
+                  そのままだとフッターが繰り上がり、ヘッダーとくっついて見える。
+
+                  どのページも `main` をひとつ持つので、それが無い間だけ
+                  画面の高さを取り、フッターを画面の外に留める。
+                  `:empty` では見分けられない。React の目印が常に残っていて、
+                  中身が無くても空にはならない。
+                */}
+                <div className="flex-1 not-has-[main]:min-h-svh">
+                  {children}
+                </div>
                 <Footer />
                 <CartDialog />
               </SmoothScrollProvider>
