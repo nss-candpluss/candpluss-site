@@ -1132,9 +1132,12 @@ describe("会員ページの画面構成", () => {
       "gap-[clamp(24px,calc(32px*var(--gap-scale-y)),32px)]"
     );
 
-    // 個口が分かれていても、見出しの下の余白は 1 個口のときと同じにする
-    expect(source).toContain('isSplit ? "mt-3" : ""');
-    expect(source).not.toContain('mt-[calc(24px*var(--gap-scale-y))]"\n      }');
+    /*
+      個口の見出しの下は「サマリー → 小計」と同じだけ空けて見せる。
+      あちらは本文の行間が広く、文字の上に 5px ほど余りが乗る。
+      行間の詰まった見出しでは、その分を余白に足さないと詰まって見える。
+    */
+    expect(source).toContain('isSplit ? "mt-[18px]" : ""');
   });
 
   it("住所の操作は角丸ボタンで出す", () => {
@@ -1160,6 +1163,18 @@ describe("会員ページの画面構成", () => {
     );
     expect(controlsSource).toContain("accountPrimaryButtonClassName");
     expect(controlsSource).toContain("accountSecondaryButtonClassName");
+    /*
+      押した結果で見た目を分ける。
+      既定を移すのは保存と同じ「変える」操作なので黒。
+      住所を追加するのはフォームが開くだけなので「編集」と同じ文字リンク。
+    */
+    expect(controlsSource).toContain(
+      "className={accountPrimaryButtonClassName}\n        >\n          既定にする"
+    );
+    expect(controlsSource).toContain(
+      "className={accountTextLinkClassName}\n      >\n        住所を追加する"
+    );
+    expect(buttonSource).toContain("accountTextLinkClassName");
     // 下線テキストのままだと、隣の角丸ボタンと作法が揃わない
     expect(controlsSource).not.toContain("addressActionClassName");
   });
@@ -1396,6 +1411,12 @@ describe("会員ページの画面構成", () => {
     expect(source).not.toContain("getContactCheckboxClassName");
     // 残るチェックボックスはメール配信だけ。既定の住所はボタンで切り替える
     expect(source.match(/className="peer sr-only"/g)).toHaveLength(1);
+    /*
+      inline-flex だと行ボックスの分だけ下に余りが出て、
+      ラベルとの上下中央がずれる。
+    */
+    expect(source).toContain("flex w-fit cursor-pointer items-center");
+    expect(source).not.toContain("inline-flex cursor-pointer items-center");
     expect(source.match(/className=\{contactCheckboxBoxClassName\}/g)).toHaveLength(1);
     expect(readSource("sections/contact/contactStyles.ts")).toContain(
       "export const contactCheckboxBoxClassName"

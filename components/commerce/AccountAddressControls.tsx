@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import {
   accountPrimaryButtonClassName,
   accountSecondaryButtonClassName,
+  accountTextLinkClassName,
 } from "@/components/commerce/accountButtonStyles";
 import { AccountShallowLink } from "@/components/commerce/AccountShallowLink";
 import { useAccountSavedNotice } from "@/components/commerce/useAccountSavedNotice";
@@ -86,7 +87,12 @@ export function AccountAddressActions({
   return (
     <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
       {isDefault ? null : (
-        <AddressIntentButton addressId={addressId} intent="default">
+        // 既定を移すのは保存と同じ「変える」操作なので、保存ボタンと同じ見た目にする
+        <AddressIntentButton
+          addressId={addressId}
+          intent="default"
+          className={accountPrimaryButtonClassName}
+        >
           既定にする
         </AddressIntentButton>
       )}
@@ -128,9 +134,10 @@ export function AccountAddressAdd({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+      {/* 押してもフォームが開くだけなので、「編集」と同じ下線付きの文字で置く */}
       <AccountShallowLink
         href={accountAddressAddHref()}
-        className={accountPrimaryButtonClassName}
+        className={accountTextLinkClassName}
       >
         住所を追加する
       </AccountShallowLink>

@@ -6,6 +6,7 @@ import {
   AccountAddressActions,
   AccountAddressAdd,
 } from "@/components/commerce/AccountAddressControls";
+import { accountTextLinkClassName } from "@/components/commerce/accountButtonStyles";
 import { AccountNotice } from "@/components/commerce/AccountNotice";
 import { AccountTabs } from "@/components/commerce/AccountTabs";
 import { OrderCardCollapse } from "@/components/commerce/OrderCardCollapse";
@@ -210,7 +211,7 @@ function ShopifyChangeLink({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={`${bodyLinkUnderlineClassName} font-body-ja font-semibold text-[var(--foreground)]`}
+      className={accountTextLinkClassName}
     >
       {children}
     </a>
@@ -272,7 +273,11 @@ function EmailMarketingForm({ profile }: { profile: CustomerAccount }) {
       {/* 名前は別のフォームで変える。ここから送ると古い値で上書きする */}
       <input type="hidden" name="intent" value="emailMarketing" />
       <AccountField label="メール配信">
-        <label className="inline-flex cursor-pointer items-center gap-x-[clamp(8px,calc(12px*var(--gap-scale-x)),12px)]">
+        {/*
+          inline-flex だと行ボックスの分だけ下に余りが出て、
+          ラベルとの上下中央がずれる。flex にして余りを無くす。
+        */}
+        <label className="flex w-fit cursor-pointer items-center gap-x-[clamp(8px,calc(12px*var(--gap-scale-x)),12px)]">
           <input
             type="checkbox"
             name="emailMarketing"
@@ -844,11 +849,11 @@ function OrderFulfillments({
     <ul
       className={`flex flex-col gap-[clamp(24px,calc(32px*var(--gap-scale-y)),32px)] ${
         /*
-          個口の見出しを挟むときも、見出しの下の余白は
-          個口が 1 つのとき（SidebarFieldList の mt-3）と同じにする。
-          スケールで縮めると、狭い画面だけ詰まって見える。
+          「サマリー → 小計」と同じだけ空けて見せる。
+          あちらの本文は行間が広く、文字の上に 5px ほど余りが乗るので、
+          行間の詰まった個口の見出しでは、その分を余白に足す。
         */
-        isSplit ? "mt-3" : ""
+        isSplit ? "mt-[18px]" : ""
       }`}
     >
       {fulfillments.map((fulfillment, index) => (

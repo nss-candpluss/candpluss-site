@@ -1,4 +1,10 @@
-import { uiText } from "@/lib/typography";
+import { bodyLinkUnderlineClassName, uiText } from "@/lib/typography";
+
+/**
+ * 画面を切り替えるだけの操作。「編集」「住所を追加する」など。
+ * 保存や削除と違って何も起きないので、ボタンにせず下線付きの文字で置く。
+ */
+export const accountTextLinkClassName = `${bodyLinkUnderlineClassName} font-body-ja font-semibold text-[var(--foreground)]`;
 
 /**
  * 会員ページの操作ボタン。
