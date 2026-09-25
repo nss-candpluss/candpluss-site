@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
-import { accountPrimaryButtonClassName } from "@/components/commerce/accountButtonStyles";
+import { accountPrimaryButtonClassName } from "@/components/commerce/accountStyles";
 import { useAccountSavedNotice } from "@/components/commerce/useAccountSavedNotice";
 import {
   ACCOUNT_SAVED_NOTICE,

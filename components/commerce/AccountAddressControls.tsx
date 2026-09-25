@@ -6,8 +6,9 @@ import type { ReactNode } from "react";
 import {
   accountPrimaryButtonClassName,
   accountSecondaryButtonClassName,
+  accountSubHeadingClassName,
   accountTextLinkClassName,
-} from "@/components/commerce/accountButtonStyles";
+} from "@/components/commerce/accountStyles";
 import { AccountShallowLink } from "@/components/commerce/AccountShallowLink";
 import { useAccountSavedNotice } from "@/components/commerce/useAccountSavedNotice";
 import {
@@ -124,7 +125,7 @@ export function AccountAddressAdd({ children }: { children: ReactNode }) {
   if (isOpen) {
     return (
       <div>
-        <p className="font-body-ja text-sm font-bold">住所を追加</p>
+        <p className={accountSubHeadingClassName}>住所を追加</p>
         <div className="mt-[clamp(24px,calc(32px*var(--gap-scale-y)),32px)]">
           {children}
         </div>

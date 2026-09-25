@@ -6,7 +6,11 @@ import {
   AccountAddressActions,
   AccountAddressAdd,
 } from "@/components/commerce/AccountAddressControls";
-import { accountTextLinkClassName } from "@/components/commerce/accountButtonStyles";
+import {
+  accountHeadingClassName,
+  accountSubHeadingClassName,
+  accountTextLinkClassName,
+} from "@/components/commerce/accountStyles";
 import { AccountNotice } from "@/components/commerce/AccountNotice";
 import { AccountTabs } from "@/components/commerce/AccountTabs";
 import { OrderCardCollapse } from "@/components/commerce/OrderCardCollapse";
@@ -104,7 +108,6 @@ function formatText(value?: string | null) {
   return value?.trim() ? value : NOT_REGISTERED;
 }
 
-const readOnlyHeadingClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(20)}`;
 // 2 行以上になる注釈なので、行間は本文の比率を使う
 const readOnlyNoteClassName = `mt-[calc(8px*var(--gap-scale-y))] font-body-ja text-[var(--color-muted)] ${bodyText(13)}`;
 /** 区画の説明。注釈ではないので、大きさも色も落とさない */
@@ -136,7 +139,7 @@ function MemberSection({
   return (
     // 区画の間に線を引く。線の上下に同じ余白を取り、どちらかに寄らないようにする
     <section className="border-t border-[var(--color-divider)] py-[clamp(42px,calc(72px*var(--gap-scale-y)),72px)] first:border-t-0 first:pt-0 last:pb-0">
-      <h3 className={readOnlyHeadingClassName}>{title}</h3>
+      <h3 className={accountHeadingClassName}>{title}</h3>
       <div
         className={`mt-[clamp(28px,calc(48px*var(--gap-scale-y)),48px)] flex flex-col ${
           wideGap
@@ -275,26 +278,25 @@ function EmailMarketingForm({ profile }: { profile: CustomerAccount }) {
     >
       {/* 名前は別のフォームで変える。ここから送ると古い値で上書きする */}
       <input type="hidden" name="intent" value="emailMarketing" />
-      <AccountField label="メール配信">
-        {/*
-          inline-flex だと行ボックスの分だけ下に余りが出て、
-          ラベルとの上下中央がずれる。flex にして余りを無くす。
-        */}
-        <label className="flex w-fit cursor-pointer items-center gap-x-[clamp(8px,calc(12px*var(--gap-scale-x)),12px)]">
-          <input
-            type="checkbox"
-            name="emailMarketing"
-            defaultChecked={isEmailMarketingSubscribed(
-              profile.emailAddress?.marketingState
-            )}
-            className="peer sr-only"
-          />
-          <span aria-hidden="true" className={contactCheckboxBoxClassName} />
-          <span className={accountFieldChoiceClassName}>
-            メールマガジンを受け取る
-          </span>
-        </label>
-      </AccountField>
+      {/*
+        設定が 1 つしかないので、ラベルの列は置かずに左から始める。
+        何の設定かは区画の見出しと上の説明で分かる。
+
+        inline-flex だと行ボックスの分だけ下に余りが出て、
+        チェックボックスと文字の上下中央がずれる。flex にして余りを無くす。
+      */}
+      <label className="flex w-fit cursor-pointer items-center gap-x-[clamp(8px,calc(12px*var(--gap-scale-x)),12px)]">
+        <input
+          type="checkbox"
+          name="emailMarketing"
+          defaultChecked={isEmailMarketingSubscribed(
+            profile.emailAddress?.marketingState
+          )}
+          className="peer sr-only"
+        />
+        <span aria-hidden="true" className={contactCheckboxBoxClassName} />
+        <span className={accountFieldChoiceClassName}>メールでの配信を希望</span>
+      </label>
     </AccountUpdateForm>
   );
 }
@@ -1009,7 +1011,7 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
       */}
       <div className="@container">
         <div className="flex flex-col @min-[520px]:grid @min-[520px]:grid-cols-[auto_minmax(0,1fr)] @min-[520px]:items-center @min-[520px]:gap-x-[32px]">
-          <p className={`font-body-ja font-semibold ${uiText(20)}`}>
+          <p className={accountHeadingClassName}>
             ご注文番号：{order.name}
           </p>
           {paymentStatus || shipmentStatus ? (
@@ -1221,7 +1223,7 @@ function AccountSettingsPanel({
             key={address.id}
             className="flex flex-col gap-[clamp(24px,calc(40px*var(--gap-scale-y)),40px)]"
           >
-            <p className="font-body-ja text-sm font-bold">
+            <p className={accountSubHeadingClassName}>
               {addressTitles.get(address.id)}
             </p>
 

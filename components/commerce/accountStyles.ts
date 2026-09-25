@@ -1,5 +1,16 @@
 import { bodyLinkUnderlineClassName, uiText } from "@/lib/typography";
 
+/*
+  会員ページの見出し。「アカウント情報」「ご注文番号：#1025」など。
+  どこを読んでいるかの目印なので、狭い画面でも縮めずに 20px で固定する。
+*/
+export const accountHeadingClassName =
+  "font-body-ja text-[20px] leading-[20px] font-semibold text-[var(--foreground)]";
+
+/** 見出しの中の区切り。「既定の住所」「住所1」など */
+export const accountSubHeadingClassName =
+  "font-body-ja text-[16px] leading-[16px] font-bold text-[var(--foreground)]";
+
 /**
  * 画面を切り替えるだけの操作。「編集」「住所を追加する」など。
  * 保存や削除と違って何も起きないので、ボタンにせず下線付きの文字で置く。

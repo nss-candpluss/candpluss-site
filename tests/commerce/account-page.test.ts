@@ -1145,7 +1145,7 @@ describe("会員ページの画面構成", () => {
       "components/commerce/AccountAddressControls.tsx"
     );
     const buttonSource = readSource(
-      "components/commerce/accountButtonStyles.ts"
+      "components/commerce/accountStyles.ts"
     );
 
     // 角丸は入力欄と同じ 8px。隣に並べたときに形が揃う
@@ -1422,10 +1422,30 @@ describe("会員ページの画面構成", () => {
       "export const contactCheckboxBoxClassName"
     );
     expect(source).toContain("getShopifyCustomerProfileUrl");
-    // 区画の見出しは、注文カードのご注文番号と同じ大きさで揃える
-    expect(source).toContain(
-      "const readOnlyHeadingClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(20)}`"
+    /*
+      区画の見出しと注文カードのご注文番号は同じ大きさで揃える。
+      どこを読んでいるかの目印なので、狭い画面でも縮めない。
+    */
+    const styleSource = readSource("components/commerce/accountStyles.ts");
+    expect(styleSource).toContain(
+      'export const accountHeadingClassName =\n  "font-body-ja text-[20px] leading-[20px] font-semibold text-[var(--foreground)]"'
     );
+    expect(styleSource).toContain(
+      'export const accountSubHeadingClassName =\n  "font-body-ja text-[16px] leading-[16px] font-bold text-[var(--foreground)]"'
+    );
+    expect(source.match(/accountHeadingClassName/g)).toHaveLength(3);
+    // 見出しの大きさを 1 か所で決めるので、その場書きは残さない
+    expect(source).not.toContain("text-sm font-bold");
+    expect(
+      readSource("components/commerce/AccountAddressControls.tsx")
+    ).not.toContain("text-sm font-bold");
+
+    /*
+      メール配信は設定が 1 つしかない。
+      ラベルの列を置くと、見出しと同じことを 2 回言うだけになる。
+    */
+    expect(source).not.toContain('<AccountField label="メール配信">');
+    expect(source).toContain("メールでの配信を希望");
     // 会員ページは横に広いので、入力欄は読める幅で止める
     expect(readSource("components/commerce/AccountUpdateForm.tsx")).toContain(
       "max-w-[560px]"
