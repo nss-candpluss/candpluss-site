@@ -1,25 +1,61 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { AccountConsentGate } from "@/components/commerce/AccountConsentGate";
+import { accountSecondaryButtonClassName } from "@/components/commerce/accountStyles";
+import { LegalDocument } from "@/components/legal/LegalDocument";
+import { privacyPolicyContent } from "@/data/legal/privacyPolicy";
+import { termsContent } from "@/data/legal/terms";
 import {
   ACCOUNT_BASE_PATH,
   safeAccountReturnTo,
 } from "@/lib/commerce/account-login";
 import { getCustomerTokenSession } from "@/lib/shopify/customer-session";
-import { bodyText, inputText, uiText } from "@/lib/typography";
+import { bodyText, uiText } from "@/lib/typography";
 
 type AccountLoginContentProps = {
   returnTo?: string;
   error?: string;
 };
 
+const pageTitleClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(20)}`;
+const blockTitleClassName = `font-body-ja font-bold text-[var(--foreground)] ${uiText(18)}`;
+const bodyClassName = `font-body-ja text-[var(--foreground)] ${bodyText(15)}`;
+
+/** 区画ひとつ。ふたつの入口を対等に見せたいので、同じ形で並べる */
+function LoginBlock({
+  title,
+  lead,
+  children,
+}: {
+  title: string;
+  lead: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="border-t border-[var(--color-divider)] py-[clamp(42px,calc(72px*var(--gap-scale-y)),72px)] first:border-t-0 first:pt-0 last:pb-0">
+      <h2 className={blockTitleClassName}>{title}</h2>
+      <p
+        className={`mt-[clamp(12px,calc(16px*var(--gap-scale-y)),16px)] ${bodyClassName}`}
+      >
+        {lead}
+      </p>
+      <div className="mt-[clamp(24px,calc(32px*var(--gap-scale-y)),32px)]">
+        {children}
+      </div>
+    </section>
+  );
+}
+
 /**
- * ログインの案内ページ。公開ページの `/account/login` とテスト領域の
+ * 会員ページに入る前の入口。公開ページの `/account/login` とテスト領域の
  * `/shopify-test/account/login` で共有する。
  *
- * 通常のログインはここを通さず Shopify のサインイン画面へ直接送る。
- * ここに来るのはログイン設定に不備があって差し戻されたときと、URL を直接
- * 開いたときだけなので、メール入力は手動のフォールバックとして残している。
+ * ログイン済みならここは通らず、そのまま会員ページへ戻す。
+ *
+ * 未ログインの人には、はじめての方と登録済みの方で道を分ける。
+ * Shopify のサインイン画面は新規と既存が一体で、こちらからは
+ * どちらなのか分からない。はじめての方にだけ規約を読んでもらうには、
+ * 進む前に本人に選んでもらうしかない。
  */
 export async function AccountLoginContent({
   returnTo: requestedReturnTo,
@@ -28,6 +64,8 @@ export async function AccountLoginContent({
   const isStaticExport = process.env.STATIC_EXPORT === "true";
   const returnTo = safeAccountReturnTo(requestedReturnTo);
   const showConfigError = error === "config";
+  // 既定の行き先なら送らない。始める側で同じ値を入れてくれる
+  const carriedReturnTo = returnTo === ACCOUNT_BASE_PATH ? undefined : returnTo;
 
   if (!isStaticExport) {
     const session = await getCustomerTokenSession();
@@ -41,15 +79,17 @@ export async function AccountLoginContent({
       data-header-theme="onLight"
       className="px-[var(--container-x)] pt-[calc(var(--header-height)+var(--container-y-top))] pb-[var(--container-y-bottom)]"
     >
-      <div className="mx-auto w-full max-w-[420px]">
-        <h1 className={`font-body-ja font-semibold ${uiText(20)}`}>
-          ログインまたはアカウント作成
-        </h1>
-        <p
-          className={`mt-[16px] font-body-ja text-[var(--color-muted)] ${bodyText(15)}`}
-        >
-          メールアドレスを入力し、ログインまたはアカウント作成を行ってください。
-        </p>
+      <div className="mx-auto w-full max-w-[720px]">
+        <h1 className={pageTitleClassName}>ログイン / 会員登録</h1>
+
+        {showConfigError ? (
+          <p
+            role="alert"
+            className={`mt-[16px] font-body-ja text-[#9b1b30] ${bodyText(14)}`}
+          >
+            ログイン設定が完了していないため、現在ご利用いただけません。
+          </p>
+        ) : null}
 
         {isStaticExport ? (
           <p
@@ -58,59 +98,48 @@ export async function AccountLoginContent({
             アカウント機能はVercel環境への移行後に利用できます。
           </p>
         ) : (
-          <form
-            action="/account/login/start"
-            method="post"
-            className="mt-[32px]"
-          >
-            {returnTo !== ACCOUNT_BASE_PATH ? (
-              <input type="hidden" name="returnTo" value={returnTo} />
-            ) : null}
-
-            {showConfigError ? (
-              <p
-                role="alert"
-                className={`mb-[16px] font-body-ja text-[#9b1b30] ${bodyText(14)}`}
-              >
-                ログイン設定が完了していないため、現在ご利用いただけません。
-              </p>
-            ) : null}
-
-            <label className="block">
-              <span className="sr-only">メールアドレス（必須）</span>
-              <input
-                type="email"
-                name="email"
-                required
-                autoComplete="email"
-                inputMode="email"
-                placeholder="メールアドレス *"
-                className={`w-full bg-[#f5f5f5] px-[16px] py-[16px] font-body-ja text-[var(--foreground)] outline-none placeholder:text-[var(--color-muted)] ${inputText(16)}`}
-              />
-            </label>
-
-            <button
-              type="submit"
-              className={`mt-[16px] flex w-full items-center justify-center rounded-full bg-[var(--foreground)] px-[16px] py-[16px] font-body-ja font-medium text-white ${uiText(16)}`}
+          <div className="mt-[clamp(32px,calc(56px*var(--gap-scale-y)),56px)] flex flex-col">
+            <LoginBlock
+              title="登録済みの方"
+              lead="ご登録のメールアドレスに確認コードをお送りします。パスワードは必要ありません。"
             >
-              続ける
-            </button>
-          </form>
-        )}
+              <form action="/account/login/start" method="post">
+                {carriedReturnTo ? (
+                  <input type="hidden" name="returnTo" value={carriedReturnTo} />
+                ) : null}
+                <button
+                  type="submit"
+                  className={`${accountSecondaryButtonClassName} w-full`}
+                >
+                  ログインに進む
+                </button>
+              </form>
+            </LoginBlock>
 
-        <p
-          className={`mt-[32px] font-body-ja text-[var(--color-muted)] ${bodyText(14)}`}
-        >
-          当サイトの利用を継続すると、
-          <Link href="/legal/terms" className="underline">
-            利用規約
-          </Link>
-          と
-          <Link href="/legal/privacy-policy" className="underline">
-            プライバシーポリシー
-          </Link>
-          に同意されたことになります。
-        </p>
+            <LoginBlock
+              title="はじめての方"
+              lead="会員登録には、利用規約とプライバシーポリシーへの同意が必要です。それぞれ最後までお読みください。"
+            >
+              <AccountConsentGate
+                returnTo={carriedReturnTo}
+                documents={[
+                  {
+                    id: "terms",
+                    label: "利用規約",
+                    body: <LegalDocument content={termsContent} embedded />,
+                  },
+                  {
+                    id: "privacy",
+                    label: "プライバシーポリシー",
+                    body: (
+                      <LegalDocument content={privacyPolicyContent} embedded />
+                    ),
+                  },
+                ]}
+              />
+            </LoginBlock>
+          </div>
+        )}
       </div>
     </main>
   );

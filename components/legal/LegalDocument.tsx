@@ -14,6 +14,8 @@ const pageTitleClassName = `font-body-ja font-semibold text-[var(--foreground)] 
 
 const sectionHeadingClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(16)}`;
 
+type LegalHeadingLevel = "h1" | "h2" | "h3" | "h4";
+
 const bodyClassName = `font-body-ja text-[var(--foreground)] ${bodyText(15)}`;
 
 function LegalBulletList({ items }: { items: readonly string[] }) {
@@ -34,7 +36,7 @@ function LegalSectionLayout({
   children,
 }: {
   title: string;
-  titleAs: "h1" | "h2";
+  titleAs: LegalHeadingLevel;
   children: ReactNode;
 }) {
   const Heading = titleAs;
@@ -69,9 +71,15 @@ function LegalContactBlock({ contact }: { contact: LegalContact }) {
   );
 }
 
-function LegalSectionBlock({ section }: { section: LegalSection }) {
+function LegalSectionBlock({
+  section,
+  titleAs,
+}: {
+  section: LegalSection;
+  titleAs: LegalHeadingLevel;
+}) {
   return (
-    <LegalSectionLayout title={section.title} titleAs="h2">
+    <LegalSectionLayout title={section.title} titleAs={titleAs}>
       {section.intro || section.bullets?.length ? (
         <div>
           {section.intro ? <p className={bodyClassName}>{section.intro}</p> : null}
@@ -98,18 +106,37 @@ function LegalSectionBlock({ section }: { section: LegalSection }) {
 
 type LegalDocumentProps = {
   content: LegalDocumentContent;
+  /**
+   * 規約のページ以外に置くとき。会員登録前の同意など。
+   *
+   * 置いた側が題を出しているので、ここでは繰り返さず、
+   * 条の見出しを 2 段下げる。幅も置いた場所に合わせる。
+   */
+  embedded?: boolean;
 };
 
-export function LegalDocument({ content }: LegalDocumentProps) {
+export function LegalDocument({ content, embedded = false }: LegalDocumentProps) {
   return (
-    <article className="mx-auto w-full max-w-[980px]">
+    <article className={embedded ? "w-full" : "mx-auto w-full max-w-[980px]"}>
       <div className="space-y-[calc(52px*var(--gap-scale-y))]">
-        <LegalSectionLayout title={content.title} titleAs="h1">
-          {content.lead ? <p className={bodyClassName}>{content.lead}</p> : null}
-        </LegalSectionLayout>
+        {embedded ? (
+          content.lead ? (
+            <p className={bodyClassName}>{content.lead}</p>
+          ) : null
+        ) : (
+          <LegalSectionLayout title={content.title} titleAs="h1">
+            {content.lead ? (
+              <p className={bodyClassName}>{content.lead}</p>
+            ) : null}
+          </LegalSectionLayout>
+        )}
 
         {content.sections.map((section) => (
-          <LegalSectionBlock key={section.title} section={section} />
+          <LegalSectionBlock
+            key={section.title}
+            section={section}
+            titleAs={embedded ? "h4" : "h2"}
+          />
         ))}
 
         {content.contact ? (

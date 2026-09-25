@@ -10,7 +10,7 @@ import {
 } from "@/data/receipt";
 import {
   ACCOUNT_BASE_PATH,
-  ACCOUNT_LOGIN_START_PATH,
+  ACCOUNT_LOGIN_PATH,
 } from "@/lib/commerce/account-login";
 import {
   fetchCustomerOrder,
@@ -97,7 +97,7 @@ export async function AccountReceiptContent({
   const session = await getLiveCustomerTokenSession();
 
   if (!session) {
-    redirect(ACCOUNT_LOGIN_START_PATH);
+    redirect(ACCOUNT_LOGIN_PATH);
   }
 
   const orderId = orderParam ? decodeURIComponent(orderParam) : null;

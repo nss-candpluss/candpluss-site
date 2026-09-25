@@ -172,12 +172,47 @@ describe("会員画面はリリースまでテスト領域だけで開く", () =
     );
   });
 
-  // Shopify のサインイン画面は置き換えられず、メールもそちらで入力する。
-  // 自前の案内ページを挟むと同じ入力を二度させることになる。
-  it("未ログインは案内ページを挟まず Shopify へ直接送る", () => {
+  /*
+    Shopify のサインイン画面は新規と既存が一体で、こちらからは
+    どちらなのか分からない。はじめての方にだけ規約を読んでもらうには、
+    その手前に自前の入口を挟むしかない。
+  */
+  it("未ログインは入口のページを挟んでから Shopify へ送る", () => {
+    expect(readSource("components/commerce/AccountPageContent.tsx")).toContain(
+      "redirect(ACCOUNT_LOGIN_PATH)"
+    );
     expect(
-      readSource("components/commerce/AccountPageContent.tsx")
-    ).toContain("redirect(ACCOUNT_LOGIN_START_PATH)");
+      readSource("components/commerce/AccountReceiptContent.tsx")
+    ).toContain("redirect(ACCOUNT_LOGIN_PATH)");
+  });
+
+  it("入口では道を分け、はじめての方だけ規約を読ませてから進める", () => {
+    const source = readSource("components/commerce/AccountLoginContent.tsx");
+    const gateSource = readSource("components/commerce/AccountConsentGate.tsx");
+
+    // 登録済みの方はそのまま Shopify へ。規約で足止めしない
+    expect(source).toContain("登録済みの方");
+    expect(source).toContain("はじめての方");
+    expect(source).toContain('action="/account/login/start"');
+    // 会員登録の規定は利用規約の中にあるので、読ませるのはこの 2 つ
+    expect(source).toContain("termsContent");
+    expect(source).toContain("privacyPolicyContent");
+    // ログイン済みならこの入口は素通りさせる
+    expect(source).toContain("redirect(returnTo)");
+
+    /*
+      読み終わるまでチェックできず、チェックするまで進めない。
+      読まずに通り抜ける道を作らない。
+    */
+    expect(gateSource).toContain("disabled={!canAgree}");
+    expect(gateSource).toContain("disabled={!hasAgreed}");
+    expect(gateSource).toContain("onScroll");
+    // 枠より中身が短いときに読み終われなくなるので、その場でも見る
+    expect(gateSource).toContain("SCROLL_END_TOLERANCE");
+    // キーボードだけでも枠を送れるようにする
+    expect(gateSource).toContain("tabIndex={0}");
+    // 見張れない環境で締め出さない
+    expect(gateSource).toContain("<noscript>");
   });
 
   // クライアントのログイン判定を待つと、読み込み直後に押したとき

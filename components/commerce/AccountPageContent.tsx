@@ -25,7 +25,7 @@ import { SiteGrid } from "@/components/ui/SiteGrid";
 import { SiteImage } from "@/components/ui/SiteImage";
 import { contactFormCopy } from "@/data/contact";
 import {
-  ACCOUNT_LOGIN_START_PATH,
+  ACCOUNT_LOGIN_PATH,
   accountReceiptHref,
 } from "@/lib/commerce/account-login";
 import { normalizeJapanZoneCode } from "@/lib/commerce/japan-zone-code";
@@ -1287,9 +1287,12 @@ export async function AccountPageContent() {
   const session = isStaticExport ? null : await getLiveCustomerTokenSession();
 
   if (!session && !isStaticExport) {
-    // 案内ページを挟まず Shopify のサインイン画面へ送る。自前の画面で
-    // メールを聞いても、Shopify 側で同じ入力をやり直すことになる。
-    redirect(ACCOUNT_LOGIN_START_PATH);
+    /*
+      Shopify のサインイン画面へ直接は送らない。
+      あちらは新規と既存が一体で、こちらからはどちらか区別できない。
+      はじめての方に規約を読んでもらう場を、その手前に挟む。
+    */
+    redirect(ACCOUNT_LOGIN_PATH);
   }
 
   // ログイン済みで取得に失敗したときは、ログインへ戻さず理由を出す。
