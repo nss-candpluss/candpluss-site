@@ -16,11 +16,11 @@ import { uiText } from "@/lib/typography";
  * 会員ページは横に広いので、入力欄が間延びしない幅で止める。
  */
 const stackedFormClassName =
-  "flex max-w-[560px] flex-col gap-[calc(32px*var(--gap-scale-y))]";
+  "flex max-w-[560px] flex-col gap-[clamp(24px,calc(32px*var(--gap-scale-y)),32px)]";
 
 /** 1 項目だけのフォームは、保存ボタンを入力欄の右へ並べる */
 const inlineFormClassName =
-  "flex flex-col flex-wrap gap-[calc(16px*var(--gap-scale-y))] min-[640px]:flex-row min-[640px]:items-center min-[640px]:gap-x-[calc(24px*var(--gap-scale-x))]";
+  "flex flex-col flex-wrap gap-[clamp(16px,calc(20px*var(--gap-scale-y)),20px)] min-[640px]:flex-row min-[640px]:items-center min-[640px]:gap-x-[clamp(16px,calc(24px*var(--gap-scale-x)),24px)]";
 
 type AccountUpdateFormProps = {
   action: string;

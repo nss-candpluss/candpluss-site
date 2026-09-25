@@ -137,7 +137,7 @@ function MemberSection({
         className={`mt-[clamp(28px,calc(48px*var(--gap-scale-y)),48px)] flex flex-col ${
           wideGap
             ? "gap-[clamp(48px,calc(80px*var(--gap-scale-y)),80px)]"
-            : "gap-[calc(24px*var(--gap-scale-y))]"
+            : "gap-[clamp(28px,calc(40px*var(--gap-scale-y)),40px)]"
         }`}
       >
         {children}
@@ -153,7 +153,7 @@ function MemberSection({
 */
 const accountFieldLabelClassName = `font-body-ja font-normal whitespace-nowrap text-[var(--foreground)] ${uiText(16)}`;
 const accountFieldRowClassName =
-  "grid gap-y-2 min-[640px]:grid-cols-[calc(128px*var(--text-scale))_minmax(0,1fr)] min-[640px]:gap-x-[calc(8px*var(--gap-scale-x))] min-[640px]:gap-y-0";
+  "grid gap-y-3 min-[640px]:grid-cols-[calc(128px*var(--text-scale))_minmax(0,1fr)] min-[640px]:gap-x-[calc(8px*var(--gap-scale-x))] min-[640px]:gap-y-0";
 
 /** 読むだけの値も、入力欄の中の文字と同じ大きさ・太さで出す */
 const accountFieldValueClassName =
@@ -230,7 +230,7 @@ function ProfileNameForm({ profile }: { profile: CustomerAccount }) {
       {/* 配信設定は別のフォームで変える。ここから送ると古い値で上書きする */}
       <input type="hidden" name="intent" value="name" />
       <AccountField label="お名前">
-        <SiteGrid className="gap-x-[calc(12px*var(--gap-scale-x))] gap-y-[clamp(14px,calc(18px*var(--gap-scale-y)),18px)]">
+        <SiteGrid className="gap-x-[calc(12px*var(--gap-scale-x))] gap-y-[clamp(16px,calc(20px*var(--gap-scale-y)),20px)]">
           <div className={formHalfSpanClassName}>
             <SupportFloatingInput
               id="account-last-name"
@@ -325,7 +325,7 @@ function AddressForm({
       {isDefault ? <input type="hidden" name="defaultAddress" value="on" /> : null}
 
       <AccountField label="お名前">
-        <SiteGrid className="gap-x-[calc(12px*var(--gap-scale-x))] gap-y-[clamp(14px,calc(18px*var(--gap-scale-y)),18px)]">
+        <SiteGrid className="gap-x-[calc(12px*var(--gap-scale-x))] gap-y-[clamp(16px,calc(20px*var(--gap-scale-y)),20px)]">
           <div className={formHalfSpanClassName}>
             <SupportFloatingInput
               id={fieldId("last-name")}
@@ -354,7 +354,7 @@ function AddressForm({
       </AccountField>
 
       <AccountField label="住所" alignTop>
-        <div className="flex flex-col gap-y-[clamp(14px,calc(18px*var(--gap-scale-y)),18px)]">
+        <div className="flex flex-col gap-y-[clamp(16px,calc(20px*var(--gap-scale-y)),20px)]">
           <div className="max-w-[240px]">
             <SupportFloatingInput
               id={fieldId("zip")}
@@ -842,8 +842,13 @@ function OrderFulfillments({
 
   return (
     <ul
-      className={`flex flex-col gap-[calc(32px*var(--gap-scale-y))] ${
-        isSplit ? "mt-[calc(24px*var(--gap-scale-y))]" : ""
+      className={`flex flex-col gap-[clamp(24px,calc(32px*var(--gap-scale-y)),32px)] ${
+        /*
+          個口の見出しを挟むときも、見出しの下の余白は
+          個口が 1 つのとき（SidebarFieldList の mt-3）と同じにする。
+          スケールで縮めると、狭い画面だけ詰まって見える。
+        */
+        isSplit ? "mt-3" : ""
       }`}
     >
       {fulfillments.map((fulfillment, index) => (
@@ -1176,7 +1181,7 @@ function AccountSettingsPanel({
 
         <AccountField label="メールアドレス">
           {/* 変更は Shopify の会員画面でしかできないので、値のすぐ横から飛ばす */}
-          <div className="flex flex-wrap items-center gap-x-[calc(24px*var(--gap-scale-x))] gap-y-2">
+          <div className="flex flex-wrap items-center gap-x-[clamp(16px,calc(24px*var(--gap-scale-x)),24px)] gap-y-3">
             <p className={accountFieldValueClassName}>
               {formatText(profile.emailAddress?.emailAddress)}
             </p>

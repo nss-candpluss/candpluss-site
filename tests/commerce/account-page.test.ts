@@ -1112,6 +1112,31 @@ describe("会員ページの画面構成", () => {
     );
   });
 
+  /*
+    余白に共通スケールをそのまま掛けると、狭い画面で 1/3 近くまで縮む。
+    行と行の区別がつかなくなるので、会員ページの余白には下限を持たせる。
+  */
+  it("会員ページの余白は狭い画面でも潰れない下限を持つ", () => {
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+    const formSource = readSource("components/commerce/AccountUpdateForm.tsx");
+
+    // 区画の中の項目どうし
+    expect(source).toContain(
+      "gap-[clamp(28px,calc(40px*var(--gap-scale-y)),40px)]"
+    );
+    // 入力欄どうし
+    expect(source).toContain(
+      "clamp(16px,calc(20px*var(--gap-scale-y)),20px)"
+    );
+    expect(formSource).toContain(
+      "gap-[clamp(24px,calc(32px*var(--gap-scale-y)),32px)]"
+    );
+
+    // 個口が分かれていても、見出しの下の余白は 1 個口のときと同じにする
+    expect(source).toContain('isSplit ? "mt-3" : ""');
+    expect(source).not.toContain('mt-[calc(24px*var(--gap-scale-y))]"\n      }');
+  });
+
   it("住所の操作は角丸ボタンで出す", () => {
     const controlsSource = readSource(
       "components/commerce/AccountAddressControls.tsx"
@@ -1120,7 +1145,19 @@ describe("会員ページの画面構成", () => {
       "components/commerce/accountButtonStyles.ts"
     );
 
-    expect(buttonSource).toContain("rounded-full");
+    // 角丸は入力欄と同じ 8px。隣に並べたときに形が揃う
+    expect(buttonSource).toContain("rounded-[8px]");
+    expect(buttonSource).not.toContain("rounded-full");
+    /*
+      枠内の余白はスケールをそのまま掛けない。
+      狭い画面で 24px → 8px まで縮み、文字に対して枠が細くなりすぎる。
+    */
+    expect(buttonSource).toContain(
+      "px-[clamp(20px,calc(28px*var(--gap-scale-x)),28px)]"
+    );
+    expect(buttonSource).toContain(
+      "py-[clamp(13px,calc(16px*var(--gap-scale-y)),16px)]"
+    );
     expect(controlsSource).toContain("accountPrimaryButtonClassName");
     expect(controlsSource).toContain("accountSecondaryButtonClassName");
     // 下線テキストのままだと、隣の角丸ボタンと作法が揃わない

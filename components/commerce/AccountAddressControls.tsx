@@ -119,7 +119,9 @@ export function AccountAddressAdd({ children }: { children: ReactNode }) {
     return (
       <div>
         <p className="font-body-ja text-sm font-bold">住所を追加</p>
-        <div className="mt-[calc(24px*var(--gap-scale-y))]">{children}</div>
+        <div className="mt-[clamp(24px,calc(32px*var(--gap-scale-y)),32px)]">
+          {children}
+        </div>
       </div>
     );
   }
