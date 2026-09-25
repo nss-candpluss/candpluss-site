@@ -1250,6 +1250,12 @@ describe("会員ページの画面構成", () => {
     expect(controlsSource).toContain("<noscript>");
     // 覆いの見た目はログアウトの確認と共用する
     expect(controlsSource).toContain("className={accountDialogClassName}");
+    /*
+      確認のボタンは枠内を半分ずつに分ける。
+      削除はフォームに包まれていて、包みだけが半分になるので、
+      中のボタンを包みの幅に合わせる。
+    */
+    expect(controlsSource).toContain("${accountPrimaryButtonClassName} w-full");
     expect(readSource("components/commerce/accountStyles.ts")).toContain(
       "backdrop:bg-black/50"
     );

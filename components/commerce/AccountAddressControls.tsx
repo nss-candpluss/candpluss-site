@@ -121,10 +121,14 @@ function AddressDeleteDialog({
         {message}
       </p>
       <div className={accountDialogActionsClassName}>
+        {/*
+          こちらはフォームに包まれているので、半分になるのは包みのほう。
+          中のボタンは文字の分しか広がらないので、包みに合わせる。
+        */}
         <AddressIntentButton
           addressId={addressId}
           intent="delete"
-          className={accountPrimaryButtonClassName}
+          className={`${accountPrimaryButtonClassName} w-full`}
         >
           削除する
         </AddressIntentButton>
