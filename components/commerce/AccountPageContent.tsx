@@ -107,6 +107,8 @@ function formatText(value?: string | null) {
 const readOnlyHeadingClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(20)}`;
 // 2 行以上になる注釈なので、行間は本文の比率を使う
 const readOnlyNoteClassName = `mt-[calc(8px*var(--gap-scale-y))] font-body-ja text-[var(--color-muted)] ${bodyText(13)}`;
+/** 区画の説明。注釈ではないので、大きさも色も落とさない */
+const readOnlyBodyClassName = `font-body-ja text-[var(--foreground)] ${bodyText(16)}`;
 
 function LogoutButton() {
   return (
@@ -1206,6 +1208,10 @@ function AccountSettingsPanel({
       </MemberSection>
 
       <MemberSection title={accountMemberCopy.notifications.title}>
+        <p className={readOnlyBodyClassName}>
+          {accountMemberCopy.notifications.body}
+        </p>
+
         <EmailMarketingForm profile={profile} />
       </MemberSection>
 

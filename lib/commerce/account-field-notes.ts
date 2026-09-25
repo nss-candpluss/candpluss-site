@@ -25,6 +25,8 @@ export const accountMemberCopy = {
   },
   notifications: {
     title: "お知らせに関する設定",
+    // 受け取ると何が届くのかを先に出す。設定の意味が分からないと選べない
+    body: "新商品のリリース情報や各種イベント情報など、C AND+Sメンバーだけの様々な特典に関する最新情報を受け取ることができます。",
   },
   /*
     保存されたお支払い方法は Shopify の Enterprise 限定の機能で、

@@ -1460,6 +1460,18 @@ describe("会員ページの画面構成", () => {
     expect(`${email.before}${email.link}${email.after}`).toBe(
       "※メールアドレスは当サイトでは変更できません。Shopify のプロフィール画面からお手続きください。ログインにも同じメールアドレスを使うため、以降は新しいメールアドレスでサインインしてください。"
     );
+    /*
+      受け取ると何が届くのかを先に出す。
+      注釈ではないので、大きさも色も落とさない。
+    */
+    expect(accountMemberCopy.notifications.body).toContain(
+      "C AND+Sメンバーだけ"
+    );
+    expect(source).toContain("readOnlyBodyClassName");
+    expect(source).toContain(
+      "const readOnlyBodyClassName = `font-body-ja text-[var(--foreground)] ${bodyText(16)}`"
+    );
+
     // 値の横のボタンは消し、案内は注釈 1 か所にまとめた
     expect(source).not.toContain("emailChange");
     expect(source).toContain("accountMemberCopy.accountDetails.email.link");
