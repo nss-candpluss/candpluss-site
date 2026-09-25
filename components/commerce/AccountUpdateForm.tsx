@@ -4,7 +4,11 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 
 import { accountPrimaryButtonClassName } from "@/components/commerce/accountButtonStyles";
 import { useAccountSavedNotice } from "@/components/commerce/useAccountSavedNotice";
-import { ACCOUNT_SAVED_NOTICE } from "@/lib/commerce/account-page";
+import {
+  ACCOUNT_SAVED_NOTICE,
+  ACCOUNT_SAVED_NOTICE_MS,
+  ACCOUNT_SAVE_FAILED_NOTICE,
+} from "@/lib/commerce/account-page";
 import { uiText } from "@/lib/typography";
 
 /**
@@ -16,7 +20,7 @@ const stackedFormClassName =
 
 /** 1 項目だけのフォームは、保存ボタンを入力欄の右へ並べる */
 const inlineFormClassName =
-  "flex flex-col gap-[calc(16px*var(--gap-scale-y))] min-[640px]:flex-row min-[640px]:items-center min-[640px]:gap-x-[calc(24px*var(--gap-scale-x))]";
+  "flex flex-col flex-wrap gap-[calc(16px*var(--gap-scale-y))] min-[640px]:flex-row min-[640px]:items-center min-[640px]:gap-x-[calc(24px*var(--gap-scale-x))]";
 
 type AccountUpdateFormProps = {
   action: string;
@@ -24,6 +28,14 @@ type AccountUpdateFormProps = {
   noticeKey: string;
   /** 1 行で収まるフォームは、保存ボタンを右に並べる */
   inlineSubmit?: boolean;
+  /**
+   * ページを読み直さずに保存する。
+   *
+   * 読み直すと、入力した内容を捨てて Shopify から読んだ値で描き直すため、
+   * Shopify の応答が一瞬古いだけで「保存したのに戻った」ように見える。
+   * 読み直さなければ、入力した内容がそのまま画面に残る。
+   */
+  keepValuesOnSave?: boolean;
   children: ReactNode;
 };
 
@@ -59,6 +71,18 @@ function serializeForm(form: HTMLFormElement) {
   ).toString();
 }
 
+/** 保存に失敗した理由。読める文でなければ、当たり障りのない 1 行にする */
+async function saveErrorMessage(response: Response) {
+  try {
+    const result = (await response.json()) as { message?: unknown };
+    return typeof result.message === "string" && result.message
+      ? result.message
+      : ACCOUNT_SAVE_FAILED_NOTICE;
+  } catch {
+    return ACCOUNT_SAVE_FAILED_NOTICE;
+  }
+}
+
 /**
  * 表示と編集を 1 つの画面にまとめるためのフォーム。
  *
@@ -69,12 +93,17 @@ export function AccountUpdateForm({
   action,
   noticeKey,
   inlineSubmit = false,
+  keepValuesOnSave = false,
   children,
 }: AccountUpdateFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const initialValuesRef = useRef("");
   const [isChanged, setIsChanged] = useState(false);
-  const showSaved = useAccountSavedNotice(noticeKey);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isJustSaved, setIsJustSaved] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // JavaScript が動かないときは URL の合図で結果を受け取る
+  const savedFromUrl = useAccountSavedNotice(noticeKey);
 
   const syncChanged = useCallback(() => {
     const form = formRef.current;
@@ -95,6 +124,59 @@ export function AccountUpdateForm({
     setIsChanged(false);
   }, []);
 
+  useEffect(() => {
+    if (!isJustSaved) {
+      return;
+    }
+
+    const timer = window.setTimeout(
+      () => setIsJustSaved(false),
+      ACCOUNT_SAVED_NOTICE_MS
+    );
+    return () => window.clearTimeout(timer);
+  }, [isJustSaved]);
+
+  const saveInPlace = useCallback(
+    async (event: React.FormEvent<HTMLFormElement>) => {
+      if (!keepValuesOnSave) {
+        return;
+      }
+
+      event.preventDefault();
+      const form = event.currentTarget;
+      setIsSaving(true);
+      setErrorMessage(null);
+
+      try {
+        const response = await fetch(action, {
+          method: "post",
+          body: new FormData(form),
+          headers: { accept: "application/json" },
+        });
+
+        if (!response.ok) {
+          setErrorMessage(await saveErrorMessage(response));
+          return;
+        }
+
+        /*
+          入力した内容はそのまま残す。
+          いまの値を新しい「元の値」として覚え直し、保存ボタンを引っ込める。
+        */
+        initialValuesRef.current = serializeForm(form);
+        setIsChanged(false);
+        setIsJustSaved(true);
+      } catch {
+        setErrorMessage(ACCOUNT_SAVE_FAILED_NOTICE);
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [action, keepValuesOnSave]
+  );
+
+  const showSaved = isJustSaved || savedFromUrl;
+
   return (
     <form
       ref={formRef}
@@ -103,6 +185,7 @@ export function AccountUpdateForm({
       onInput={syncChanged}
       onChange={syncChanged}
       onKeyDown={blockImplicitSubmit}
+      onSubmit={saveInPlace}
       className={inlineSubmit ? inlineFormClassName : stackedFormClassName}
     >
       <input type="hidden" name="notice" value={noticeKey} />
@@ -117,7 +200,11 @@ export function AccountUpdateForm({
       {isChanged || showSaved ? (
         <div className="shrink-0">
           {isChanged ? (
-            <button type="submit" className={accountPrimaryButtonClassName}>
+            <button
+              type="submit"
+              disabled={isSaving}
+              className={`${accountPrimaryButtonClassName} disabled:cursor-not-allowed disabled:opacity-50`}
+            >
               保存
             </button>
           ) : (
@@ -129,6 +216,16 @@ export function AccountUpdateForm({
             </p>
           )}
         </div>
+      ) : null}
+
+      {/* 失敗したら入力内容を残したまま理由を出す。押し直せば再送できる */}
+      {errorMessage ? (
+        <p
+          role="alert"
+          className={`basis-full font-body-ja text-[#9b1b30] ${uiText(14)}`}
+        >
+          {errorMessage}
+        </p>
       ) : null}
     </form>
   );

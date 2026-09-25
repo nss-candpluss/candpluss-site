@@ -4,13 +4,11 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import {
+  ACCOUNT_SAVED_NOTICE_MS,
   ACCOUNT_UPDATED_NOTICE_PARAMS,
   accountPageNotice,
   accountSearchWithoutNoticeKeys,
 } from "@/lib/commerce/account-page";
-
-/** うまくいった知らせは読み終わる頃に消す。残り続けると今の操作の結果か分からなくなる */
-const SUCCESS_NOTICE_MS = 4000;
 
 /**
  * 更新後のリダイレクトに付くクエリを、1 行の結果表示に変える。
@@ -42,7 +40,10 @@ export function AccountNotice() {
     );
     window.history.replaceState(null, "", search || window.location.pathname);
 
-    const timer = window.setTimeout(() => setIsHidden(true), SUCCESS_NOTICE_MS);
+    const timer = window.setTimeout(
+      () => setIsHidden(true),
+      ACCOUNT_SAVED_NOTICE_MS
+    );
     return () => window.clearTimeout(timer);
   }, [savedNotice]);
 

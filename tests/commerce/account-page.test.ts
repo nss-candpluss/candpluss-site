@@ -11,6 +11,7 @@ import {
   ACCOUNT_SAVED_NOTICE_PARAMS,
   ACCOUNT_UPDATED_NOTICE_PARAMS,
   accountSearchWithoutNoticeKeys,
+  accountPageErrorMessage,
   accountAddressDeleteHref,
   accountAddressNoticeKey,
   accountSavedNoticeKey,
@@ -1105,6 +1106,53 @@ describe("会員ページの画面構成", () => {
     );
     expect(hookSource).toContain("const [wasSaved] = useState(");
     expect(noticeSource).toContain("const [savedNotice] = useState(");
+  });
+
+  /*
+    ページを読み直すと、入力した内容を捨てて Shopify から読んだ値で描き直す。
+    Shopify の応答が一瞬古いだけで「保存したのに戻った」ように見えてしまう。
+  */
+  it("名前とメール配信はページを読み直さず、入力した内容を残して保存する", () => {
+    const formSource = readSource("components/commerce/AccountUpdateForm.tsx");
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+    const routeSource = readSource(
+      "app/api/shopify/customer/profile/route.ts"
+    );
+
+    // 読み直さないので、入力した値がそのまま残る
+    expect(formSource).toContain("event.preventDefault()");
+    expect(formSource).toContain('headers: { accept: "application/json" }');
+    expect(formSource).toContain("initialValuesRef.current = serializeForm(form)");
+    expect(source.match(/keepValuesOnSave/g)).toHaveLength(2);
+    // 住所は一覧そのものが変わるので、まだ読み直す方式のまま
+    expect(source).not.toContain("keepValuesOnSave\n      noticeKey");
+
+    // 失敗したら入力内容を残したまま、その場に理由を出す
+    expect(formSource).toContain('role="alert"');
+    expect(formSource).toContain("ACCOUNT_SAVE_FAILED_NOTICE");
+    expect(accountPageErrorMessage("profile")).toBe(
+      "プロフィールを更新できませんでした。"
+    );
+    expect(accountPageErrorMessage("unknown")).toBe("保存できませんでした。");
+
+    /*
+      読み直さなくなると、片方のフォームが持つ相手側の隠し値が古くなる。
+      名前のフォームと配信のフォームで、触る項目を分ける。
+    */
+    expect(source).toContain('name="intent" value="name"');
+    expect(source).toContain('name="intent" value="emailMarketing"');
+    expect(source).not.toContain('name="lastName" value={profile.lastName');
+    expect(source).not.toContain('name="emailMarketing" value="on"');
+    expect(routeSource).toContain(
+      'const intentSchema = z.enum(["name", "emailMarketing"])'
+    );
+
+    // JavaScript が動かないときは、これまでどおりリダイレクトで伝える
+    expect(routeSource).toContain("wantsJson");
+    expect(routeSource).toContain("Response.json({ ok: true })");
+    expect(routeSource).toContain("Response.redirect(redirectUrl, 303)");
+    expect(routeSource).toContain("ACCOUNT_SESSION_EXPIRED_NOTICE");
+    expect(formSource).toContain("useAccountSavedNotice");
   });
 
   /*

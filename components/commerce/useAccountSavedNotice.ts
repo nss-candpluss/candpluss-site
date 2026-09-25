@@ -4,13 +4,11 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import {
+  ACCOUNT_SAVED_NOTICE_MS,
   ACCOUNT_SAVED_NOTICE_PARAMS,
   accountSavedNoticeKey,
   accountSearchWithoutNoticeKeys,
 } from "@/lib/commerce/account-page";
-
-/** 読み終わる頃には消したい。残り続けると、今の操作の結果か分からなくなる */
-const SAVED_NOTICE_MS = 4000;
 
 /**
  * 自分のフォームの保存だったときだけ true を返し、数秒後に false へ戻す。
@@ -38,7 +36,10 @@ export function useAccountSavedNotice(noticeKey: string) {
     );
     window.history.replaceState(null, "", search || window.location.pathname);
 
-    const timer = window.setTimeout(() => setIsHidden(true), SAVED_NOTICE_MS);
+    const timer = window.setTimeout(
+      () => setIsHidden(true),
+      ACCOUNT_SAVED_NOTICE_MS
+    );
     return () => window.clearTimeout(timer);
   }, [wasSaved]);
 

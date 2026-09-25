@@ -223,10 +223,10 @@ function ProfileNameForm({ profile }: { profile: CustomerAccount }) {
       action="/api/shopify/customer/profile"
       noticeKey="profile-name"
       inlineSubmit
+      keepValuesOnSave
     >
-      {isEmailMarketingSubscribed(profile.emailAddress?.marketingState) ? (
-        <input type="hidden" name="emailMarketing" value="on" />
-      ) : null}
+      {/* 配信設定は別のフォームで変える。ここから送ると古い値で上書きする */}
+      <input type="hidden" name="intent" value="name" />
       <AccountField label="お名前">
         <SiteGrid className="gap-x-[calc(12px*var(--gap-scale-x))] gap-y-[clamp(14px,calc(18px*var(--gap-scale-y)),18px)]">
           <div className={formHalfSpanClassName}>
@@ -265,9 +265,10 @@ function EmailMarketingForm({ profile }: { profile: CustomerAccount }) {
       action="/api/shopify/customer/profile"
       noticeKey="profile-marketing"
       inlineSubmit
+      keepValuesOnSave
     >
-      <input type="hidden" name="lastName" value={profile.lastName ?? ""} />
-      <input type="hidden" name="firstName" value={profile.firstName ?? ""} />
+      {/* 名前は別のフォームで変える。ここから送ると古い値で上書きする */}
+      <input type="hidden" name="intent" value="emailMarketing" />
       <AccountField label="メール配信">
         <label className="inline-flex cursor-pointer items-center gap-x-[clamp(8px,calc(12px*var(--gap-scale-x)),12px)]">
           <input

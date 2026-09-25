@@ -828,6 +828,16 @@ export function accountPageTabHref(tabId: AccountPageTabId, currentSearch = "") 
  */
 export const ACCOUNT_SAVED_NOTICE = "変更が保存されました。";
 
+/** 読み終わる頃には消したい。残り続けると、今の操作の結果か分からなくなる */
+export const ACCOUNT_SAVED_NOTICE_MS = 4000;
+
+/** 何が起きたか分からないまま終わらせないための、最後の受け皿 */
+export const ACCOUNT_SAVE_FAILED_NOTICE = "保存できませんでした。";
+
+/** セッションが切れていたら、保存できない理由をその場で伝える */
+export const ACCOUNT_SESSION_EXPIRED_NOTICE =
+  "ログインの有効期限が切れました。お手数ですが、もう一度ログインしてください。";
+
 /** どのフォームの保存だったかを URL から取り出す */
 export function accountSavedNoticeKey(search = "") {
   const query = search.startsWith("?") ? search.slice(1) : search;
@@ -972,6 +982,14 @@ export type AccountPageNotice = {
   tone: "success" | "error";
   message: string;
 };
+
+/** 失敗した操作の 1 行。ページを読み直さない保存では、これをその場に出す */
+export function accountPageErrorMessage(key: string) {
+  return (
+    ACCOUNT_PAGE_ERRORS[key as keyof typeof ACCOUNT_PAGE_ERRORS] ??
+    ACCOUNT_SAVE_FAILED_NOTICE
+  );
+}
 
 /** 更新後のリダイレクトに付くクエリを、画面に出す 1 行に変える */
 export function accountPageNotice(search = ""): AccountPageNotice | null {
