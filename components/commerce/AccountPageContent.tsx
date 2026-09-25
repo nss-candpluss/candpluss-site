@@ -160,8 +160,12 @@ function MemberSection({
   どの区画でも入力欄の左端が同じ位置から始まるようにする。
 */
 const accountFieldLabelClassName = `font-body-ja font-normal whitespace-nowrap text-[var(--foreground)] ${uiText(16)}`;
+/*
+  縦に積む幅では、ラベルと入力欄が上下に並ぶ。
+  ラベルは行間を詰めた文字で余りが無いので、余白は素の値のまま空ける。
+*/
 const accountFieldRowClassName =
-  "grid gap-y-3 min-[640px]:grid-cols-[calc(128px*var(--text-scale))_minmax(0,1fr)] min-[640px]:gap-x-[calc(8px*var(--gap-scale-x))] min-[640px]:gap-y-0";
+  "grid gap-y-4 min-[640px]:grid-cols-[calc(128px*var(--text-scale))_minmax(0,1fr)] min-[640px]:gap-x-[calc(8px*var(--gap-scale-x))] min-[640px]:gap-y-0";
 
 /** 読むだけの値も、入力欄の中の文字と同じ大きさ・太さで出す */
 const accountFieldValueClassName =
