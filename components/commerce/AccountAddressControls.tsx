@@ -50,7 +50,12 @@ function AddressIntentButton({
  * 削除の確認。取り消しがきかないので、画面を覆って手を止めてもらう。
  *
  * 開いているかどうかは URL の `confirmDelete` が持つ。
- * JavaScript が動かないときは `open` が付いたまま出るので、確認自体は残る。
+ * ただし `open` 属性は React に触らせない。
+ * `showModal()` で開いたダイアログは最前面の層に載っていて、
+ * 属性を外しただけでは層と覆いが残り、ページ全体が押せなくなる。
+ * 閉じるのは必ず `close()` を通す。
+ *
+ * JavaScript が動かないときは `<noscript>` の確認を出す。
  */
 function AddressDeleteDialog({
   addressId,
@@ -71,21 +76,16 @@ function AddressDeleteDialog({
       return;
     }
 
-    if (!isOpen) {
-      if (dialog.open) {
-        dialog.close();
+    if (isOpen) {
+      if (!dialog.open) {
+        dialog.showModal();
       }
       return;
     }
 
-    /*
-      サーバーから `open` 付きで届くと、背景を押せる素の表示になる。
-      いったん閉じてから開き直して、覆う表示にそろえる。
-    */
     if (dialog.open) {
       dialog.close();
     }
-    dialog.showModal();
   }, [isOpen]);
 
   /*
@@ -99,7 +99,6 @@ function AddressDeleteDialog({
   return (
     <dialog
       ref={dialogRef}
-      open={isOpen}
       aria-labelledby={`${addressId}-delete-message`}
       onCancel={(event) => {
         event.preventDefault();
@@ -136,6 +135,39 @@ function AddressDeleteDialog({
         </button>
       </div>
     </dialog>
+  );
+}
+
+/** JavaScript が動かないときの確認。覆えないので、その場に並べる */
+function AddressDeleteFallback({
+  addressId,
+  closeHref,
+  message,
+}: {
+  addressId: string;
+  closeHref: string;
+  message: string;
+}) {
+  return (
+    <noscript>
+      <div className="flex w-full flex-wrap items-center gap-x-[clamp(12px,calc(16px*var(--gap-scale-x)),16px)] gap-y-3 rounded-[16px] border border-[var(--color-divider)] p-[clamp(16px,calc(24px*var(--gap-scale-x)),24px)]">
+        <p
+          className={`basis-full font-body-ja text-[var(--foreground)] ${bodyText(15)}`}
+        >
+          {message}
+        </p>
+        <AddressIntentButton
+          addressId={addressId}
+          intent="delete"
+          className={accountPrimaryButtonClassName}
+        >
+          削除する
+        </AddressIntentButton>
+        <a href={closeHref} className={accountSecondaryButtonClassName}>
+          キャンセル
+        </a>
+      </div>
+    </noscript>
   );
 }
 
@@ -181,6 +213,13 @@ export function AccountAddressActions({
         closeHref={accountPageTabHref("account", search)}
         message={deleteMessage}
       />
+      {isConfirmingDelete ? (
+        <AddressDeleteFallback
+          addressId={addressId}
+          closeHref={accountPageTabHref("account", search)}
+          message={deleteMessage}
+        />
+      ) : null}
     </div>
   );
 }

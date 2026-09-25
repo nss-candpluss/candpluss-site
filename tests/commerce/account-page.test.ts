@@ -1239,6 +1239,15 @@ describe("会員ページの画面構成", () => {
 
     expect(controlsSource).toContain("<dialog");
     expect(controlsSource).toContain("dialog.showModal()");
+    /*
+      `showModal()` で開いたダイアログは最前面の層に載る。
+      React に `open` 属性を外させると層と覆いが残り、
+      ページ全体が押せなくなる。閉じるのは必ず `close()` を通す。
+    */
+    expect(controlsSource).not.toContain("open={isOpen}");
+    expect(controlsSource).toContain("dialog.close()");
+    // 覆えない環境では、その場に並べた確認を出す
+    expect(controlsSource).toContain("<noscript>");
     expect(controlsSource).toContain("backdrop:bg-black/50");
     expect(controlsSource).toContain("キャンセル");
     expect(controlsSource).not.toContain("やめる");
