@@ -50,6 +50,7 @@ import {
   formatAccountOrderDateTime,
   formatAccountName,
   formatAccountShipmentStatus,
+  sortAccountAddresses,
 } from "@/lib/commerce/account-page";
 import {
   fetchCustomerAccountSnapshot,
@@ -1158,7 +1159,9 @@ function AccountSettingsPanel({
   profile: CustomerAccount;
   shopifyProfileUrl: string | null;
 }) {
-  const addressTitles = accountAddressTitles(addresses, defaultAddressId);
+  // 既定は一覧の先頭に出し、残りは元の並びのまま 1 から番号を振る
+  const sortedAddresses = sortAccountAddresses(addresses, defaultAddressId);
+  const addressTitles = accountAddressTitles(sortedAddresses, defaultAddressId);
 
   return (
     <div className="flex flex-col">
@@ -1189,7 +1192,7 @@ function AccountSettingsPanel({
       </MemberSection>
 
       <MemberSection title="配送先住所" wideGap>
-        {addresses.map((address, index) => (
+        {sortedAddresses.map((address, index) => (
           <div
             key={address.id}
             className="flex flex-col gap-[clamp(24px,calc(40px*var(--gap-scale-y)),40px)]"

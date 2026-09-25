@@ -927,6 +927,25 @@ export function formatJapanPhoneNumberInput(value?: string | null) {
 export const NEW_ACCOUNT_ADDRESS = "new";
 
 /**
+ * 既定の住所を先頭に寄せる。残りは受け取った並びのまま。
+ *
+ * 既定が途中にあると、番号の列の中に役割の見出しが挟まって探しにくい。
+ */
+export function sortAccountAddresses<T extends { id: string }>(
+  addresses: readonly T[],
+  defaultAddressId?: string
+) {
+  const index = addresses.findIndex(
+    (address) => address.id === defaultAddressId
+  );
+  if (index <= 0) return [...addresses];
+
+  const sorted = [...addresses];
+  const [defaultAddress] = sorted.splice(index, 1);
+  return [defaultAddress, ...sorted];
+}
+
+/**
  * 住所ごとの見出し。既定は役割で呼び、残りに 1 から番号を振る。
  *
  * 既定を番号の列に混ぜると、既定を変えるたびに番号が動いて読みにくい。

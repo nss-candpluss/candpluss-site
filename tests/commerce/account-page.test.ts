@@ -16,6 +16,7 @@ import {
   accountAddressNoticeKey,
   accountAddressTitles,
   accountSavedNoticeKey,
+  sortAccountAddresses,
   applyAccountSavedParams,
   accountOrderHasReceipt,
   accountAddressEditHref,
@@ -1005,6 +1006,46 @@ describe("会員ページの画面構成", () => {
     // 1 項目だけのフォームは、ボタンを入力欄の右へ並べる
     expect(formSource).toContain("inlineSubmit");
     expect(source.match(/inlineSubmit/g)).toHaveLength(2);
+  });
+
+  it("既定の住所を先頭に寄せ、残りは元の並びのまま番号を振る", () => {
+    const addresses = [{ id: "a" }, { id: "b" }, { id: "c" }, { id: "d" }];
+    // 3 番目を既定にすると、それだけが先頭へ上がり、残りの前後関係は変わらない
+    const sorted = sortAccountAddresses(addresses, "c");
+
+    expect(sorted.map((address) => address.id)).toEqual(["c", "a", "b", "d"]);
+    // 元の配列は触らない
+    expect(addresses.map((address) => address.id)).toEqual([
+      "a",
+      "b",
+      "c",
+      "d",
+    ]);
+
+    const titles = accountAddressTitles(sorted, "c");
+    expect([...titles.values()]).toEqual([
+      "既定の住所",
+      "住所1",
+      "住所2",
+      "住所3",
+    ]);
+
+    // 既定が無いとき・すでに先頭のときは並びを変えない
+    expect(sortAccountAddresses(addresses).map((a) => a.id)).toEqual([
+      "a",
+      "b",
+      "c",
+      "d",
+    ]);
+    expect(sortAccountAddresses(addresses, "a").map((a) => a.id)).toEqual([
+      "a",
+      "b",
+      "c",
+      "d",
+    ]);
+
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+    expect(source).toContain("sortedAddresses.map((address, index)");
   });
 
   // 既定を番号の列に混ぜると、既定を変えるたびに番号が動いて読みにくい
