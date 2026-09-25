@@ -998,7 +998,12 @@ describe("会員ページの画面構成", () => {
     const formSource = readSource("components/commerce/AccountUpdateForm.tsx");
     const source = readSource("components/commerce/AccountPageContent.tsx");
 
-    expect(formSource).toContain("{isChanged || showSaved ?");
+    expect(formSource).toContain("{isChanged || showSaved || secondaryAction ?");
+    /*
+      追加用のフォームは、開いたまま閉じられないと行き止まりになる。
+      何も直していなくてもボタンの行を出し、そこにクリアを並べる。
+    */
+    expect(formSource).toContain("{secondaryAction}");
     expect(formSource).toContain(">\n              保存\n            </button>");
     expect(formSource).not.toContain("disabled={!isChanged}");
     expect(formSource).not.toContain("submitLabel");
@@ -1168,6 +1173,17 @@ describe("会員ページの画面構成", () => {
     expect(routeSource).toContain("address2: z.string().trim().min(1).max(255)");
     expect(routeSource).toContain("phoneNumber: z.string().trim().min(1).max(20)");
     expect(routeSource).not.toContain("|| undefined,\n      phoneNumber");
+  });
+
+  // 開いたまま閉じられないと、入力をやめたい人が行き止まりになる
+  it("追加用の住所フォームは保存せずに閉じられる", () => {
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+
+    expect(source).toContain("canClear");
+    expect(source).toContain('accountPageTabHref("account")');
+    expect(source).toContain("クリア");
+    // 閉じる道を用意するのは追加用だけ。すでにある住所は消えると困る
+    expect(source.match(/canClear/g)).toHaveLength(4);
   });
 
   it("住所の操作は角丸ボタンで出す", () => {
@@ -1488,8 +1504,18 @@ describe("会員ページの画面構成", () => {
     expect(source).toContain('name="phoneNumber"');
     expect(source).toContain("formatJapanPhoneNumberInput(address?.phoneNumber)");
     expect(source).toContain("accountMemberCopy.payments.title");
-    // 保存カードを管理する画面は存在しないので、案内先も作らない
-    expect(accountMemberCopy.payments.body).toContain("保管することはありません");
+    /*
+      保存カードを管理する画面は存在しないので、案内先も作らない。
+      できること（その都度選べる）を先に出し、
+      保管しないことは断りではなく安心材料として添える。
+    */
+    expect(accountMemberCopy.payments.body).toContain("その都度お選びいただけます");
+    expect(accountMemberCopy.payments.body).toContain("安心してご利用ください");
+    expect(accountMemberCopy.payments.body).not.toContain("ご入力ください");
+    // 注釈ではなく、区画の説明として本文の大きさで出す
+    expect(source).toContain(
+      "<p className={readOnlyBodyClassName}>\n          {accountMemberCopy.payments.body}"
+    );
     expect(source).not.toContain("accountMemberCopy.payments.link");
     expect(source).not.toContain("このページで変更できない情報は");
     expect(source).not.toContain("label=\"アバター画像 URL\"");

@@ -8,9 +8,11 @@ import {
 } from "@/components/commerce/AccountAddressControls";
 import {
   accountHeadingClassName,
+  accountSecondaryButtonClassName,
   accountSubHeadingClassName,
   accountTextLinkClassName,
 } from "@/components/commerce/accountStyles";
+import { AccountShallowLink } from "@/components/commerce/AccountShallowLink";
 import { AccountNotice } from "@/components/commerce/AccountNotice";
 import { AccountTabs } from "@/components/commerce/AccountTabs";
 import { OrderCardCollapse } from "@/components/commerce/OrderCardCollapse";
@@ -43,6 +45,7 @@ import {
   type AccountStatusDisplay,
   type AccountStatusTone,
   accountOrderPaymentMethods,
+  accountPageTabHref,
   accountOrderShipmentDisplay,
   formatAccountAddressLine,
   formatAccountAddressName,
@@ -305,10 +308,13 @@ function AddressForm({
   address,
   formKey,
   isDefault,
+  canClear = false,
 }: {
   address?: CustomerAddressDetail;
   formKey: string;
   isDefault: boolean;
+  /** 追加用のフォームは、保存せずに閉じる道を用意する */
+  canClear?: boolean;
 }) {
   const { fieldLabels, placeholders } = contactFormCopy;
   const zoneCode = normalizeJapanZoneCode(address?.zoneCode);
@@ -324,6 +330,17 @@ function AddressForm({
         新しい住所はフォームごと閉じて一覧に加わるため、読み直す。
       */
       keepValuesOnSave={Boolean(address?.id)}
+      secondaryAction={
+        canClear ? (
+          // 一覧に戻すだけ。入力した内容はフォームごと消える
+          <AccountShallowLink
+            href={accountPageTabHref("account")}
+            className={accountSecondaryButtonClassName}
+          >
+            クリア
+          </AccountShallowLink>
+        ) : undefined
+      }
     >
       <input type="hidden" name="intent" value="save" />
       <input type="hidden" name="addressId" value={address?.id ?? ""} />
@@ -1243,12 +1260,16 @@ function AccountSettingsPanel({
         ))}
 
         <AccountAddressAdd>
-          <AddressForm formKey="new" isDefault={addresses.length === 0} />
+          <AddressForm
+            formKey="new"
+            isDefault={addresses.length === 0}
+            canClear
+          />
         </AccountAddressAdd>
       </MemberSection>
 
       <MemberSection title={accountMemberCopy.payments.title}>
-        <p className={readOnlyNoteClassName}>
+        <p className={readOnlyBodyClassName}>
           {accountMemberCopy.payments.body}
         </p>
       </MemberSection>

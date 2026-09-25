@@ -36,6 +36,13 @@ type AccountUpdateFormProps = {
    * 読み直さなければ、入力した内容がそのまま画面に残る。
    */
   keepValuesOnSave?: boolean;
+  /**
+   * 保存ボタンの横に並べる、保存以外の操作。
+   *
+   * 渡すと、まだ何も直していなくてもボタンの行を出す。
+   * 追加用のフォームは、開いたまま閉じられないと行き止まりになる。
+   */
+  secondaryAction?: ReactNode;
   children: ReactNode;
 };
 
@@ -94,6 +101,7 @@ export function AccountUpdateForm({
   noticeKey,
   inlineSubmit = false,
   keepValuesOnSave = false,
+  secondaryAction,
   children,
 }: AccountUpdateFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
@@ -197,8 +205,8 @@ export function AccountUpdateForm({
       )}
 
       {/* 直したときだけ保存ボタンを出し、押したあとは同じ場所で結果を知らせる */}
-      {isChanged || showSaved ? (
-        <div className="shrink-0">
+      {isChanged || showSaved || secondaryAction ? (
+        <div className="flex shrink-0 flex-wrap items-center gap-x-[clamp(16px,calc(24px*var(--gap-scale-x)),24px)] gap-y-3">
           {isChanged ? (
             <button
               type="submit"
@@ -207,14 +215,15 @@ export function AccountUpdateForm({
             >
               保存
             </button>
-          ) : (
+          ) : showSaved ? (
             <p
               role="status"
               className={`font-body-ja text-[var(--color-muted)] ${uiText(14)}`}
             >
               {ACCOUNT_SAVED_NOTICE}
             </p>
-          )}
+          ) : null}
+          {secondaryAction}
         </div>
       ) : null}
 
