@@ -1140,6 +1140,36 @@ describe("会員ページの画面構成", () => {
     expect(source).toContain('isSplit ? "mt-[18px]" : ""');
   });
 
+  /*
+    配送先なので、欠けたまま保存させない。
+    フォームの required はブラウザに任せた確認でしかないので、
+    受け口でも 1 文字以上あることを確かめる。
+  */
+  it("住所の入力欄はすべて必須にする", () => {
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+    const routeSource = readSource(
+      "app/api/shopify/customer/address/route.ts"
+    );
+    const form = source.slice(
+      source.indexOf("function AddressForm("),
+      source.indexOf("function OrderAddressBlock(")
+    );
+
+    // 姓・名・郵便番号・都道府県・市区町村・番地・建物名・電話番号の 8 つ
+    expect(form.match(/^\s*required$/gm)).toHaveLength(8);
+    // 必須の印は、お問い合わせフォームと同じ末尾の * で示す
+    expect(form).toContain("label={`${fieldLabels.postalCode} *`}");
+    expect(form).toContain('label="市区町村 *"');
+    expect(form).toContain('label="番地 *"');
+    expect(form).toContain("label={`${placeholders.addressLine2} *`}");
+    expect(form).toContain('label="電話番号 *"');
+    expect(form).toContain("{`${placeholders.prefecture} *`}");
+
+    expect(routeSource).toContain("address2: z.string().trim().min(1).max(255)");
+    expect(routeSource).toContain("phoneNumber: z.string().trim().min(1).max(20)");
+    expect(routeSource).not.toContain("|| undefined,\n      phoneNumber");
+  });
+
   it("住所の操作は角丸ボタンで出す", () => {
     const controlsSource = readSource(
       "components/commerce/AccountAddressControls.tsx"

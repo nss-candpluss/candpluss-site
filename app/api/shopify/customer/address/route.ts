@@ -24,17 +24,22 @@ import { getCustomerTokenSession } from "@/lib/shopify/customer-session";
 
 export const runtime = "nodejs";
 
+/*
+  配送先なので、欠けたまま保存させない。
+  フォーム側の required はブラウザに任せた確認でしかないので、
+  ここでも 1 文字以上あることを確かめる。
+*/
 const addressSchema = z.object({
   addressId: z.string().optional(),
-  firstName: z.string().trim().max(100),
-  lastName: z.string().trim().max(100),
-  zip: z.string().trim().max(20),
+  firstName: z.string().trim().min(1).max(100),
+  lastName: z.string().trim().min(1).max(100),
+  zip: z.string().trim().min(1).max(20),
   territoryCode: z.string().trim().length(2).default("JP"),
-  zoneCode: z.string().trim().max(20),
-  city: z.string().trim().max(100),
-  address1: z.string().trim().max(255),
-  address2: z.string().trim().max(255).optional(),
-  phoneNumber: z.string().trim().max(20).optional(),
+  zoneCode: z.string().trim().min(1).max(20),
+  city: z.string().trim().min(1).max(100),
+  address1: z.string().trim().min(1).max(255),
+  address2: z.string().trim().min(1).max(255),
+  phoneNumber: z.string().trim().min(1).max(20),
 });
 
 /** 一覧の「既定に設定」「削除」と、編集フォームの保存を 1 つの口で受ける */
@@ -108,14 +113,14 @@ export async function POST(request: Request) {
       zoneCode: formData.get("zoneCode"),
       city: formData.get("city"),
       address1: formData.get("address1"),
-      address2: formData.get("address2") || undefined,
-      phoneNumber: formData.get("phoneNumber") || undefined,
+      address2: formData.get("address2"),
+      phoneNumber: formData.get("phoneNumber"),
     });
     const { addressId: savedAddressId, phoneNumber, ...address } = parsed;
 
     const saved = await saveCustomerAddress(session.accessToken, {
       addressId: savedAddressId,
-      // 空で送られたら null。消したいときに消せるようにする
+      // Shopify は E.164 でしか受け取らないので、送る前に整える
       address: { ...address, phoneNumber: toShopifyJapanPhoneNumber(phoneNumber) },
       // 既定にするかはフォームのチェックで決める（1 件目は既定で入る）
       defaultAddress: formData.get("defaultAddress") === "on",

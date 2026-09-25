@@ -370,7 +370,7 @@ function AddressForm({
               id={fieldId("zip")}
               name="zip"
               type="text"
-              label={fieldLabels.postalCode}
+              label={`${fieldLabels.postalCode} *`}
               autoComplete="postal-code"
               inputMode="numeric"
               defaultValue={address?.zip ?? ""}
@@ -382,7 +382,7 @@ function AddressForm({
           {/* 都道府県名は短いので、郵便番号と同じ幅で足りる */}
           <div className="relative max-w-[240px]">
             <label htmlFor={fieldId("zone")} className="sr-only">
-              {placeholders.prefecture}
+              {`${placeholders.prefecture} *`}
             </label>
             <select
               id={fieldId("zone")}
@@ -392,7 +392,7 @@ function AddressForm({
               className={getContactFloatingSelectClassName()}
               style={getContactFloatingSelectStyle(Boolean(zoneCode))}
             >
-              <option value="">{placeholders.prefecture}</option>
+              <option value="">{`${placeholders.prefecture} *`}</option>
               {japanZones.map((zone) => (
                 <option key={zone.zoneCode} value={zone.zoneCode}>
                   {zone.prefecture}
@@ -407,7 +407,7 @@ function AddressForm({
               id={fieldId("city")}
               name="city"
               type="text"
-              label="市区町村"
+              label="市区町村 *"
               autoComplete="address-level2"
               defaultValue={address?.city ?? ""}
               maxLength={100}
@@ -419,7 +419,7 @@ function AddressForm({
             id={fieldId("address1")}
             name="address1"
             type="text"
-            label="番地"
+            label="番地 *"
             autoComplete="address-line1"
             defaultValue={address?.address1 ?? ""}
             maxLength={255}
@@ -430,10 +430,11 @@ function AddressForm({
             id={fieldId("address2")}
             name="address2"
             type="text"
-            label={placeholders.addressLine2}
+            label={`${placeholders.addressLine2} *`}
             autoComplete="address-line2"
             defaultValue={address?.address2 ?? ""}
             maxLength={255}
+            required
           />
         </div>
       </AccountField>
@@ -444,11 +445,12 @@ function AddressForm({
             id={fieldId("phone")}
             name="phoneNumber"
             type="tel"
-            label="電話番号"
+            label="電話番号 *"
             autoComplete="tel"
             inputMode="tel"
             defaultValue={formatJapanPhoneNumberInput(address?.phoneNumber)}
             maxLength={20}
+            required
           />
         </div>
       </AccountField>
