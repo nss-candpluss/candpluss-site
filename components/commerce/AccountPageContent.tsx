@@ -15,6 +15,7 @@ import {
 } from "@/components/commerce/accountStyles";
 import { AccountShallowLink } from "@/components/commerce/AccountShallowLink";
 import { AccountAddressLocationFields } from "@/components/commerce/AccountAddressLocationFields";
+import { AccountLogoutButton } from "@/components/commerce/AccountLogoutButton";
 import { AccountNotice } from "@/components/commerce/AccountNotice";
 import { AccountTabs } from "@/components/commerce/AccountTabs";
 import { OrderCardCollapse } from "@/components/commerce/OrderCardCollapse";
@@ -113,19 +114,6 @@ function formatText(value?: string | null) {
 const readOnlyNoteClassName = `mt-[calc(8px*var(--gap-scale-y))] font-body-ja text-[var(--color-muted)] ${bodyText(13)}`;
 /** 区画の説明。注釈ではないので、大きさも色も落とさない */
 const readOnlyBodyClassName = `font-body-ja text-[var(--foreground)] ${bodyText(16)}`;
-
-function LogoutButton() {
-  return (
-    <form action="/account/logout" method="post">
-      <button
-        type="submit"
-        className="border-b border-current font-ui-en text-sm"
-      >
-        LOGOUT
-      </button>
-    </form>
-  );
-}
 
 function MemberSection({
   title,
@@ -1264,7 +1252,7 @@ function AccountSettingsPanel({
 
       {/* 会員ページから出る操作。設定をひととおり見終えた先に置く */}
       <MemberSection>
-        <LogoutButton />
+        <AccountLogoutButton />
       </MemberSection>
     </div>
   );
@@ -1355,7 +1343,7 @@ export async function AccountPageContent() {
         <div className="mt-12">
           <SectionError error={snapshotError} />
           <div className="mt-6">
-            <LogoutButton />
+            <AccountLogoutButton />
           </div>
         </div>
       ) : null}

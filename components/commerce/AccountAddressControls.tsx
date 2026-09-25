@@ -4,6 +4,8 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, type ReactNode } from "react";
 
 import {
+  accountDialogActionsClassName,
+  accountDialogClassName,
   accountPrimaryButtonClassName,
   accountSecondaryButtonClassName,
   accountSubHeadingClassName,
@@ -110,7 +112,7 @@ function AddressDeleteDialog({
           dismiss();
         }
       }}
-      className="m-auto w-[min(420px,calc(100vw-32px))] rounded-[16px] border border-[var(--color-divider)] bg-white p-[clamp(24px,calc(40px*var(--gap-scale-x)),40px)] shadow-[0_0_24px_rgba(0,0,0,0.12)] backdrop:bg-black/50"
+      className={accountDialogClassName}
     >
       <p
         id={`${addressId}-delete-message`}
@@ -118,7 +120,7 @@ function AddressDeleteDialog({
       >
         {message}
       </p>
-      <div className="mt-[clamp(24px,calc(32px*var(--gap-scale-y)),32px)] flex flex-wrap items-center gap-x-[clamp(12px,calc(16px*var(--gap-scale-x)),16px)] gap-y-3">
+      <div className={accountDialogActionsClassName}>
         <AddressIntentButton
           addressId={addressId}
           intent="delete"

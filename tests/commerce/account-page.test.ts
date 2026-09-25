@@ -1248,7 +1248,11 @@ describe("会員ページの画面構成", () => {
     expect(controlsSource).toContain("dialog.close()");
     // 覆えない環境では、その場に並べた確認を出す
     expect(controlsSource).toContain("<noscript>");
-    expect(controlsSource).toContain("backdrop:bg-black/50");
+    // 覆いの見た目はログアウトの確認と共用する
+    expect(controlsSource).toContain("className={accountDialogClassName}");
+    expect(readSource("components/commerce/accountStyles.ts")).toContain(
+      "backdrop:bg-black/50"
+    );
     expect(controlsSource).toContain("キャンセル");
     expect(controlsSource).not.toContain("やめる");
 
@@ -1261,6 +1265,28 @@ describe("会員ページの画面構成", () => {
     );
     expect(routeSource).toContain("const nextDefaultId = remaining.defaultAddress?.id");
     expect(routeSource).toContain("remaining.addresses.nodes[0]?.id");
+  });
+
+  it("ログアウトは設定の末尾に置き、確認を挟んでから送る", () => {
+    const logoutSource = readSource(
+      "components/commerce/AccountLogoutButton.tsx"
+    );
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+
+    // 周りが日本語の設定項目なので、表記もボタンの形もそこに合わせる
+    expect(logoutSource).toContain("ログアウト");
+    expect(logoutSource).toContain("accountSecondaryButtonClassName");
+    /*
+      触れただけで締め出されると困るので、送信を止めて確認を出す。
+      確認の中からの送信だけ通すので、素のフォームとしても働く。
+    */
+    expect(logoutSource).toContain("dialog.showModal()");
+    expect(logoutSource).toContain("if (!dialog || dialog.open)");
+    expect(logoutSource).toContain('action="/account/logout"');
+    expect(logoutSource).toContain("キャンセル");
+    // 設定をひととおり見終えた先に置く。タブの上には出さない
+    expect(source).toContain("<AccountLogoutButton />");
+    expect(source).not.toContain("items-end justify-end");
   });
 
   // 開いたまま閉じられないと、入力をやめたい人が行き止まりになる

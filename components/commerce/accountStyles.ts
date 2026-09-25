@@ -36,3 +36,14 @@ export const accountPrimaryButtonClassName =
 
 export const accountSecondaryButtonClassName =
   `${accountButtonBaseClassName} border border-[var(--foreground)] bg-white text-[var(--foreground)]`;
+
+/**
+ * 取り消しがきかない操作の前に出す確認。
+ * 画面を覆って手を止めてもらうので、幅は読み切れる範囲に収める。
+ */
+export const accountDialogClassName =
+  "m-auto w-[min(420px,calc(100vw-32px))] rounded-[16px] border border-[var(--color-divider)] bg-white p-[clamp(24px,calc(40px*var(--gap-scale-x)),40px)] shadow-[0_0_24px_rgba(0,0,0,0.12)] backdrop:bg-black/50";
+
+/** 確認の中に並べるボタンの行 */
+export const accountDialogActionsClassName =
+  "mt-[clamp(24px,calc(32px*var(--gap-scale-y)),32px)] flex flex-wrap items-center gap-x-[clamp(12px,calc(16px*var(--gap-scale-x)),16px)] gap-y-3";
