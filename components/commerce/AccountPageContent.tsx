@@ -132,7 +132,8 @@ function MemberSection({
   wideGap = false,
   children,
 }: {
-  title: string;
+  /** ログアウトのように、見出しを付けるほどの中身がない区画では省く */
+  title?: string;
   /** 住所のように 1 件ずつが大きいものは、間をはっきり空ける */
   wideGap?: boolean;
   children: React.ReactNode;
@@ -140,9 +141,9 @@ function MemberSection({
   return (
     // 区画の間に線を引く。線の上下に同じ余白を取り、どちらかに寄らないようにする
     <section className="border-t border-[var(--color-divider)] py-[clamp(42px,calc(72px*var(--gap-scale-y)),72px)] first:border-t-0 first:pt-0 last:pb-0">
-      <h3 className={accountHeadingClassName}>{title}</h3>
+      {title ? <h3 className={accountHeadingClassName}>{title}</h3> : null}
       <div
-        className={`mt-[clamp(28px,calc(48px*var(--gap-scale-y)),48px)] flex flex-col ${
+        className={`${title ? "mt-[clamp(28px,calc(48px*var(--gap-scale-y)),48px)] " : ""}flex flex-col ${
           wideGap
             ? "gap-[clamp(48px,calc(80px*var(--gap-scale-y)),80px)]"
             : "gap-[clamp(28px,calc(40px*var(--gap-scale-y)),40px)]"
@@ -1260,6 +1261,11 @@ function AccountSettingsPanel({
           {accountMemberCopy.deletion.notice}
         </p>
       </MemberSection>
+
+      {/* 会員ページから出る操作。設定をひととおり見終えた先に置く */}
+      <MemberSection>
+        <LogoutButton />
+      </MemberSection>
     </div>
   );
 }
@@ -1367,10 +1373,6 @@ export async function AccountPageContent() {
 
       {snapshot ? (
         <div className="mt-[calc(32px*var(--gap-scale-y))]">
-          <div className="flex flex-wrap items-end justify-end gap-4">
-            <LogoutButton />
-          </div>
-
           <AccountNotice />
 
           <AccountTabs

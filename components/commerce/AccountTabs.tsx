@@ -60,7 +60,7 @@ export function AccountTabs({ panels }: AccountTabsProps) {
         </ul>
       </nav>
 
-      <div className="mt-[calc(52px*var(--gap-scale-y))]">
+      <div className="mt-[calc(102px*var(--gap-scale-y))]">
         {ACCOUNT_PAGE_TABS.map((tab) => (
           <div key={tab.id} hidden={tab.id !== activeTabId}>
             {panels[tab.id]}

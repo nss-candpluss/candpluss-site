@@ -992,7 +992,7 @@ describe("会員ページの画面構成", () => {
     );
     // 区画の見出しと中身、住所 1 件ずつの間はどちらも広く取る
     expect(source).toContain(
-      "mt-[clamp(28px,calc(48px*var(--gap-scale-y)),48px)] flex flex-col"
+      "mt-[clamp(28px,calc(48px*var(--gap-scale-y)),48px)] "
     );
     expect(source).toContain(
       "gap-[clamp(48px,calc(80px*var(--gap-scale-y)),80px)]"
