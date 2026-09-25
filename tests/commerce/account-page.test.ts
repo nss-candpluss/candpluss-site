@@ -14,6 +14,7 @@ import {
   accountPageErrorMessage,
   accountAddressDeleteHref,
   accountAddressNoticeKey,
+  accountAddressTitles,
   accountSavedNoticeKey,
   applyAccountSavedParams,
   accountOrderHasReceipt,
@@ -1006,6 +1007,45 @@ describe("会員ページの画面構成", () => {
     expect(source.match(/inlineSubmit/g)).toHaveLength(2);
   });
 
+  // 既定を番号の列に混ぜると、既定を変えるたびに番号が動いて読みにくい
+  it("既定の住所は役割で呼び、残りの住所に番号を振る", () => {
+    const titles = accountAddressTitles(
+      [{ id: "a" }, { id: "b" }, { id: "c" }],
+      "b"
+    );
+
+    expect(titles.get("b")).toBe("既定の住所");
+    expect(titles.get("a")).toBe("住所1");
+    expect(titles.get("c")).toBe("住所2");
+    // 既定が無いときは全部に番号を振る
+    expect(accountAddressTitles([{ id: "a" }]).get("a")).toBe("住所1");
+
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+    expect(source).toContain("addressTitles.get(address.id)");
+    expect(source).not.toContain("（既定）");
+  });
+
+  it("既定にするは削除するの左に並べ、既定の住所には出さない", () => {
+    const controlsSource = readSource(
+      "components/commerce/AccountAddressControls.tsx"
+    );
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+
+    // 既定の住所に「既定にする」を出しても押す意味がない
+    expect(controlsSource).toContain("{isDefault ? null : (");
+    expect(controlsSource.indexOf("既定にする")).toBeLessThan(
+      controlsSource.lastIndexOf("削除する")
+    );
+    /*
+      フォーム内のチェックボックスは外した。
+      保存で既定が外れないよう、今の状態だけ送り返す。
+    */
+    expect(source).not.toContain("この住所を既定にする");
+    expect(source).toContain(
+      '<input type="hidden" name="defaultAddress" value="on" />'
+    );
+  });
+
   it("住所の操作は角丸ボタンで出す", () => {
     const controlsSource = readSource(
       "components/commerce/AccountAddressControls.tsx"
@@ -1253,8 +1293,9 @@ describe("会員ページの画面構成", () => {
     expect(source).not.toContain('<dl className="border-t border-[#eee]">');
     // チェックボックスはお問い合わせフォームと同じ見た目にする
     expect(source).not.toContain("getContactCheckboxClassName");
-    expect(source.match(/className="peer sr-only"/g)).toHaveLength(2);
-    expect(source.match(/className=\{contactCheckboxBoxClassName\}/g)).toHaveLength(2);
+    // 残るチェックボックスはメール配信だけ。既定の住所はボタンで切り替える
+    expect(source.match(/className="peer sr-only"/g)).toHaveLength(1);
+    expect(source.match(/className=\{contactCheckboxBoxClassName\}/g)).toHaveLength(1);
     expect(readSource("sections/contact/contactStyles.ts")).toContain(
       "export const contactCheckboxBoxClassName"
     );

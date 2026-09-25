@@ -24,6 +24,7 @@ import { accountMemberCopy } from "@/lib/commerce/account-field-notes";
 import {
   ACCOUNT_CANCELLED_BADGE,
   accountAddressNoticeKey,
+  accountAddressTitles,
   accountOrderHasReceipt,
   accountOrderLineImageAlt,
   accountOrderLineTitle,
@@ -310,6 +311,11 @@ function AddressForm({
       <input type="hidden" name="intent" value="save" />
       <input type="hidden" name="addressId" value={address?.id ?? ""} />
       <input type="hidden" name="territoryCode" value="JP" />
+      {/*
+        既定の切り替えはフォームの下のボタンで行う。
+        今の状態をそのまま送り返して、保存で既定が外れないようにする。
+      */}
+      {isDefault ? <input type="hidden" name="defaultAddress" value="on" /> : null}
 
       <AccountField label="お名前">
         <SiteGrid className="gap-x-[calc(12px*var(--gap-scale-x))] gap-y-[clamp(14px,calc(18px*var(--gap-scale-y)),18px)]">
@@ -428,21 +434,6 @@ function AddressForm({
             maxLength={20}
           />
         </div>
-      </AccountField>
-
-      <AccountField label="既定の住所">
-        <label className="inline-flex cursor-pointer items-center gap-x-[clamp(8px,calc(12px*var(--gap-scale-x)),12px)]">
-          <input
-            type="checkbox"
-            name="defaultAddress"
-            defaultChecked={isDefault}
-            className="peer sr-only"
-          />
-          <span aria-hidden="true" className={contactCheckboxBoxClassName} />
-          <span className={accountFieldChoiceClassName}>
-            この住所を既定にする
-          </span>
-        </label>
       </AccountField>
     </AccountUpdateForm>
   );
@@ -1167,6 +1158,8 @@ function AccountSettingsPanel({
   profile: CustomerAccount;
   shopifyProfileUrl: string | null;
 }) {
+  const addressTitles = accountAddressTitles(addresses, defaultAddressId);
+
   return (
     <div className="flex flex-col">
       <MemberSection title={accountMemberCopy.accountDetails.title}>
@@ -1202,9 +1195,7 @@ function AccountSettingsPanel({
             className="flex flex-col gap-[clamp(24px,calc(40px*var(--gap-scale-y)),40px)]"
           >
             <p className="font-body-ja text-sm font-bold">
-              {`住所 ${index + 1}${
-                address.id === defaultAddressId ? "（既定）" : ""
-              }`}
+              {addressTitles.get(address.id)}
             </p>
 
             <AddressForm

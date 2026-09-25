@@ -926,6 +926,28 @@ export function formatJapanPhoneNumberInput(value?: string | null) {
 /** 住所を新しく登録するときに `address` へ入れる値 */
 export const NEW_ACCOUNT_ADDRESS = "new";
 
+/**
+ * 住所ごとの見出し。既定は役割で呼び、残りに 1 から番号を振る。
+ *
+ * 既定を番号の列に混ぜると、既定を変えるたびに番号が動いて読みにくい。
+ */
+export function accountAddressTitles(
+  addresses: readonly { id: string }[],
+  defaultAddressId?: string
+) {
+  const titles = new Map<string, string>();
+  let next = 1;
+
+  for (const address of addresses) {
+    titles.set(
+      address.id,
+      address.id === defaultAddressId ? "既定の住所" : `住所${next++}`
+    );
+  }
+
+  return titles;
+}
+
 /** 住所一覧の末尾に、空の追加フォームを出すリンク */
 export function accountAddressAddHref() {
   return `?tab=account&address=${NEW_ACCOUNT_ADDRESS}`;
