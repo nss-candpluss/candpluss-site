@@ -58,6 +58,7 @@ const UI_TEXT_RANGE_PX = {
 } as const;
 
 const BODY_TEXT_PX = {
+  13: "text-[clamp(12px,calc(13px*var(--text-scale)),13px)] leading-[calc(22.75px*var(--text-scale))]",
   14: "text-[clamp(13px,calc(14px*var(--text-scale)),14px)] leading-[calc(24.5px*var(--text-scale))]",
   15: "text-[clamp(14px,calc(15px*var(--text-scale)),15px)] leading-[calc(26.25px*var(--text-scale))]",
   16: "text-[clamp(15px,calc(16px*var(--text-scale)),16px)] leading-[calc(28px*var(--text-scale))]",

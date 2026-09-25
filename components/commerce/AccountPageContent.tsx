@@ -105,7 +105,8 @@ function formatText(value?: string | null) {
 }
 
 const readOnlyHeadingClassName = `font-body-ja font-semibold text-[var(--foreground)] ${uiText(20)}`;
-const readOnlyNoteClassName = `mt-[calc(8px*var(--gap-scale-y))] font-body-ja text-[var(--color-muted)] ${uiText(13)}`;
+// 2 行以上になる注釈なので、行間は本文の比率を使う
+const readOnlyNoteClassName = `mt-[calc(8px*var(--gap-scale-y))] font-body-ja text-[var(--color-muted)] ${bodyText(13)}`;
 
 function LogoutButton() {
   return (
@@ -1185,21 +1186,22 @@ function AccountSettingsPanel({
         <ProfileNameForm profile={profile} />
 
         <AccountField label="メールアドレス">
-          {/* 変更は Shopify の会員画面でしかできないので、値のすぐ横から飛ばす */}
-          <div className="flex flex-wrap items-center gap-x-[clamp(16px,calc(24px*var(--gap-scale-x)),24px)] gap-y-3">
-            <p className={accountFieldValueClassName}>
-              {formatText(profile.emailAddress?.emailAddress)}
-            </p>
-            {shopifyProfileUrl ? (
-              <ShopifyChangeLink href={shopifyProfileUrl}>
-                {accountMemberCopy.accountDetails.emailChange}
-              </ShopifyChangeLink>
-            ) : null}
-          </div>
+          <p className={accountFieldValueClassName}>
+            {formatText(profile.emailAddress?.emailAddress)}
+          </p>
         </AccountField>
 
+        {/* 変更は Shopify の会員画面でしかできないので、行き先を文中から示す */}
         <p className={readOnlyNoteClassName}>
-          {accountMemberCopy.accountDetails.login}
+          {accountMemberCopy.accountDetails.email.before}
+          {shopifyProfileUrl ? (
+            <ShopifyChangeLink href={shopifyProfileUrl}>
+              {accountMemberCopy.accountDetails.email.link}
+            </ShopifyChangeLink>
+          ) : (
+            accountMemberCopy.accountDetails.email.link
+          )}
+          {accountMemberCopy.accountDetails.email.after}
         </p>
       </MemberSection>
 

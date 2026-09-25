@@ -1449,7 +1449,18 @@ describe("会員ページの画面構成", () => {
     const source = readSource("components/commerce/AccountPageContent.tsx");
 
     expect(source).toContain("accountMemberCopy");
-    expect(accountMemberCopy.accountDetails.login).toContain("パスワードはありません");
+    /*
+      メールアドレスだけは当店の画面で直せない。
+      行き先を文中のリンクで示し、変更後に何が変わるかまで書く。
+    */
+    const { email } = accountMemberCopy.accountDetails;
+    expect(email.link).toBe("Shopify のアカウントページ");
+    expect(`${email.before}${email.link}${email.after}`).toBe(
+      "※メールアドレスの変更は、Shopify のアカウントページから行えます。ログインにも同じメールアドレスを使うため、変更後は新しいメールアドレスでサインインしてください。"
+    );
+    // 値の横のボタンは消し、案内は注釈 1 か所にまとめた
+    expect(source).not.toContain("emailChange");
+    expect(source).toContain("accountMemberCopy.accountDetails.email.link");
     /*
       項目の説明は、Shopify のどの値かを確かめるための下書きだった。
       出す項目が決まったので、入力欄の下から全部外す。
