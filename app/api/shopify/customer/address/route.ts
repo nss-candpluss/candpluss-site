@@ -89,11 +89,28 @@ export async function POST(request: Request) {
         );
       } else {
         await deleteCustomerAddress(session.accessToken, addressId);
-        await readAfterCustomerUpdate(
+        const remaining = await readAfterCustomerUpdate(
           () => fetchCustomerAccount(session.accessToken),
           (current) =>
             !current.addresses.nodes.some((node) => node.id === addressId)
         );
+
+        /*
+          既定を消すと既定が無くなり、届け先が選ばれていない状態になる。
+          削除前の確認でも「次はこれが既定になる」と伝えているので、
+          残りの先頭をそのとおり繰り上げる。
+        */
+        const nextDefaultId = remaining.defaultAddress?.id
+          ? undefined
+          : remaining.addresses.nodes[0]?.id;
+
+        if (nextDefaultId) {
+          await setDefaultCustomerAddress(session.accessToken, nextDefaultId);
+          await readAfterCustomerUpdate(
+            () => fetchCustomerAccount(session.accessToken),
+            (current) => current.defaultAddress?.id === nextDefaultId
+          );
+        }
       }
 
       listUrl.searchParams.set("updated", updatedKey);

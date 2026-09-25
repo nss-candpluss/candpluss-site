@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import type { ReactNode } from "react";
+import { useCallback, useEffect, useRef, type ReactNode } from "react";
 
 import {
   accountPrimaryButtonClassName,
@@ -21,7 +21,7 @@ import {
   accountAddressNoticeKey,
   accountPageTabHref,
 } from "@/lib/commerce/account-page";
-import { uiText } from "@/lib/typography";
+import { bodyText, uiText } from "@/lib/typography";
 
 /** 住所 1 件に対する操作。フォームなので JavaScript なしで動く */
 function AddressIntentButton({
@@ -47,27 +47,79 @@ function AddressIntentButton({
 }
 
 /**
- * 住所 1 件に対する操作。入力欄を読んだあとに押すものなので、フォームの下に置く。
+ * 削除の確認。取り消しがきかないので、画面を覆って手を止めてもらう。
  *
- * 削除の確認は JavaScript のダイアログではなく URL の `confirmDelete` で表す。
- * 開け閉てするだけなのでサーバーへは取りに行かない。
+ * 開いているかどうかは URL の `confirmDelete` が持つ。
+ * JavaScript が動かないときは `open` が付いたまま出るので、確認自体は残る。
  */
-export function AccountAddressActions({
+function AddressDeleteDialog({
   addressId,
-  isDefault,
+  isOpen,
+  closeHref,
+  message,
 }: {
   addressId: string;
-  isDefault: boolean;
+  isOpen: boolean;
+  closeHref: string;
+  message: string;
 }) {
-  const searchParams = useSearchParams();
-  const search = searchParams.toString();
-  const isConfirmingDelete =
-    accountAddressDeleteIdFromSearch(search) === addressId;
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
-  if (isConfirmingDelete) {
-    return (
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border border-[#ddd] p-4">
-        <p className="font-body-ja text-sm">この住所を削除しますか？</p>
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) {
+      return;
+    }
+
+    if (!isOpen) {
+      if (dialog.open) {
+        dialog.close();
+      }
+      return;
+    }
+
+    /*
+      サーバーから `open` 付きで届くと、背景を押せる素の表示になる。
+      いったん閉じてから開き直して、覆う表示にそろえる。
+    */
+    if (dialog.open) {
+      dialog.close();
+    }
+    dialog.showModal();
+  }, [isOpen]);
+
+  /*
+    閉じるのは URL から合図を外すだけ。
+    実際に閉じるのは上の効果なので、閉じ方が増えても 1 か所で済む。
+  */
+  const dismiss = useCallback(() => {
+    window.history.replaceState(null, "", closeHref);
+  }, [closeHref]);
+
+  return (
+    <dialog
+      ref={dialogRef}
+      open={isOpen}
+      aria-labelledby={`${addressId}-delete-message`}
+      onCancel={(event) => {
+        event.preventDefault();
+        dismiss();
+      }}
+      onClick={(event) => {
+        // 覆っている部分を押したときだけ閉じる。中身を押しても閉じない
+        if (event.target === dialogRef.current) {
+          dismiss();
+        }
+      }}
+      className="m-auto w-[min(420px,calc(100vw-32px))] rounded-[16px] border border-[var(--color-divider)] bg-white p-[clamp(24px,calc(40px*var(--gap-scale-x)),40px)] shadow-[0_0_24px_rgba(0,0,0,0.12)] backdrop:bg-black/50"
+    >
+      <p
+        id={`${addressId}-delete-message`}
+        className={`font-body-ja text-[var(--foreground)] ${bodyText(15)}`}
+      >
+        {message}
+      </p>
+      <div className="mt-[clamp(24px,calc(32px*var(--gap-scale-y)),32px)] flex flex-wrap items-center gap-x-[clamp(12px,calc(16px*var(--gap-scale-x)),16px)] gap-y-3">
         <AddressIntentButton
           addressId={addressId}
           intent="delete"
@@ -75,15 +127,35 @@ export function AccountAddressActions({
         >
           削除する
         </AddressIntentButton>
-        <AccountShallowLink
-          href={accountPageTabHref("account", search)}
+        <button
+          type="button"
+          onClick={dismiss}
           className={accountSecondaryButtonClassName}
         >
-          やめる
-        </AccountShallowLink>
+          キャンセル
+        </button>
       </div>
-    );
-  }
+    </dialog>
+  );
+}
+
+/**
+ * 住所 1 件に対する操作。入力欄を読んだあとに押すものなので、フォームの下に置く。
+ */
+export function AccountAddressActions({
+  addressId,
+  isDefault,
+  deleteMessage,
+}: {
+  addressId: string;
+  isDefault: boolean;
+  /** 削除の確認に出す文。既定かどうかで変わるのでサーバーで組む */
+  deleteMessage: string;
+}) {
+  const searchParams = useSearchParams();
+  const search = searchParams.toString();
+  const isConfirmingDelete =
+    accountAddressDeleteIdFromSearch(search) === addressId;
 
   return (
     <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
@@ -103,6 +175,12 @@ export function AccountAddressActions({
       >
         削除する
       </AccountShallowLink>
+      <AddressDeleteDialog
+        addressId={addressId}
+        isOpen={isConfirmingDelete}
+        closeHref={accountPageTabHref("account", search)}
+        message={deleteMessage}
+      />
     </div>
   );
 }

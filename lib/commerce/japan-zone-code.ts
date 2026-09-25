@@ -17,6 +17,13 @@ export function normalizeJapanZoneCode(value?: string | null) {
   return japanZones.some((zone) => zone.zoneCode === zoneCode) ? zoneCode : "";
 }
 
+/** 郵便番号の検索は都道府県名で返ってくるので、名前から引けるようにする */
+export function japanZoneCodeFromPrefecture(value?: string | null) {
+  const prefecture = value?.trim() ?? "";
+
+  return japanZones.find((zone) => zone.prefecture === prefecture)?.zoneCode ?? "";
+}
+
 export function prefectureFromJapanZoneCode(value?: string | null) {
   const zoneCode = normalizeJapanZoneCode(value);
 

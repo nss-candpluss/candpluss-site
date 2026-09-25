@@ -946,6 +946,34 @@ export function sortAccountAddresses<T extends { id: string }>(
 }
 
 /**
+ * 削除の前に出す確認の文。
+ *
+ * 既定の住所を消すと、そのあとどこへ届くのかが変わる。
+ * 押す前にそこまで分かるよう、次に何が既定になるかまで書く。
+ *
+ * @param nextDefaultTitle 既定を消したあとに繰り上がる住所。他に無ければ省く
+ */
+export function accountAddressDeleteMessage({
+  title,
+  isDefault,
+  nextDefaultTitle,
+}: {
+  title: string;
+  isDefault: boolean;
+  nextDefaultTitle?: string;
+}) {
+  if (!isDefault) {
+    return `${title}を削除します。よろしいですか？`;
+  }
+
+  if (!nextDefaultTitle) {
+    return "この住所は既定の住所に設定されています。削除すると、配送先住所が登録されていない状態になります。よろしいですか？";
+  }
+
+  return `この住所は既定の住所に設定されています。削除すると、${nextDefaultTitle}が新しい既定の住所になります。よろしいですか？`;
+}
+
+/**
  * 住所ごとの見出し。既定は役割で呼び、残りに 1 から番号を振る。
  *
  * 既定を番号の列に混ぜると、既定を変えるたびに番号が動いて読みにくい。

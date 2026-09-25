@@ -13,6 +13,7 @@ import {
   accountSearchWithoutNoticeKeys,
   accountPageErrorMessage,
   accountAddressDeleteHref,
+  accountAddressDeleteMessage,
   accountAddressNoticeKey,
   accountAddressTitles,
   accountSavedNoticeKey,
@@ -55,6 +56,7 @@ import {
   shouldHandleAccountShallowClick,
 } from "@/lib/commerce/account-page";
 import {
+  japanZoneCodeFromPrefecture,
   japanZones,
   normalizeJapanZoneCode,
   prefectureFromJapanZoneCode,
@@ -951,8 +953,11 @@ describe("会員ページの画面構成", () => {
 
     expect(source).toContain("AccountUpdateForm");
     expect(source).toContain("SupportFloatingInput");
-    expect(source).toContain("getContactFloatingSelectClassName");
     expect(source).toContain("contactCheckboxBoxClassName");
+    // 郵便番号・都道府県・市区町村は自動入力のため別部品に移した
+    expect(
+      readSource("components/commerce/AccountAddressLocationFields.tsx")
+    ).toContain("getContactFloatingSelectClassName");
     /*
       行の並びだけは問い合わせフォームと違う。
       会員ページは「ラベル：入力欄」の横並びなので、専用の行を持つ。
@@ -1160,14 +1165,19 @@ describe("会員ページの画面構成", () => {
       source.indexOf("function OrderAddressBlock(")
     );
 
-    // 姓・名・郵便番号・都道府県・市区町村・番地・電話番号の 7 つ
-    expect(form.match(/^\s*required$/gm)).toHaveLength(7);
+    const fields = readSource(
+      "components/commerce/AccountAddressLocationFields.tsx"
+    );
+
+    // 姓・名・番地・電話番号。郵便番号から下の 3 つは別部品にある
+    expect(form.match(/^\s*required$/gm)).toHaveLength(4);
+    expect(fields.match(/^\s*required$/gm)).toHaveLength(3);
     // 必須の印は、お問い合わせフォームと同じ末尾の * で示す
-    expect(form).toContain("label={`${fieldLabels.postalCode} *`}");
-    expect(form).toContain('label="市区町村 *"');
+    expect(fields).toContain("label={`${fieldLabels.postalCode} *`}");
+    expect(fields).toContain('label="市区町村 *"');
+    expect(fields).toContain("{`${placeholders.prefecture} *`}");
     expect(form).toContain('label="番地 *"');
     expect(form).toContain('label="電話番号 *"');
-    expect(form).toContain("{`${placeholders.prefecture} *`}");
     // 建物名・部屋番号だけは、戸建てで書きようがないので任意のまま
     expect(form).toContain("label={placeholders.addressLine2}");
 
@@ -1196,6 +1206,52 @@ describe("会員ページの画面構成", () => {
     // 注釈ではなく本文。リンクは太さを変えず、下線と色だけで示す
     expect(source).toContain('<Link href="/contact" className={accountBodyLinkClassName}>');
     expect(payments.body).not.toContain("お問い合わせ");
+  });
+
+  /*
+    削除は取り消しがきかない。
+    行の中の小さな確認では押し流されるので、画面を覆って手を止めてもらう。
+  */
+  it("住所の削除は覆う確認を出し、状況で文言を変える", () => {
+    const controlsSource = readSource(
+      "components/commerce/AccountAddressControls.tsx"
+    );
+
+    expect(accountAddressDeleteMessage({ title: "住所1", isDefault: false })).toBe(
+      "住所1を削除します。よろしいですか？"
+    );
+    // 既定を消すと届け先が変わるので、次に何が既定になるかまで伝える
+    expect(
+      accountAddressDeleteMessage({
+        title: "既定の住所",
+        isDefault: true,
+        nextDefaultTitle: "住所1",
+      })
+    ).toBe(
+      "この住所は既定の住所に設定されています。削除すると、住所1が新しい既定の住所になります。よろしいですか？"
+    );
+    // 他に住所が無ければ、繰り上がるものも無い
+    expect(
+      accountAddressDeleteMessage({ title: "既定の住所", isDefault: true })
+    ).toBe(
+      "この住所は既定の住所に設定されています。削除すると、配送先住所が登録されていない状態になります。よろしいですか？"
+    );
+
+    expect(controlsSource).toContain("<dialog");
+    expect(controlsSource).toContain("dialog.showModal()");
+    expect(controlsSource).toContain("backdrop:bg-black/50");
+    expect(controlsSource).toContain("キャンセル");
+    expect(controlsSource).not.toContain("やめる");
+
+    /*
+      既定を消すと既定が無くなる。
+      確認で「次はこれが既定になる」と伝えた以上、そのとおりに繰り上げる。
+    */
+    const routeSource = readSource(
+      "app/api/shopify/customer/address/route.ts"
+    );
+    expect(routeSource).toContain("const nextDefaultId = remaining.defaultAddress?.id");
+    expect(routeSource).toContain("remaining.addresses.nodes[0]?.id");
   });
 
   // 開いたまま閉じられないと、入力をやめたい人が行き止まりになる
@@ -1418,12 +1474,43 @@ describe("会員ページの画面構成", () => {
 
   // コード直接入力は住所を書き間違えるので、問い合わせと同じ選択式にする
   it("都道府県は問い合わせと同じセレクトで選ばせる", () => {
-    const source = readSource("components/commerce/AccountPageContent.tsx");
+    const source = readSource(
+      "components/commerce/AccountAddressLocationFields.tsx"
+    );
 
     expect(source).toContain("getContactFloatingSelectClassName");
     expect(source).toContain("contactSelectChevronClassName");
     expect(source).toContain("japanZones.map");
     expect(source).not.toContain('placeholder="JP-40"');
+  });
+
+  /*
+    郵便番号を打てば都道府県と市区町村は決まる。
+    お問い合わせフォームと同じ引き方を使い、入力の作法をそろえる。
+  */
+  it("郵便番号から都道府県と市区町村を自動で入れる", () => {
+    const source = readSource(
+      "components/commerce/AccountAddressLocationFields.tsx"
+    );
+
+    expect(source).toContain("lookupAddressByPostalCode");
+    // 検索結果は都道府県名なので、Shopify に送るコードへ直す
+    expect(source).toContain("japanZoneCodeFromPrefecture(found.prefecture)");
+    expect(japanZoneCodeFromPrefecture("東京都")).toBe("JP-13");
+    expect(japanZoneCodeFromPrefecture("沖縄県")).toBe("JP-47");
+    expect(japanZoneCodeFromPrefecture("東京")).toBe("");
+    expect(japanZoneCodeFromPrefecture()).toBe("");
+
+    /*
+      引くのは打っている最中だけ。
+      郵便番号を触らずに都道府県だけ変わると、
+      保存ボタンを出す判定（入力の変化）が動かない。
+    */
+    expect(source).not.toContain("onBlur");
+    // 自動で入れたあとも直せるよう、値は React 側で持つ
+    expect(source).toContain("value={zip}");
+    expect(source).toContain("value={city}");
+    expect(source).toContain("value={zoneCode}");
   });
 
   it("住所タブ内で編集・既定設定・削除でき、削除は確認を挟む", () => {
@@ -1435,7 +1522,6 @@ describe("会員ページの画面構成", () => {
     expect(source).toContain("AddressForm");
     expect(controlsSource).toContain('intent="default"');
     expect(controlsSource).toContain('intent="delete"');
-    expect(controlsSource).toContain("この住所を削除しますか？");
     expect(controlsSource).toContain("accountAddressDeleteHref");
     expect(controlsSource).toContain("accountAddressAddHref");
     expect(controlsSource).not.toContain("accountAddressEditHref");

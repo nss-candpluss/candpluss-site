@@ -14,6 +14,7 @@ import {
   accountTextLinkClassName,
 } from "@/components/commerce/accountStyles";
 import { AccountShallowLink } from "@/components/commerce/AccountShallowLink";
+import { AccountAddressLocationFields } from "@/components/commerce/AccountAddressLocationFields";
 import { AccountNotice } from "@/components/commerce/AccountNotice";
 import { AccountTabs } from "@/components/commerce/AccountTabs";
 import { OrderCardCollapse } from "@/components/commerce/OrderCardCollapse";
@@ -26,11 +27,12 @@ import {
   ACCOUNT_LOGIN_START_PATH,
   accountReceiptHref,
 } from "@/lib/commerce/account-login";
-import { japanZones, normalizeJapanZoneCode } from "@/lib/commerce/japan-zone-code";
+import { normalizeJapanZoneCode } from "@/lib/commerce/japan-zone-code";
 import { formHalfSpanClassName } from "@/lib/layout";
 import { accountMemberCopy } from "@/lib/commerce/account-field-notes";
 import {
   ACCOUNT_CANCELLED_BADGE,
+  accountAddressDeleteMessage,
   accountAddressNoticeKey,
   accountAddressTitles,
   accountOrderHasReceipt,
@@ -78,12 +80,7 @@ import {
   bodyText,
   uiText,
 } from "@/lib/typography";
-import {
-  contactCheckboxBoxClassName,
-  contactSelectChevronClassName,
-  getContactFloatingSelectClassName,
-  getContactFloatingSelectStyle,
-} from "@/sections/contact/contactStyles";
+import { contactCheckboxBoxClassName } from "@/sections/contact/contactStyles";
 import { SupportFloatingInput } from "@/sections/support/SupportFloatingField";
 
 const NOT_REGISTERED = "登録なし";
@@ -317,7 +314,7 @@ function AddressForm({
   /** 追加用のフォームは、保存せずに閉じる道を用意する */
   canClear?: boolean;
 }) {
-  const { fieldLabels, placeholders } = contactFormCopy;
+  const { placeholders } = contactFormCopy;
   const zoneCode = normalizeJapanZoneCode(address?.zoneCode);
   const fieldId = (name: string) => `account-address-${formKey}-${name}`;
 
@@ -383,55 +380,13 @@ function AddressForm({
 
       <AccountField label="住所" alignTop>
         <div className="flex flex-col gap-y-[clamp(16px,calc(20px*var(--gap-scale-y)),20px)]">
-          <div className="max-w-[240px]">
-            <SupportFloatingInput
-              id={fieldId("zip")}
-              name="zip"
-              type="text"
-              label={`${fieldLabels.postalCode} *`}
-              autoComplete="postal-code"
-              inputMode="numeric"
-              defaultValue={address?.zip ?? ""}
-              maxLength={20}
-              required
-            />
-          </div>
-
-          {/* 都道府県名は短いので、郵便番号と同じ幅で足りる */}
-          <div className="relative max-w-[240px]">
-            <label htmlFor={fieldId("zone")} className="sr-only">
-              {`${placeholders.prefecture} *`}
-            </label>
-            <select
-              id={fieldId("zone")}
-              name="zoneCode"
-              defaultValue={zoneCode}
-              required
-              className={getContactFloatingSelectClassName()}
-              style={getContactFloatingSelectStyle(Boolean(zoneCode))}
-            >
-              <option value="">{`${placeholders.prefecture} *`}</option>
-              {japanZones.map((zone) => (
-                <option key={zone.zoneCode} value={zone.zoneCode}>
-                  {zone.prefecture}
-                </option>
-              ))}
-            </select>
-            <span aria-hidden="true" className={contactSelectChevronClassName} />
-          </div>
-
-          <div className="max-w-[320px]">
-            <SupportFloatingInput
-              id={fieldId("city")}
-              name="city"
-              type="text"
-              label="市区町村 *"
-              autoComplete="address-level2"
-              defaultValue={address?.city ?? ""}
-              maxLength={100}
-              required
-            />
-          </div>
+          {/* 郵便番号から都道府県・市区町村を自動で入れるので、3 つで 1 組 */}
+          <AccountAddressLocationFields
+            formKey={formKey}
+            defaultZip={address?.zip ?? ""}
+            defaultZoneCode={zoneCode}
+            defaultCity={address?.city ?? ""}
+          />
 
           <SupportFloatingInput
             id={fieldId("address1")}
@@ -1202,6 +1157,14 @@ function AccountSettingsPanel({
   // 既定は一覧の先頭に出し、残りは元の並びのまま 1 から番号を振る
   const sortedAddresses = sortAccountAddresses(addresses, defaultAddressId);
   const addressTitles = accountAddressTitles(sortedAddresses, defaultAddressId);
+  /*
+    既定を消すと既定が無くなるので、残りの先頭が繰り上がる。
+    既定は先頭に寄せてあるので、その次が繰り上がる住所になる。
+  */
+  const nextDefault = sortedAddresses[1];
+  const nextDefaultTitle = nextDefault
+    ? addressTitles.get(nextDefault.id)
+    : undefined;
 
   return (
     <div className="flex flex-col">
@@ -1255,6 +1218,11 @@ function AccountSettingsPanel({
             <AccountAddressActions
               addressId={address.id}
               isDefault={address.id === defaultAddressId}
+              deleteMessage={accountAddressDeleteMessage({
+                title: addressTitles.get(address.id) ?? "",
+                isDefault: address.id === defaultAddressId,
+                nextDefaultTitle,
+              })}
             />
           </div>
         ))}
@@ -1275,20 +1243,16 @@ function AccountSettingsPanel({
       </MemberSection>
 
       <MemberSection title={accountMemberCopy.deletion.title}>
-        {/* この画面からは削除できないので、連絡先を先に示す */}
-        <p className={readOnlyBodyClassName}>
+        {/* 段落で分けず、ひと続きの文章として改行だけで区切る */}
+        <p className={`${readOnlyBodyClassName} whitespace-pre-line`}>
           {accountMemberCopy.deletion.request.before}
           <Link href="/contact" className={accountBodyLinkClassName}>
             {accountMemberCopy.deletion.request.link}
           </Link>
           {accountMemberCopy.deletion.request.after}
-        </p>
-
-        <p className={readOnlyBodyClassName}>
+          {"\n"}
           {accountMemberCopy.deletion.flow}
-        </p>
-
-        <p className={readOnlyBodyClassName}>
+          {"\n"}
           {accountMemberCopy.deletion.notice}
         </p>
       </MemberSection>
