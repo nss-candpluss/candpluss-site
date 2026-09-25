@@ -17,6 +17,9 @@ export const accountSubHeadingClassName =
  */
 export const accountTextLinkClassName = `${bodyLinkUnderlineClassName} font-body-ja font-semibold text-[var(--foreground)]`;
 
+/** 文章の中に置くリンク。太さは変えず、下線と色だけで示す */
+export const accountBodyLinkClassName = `${bodyLinkUnderlineClassName} text-[var(--foreground)]`;
+
 /**
  * 会員ページの操作ボタン。
  * 入力欄の横や見出しの横に並べるので、文字の分だけの幅で置く。

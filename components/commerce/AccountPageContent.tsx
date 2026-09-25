@@ -7,6 +7,7 @@ import {
   AccountAddressAdd,
 } from "@/components/commerce/AccountAddressControls";
 import {
+  accountBodyLinkClassName,
   accountHeadingClassName,
   accountSecondaryButtonClassName,
   accountSubHeadingClassName,
@@ -447,11 +448,10 @@ function AddressForm({
             id={fieldId("address2")}
             name="address2"
             type="text"
-            label={`${placeholders.addressLine2} *`}
+            label={placeholders.addressLine2}
             autoComplete="address-line2"
             defaultValue={address?.address2 ?? ""}
             maxLength={255}
-            required
           />
         </div>
       </AccountField>
@@ -1271,6 +1271,25 @@ function AccountSettingsPanel({
       <MemberSection title={accountMemberCopy.payments.title}>
         <p className={readOnlyBodyClassName}>
           {accountMemberCopy.payments.body}
+        </p>
+      </MemberSection>
+
+      <MemberSection title={accountMemberCopy.deletion.title}>
+        {/* この画面からは削除できないので、連絡先を先に示す */}
+        <p className={readOnlyBodyClassName}>
+          {accountMemberCopy.deletion.request.before}
+          <Link href="/contact" className={accountBodyLinkClassName}>
+            {accountMemberCopy.deletion.request.link}
+          </Link>
+          {accountMemberCopy.deletion.request.after}
+        </p>
+
+        <p className={readOnlyBodyClassName}>
+          {accountMemberCopy.deletion.flow}
+        </p>
+
+        <p className={readOnlyBodyClassName}>
+          {accountMemberCopy.deletion.notice}
         </p>
       </MemberSection>
     </div>

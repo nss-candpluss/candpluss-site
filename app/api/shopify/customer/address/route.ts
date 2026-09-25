@@ -28,6 +28,7 @@ export const runtime = "nodejs";
   配送先なので、欠けたまま保存させない。
   フォーム側の required はブラウザに任せた確認でしかないので、
   ここでも 1 文字以上あることを確かめる。
+  建物名・部屋番号だけは、戸建てで書きようがないので任意のまま。
 */
 const addressSchema = z.object({
   addressId: z.string().optional(),
@@ -38,7 +39,7 @@ const addressSchema = z.object({
   zoneCode: z.string().trim().min(1).max(20),
   city: z.string().trim().min(1).max(100),
   address1: z.string().trim().min(1).max(255),
-  address2: z.string().trim().min(1).max(255),
+  address2: z.string().trim().max(255).optional(),
   phoneNumber: z.string().trim().min(1).max(20),
 });
 
@@ -113,7 +114,7 @@ export async function POST(request: Request) {
       zoneCode: formData.get("zoneCode"),
       city: formData.get("city"),
       address1: formData.get("address1"),
-      address2: formData.get("address2"),
+      address2: formData.get("address2") || undefined,
       phoneNumber: formData.get("phoneNumber"),
     });
     const { addressId: savedAddressId, phoneNumber, ...address } = parsed;

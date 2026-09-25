@@ -1160,19 +1160,42 @@ describe("会員ページの画面構成", () => {
       source.indexOf("function OrderAddressBlock(")
     );
 
-    // 姓・名・郵便番号・都道府県・市区町村・番地・建物名・電話番号の 8 つ
-    expect(form.match(/^\s*required$/gm)).toHaveLength(8);
+    // 姓・名・郵便番号・都道府県・市区町村・番地・電話番号の 7 つ
+    expect(form.match(/^\s*required$/gm)).toHaveLength(7);
     // 必須の印は、お問い合わせフォームと同じ末尾の * で示す
     expect(form).toContain("label={`${fieldLabels.postalCode} *`}");
     expect(form).toContain('label="市区町村 *"');
     expect(form).toContain('label="番地 *"');
-    expect(form).toContain("label={`${placeholders.addressLine2} *`}");
     expect(form).toContain('label="電話番号 *"');
     expect(form).toContain("{`${placeholders.prefecture} *`}");
+    // 建物名・部屋番号だけは、戸建てで書きようがないので任意のまま
+    expect(form).toContain("label={placeholders.addressLine2}");
 
-    expect(routeSource).toContain("address2: z.string().trim().min(1).max(255)");
+    expect(routeSource).toContain("address2: z.string().trim().max(255).optional()");
     expect(routeSource).toContain("phoneNumber: z.string().trim().min(1).max(20)");
-    expect(routeSource).not.toContain("|| undefined,\n      phoneNumber");
+  });
+
+  /*
+    Customer Account API には退会の口が無く、この画面からは削除できない。
+    利用規約 第4条の「当社の定める退会手続き」がここに当たる。
+  */
+  it("アカウントの削除は、連絡先と流れを最後の区画で伝える", () => {
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+    const { deletion, payments } = accountMemberCopy;
+
+    expect(deletion.title).toBe("アカウントの削除について");
+    expect(deletion.request.link).toBe("お問い合わせフォーム");
+    expect(deletion.flow).toContain("ご本人さまの確認");
+    // 削除しても注文の記録は残ることを、先に伝えておく
+    expect(deletion.notice).toContain("法令にもとづき");
+
+    // 一番下に置く。日常の設定より先に目に入る場所ではない
+    expect(source.indexOf(`accountMemberCopy.${"deletion"}.title`)).toBeGreaterThan(
+      source.indexOf("accountMemberCopy.payments.title")
+    );
+    // 注釈ではなく本文。リンクは太さを変えず、下線と色だけで示す
+    expect(source).toContain('<Link href="/contact" className={accountBodyLinkClassName}>');
+    expect(payments.body).not.toContain("お問い合わせ");
   });
 
   // 開いたまま閉じられないと、入力をやめたい人が行き止まりになる
