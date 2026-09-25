@@ -6,8 +6,10 @@ import {
   publicOriginFromRequest,
 } from "@/lib/commerce/account-login";
 import {
+  ACCOUNT_SESSION_EXPIRED_NOTICE,
   accountAddressEditHref,
   accountAddressNoticeKey,
+  accountPageErrorMessage,
   applyAccountSavedParams,
   toShopifyJapanPhoneNumber,
 } from "@/lib/commerce/account-page";
@@ -41,8 +43,22 @@ const intentSchema = z.enum(["save", "default", "delete"]).catch("save");
 export async function POST(request: Request) {
   const session = await getCustomerTokenSession();
   const origin = publicOriginFromRequest(request.url, request.headers);
+  /*
+    すでにある住所の保存は、ページを読み直さずに JSON で結果だけ受け取る。
+    JavaScript が動かないときは普通のフォーム送信になり、
+    これまでどおりリダイレクトで結果を伝える。
+  */
+  const wantsJson = (request.headers.get("accept") ?? "").includes(
+    "application/json"
+  );
 
   if (!session) {
+    if (wantsJson) {
+      return Response.json(
+        { ok: false, message: ACCOUNT_SESSION_EXPIRED_NOTICE },
+        { status: 401 }
+      );
+    }
     return Response.redirect(new URL(ACCOUNT_LOGIN_PATH, origin), 303);
   }
 
@@ -122,6 +138,10 @@ export async function POST(request: Request) {
       );
     }
 
+    if (wantsJson) {
+      return Response.json({ ok: true });
+    }
+
     // 押したフォームのその場に結果を出すので、どのフォームだったかを返す
     const notice = formData.get("notice");
     applyAccountSavedParams(
@@ -132,6 +152,13 @@ export async function POST(request: Request) {
     );
     return Response.redirect(listUrl, 303);
   } catch {
+    if (wantsJson) {
+      return Response.json(
+        { ok: false, message: accountPageErrorMessage("address") },
+        { status: 400 }
+      );
+    }
+
     // 入力内容を直せるよう、編集していた住所のフォームへ戻す
     const editUrl = new URL(
       `${ACCOUNT_BASE_PATH}${accountAddressEditHref(

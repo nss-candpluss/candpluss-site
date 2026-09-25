@@ -308,6 +308,12 @@ function AddressForm({
     <AccountUpdateForm
       action="/api/shopify/customer/address"
       noticeKey={accountAddressNoticeKey(address?.id)}
+      /*
+        すでにある住所は、保存しても画面の作りが変わらないので、
+        入力した内容を残したまま保存する。
+        新しい住所はフォームごと閉じて一覧に加わるため、読み直す。
+      */
+      keepValuesOnSave={Boolean(address?.id)}
     >
       <input type="hidden" name="intent" value="save" />
       <input type="hidden" name="addressId" value={address?.id ?? ""} />

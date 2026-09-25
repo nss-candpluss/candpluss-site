@@ -1008,6 +1008,31 @@ describe("会員ページの画面構成", () => {
     expect(source.match(/inlineSubmit/g)).toHaveLength(2);
   });
 
+  /*
+    住所も名前と同じ問題を抱えている。
+    ただし新しい住所はフォームごと閉じて一覧に加わるので、そこは読み直す。
+  */
+  it("すでにある住所は読み直さず、新しい住所は読み直して保存する", () => {
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+    const routeSource = readSource(
+      "app/api/shopify/customer/address/route.ts"
+    );
+
+    expect(source).toContain("keepValuesOnSave={Boolean(address?.id)}");
+
+    // JavaScript が動くときは JSON、動かないときはこれまでどおりリダイレクト
+    expect(routeSource).toContain('.includes(\n    "application/json"\n  )');
+    expect(routeSource).toContain("Response.json({ ok: true })");
+    expect(routeSource).toContain('accountPageErrorMessage("address")');
+    expect(routeSource).toContain("ACCOUNT_SESSION_EXPIRED_NOTICE");
+    expect(routeSource).toContain("Response.redirect(listUrl, 303)");
+
+    // 失敗したときに出る 1 行は、その場に出せる文になっている
+    expect(accountPageErrorMessage("address")).toBe(
+      "住所を保存できませんでした。"
+    );
+  });
+
   it("既定の住所を先頭に寄せ、残りは元の並びのまま番号を振る", () => {
     const addresses = [{ id: "a" }, { id: "b" }, { id: "c" }, { id: "d" }];
     // 3 番目を既定にすると、それだけが先頭へ上がり、残りの前後関係は変わらない
@@ -1204,9 +1229,7 @@ describe("会員ページの画面構成", () => {
     expect(formSource).toContain("event.preventDefault()");
     expect(formSource).toContain('headers: { accept: "application/json" }');
     expect(formSource).toContain("initialValuesRef.current = serializeForm(form)");
-    expect(source.match(/keepValuesOnSave/g)).toHaveLength(2);
-    // 住所は一覧そのものが変わるので、まだ読み直す方式のまま
-    expect(source).not.toContain("keepValuesOnSave\n      noticeKey");
+    expect(source.match(/keepValuesOnSave/g)).toHaveLength(3);
 
     // 失敗したら入力内容を残したまま、その場に理由を出す
     expect(formSource).toContain('role="alert"');
