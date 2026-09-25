@@ -70,6 +70,13 @@ function ConsentDocumentBox({
         tabIndex={0}
         role="group"
         aria-label={entry.label}
+        /*
+          Lenis に wheel を渡さない。
+          慣性スクロールはページ全体の wheel を受け取って打ち消すので、
+          付けないと枠の中が動かず、読み終われない＝同意できない。
+          効くのは PC 幅だけなので、スマホでは症状が出ない。
+        */
+        data-lenis-prevent
         className="mt-[clamp(12px,calc(16px*var(--gap-scale-y)),16px)] h-[clamp(240px,45vh,400px)] overflow-y-auto overscroll-contain rounded-[8px] border border-[var(--color-divider)] bg-white p-[clamp(16px,calc(28px*var(--gap-scale-x)),28px)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--foreground)]"
       >
         {entry.body}

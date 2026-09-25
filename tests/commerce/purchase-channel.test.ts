@@ -191,25 +191,15 @@ describe("会員画面はリリースまでテスト領域だけで開く", () =
     その間フッターが繰り上がると、画面が一度潰れて見える。
   */
   it("会員まわりは待っている間も画面の高さを保つ", () => {
-    // どのページも `main` を持つので、無い間だけ高さを取る。
-    // `:empty` では見分けられない。React の目印が常に残っている。
-    expect(readSource("app/layout.tsx")).toContain(
-      "not-has-[main]:min-h-svh"
-    );
-    // 公開側とテスト領域のどちらにも置く
-    expect(readSource("app/account/loading.tsx")).toContain(
-      "AccountPageFallback"
-    );
-    expect(readSource("app/shopify-test/account/loading.tsx")).toContain(
-      "AccountPageFallback"
-    );
     /*
-      目に見える文字は置かない。
-      数百ミリ秒で消えるものが出入りすると、それ自体がちらつきになる。
+      どのページも `main` をひとつ持つので、無い間だけ高さを取る。
+      `:empty` では見分けられない。React の目印が常に残っていて空にならない。
+
+      `loading.tsx` は置かない。これ自体で足りるうえ、
+      あれを置くと Suspense の境目ができて、隠れたページの写しが
+      DOM に残る（`h1`・`main`・フォームが二重になる）。
     */
-    const fallback = readSource("components/commerce/AccountPageFallback.tsx");
-    expect(fallback).toContain("min-h-svh");
-    expect(fallback).toContain('className="sr-only"');
+    expect(readSource("app/layout.tsx")).toContain("not-has-[main]:min-h-svh");
   });
 
   it("入口では道を分け、はじめての方だけ規約を読ませてから進める", () => {
@@ -237,6 +227,12 @@ describe("会員画面はリリースまでテスト領域だけで開く", () =
     expect(gateSource).toContain("SCROLL_END_TOLERANCE");
     // キーボードだけでも枠を送れるようにする
     expect(gateSource).toContain("tabIndex={0}");
+    /*
+      慣性スクロールはページ全体の wheel を受け取って打ち消す。
+      渡さないようにしないと枠の中が動かず、読み終われない＝同意できない。
+      効くのは PC 幅だけなので、スマホでは症状が出ない。
+    */
+    expect(gateSource).toContain("data-lenis-prevent");
     // 見張れない環境で締め出さない
     expect(gateSource).toContain("<noscript>");
   });
