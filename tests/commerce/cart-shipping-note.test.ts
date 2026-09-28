@@ -16,8 +16,11 @@ const supportNoteClass =
   "font-body-ja text-[clamp(12px,calc(13px*var(--text-scale)),13px)] leading-[1.3] text-[var(--foreground)]";
 
 describe("カートの国内配送注釈", () => {
-  it("日本語と英語の注釈を持つ", () => {
+  // 取り消せないこと → いつ届くか → どこへ送れるか の順に並べる
+  it("キャンセル・発送・配送範囲の注釈を、日本語と英語で持つ", () => {
     expect(cartDomesticShippingNotes).toEqual([
+      "※ご注文確定後のキャンセルは原則としてお受けしておりません。あらかじめご了承ください。",
+      "※お支払いの確認後、通常3営業日以内（予約商品等を除く）に発送いたします。土・日・祝日の発送は行っておりません。",
       "※国内配送のみ対応しております。海外への発送は承っておりませんので、あらかじめご了承ください。",
       "*We only ship within Japan. We are unable to ship internationally, so please note this before placing your order.",
     ]);
