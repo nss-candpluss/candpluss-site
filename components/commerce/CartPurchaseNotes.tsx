@@ -11,7 +11,7 @@ export function CartPurchaseNotes() {
     下限は狭めにする。
   */
   return (
-    <div className="mt-[clamp(12px,calc(16px*var(--gap-scale-y)),16px)] flex flex-col gap-[clamp(5px,calc(12px*var(--gap-scale-y)),12px)]">
+    <div className="mt-[clamp(12px,calc(16px*var(--gap-scale-y)),16px)] flex flex-col gap-[clamp(5px,calc(9px*var(--gap-scale-y)),9px)]">
       {cartPurchaseNotes.map((note) => (
         <p key={note} className={cartAnnotationNoteClassName}>
           {note}
