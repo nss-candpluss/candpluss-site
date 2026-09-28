@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { CartDomesticShippingNotes } from "@/components/commerce/CartDomesticShippingNotes";
+import { CartPurchaseNotes } from "@/components/commerce/CartPurchaseNotes";
 import { CartLineThumbnail } from "@/components/commerce/CartLineThumbnail";
 import { CartQuantityStepper } from "@/components/commerce/CartQuantityStepper";
 import { CartRemoveButton } from "@/components/commerce/CartRemoveButton";
@@ -333,7 +333,7 @@ function CartDialogView({ onDismiss }: { onDismiss: () => void }) {
                 >
                   ご購入の手続き
                 </a>
-                <CartDomesticShippingNotes />
+                <CartPurchaseNotes />
               </>
             ) : null}
           </div>

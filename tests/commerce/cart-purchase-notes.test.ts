@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-import { cartDomesticShippingNotes } from "@/data/cart";
+import { cartPurchaseNotes } from "@/data/cart";
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -15,15 +15,25 @@ function readSource(relativePath: string) {
 const supportNoteClass =
   "font-body-ja text-[clamp(12px,calc(13px*var(--text-scale)),13px)] leading-[1.3] text-[var(--foreground)]";
 
-describe("カートの国内配送注釈", () => {
+describe("カートの購入前の注釈", () => {
   // 取り消せないこと → いつ届くか → どこへ送れるか の順に並べる
-  it("キャンセル・発送・配送範囲の注釈を、日本語と英語で持つ", () => {
-    expect(cartDomesticShippingNotes).toEqual([
-      "※ご注文確定後のキャンセルは原則としてお受けしておりません。あらかじめご了承ください。",
-      "※お支払いの確認後、通常3営業日以内（予約商品等を除く）に発送いたします。土・日・祝日の発送は行っておりません。",
-      "※国内配送のみ対応しております。海外への発送は承っておりませんので、あらかじめご了承ください。",
-      "*We only ship within Japan. We are unable to ship internationally, so please note this before placing your order.",
+  it("キャンセル・発送・配送範囲を、一行ずつ短く出す", () => {
+    expect(cartPurchaseNotes).toEqual([
+      "※ご注文確定後のキャンセルは原則承っておりません。",
+      "※お支払い確認後、通常3営業日以内に発送いたします。（予約商品を除く）",
+      "※配送は日本国内のみです。(Japan domestic shipping only.)",
     ]);
+  });
+
+  /*
+    狭い画面ではカートの半分近くを占めてしまう。
+    詳しい条件はショッピングガイドに書き、ここでは要点だけ出す。
+  */
+  it("一行が長くならないようにする", () => {
+    for (const note of cartPurchaseNotes) {
+      // 英語を併記する行がいちばん長い。それを上限の目安にする
+      expect(note.length).toBeLessThanOrEqual(45);
+    }
   });
 
   it("Support ページの注釈と同じフォント仕様を使う", () => {
@@ -31,16 +41,16 @@ describe("カートの国内配送注釈", () => {
       supportNoteClass
     );
     expect(
-      readSource("components/commerce/CartDomesticShippingNotes.tsx")
+      readSource("components/commerce/CartPurchaseNotes.tsx")
     ).toContain(supportNoteClass);
   });
 
   it("カートダイアログとカートページの購入ボタン下に出す", () => {
     expect(readSource("components/commerce/CartDialog.tsx")).toContain(
-      "CartDomesticShippingNotes"
+      "CartPurchaseNotes"
     );
     expect(readSource("components/commerce/CartPageContent.tsx")).toContain(
-      "CartDomesticShippingNotes"
+      "CartPurchaseNotes"
     );
   });
 });
