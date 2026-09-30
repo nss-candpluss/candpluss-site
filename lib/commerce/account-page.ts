@@ -394,15 +394,6 @@ const ACCOUNT_SHIPMENT_STATUS_JA: Record<string, string> = {
   READY_FOR_PICKUP: "受け取り準備完了",
 };
 
-const ACCOUNT_FULFILLMENT_UNIT_STATUS_JA: Record<string, string> = {
-  CANCELLED: "発送キャンセル",
-  ERROR: "発送エラー",
-  FAILURE: "発送失敗",
-  OPEN: "未処理",
-  PENDING: "処理待ち",
-  SUCCESS: "発送完了",
-};
-
 /**
  * Shopify が返す配送業者名。
  *
@@ -572,10 +563,6 @@ export function formatAccountFulfillmentStatus(value?: string | null) {
 
 export function formatAccountShipmentStatus(value?: string | null) {
   return formatShopifyStatusLabel(value, ACCOUNT_SHIPMENT_STATUS_JA);
-}
-
-export function formatAccountFulfillmentUnitStatus(value?: string | null) {
-  return formatShopifyStatusLabel(value, ACCOUNT_FULFILLMENT_UNIT_STATUS_JA);
 }
 
 /** キャンセル理由。誰の都合で取り消したのかが分かる言い方にする */
