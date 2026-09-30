@@ -237,6 +237,41 @@ describe("会員画面はリリースまでテスト領域だけで開く", () =
     expect(gateSource).toContain("<noscript>");
   });
 
+  it("次のページへ送り出すボタンは、問い合わせの確認ボタンと同じ形にする", () => {
+    const styleSource = readSource("components/commerce/accountStyles.ts");
+    const loginSource = readSource(
+      "components/commerce/AccountLoginContent.tsx"
+    );
+    const gateSource = readSource("components/commerce/AccountConsentGate.tsx");
+
+    /*
+      高さを数値で写すと、どちらかを直したときに揃わなくなる。
+      問い合わせの「確認画面へ」の指定をそのまま借りる。
+    */
+    expect(styleSource).toContain("supportContactButtonClassName");
+    // 会員ページ内の操作ボタンは角丸のまま。送り出しだけ形を分ける
+    expect(styleSource).toContain("accountSubmitButtonClassName");
+
+    for (const source of [loginSource, gateSource]) {
+      expect(source).toContain("accountSubmitButtonClassName");
+      // 矢印＋文字。進む先があることを形で示す
+      expect(source).toContain("arrowMaskStyle");
+    }
+  });
+
+  /*
+    読む → チェックする → 進む の三段。
+    読み終わった時点でボタンを案内すると、まだ押せないボタンを探させてしまう。
+  */
+  it("チェックの下の一文は、進み具合に合わせて三段で切り替える", () => {
+    const gateSource = readSource("components/commerce/AccountConsentGate.tsx");
+
+    expect(gateSource).toContain("BEFORE_READ_NOTE");
+    expect(gateSource).toContain("BEFORE_AGREE_NOTE");
+    expect(gateSource).toContain("AFTER_AGREE_NOTE");
+    expect(gateSource).toContain("getConsentNote(canAgree, hasAgreed)");
+  });
+
   // クライアントのログイン判定を待つと、読み込み直後に押したとき
   // ログイン済みでも Shopify を経由して戻る遠回りになる
   it("ユーザーアイコンの行き先はログイン状態によらずマイページ", () => {

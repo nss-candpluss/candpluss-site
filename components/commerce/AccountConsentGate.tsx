@@ -2,7 +2,11 @@
 
 import { useState, type ReactNode } from "react";
 
-import { accountPrimaryButtonClassName } from "@/components/commerce/accountStyles";
+import {
+  accountSubmitButtonArrowClassName,
+  accountSubmitButtonClassName,
+} from "@/components/commerce/accountStyles";
+import { arrowMaskStyle } from "@/lib/maskStyle";
 import { contactCheckboxBoxClassName } from "@/sections/contact/contactStyles";
 import { bodyText, uiText } from "@/lib/typography";
 
@@ -15,6 +19,30 @@ export type AccountConsentDocument = {
 
 const documentLabelClassName = `font-body-ja font-bold text-[var(--foreground)] ${uiText(16)}`;
 const noteClassName = `font-body-ja text-[var(--color-muted)] ${bodyText(14)}`;
+
+/** 区画の先頭の文章と同じ大きさ。同意の文は読ませたいので小さくしない */
+const consentLabelClassName = `font-body-ja text-[var(--foreground)] ${bodyText(15)}`;
+
+/*
+  チェックの下に出す一文。
+  読む → チェックする → 進む の三段なので、案内も三つ用意する。
+  読み終わった時点でボタンを案内すると、まだ押せないボタンを探させてしまう。
+  どの状態でも案内が無い瞬間を作らないよう、消さずに入れ替える。
+*/
+const BEFORE_READ_NOTE =
+  "利用規約とプライバシーポリシーを最後までお読みいただくと、チェックできるようになります。";
+const BEFORE_AGREE_NOTE =
+  "お読みいただきありがとうございます。上記に同意いただける場合は、チェックを入れてください。";
+const AFTER_AGREE_NOTE =
+  "下記の「同意して会員登録に進む」ボタンから次のページへ進み、登録を行ってください。";
+
+function getConsentNote(canAgree: boolean, hasAgreed: boolean) {
+  if (!canAgree) {
+    return BEFORE_READ_NOTE;
+  }
+
+  return hasAgreed ? AFTER_AGREE_NOTE : BEFORE_AGREE_NOTE;
+}
 
 /*
   端数の切り上げで数 px 届かないことがあるので、少し手前で読み終わりとみなす。
@@ -144,25 +172,26 @@ export function AccountConsentGate({
             className="peer sr-only"
           />
           <span aria-hidden="true" className={contactCheckboxBoxClassName} />
-          <span
-            className={`font-body-ja text-[16px] leading-[1.3] text-[var(--foreground)]`}
-          >
+          <span className={consentLabelClassName}>
             利用規約とプライバシーポリシーに同意します
           </span>
         </label>
 
-        {canAgree ? null : (
-          <p className={`mt-[12px] ${noteClassName}`}>
-            上の2つの枠を最後までお読みいただくと、チェックできるようになります。
-          </p>
-        )}
+        <p role="status" className={`mt-[12px] ${noteClassName}`}>
+          {getConsentNote(canAgree, hasAgreed)}
+        </p>
       </div>
 
       <button
         type="submit"
         disabled={!hasAgreed}
-        className={`${accountPrimaryButtonClassName} w-full disabled:cursor-not-allowed disabled:opacity-50`}
+        className={accountSubmitButtonClassName}
       >
+        <span
+          aria-hidden="true"
+          className={accountSubmitButtonArrowClassName}
+          style={arrowMaskStyle}
+        />
         同意して会員登録に進む
       </button>
 
@@ -174,8 +203,13 @@ export function AccountConsentGate({
         </p>
         <button
           type="submit"
-          className={`${accountPrimaryButtonClassName} mt-[16px] w-full`}
+          className={`${accountSubmitButtonClassName} mt-[16px]`}
         >
+          <span
+            aria-hidden="true"
+            className={accountSubmitButtonArrowClassName}
+            style={arrowMaskStyle}
+          />
           同意して会員登録に進む
         </button>
       </noscript>

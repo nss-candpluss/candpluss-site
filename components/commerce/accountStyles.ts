@@ -1,4 +1,5 @@
 import { bodyLinkUnderlineClassName, uiText } from "@/lib/typography";
+import { supportContactButtonClassName } from "@/sections/support/supportContactStyles";
 
 /*
   会員ページの見出し。「アカウント情報」「ご注文番号：#1025」など。
@@ -36,6 +37,20 @@ export const accountPrimaryButtonClassName =
 
 export const accountSecondaryButtonClassName =
   `${accountButtonBaseClassName} border border-[var(--foreground)] bg-white text-[var(--foreground)]`;
+
+/**
+ * ここを押すと別の画面へ移る、という送り出しのボタン。
+ *
+ * 会員ページの中の操作ボタンとは役目が違うので、形も分ける。
+ * お問い合わせの「確認画面へ」と同じ指定を借りる。
+ * 高さを数値で写すと、どちらかを直したときに揃わなくなる。
+ */
+export const accountSubmitButtonClassName =
+  `${supportContactButtonClassName} cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`;
+
+/** 送り出しのボタンの中に置く矢印。文字色に追従させる */
+export const accountSubmitButtonArrowClassName =
+  "size-[calc(24px*var(--text-scale))] shrink-0 bg-current";
 
 /**
  * 取り消しがきかない操作の前に出す確認。

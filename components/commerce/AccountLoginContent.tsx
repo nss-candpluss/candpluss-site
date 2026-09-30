@@ -1,8 +1,12 @@
 import { redirect } from "next/navigation";
 
 import { AccountConsentGate } from "@/components/commerce/AccountConsentGate";
-import { accountSecondaryButtonClassName } from "@/components/commerce/accountStyles";
+import {
+  accountSubmitButtonArrowClassName,
+  accountSubmitButtonClassName,
+} from "@/components/commerce/accountStyles";
 import { LegalDocument } from "@/components/legal/LegalDocument";
+import { arrowMaskStyle } from "@/lib/maskStyle";
 import { privacyPolicyContent } from "@/data/legal/privacyPolicy";
 import { termsContent } from "@/data/legal/terms";
 import {
@@ -101,16 +105,18 @@ export async function AccountLoginContent({
           <div className="mt-[clamp(32px,calc(56px*var(--gap-scale-y)),56px)] flex flex-col">
             <LoginBlock
               title="登録済みの方"
-              lead="ご登録のメールアドレスに確認コードをお送りします。パスワードは必要ありません。"
+              lead="下記の「ログインに進む」ボタンから次のページへ進み、ログインしてください。"
             >
               <form action="/account/login/start" method="post">
                 {carriedReturnTo ? (
                   <input type="hidden" name="returnTo" value={carriedReturnTo} />
                 ) : null}
-                <button
-                  type="submit"
-                  className={`${accountSecondaryButtonClassName} w-full`}
-                >
+                <button type="submit" className={accountSubmitButtonClassName}>
+                  <span
+                    aria-hidden="true"
+                    className={accountSubmitButtonArrowClassName}
+                    style={arrowMaskStyle}
+                  />
                   ログインに進む
                 </button>
               </form>
