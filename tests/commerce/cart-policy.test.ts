@@ -37,6 +37,21 @@ describe("evaluateCartMerchandisePolicy", () => {
     ).toMatchObject({ ok: false, status: 409 });
   });
 
+  // 画面は COMING SOON でも、API を直接叩けばカートに入ってしまう
+  it("発売時期が先の商品は 409、10/2 販売開始の商品は通す", () => {
+    const base = { availableForSale: true, memberOnly: false, status: "available" };
+
+    for (const handle of ["moya420", "moya420_roofsheet", "nokuta"]) {
+      expect(
+        evaluateCartMerchandisePolicy({ ...base, handle }, true),
+        handle
+      ).toMatchObject({ ok: false, status: 409 });
+    }
+    expect(
+      evaluateCartMerchandisePolicy({ ...base, handle: "moya500" }, false)
+    ).toEqual({ ok: true });
+  });
+
   it("会員限定は未ログインなら 403、ログインなら通す", () => {
     const policy = {
       availableForSale: true,

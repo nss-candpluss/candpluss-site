@@ -1,9 +1,12 @@
+import { isProductLaunched } from "@/data/product-launch-notices";
 import { isNonPurchasableStatus } from "@/lib/products/purchase";
 
 export type CartMerchandisePolicy = {
   availableForSale: boolean;
   memberOnly: boolean;
   status?: string | null;
+  /** 発売時期が先の商品は、画面を通さず API を直接叩かれても入れない */
+  handle?: string | null;
 };
 
 export type CartPolicyDenial = {
@@ -22,7 +25,11 @@ export function evaluateCartMerchandisePolicy(
   policy: CartMerchandisePolicy,
   isAuthenticated: boolean
 ): CartPolicyDecision {
-  if (!policy.availableForSale || isNonPurchasableStatus(policy.status)) {
+  if (
+    !policy.availableForSale ||
+    isNonPurchasableStatus(policy.status) ||
+    (policy.handle && !isProductLaunched(policy.handle))
+  ) {
     return {
       ok: false,
       status: 409,

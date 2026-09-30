@@ -8,6 +8,8 @@
  * 判定は URL だけに依存させる。環境変数や cookie で切り替えると、いま見て
  * いる画面が公開ページなのかテスト領域なのかが URL から分からなくなる。
  */
+import { isProductLaunched } from "@/data/product-launch-notices";
+
 export type PurchaseChannel = "public" | "test";
 
 /** テスト領域のルート。Basic 認証（`proxy.ts`）と robots で保護する */
@@ -21,6 +23,17 @@ const PUBLIC_WEB_PURCHASE_ENABLED = false;
 
 export function isWebPurchaseEnabled(channel: PurchaseChannel): boolean {
   return channel === "test" || PUBLIC_WEB_PURCHASE_ENABLED;
+}
+
+/**
+ * 商品ごとの購入可否。系統が開いていても、発売時期が先の商品
+ * （2026年12月・2027年春など）は COMING SOON のまま止める。
+ */
+export function isProductWebPurchaseEnabled(
+  channel: PurchaseChannel,
+  handle: string
+): boolean {
+  return isWebPurchaseEnabled(channel) && isProductLaunched(handle);
 }
 
 /** basePath を含まない pathname を渡す（`usePathname()` / `nextUrl.pathname`） */

@@ -27,7 +27,7 @@ export default function ShopifyTestPage() {
           className={`mt-[var(--section-title-gap)] font-body-ja text-[var(--foreground)] ${bodyText(15)}`}
         >
           Shopify の購入テスト用の領域です。公開ページと同じ画面を使いますが、
-          発売予定のラベルは出さず、購入まで進めます。
+          10/2 販売開始の商品は購入まで進めます。発売時期が先の商品は公開ページと同じく COMING SOON のままです。
         </p>
         <ul className="mt-[calc(32px*var(--gap-scale-y))] flex flex-col gap-[calc(20px*var(--gap-scale-y))]">
           <li>

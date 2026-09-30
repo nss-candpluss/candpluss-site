@@ -23,7 +23,7 @@ import {
   type ProductDetailGalleryItem,
 } from "@/components/products/product-detail/gallery-items";
 import { preloadProductDetailImage } from "@/components/products/product-detail/image-preload";
-import { isWebPurchaseEnabled } from "@/lib/commerce/purchase-channel";
+import { isProductWebPurchaseEnabled } from "@/lib/commerce/purchase-channel";
 import { shouldDisplayGalleryNavigation } from "@/lib/products/gallery";
 import { canPurchaseProduct } from "@/lib/products/purchase";
 import {
@@ -182,7 +182,10 @@ export function ProductDetailDesktopHero({
   const canSelectVariant = product.variants.length > 1;
   const showGalleryNavigation = shouldDisplayGalleryNavigation(items.length);
   const isMainSliding = slideLayers.some((layer) => layer.role !== "settled");
-  const isPurchaseEnabled = isWebPurchaseEnabled(purchaseChannel);
+  const isPurchaseEnabled = isProductWebPurchaseEnabled(
+    purchaseChannel,
+    product.handle
+  );
   const canAddToCart = isPurchaseEnabled &&
     Boolean(selectedVariant?.shopifyVariantId) &&
     selectedVariant?.availableForSale !== false &&

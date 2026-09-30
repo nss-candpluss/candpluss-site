@@ -6,7 +6,10 @@ import {
   getProductVariantOptionName,
   isPlaceholderProductVariantName,
 } from "@/lib/products/helpers";
-import { isWebPurchaseEnabled } from "@/lib/commerce/purchase-channel";
+import {
+  isProductWebPurchaseEnabled,
+  isWebPurchaseEnabled,
+} from "@/lib/commerce/purchase-channel";
 import { productLaunchStartsAtByHandle } from "@/data/product-launch-notices";
 import { canPurchaseProduct } from "@/lib/products/purchase";
 import { resolveArticleExcerpt } from "@/lib/news/excerpt";
@@ -178,9 +181,9 @@ export function productAvailability(product: Product): string {
    * 検索結果から来た人が買えず、Google にも不一致とみなされる。
    *
    * 10/2 の販売開始で `PUBLIC_WEB_PURCHASE_ENABLED` を戻せば、
-   * 本来の在庫表記に戻る。
+   * 本来の在庫表記に戻る。発売時期が先の商品は戻した後も止めたまま。
    */
-  if (!isWebPurchaseEnabled("public")) {
+  if (!isProductWebPurchaseEnabled("public", product.handle)) {
     return `${SCHEMA}/OutOfStock`;
   }
 

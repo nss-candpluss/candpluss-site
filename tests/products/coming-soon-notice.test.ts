@@ -8,7 +8,10 @@ import {
   productLaunchNoticeByHandle,
   productLaunchStartsAtByHandle,
 } from "@/data/product-launch-notices";
-import { isWebPurchaseEnabled } from "@/lib/commerce/purchase-channel";
+import {
+  isProductWebPurchaseEnabled,
+  isWebPurchaseEnabled,
+} from "@/lib/commerce/purchase-channel";
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -26,6 +29,34 @@ describe("isWebPurchaseEnabled", () => {
   it("公開ページは止めて、テスト領域は買える", () => {
     expect(isWebPurchaseEnabled("public")).toBe(false);
     expect(isWebPurchaseEnabled("test")).toBe(true);
+  });
+});
+
+describe("isProductWebPurchaseEnabled", () => {
+  // テスト領域でも、発売時期が先の商品は公開ページと同じ告知に揃える
+  it("テスト領域で買えるのは 10/2 販売開始の商品だけ", () => {
+    expect(isProductWebPurchaseEnabled("test", "moya500")).toBe(true);
+    expect(isProductWebPurchaseEnabled("test", "guyrope")).toBe(true);
+    expect(isProductWebPurchaseEnabled("test", "moya420")).toBe(false);
+    expect(isProductWebPurchaseEnabled("test", "moya420_roofsheet")).toBe(false);
+    expect(isProductWebPurchaseEnabled("test", "nokuta")).toBe(false);
+    expect(isProductWebPurchaseEnabled("test", "moya500_roofsheet")).toBe(false);
+  });
+
+  it("販売開始時期が未登録の商品は系統の判定に従う", () => {
+    expect(isProductWebPurchaseEnabled("test", "unknown-product")).toBe(true);
+    expect(isProductWebPurchaseEnabled("public", "unknown-product")).toBe(
+      isWebPurchaseEnabled("public")
+    );
+  });
+
+  it("一覧と詳細が同じ判定を使う", () => {
+    for (const path of [
+      "components/products/ProductCard.tsx",
+      ...heroSources,
+    ]) {
+      expect(readSource(path), path).toContain("isProductWebPurchaseEnabled(");
+    }
   });
 });
 
@@ -130,7 +161,9 @@ describe("一覧カード", () => {
   const cardSource = () => readSource("components/products/ProductCard.tsx");
 
   it("購入停止中は COMING SOON と販売開始日を出す", () => {
-    expect(cardSource()).toContain("const showComingSoon = !isWebPurchaseEnabled(channel)");
+    expect(cardSource()).toContain(
+      "const showComingSoon = !isProductWebPurchaseEnabled(channel, product.handle)"
+    );
     expect(cardSource()).toContain("ProductComingSoonBadge");
     expect(cardSource()).toContain("productLaunchNoticeByHandle");
   });
@@ -167,19 +200,24 @@ describe("一覧カード", () => {
 });
 
 describe("販売開始時期のデータ", () => {
-  it("MOYA420 系は 2027年春、NOKUTA は 2026年12月、それ以外は 10/2", () => {
+  it("MOYA420 系は 2027年春、NOKUTA は 2026年12月、MOYA500 ルーフシートは 10月中旬〜下旬、それ以外は 10/2", () => {
     expect(productLaunchNoticeByHandle.moya500).toBe(
       "2026年10月2日(金)20:00 販売開始"
     );
     expect(productLaunchNoticeByHandle.moya420).toBe("2027年春 発売予定");
     expect(productLaunchNoticeByHandle.nokuta).toBe("2026年12月 発売予定");
+    expect(productLaunchNoticeByHandle.moya500_roofsheet).toBe(
+      "2026年10月中旬〜下旬 発売予定"
+    );
 
     for (const [handle, notice] of Object.entries(productLaunchNoticeByHandle)) {
       const expected = handle.startsWith("moya420")
         ? "2027年春 発売予定"
         : handle === "nokuta"
           ? "2026年12月 発売予定"
-          : "2026年10月2日(金)20:00 販売開始";
+          : handle === "moya500_roofsheet"
+            ? "2026年10月中旬〜下旬 発売予定"
+            : "2026年10月2日(金)20:00 販売開始";
 
       expect(notice, handle).toBe(expected);
     }

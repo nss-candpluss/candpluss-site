@@ -42,6 +42,7 @@ export async function getCartMerchandisePolicy(merchandiseId: string) {
     node?: {
       availableForSale: boolean;
       product: {
+        handle: string;
         memberOnly?: { value?: string | null } | null;
         salesStatus?: {
           reference?: {
@@ -56,6 +57,7 @@ export async function getCartMerchandisePolicy(merchandiseId: string) {
         ... on ProductVariant {
           availableForSale
           product {
+            handle
             memberOnly: metafield(namespace: "custom", key: "member_only") {
               value
             }
@@ -84,6 +86,7 @@ export async function getCartMerchandisePolicy(merchandiseId: string) {
     memberAccessConfigured: Boolean(data.node?.product.memberOnly?.value),
     memberOnly: data.node?.product.memberOnly?.value === "true",
     status,
+    handle: data.node?.product.handle,
   };
 }
 

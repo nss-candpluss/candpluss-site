@@ -14,7 +14,10 @@ import {
   useStatusDisplayOverrideHandle,
 } from "@/components/products/ProductStatusLabel";
 import { productLaunchNoticeByHandle } from "@/data/product-launch-notices";
-import { channelPath, isWebPurchaseEnabled } from "@/lib/commerce/purchase-channel";
+import {
+  channelPath,
+  isProductWebPurchaseEnabled,
+} from "@/lib/commerce/purchase-channel";
 import { getProductListingImage } from "@/lib/products/gallery";
 import {
   getProductDetailHref,
@@ -72,7 +75,7 @@ export function ProductCard({
   const hasMultipleVariants = product.variants.length > 1;
   const statusOverrideHandle = useStatusDisplayOverrideHandle(product.handle);
   // 購入停止中は Shopify のステータスではなく COMING SOON と販売開始日を出す
-  const showComingSoon = !isWebPurchaseEnabled(channel);
+  const showComingSoon = !isProductWebPurchaseEnabled(channel, product.handle);
   const launchNotice = productLaunchNoticeByHandle[product.handle];
   const showStatusLabel =
     !showComingSoon &&
