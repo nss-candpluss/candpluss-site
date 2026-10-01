@@ -96,9 +96,17 @@ describe("channelPath", () => {
 });
 
 describe("発売予定ラベルの出し分け", () => {
-  it("公開ページだけに出す", () => {
-    expect(showsStatusDisplayOverride("public")).toBe(true);
-    expect(showsStatusDisplayOverride("test")).toBe(false);
+  it("購入を止めている公開ページだけに出す", () => {
+    expect(showsStatusDisplayOverride("public", "prelaunch")).toBe(true);
+    expect(showsStatusDisplayOverride("test", "prelaunch")).toBe(false);
+  });
+
+  // 購入テスト中も本公開と同じ、テスト領域と同じ表示にする
+  it("公開ページが開いたらテスト領域と同じく出さない", () => {
+    for (const mode of ["purchaseTest", "launched"] as const) {
+      expect(showsStatusDisplayOverride("public", mode)).toBe(false);
+      expect(showsStatusDisplayOverride("test", mode)).toBe(false);
+    }
   });
 
   it("ラベルと一覧カードが同じ判定を使う", () => {

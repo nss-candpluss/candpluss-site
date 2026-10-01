@@ -75,10 +75,13 @@ export function channelPath(channel: PurchaseChannel, path: string): string {
 }
 
 /**
- * 発売予定ラベル（`data/product-status-overrides.ts` の直書き）は公開ページ
- * だけに出す。テスト領域は購入できる状態なので、発売前の告知が出ていると
+ * 発売予定ラベル（`data/product-status-overrides.ts` の直書き）は、購入を
+ * 止めている公開ページだけに出す。購入できる系統で発売前の告知が出ていると
  * 表示と実際の挙動が食い違う。
  */
-export function showsStatusDisplayOverride(channel: PurchaseChannel): boolean {
-  return channel === "public";
+export function showsStatusDisplayOverride(
+  channel: PurchaseChannel,
+  mode: PublicSiteMode = PUBLIC_SITE_MODE
+): boolean {
+  return channel === "public" && !isPublicSiteOpen(mode);
 }
