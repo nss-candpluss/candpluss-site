@@ -17,6 +17,7 @@ import { useCustomer } from "@/components/commerce/CustomerProvider";
 import { usePurchaseChannel } from "@/components/commerce/PurchaseChannelProvider";
 import { ProductComingSoonBadge } from "@/components/products/ProductComingSoonBadge";
 import { ProductComingSoonNotice } from "@/components/products/product-detail/ProductComingSoonNotice";
+import { ProductPurchaseTestNotice } from "@/components/products/product-detail/ProductPurchaseTestNotice";
 import { ProductDetailGalleryMedia } from "@/components/products/product-detail/ProductDetailGalleryMedia";
 import { ProductDetailGalleryModal } from "@/components/products/product-detail/ProductDetailGalleryModal";
 import { PRODUCT_DETAIL_ZOOM_IN_CURSOR } from "@/components/products/product-detail/gallery-cursors";
@@ -747,6 +748,10 @@ export function ProductDetailMobileHero({
                 </span>
               ) : null}
             </button>
+            <ProductPurchaseTestNotice
+              channel={purchaseChannel}
+              className="mt-[12px]"
+            />
             {cartError ? (
               <p role="alert" className="mt-3 font-body-ja text-xs text-[#9b1b30]">
                 {cartError}
