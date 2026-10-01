@@ -1,3 +1,7 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { describe, expect, it } from "vitest";
 
 import {
@@ -88,6 +92,41 @@ describe("resolveCustomerAccountCallbackUrl", () => {
       )
     ).toBe(
       "https://mosaic-lubricate-salute.ngrok-free.dev/account/authorize"
+    );
+  });
+});
+
+const rootDir = join(dirname(fileURLToPath(import.meta.url)), "../..");
+
+function readSource(relativePath: string) {
+  return readFileSync(join(rootDir, relativePath), "utf8");
+}
+
+describe("ログアウトと id_token", () => {
+  // Shopify のログアウトは id_token_hint が必須。欠けるとエラー画面で止まる
+  it("トークン更新で id_token を失わない", () => {
+    const source = readSource("app/api/shopify/customer/route.ts");
+
+    expect(source).toContain("idToken: refreshed.idToken ?? session.idToken");
+    expect(source).toContain(
+      "refreshToken: refreshed.refreshToken ?? session.refreshToken"
+    );
+  });
+
+  it("ログアウト後は会員ログインページへ戻す", () => {
+    const source = readSource("app/account/logout/route.ts");
+
+    expect(source).toContain("new URL(ACCOUNT_LOGIN_PATH, origin)");
+    expect(source).toContain("loginUrl.toString()");
+    expect(source).not.toContain('new URL("/", origin)');
+  });
+
+  it("id_token が無いときは Shopify へ送らずログインページへ戻す", () => {
+    const source = readSource("app/account/logout/route.ts");
+
+    expect(source).toContain("if (!session?.idToken)");
+    expect(source.indexOf("if (!session?.idToken)")).toBeLessThan(
+      source.indexOf("getCustomerLogoutUrl(")
     );
   });
 });
