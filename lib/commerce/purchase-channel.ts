@@ -27,7 +27,7 @@ export const TEST_AREA_ROOT_PATH = "/shopify-test";
  */
 export type PublicSiteMode = "prelaunch" | "purchaseTest" | "launched";
 
-export const PUBLIC_SITE_MODE = "purchaseTest" as PublicSiteMode;
+export const PUBLIC_SITE_MODE = "prelaunch" as PublicSiteMode;
 
 export function isPublicSiteOpen(mode: PublicSiteMode = PUBLIC_SITE_MODE): boolean {
   return mode !== "prelaunch";
