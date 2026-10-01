@@ -11,17 +11,13 @@ export const metadata = createPageMetadata({
 });
 
 type ShopifyTestAccountReceiptPageProps = {
-  searchParams: Promise<{
-    order?: string;
-    to?: string;
-    note?: string;
-  }>;
+  searchParams: Promise<{ order?: string }>;
 };
 
 export default async function ShopifyTestAccountReceiptPage({
   searchParams,
 }: ShopifyTestAccountReceiptPageProps) {
-  const { order, to, note } = await searchParams;
+  const { order } = await searchParams;
 
-  return <AccountReceiptContent order={order} to={to} note={note} />;
+  return <AccountReceiptContent order={order} />;
 }

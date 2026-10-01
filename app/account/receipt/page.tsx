@@ -18,17 +18,13 @@ export const metadata = isAccountEnabled("public")
     };
 
 type AccountReceiptPageProps = {
-  searchParams: Promise<{
-    order?: string;
-    to?: string;
-    note?: string;
-  }>;
+  searchParams: Promise<{ order?: string }>;
 };
 
 export default async function AccountReceiptPage({
   searchParams,
 }: AccountReceiptPageProps) {
-  const { order, to, note } = await searchParams;
+  const { order } = await searchParams;
 
-  return <AccountReceiptContent order={order} to={to} note={note} />;
+  return <AccountReceiptContent order={order} />;
 }

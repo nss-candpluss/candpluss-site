@@ -16,15 +16,17 @@ export const receiptIssuer = {
    * 印字せず、適格請求書としては扱わない。番号を入れた時点で登録番号と
    * 税率別内訳が印字され、適格請求書の体裁になる。
    */
-  invoiceRegistrationNumber: "",
+  invoiceRegistrationNumber: "T5290001041852",
 } as const;
 
 /** 消費税の標準税率。軽減税率の商品を扱いはじめたら区分が必要になる */
 export const RECEIPT_TAX_RATE_PERCENT = 10;
 
-export const receiptNotes = [
-  "本領収書は電子的に発行しているため、収入印紙の貼付は不要です。",
-] as const;
+/**
+ * 明細の最低行数。商品が少なくても表の高さを保ち、A4 1 枚の体裁にする。
+ * 超えた分はそのまま行を足す。
+ */
+export const RECEIPT_MIN_DETAIL_ROWS = 18;
 
 export function isQualifiedInvoiceReady() {
   return receiptIssuer.invoiceRegistrationNumber.trim().length > 0;

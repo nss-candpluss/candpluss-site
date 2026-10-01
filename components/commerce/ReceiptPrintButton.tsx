@@ -1,14 +1,33 @@
 "use client";
 
+import { accountPrimaryButtonClassName } from "@/components/commerce/accountStyles";
+
+type ReceiptPrintButtonProps = {
+  /** 保存するときの既定のファイル名。ブラウザはページタイトルを使う */
+  fileName: string;
+};
+
 /** 印刷ダイアログから PDF として保存してもらう */
-export function ReceiptPrintButton() {
+export function ReceiptPrintButton({ fileName }: ReceiptPrintButtonProps) {
   return (
     <button
       type="button"
-      onClick={() => window.print()}
-      className="cursor-pointer border border-[var(--foreground)] px-6 py-4 font-ui-en text-sm"
+      onClick={() => {
+        const pageTitle = document.title;
+
+        document.title = fileName;
+        window.addEventListener(
+          "afterprint",
+          () => {
+            document.title = pageTitle;
+          },
+          { once: true }
+        );
+        window.print();
+      }}
+      className={accountPrimaryButtonClassName}
     >
-      PRINT / PDF
+      PDFダウンロード
     </button>
   );
 }

@@ -40,14 +40,49 @@ describe("領収書の発行者情報", () => {
     expect(RECEIPT_TAX_RATE_PERCENT).toBe(10);
   });
 
-  // 登録番号が入るまでは税率別内訳を出さない
+  // 登録番号が入るまでは登録番号の行を出さない
   it("登録番号の有無で印字を切り替える", () => {
-    const source = readSource(
-      "components/commerce/AccountReceiptContent.tsx"
+    expect(
+      readSource("components/commerce/AccountReceiptContent.tsx")
+    ).toContain("isQualifiedInvoiceReady()");
+    expect(readSource("components/commerce/ReceiptSheet.tsx")).toContain(
+      "{registrationNumber ? ("
     );
+  });
+});
 
-    expect(source).toContain("isQualifiedInvoiceReady()");
-    expect(source).toContain("showRegistrationNumber");
+describe("領収書の体裁", () => {
+  const sheetSource = () => readSource("components/commerce/ReceiptSheet.tsx");
+
+  // 小計・送料・消費税を足すと合計に一致させる
+  it("小計は合計から送料と消費税を引いた額にする", () => {
+    expect(
+      readSource("components/commerce/AccountReceiptContent.tsx")
+    ).toContain("subtotal={total - shipping - tax}");
+  });
+
+  it("宛名と但し書きは購入者に入力させない", () => {
+    const source = readSource("components/commerce/AccountReceiptContent.tsx");
+
+    expect(source).not.toContain("<form");
+    expect(source).not.toContain("但し");
+    expect(readSource("app/account/receipt/page.tsx")).not.toContain("note");
+  });
+
+  it("操作は PDF ダウンロードのボタンだけ", () => {
+    expect(readSource("components/commerce/ReceiptPrintButton.tsx")).toContain(
+      "PDFダウンロード"
+    );
+  });
+
+  // 紙の書類なので、文字だけ縮む Text Scale では比率が崩れる
+  it("寸法は用紙の幅に対する割合で持つ", () => {
+    expect(sheetSource()).toContain("@container");
+    expect(sheetSource()).not.toContain("--text-scale");
+  });
+
+  it("商品が少なくても明細の行数を保つ", () => {
+    expect(sheetSource()).toContain("RECEIPT_MIN_DETAIL_ROWS");
   });
 });
 
