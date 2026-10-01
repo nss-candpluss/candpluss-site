@@ -28,6 +28,14 @@ export const RECEIPT_TAX_RATE_PERCENT = 10;
  */
 export const RECEIPT_MIN_DETAIL_ROWS = 18;
 
+/** ライセンス表記は使っているページにだけ置く。PDF には含めない */
+export const receiptLicenseNote = {
+  before: "※PDFの作成にオープンソースソフトウェア（",
+  linkLabel: "ライセンス表記",
+  href: "/legal/licenses",
+  after: "）を利用しています。",
+} as const;
+
 export function isQualifiedInvoiceReady() {
   return receiptIssuer.invoiceRegistrationNumber.trim().length > 0;
 }

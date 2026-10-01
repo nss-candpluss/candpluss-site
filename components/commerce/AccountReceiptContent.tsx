@@ -4,7 +4,11 @@ import { redirect } from "next/navigation";
 import { accountTextLinkClassName } from "@/components/commerce/accountStyles";
 import { ReceiptPrintButton } from "@/components/commerce/ReceiptPrintButton";
 import { ReceiptSheet } from "@/components/commerce/ReceiptSheet";
-import { isQualifiedInvoiceReady, receiptIssuer } from "@/data/receipt";
+import {
+  isQualifiedInvoiceReady,
+  receiptIssuer,
+  receiptLicenseNote,
+} from "@/data/receipt";
 import {
   ACCOUNT_BASE_PATH,
   ACCOUNT_LOGIN_PATH,
@@ -102,6 +106,17 @@ export async function AccountReceiptContent({
             }))}
           />
         </div>
+
+        <p className="mt-[clamp(16px,calc(24px*var(--gap-scale-y)),24px)] font-body-ja text-[clamp(12px,calc(13px*var(--text-scale)),13px)] leading-[1.3] text-[var(--foreground)] print:hidden">
+          {receiptLicenseNote.before}
+          <Link
+            href={receiptLicenseNote.href}
+            className="underline underline-offset-2 hover:no-underline"
+          >
+            {receiptLicenseNote.linkLabel}
+          </Link>
+          {receiptLicenseNote.after}
+        </p>
       </div>
     </main>
   );

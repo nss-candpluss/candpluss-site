@@ -75,6 +75,25 @@ describe("領収書の体裁", () => {
     );
   });
 
+  // 印刷ダイアログを挟まずに保存させる。重いので押したときだけ読み込む
+  it("押したらその場で PDF を保存し、ライブラリは遅延読み込みにする", () => {
+    const source = readSource("components/commerce/ReceiptPrintButton.tsx");
+
+    expect(source).toContain('import("html2canvas-pro")');
+    expect(source).toContain('import("jspdf")');
+    expect(source).not.toMatch(/^import .* from "(html2canvas-pro|jspdf)";$/m);
+    expect(source).toContain("pdf.save(");
+  });
+
+  it("PDF にするのは帳票の部分だけ", () => {
+    expect(readSource("components/commerce/ReceiptPrintButton.tsx")).toContain(
+      "[data-receipt-sheet]"
+    );
+    expect(readSource("components/commerce/ReceiptSheet.tsx")).toContain(
+      "data-receipt-sheet"
+    );
+  });
+
   // 紙の書類なので、文字だけ縮む Text Scale では比率が崩れる
   it("寸法は用紙の幅に対する割合で持つ", () => {
     expect(sheetSource()).toContain("@container");
@@ -97,6 +116,18 @@ describe("領収書への導線", () => {
     expect(
       readSource("components/commerce/AccountPageContent.tsx")
     ).toContain("accountReceiptHref(order.id)");
+  });
+
+  // 会員ページを開いたまま、注文ごとに領収書を出せるようにする
+  it("領収書は別タブで開く", () => {
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+    const linkSource = source.slice(
+      source.indexOf("accountReceiptHref(order.id)"),
+      source.indexOf("領収書を見る")
+    );
+
+    expect(linkSource).toContain('target="_blank"');
+    expect(linkSource).toContain('rel="noopener noreferrer"');
   });
 
   // ヘッダーやフッターが混ざると領収書として使えない

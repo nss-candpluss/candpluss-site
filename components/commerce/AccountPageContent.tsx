@@ -1018,6 +1018,8 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
               <OrderSidebarSection>
                 <Link
                   href={accountReceiptHref(order.id)}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className={`inline-flex border-b border-current font-body-ja ${uiText(14)}`}
                 >
                   領収書を見る

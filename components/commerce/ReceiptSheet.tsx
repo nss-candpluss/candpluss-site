@@ -76,7 +76,10 @@ export function ReceiptSheet({
 
   return (
     <div className="@container">
-      <article className="font-body-ja text-[var(--foreground)]">
+      <article
+        data-receipt-sheet
+        className="bg-white font-body-ja text-[var(--foreground)]"
+      >
         <h1 className="text-center font-body-ja text-[5.8cqw] leading-none font-normal">
           領収書
         </h1>

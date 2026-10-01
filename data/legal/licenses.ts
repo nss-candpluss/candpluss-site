@@ -1,5 +1,12 @@
 import type { LegalDocumentContent } from "@/types/legal";
 
+const MIT_PERMISSION =
+  'Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:';
+const MIT_NOTICE =
+  "The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.";
+const MIT_WARRANTY =
+  'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
+
 /**
  * 本サイトがブラウザへ配信している OSS の告知。
  * heic-to は LGPL-3.0+ のため、ライセンス本文および入手元の明示が必要。
@@ -45,15 +52,43 @@ export const licensesContent = {
         {
           text: "Copyright (c) 2019 Donald Chan",
         },
+        { text: MIT_PERMISSION },
+        { text: MIT_NOTICE },
+        { text: MIT_WARRANTY },
+      ],
+    },
+    {
+      title: "html2canvas-pro 2.5.0",
+      clauses: [
         {
-          text: 'Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:',
+          text: "会員ページの領収書を PDF で保存する際、ブラウザ上で領収書を画像に変換するために利用しています。",
         },
         {
-          text: "The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.",
+          text: "ライセンス：MIT License",
         },
         {
-          text: 'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.',
+          text: "Copyright (c) 2024-present yorickshan and html2canvas-pro contributors",
         },
+        { text: MIT_PERMISSION },
+        { text: MIT_NOTICE },
+        { text: MIT_WARRANTY },
+      ],
+    },
+    {
+      title: "jsPDF 4.2.1",
+      clauses: [
+        {
+          text: "会員ページの領収書を、ブラウザ上で PDF ファイルにするために利用しています。",
+        },
+        {
+          text: "ライセンス：MIT License",
+        },
+        {
+          text: "Copyright (c) 2010-2025 James Hall, https://github.com/MrRio/jsPDF / (c) 2015-2025 yWorks GmbH, https://www.yworks.com/",
+        },
+        { text: MIT_PERMISSION },
+        { text: MIT_NOTICE },
+        { text: MIT_WARRANTY },
       ],
     },
   ],
