@@ -441,13 +441,15 @@ describe("注文履歴の商品行", () => {
     expect(source).not.toContain('label="注文日時"');
     expect(source).not.toContain('label="支払い状況"');
     expect(source).toContain("サマリー");
-    expect(source).toContain('label="小計"');
-    expect(source).toContain('label="配送料"');
-    expect(source).toContain('label="消費税"');
-    // 利用明細書と同じ計算。Shopify の税額は送料の分を含まない
+    // 利用明細書と同じ項目・同じ計算。Shopify の税額は送料の分を含まない
+    expect(source).toContain('label="税抜合計"');
+    expect(source).toContain('label="送料（税抜）"');
+    expect(source).toContain("label={`消費税 (${RECEIPT_TAX_RATE_PERCENT}%)`}");
+    expect(source).toContain('label="合計金額"');
     expect(source).toContain("receiptSummaryAmounts({");
     expect(source).not.toContain("formatAmount(order.totalTax)");
-    expect(source).toContain('label="ご請求額"');
+    expect(source).not.toContain('label="小計"');
+    expect(source).not.toContain('label="ご請求額"');
     // 税はサマリーの独立した行にするので、金額に税込を付けない
     expect(source).toContain("formatAmount(order.totalPrice)");
     expect(source).not.toContain("formatMoney(order.totalPrice)");
@@ -1146,7 +1148,7 @@ describe("会員ページの画面構成", () => {
     );
 
     /*
-      個口の見出しの下は「サマリー → 小計」と同じだけ空けて見せる。
+      個口の見出しの下は「サマリー → 税抜合計」と同じだけ空けて見せる。
       あちらは本文の行間が広く、文字の上に 5px ほど余りが乗る。
       行間の詰まった見出しでは、その分を余白に足さないと詰まって見える。
     */

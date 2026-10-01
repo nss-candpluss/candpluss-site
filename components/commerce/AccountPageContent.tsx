@@ -26,6 +26,7 @@ import { SiteImage } from "@/components/ui/SiteImage";
 import { contactFormCopy } from "@/data/contact";
 import {
   RECEIPT_DOCUMENT_TITLE,
+  RECEIPT_TAX_RATE_PERCENT,
   receiptSummaryAmounts,
 } from "@/data/receipt";
 import {
@@ -678,25 +679,34 @@ function OrderAmountSummary({
   order: CustomerOrderDetail;
   showRefunded: boolean;
 }) {
-  // Shopify の税額は送料の分を含まないので、利用明細書と同じく税込の合計から出す
-  const tax = order.totalPrice
-    ? {
-        amount: String(
-          receiptSummaryAmounts({
-            total: Number(order.totalPrice.amount),
-            shipping: Number(order.totalShipping?.amount ?? 0),
-          }).tax
-        ),
-        currencyCode: order.totalPrice.currencyCode,
-      }
+  // 利用明細書と同じ内訳。Shopify の税額は送料の分を含まないので使わない
+  const totalPrice = order.totalPrice;
+  const amounts = totalPrice
+    ? receiptSummaryAmounts({
+        total: Number(totalPrice.amount),
+        shipping: Number(order.totalShipping?.amount ?? 0),
+      })
     : null;
+  const money = (amount?: number) =>
+    totalPrice && amount !== undefined
+      ? { amount: String(amount), currencyCode: totalPrice.currencyCode }
+      : null;
 
   return (
     <OrderSidebarSection title="サマリー">
       <dl className="mt-3 flex flex-col gap-3">
-        <OrderAmountRow label="小計" value={formatAmount(order.subtotal)} />
-        <OrderAmountRow label="配送料" value={formatAmount(order.totalShipping)} />
-        <OrderAmountRow label="消費税" value={formatAmount(tax)} />
+        <OrderAmountRow
+          label="税抜合計"
+          value={formatAmount(money(amounts?.subtotalExcludingTax))}
+        />
+        <OrderAmountRow
+          label="送料（税抜）"
+          value={formatAmount(money(amounts?.shippingExcludingTax))}
+        />
+        <OrderAmountRow
+          label={`消費税 (${RECEIPT_TAX_RATE_PERCENT}%)`}
+          value={formatAmount(money(amounts?.tax))}
+        />
         {showRefunded ? (
           <OrderAmountRow
             label="返金額"
@@ -704,7 +714,7 @@ function OrderAmountSummary({
           />
         ) : null}
         <OrderAmountRow
-          label="ご請求額"
+          label="合計金額"
           value={formatAmount(order.totalPrice)}
           emphasized
         />
@@ -838,7 +848,7 @@ function OrderFulfillments({
     <ul
       className={`flex flex-col gap-[clamp(24px,calc(32px*var(--gap-scale-y)),32px)] ${
         /*
-          「サマリー → 小計」と同じだけ空けて見せる。
+          「サマリー → 税抜合計」と同じだけ空けて見せる。
           あちらの本文は行間が広く、文字の上に 5px ほど余りが乗るので、
           行間の詰まった個口の見出しでは、その分を余白に足す。
         */
