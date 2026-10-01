@@ -1,4 +1,5 @@
 import {
+  RECEIPT_DOCUMENT_TITLE,
   RECEIPT_MIN_DETAIL_ROWS,
   RECEIPT_TAX_RATE_PERCENT,
   receiptIssuer,
@@ -17,8 +18,9 @@ export type ReceiptSheetProps = {
   orderName: string;
   /** 未登録なら行ごと出さない（適格請求書として扱わない） */
   registrationNumber: string | null;
-  subtotal: number;
-  shipping: number;
+  /** 商品の税抜合計 */
+  subtotalExcludingTax: number;
+  shippingExcludingTax: number;
   tax: number;
   total: number;
   lines: ReceiptSheetLine[];
@@ -48,26 +50,13 @@ const detailHeadClassName = `${cellClassName} h-[4cqw] text-center text-[1.6cqw]
 const detailCellClassName = `${cellClassName} h-[4.7cqw] text-[1.6cqw] leading-none`;
 const metaRowClassName = "grid grid-cols-[13.4cqw_auto] text-[1.6cqw] leading-[2.75cqw]";
 
-/** 社印。正式な印影が届くまでの仮置き */
-function ReceiptStamp() {
-  return (
-    <span
-      aria-hidden="true"
-      className="absolute top-1/2 right-0 flex size-[13.2cqw] -translate-y-1/2 flex-col items-center justify-center rounded-full border-[0.5cqw] border-[#e0694e] text-[2.1cqw] leading-[1.15] font-semibold text-[#e0694e] [print-color-adjust:exact]"
-    >
-      <span>NSS 印</span>
-      <span>(仮)</span>
-    </span>
-  );
-}
-
 export function ReceiptSheet({
   recipientName,
   issuedAt,
   orderName,
   registrationNumber,
-  subtotal,
-  shipping,
+  subtotalExcludingTax,
+  shippingExcludingTax,
   tax,
   total,
   lines,
@@ -80,8 +69,8 @@ export function ReceiptSheet({
         data-receipt-sheet
         className="bg-white font-body-ja text-[var(--foreground)]"
       >
-        <h1 className="text-center font-body-ja text-[5.8cqw] leading-none font-normal">
-          領収書
+        <h1 className="text-center font-body-ja text-[4.5cqw] leading-none font-normal">
+          {RECEIPT_DOCUMENT_TITLE}
         </h1>
 
         <div className="mt-[9.5cqw] flex items-start justify-between gap-[4cqw]">
@@ -89,7 +78,7 @@ export function ReceiptSheet({
             {recipientName ? `${recipientName} 様` : "様"}
           </p>
 
-          <div className="relative shrink-0">
+          <div className="shrink-0">
             <dl>
               <div className={metaRowClassName}>
                 <dt>発行日</dt>
@@ -107,11 +96,12 @@ export function ReceiptSheet({
               </div>
             </dl>
 
-            <div className="relative mt-[2.75cqw] text-[1.6cqw] leading-[2.75cqw]">
+            <div className="mt-[2.75cqw] text-[1.6cqw] leading-[2.75cqw]">
+              <p>{receiptIssuer.brandName}</p>
+              <p>TEL：{receiptIssuer.tel}</p>
+              <p className="mt-[2.75cqw]">運営：{receiptIssuer.name}</p>
               <p>{receiptIssuer.postalCode}</p>
               <p>{receiptIssuer.address}</p>
-              <p>{receiptIssuer.name}</p>
-              <ReceiptStamp />
             </div>
           </div>
         </div>
@@ -119,8 +109,8 @@ export function ReceiptSheet({
         <table className="mt-[3.9cqw] w-[69.2%] table-fixed border-collapse">
           <thead>
             <tr>
-              <th className={summaryHeadClassName}>小計</th>
-              <th className={summaryHeadClassName}>送料</th>
+              <th className={summaryHeadClassName}>税抜合計</th>
+              <th className={summaryHeadClassName}>送料（税抜）</th>
               <th className={summaryHeadClassName}>
                 消費税 ({RECEIPT_TAX_RATE_PERCENT}%)
               </th>
@@ -129,8 +119,8 @@ export function ReceiptSheet({
           </thead>
           <tbody>
             <tr>
-              <td className={summaryValueClassName}>{formatYen(subtotal)} 円</td>
-              <td className={summaryValueClassName}>{formatYen(shipping)} 円</td>
+              <td className={summaryValueClassName}>{formatYen(subtotalExcludingTax)} 円</td>
+              <td className={summaryValueClassName}>{formatYen(shippingExcludingTax)} 円</td>
               <td className={summaryValueClassName}>{formatYen(tax)} 円</td>
               <td className={`${summaryValueClassName} text-[1.8cqw] font-semibold`}>
                 {formatYen(total)} 円
@@ -149,7 +139,7 @@ export function ReceiptSheet({
             <tr>
               <th className={detailHeadClassName}>摘要</th>
               <th className={detailHeadClassName}>数量</th>
-              <th className={detailHeadClassName}>金額</th>
+              <th className={detailHeadClassName}>税込金額</th>
             </tr>
           </thead>
           <tbody>

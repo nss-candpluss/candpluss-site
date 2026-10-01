@@ -1,13 +1,14 @@
 import { AccountReceiptContent } from "@/components/commerce/AccountReceiptContent";
 import { notFoundContent } from "@/data/error-pages";
+import { RECEIPT_DOCUMENT_TITLE } from "@/data/receipt";
 import { isAccountEnabled } from "@/lib/commerce/account-login";
 import { createPageMetadata } from "@/lib/site-metadata";
 import { siteConfig } from "@/lib/site";
 
 export const metadata = isAccountEnabled("public")
   ? createPageMetadata({
-      title: "領収書",
-      description: `${siteConfig.name}の領収書ページです。`,
+      title: RECEIPT_DOCUMENT_TITLE,
+      description: `${siteConfig.name}の${RECEIPT_DOCUMENT_TITLE}ページです。`,
       path: "/account/receipt",
       index: false,
     })

@@ -24,6 +24,7 @@ import { Container } from "@/components/ui/Container";
 import { SiteGrid } from "@/components/ui/SiteGrid";
 import { SiteImage } from "@/components/ui/SiteImage";
 import { contactFormCopy } from "@/data/contact";
+import { RECEIPT_DOCUMENT_TITLE } from "@/data/receipt";
 import {
   ACCOUNT_LOGIN_PATH,
   accountReceiptHref,
@@ -1022,7 +1023,7 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
                   rel="noopener noreferrer"
                   className={`inline-flex border-b border-current font-body-ja ${uiText(14)}`}
                 >
-                  領収書を見る
+                  {RECEIPT_DOCUMENT_TITLE}
                 </Link>
               </OrderSidebarSection>
             ) : null}

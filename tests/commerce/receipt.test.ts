@@ -5,14 +5,19 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import {
+  RECEIPT_DOCUMENT_TITLE,
   RECEIPT_TAX_RATE_PERCENT,
   isQualifiedInvoiceReady,
+  receiptFileName,
   receiptIssuer,
+  receiptLineDescription,
+  receiptSummaryAmounts,
 } from "@/data/receipt";
 import {
   ACCOUNT_RECEIPT_PATH,
   accountReceiptHref,
 } from "@/lib/commerce/account-login";
+import { buildImagePdf, deflate } from "@/lib/commerce/receipt-pdf";
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -24,6 +29,23 @@ describe("領収書の発行者情報", () => {
   it("会社情報と同じ発行者を使う", () => {
     expect(receiptIssuer.name).toBe("株式会社NSS");
     expect(receiptIssuer.address).toContain("大野城市");
+  });
+
+  // 屋号と問い合わせ先を先に、運営会社を後に並べる
+  it("屋号・TEL・運営会社・住所の順に並べる", () => {
+    const source = readSource("components/commerce/ReceiptSheet.tsx");
+    const order = [
+      "{receiptIssuer.brandName}",
+      "TEL：{receiptIssuer.tel}",
+      "運営：{receiptIssuer.name}",
+      "{receiptIssuer.postalCode}",
+      "{receiptIssuer.address}",
+    ].map((text) => source.indexOf(text));
+
+    expect(receiptIssuer.brandName).toBe("C AND+S");
+    expect(receiptIssuer.tel).toBe("0120-64-8175");
+    expect(order.every((index) => index >= 0)).toBe(true);
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
   });
 
   // 番号を推測で埋めると、適格請求書として成立しない書類を配ってしまう
@@ -54,11 +76,58 @@ describe("領収書の発行者情報", () => {
 describe("領収書の体裁", () => {
   const sheetSource = () => readSource("components/commerce/ReceiptSheet.tsx");
 
-  // 小計・送料・消費税を足すと合計に一致させる
-  it("小計は合計から送料と消費税を引いた額にする", () => {
+  // 消費税には送料の分も含まれる。合計から送料（税込）と消費税を引くと、税抜合計が送料の税の分だけ小さく出る
+  it("税抜合計・送料（税抜）・消費税を足すと合計金額になる", () => {
+    // ガイロープ 2,400 円＋送料 700 円。消費税は商品 218 円＋送料 64 円
+    expect(receiptSummaryAmounts({ total: 3100, shipping: 700, tax: 282 })).toEqual({
+      subtotalExcludingTax: 2182,
+      shippingExcludingTax: 636,
+      tax: 282,
+      total: 3100,
+    });
     expect(
-      readSource("components/commerce/AccountReceiptContent.tsx")
-    ).toContain("subtotal={total - shipping - tax}");
+      receiptSummaryAmounts({ total: 494060, shipping: 0, tax: 44915 })
+    ).toEqual({
+      subtotalExcludingTax: 449145,
+      shippingExcludingTax: 0,
+      tax: 44915,
+      total: 494060,
+    });
+
+    for (const [total, shipping, tax] of [
+      [3100, 700, 282],
+      [5699, 700, 518],
+      [372000, 0, 33818],
+    ]) {
+      const amounts = receiptSummaryAmounts({ total, shipping, tax });
+
+      expect(
+        amounts.subtotalExcludingTax + amounts.shippingExcludingTax + amounts.tax
+      ).toBe(total);
+    }
+  });
+
+  it("表題は利用明細書（兼 適格請求書）で、画面・タイトル・リンク・ファイル名で揃える", () => {
+    expect(RECEIPT_DOCUMENT_TITLE).toBe("利用明細書（兼 適格請求書）");
+
+    for (const path of [
+      "components/commerce/ReceiptSheet.tsx",
+      "components/commerce/AccountPageContent.tsx",
+      "app/account/receipt/page.tsx",
+      "app/shopify-test/account/receipt/page.tsx",
+    ]) {
+      expect(readSource(path), path).toContain("RECEIPT_DOCUMENT_TITLE");
+    }
+  });
+
+  // 発行日は日本時間で数える。UTC のままだと朝 9 時前の注文が前日になる
+  it("ファイル名は「表題_注文番号_発行日」", () => {
+    expect(receiptFileName("#1024", "2026-10-01T05:00:00Z")).toBe(
+      "利用明細書（兼 適格請求書）_1024_20261001"
+    );
+    expect(receiptFileName("#1025", "2026-10-01T16:30:00Z")).toBe(
+      "利用明細書（兼 適格請求書）_1025_20261002"
+    );
   });
 
   it("宛名と但し書きは購入者に入力させない", () => {
@@ -75,18 +144,22 @@ describe("領収書の体裁", () => {
     );
   });
 
-  // 印刷ダイアログを挟まずに保存させる。重いので押したときだけ読み込む
-  it("押したらその場で PDF を保存し、ライブラリは遅延読み込みにする", () => {
-    const source = readSource("components/commerce/ReceiptPrintButton.tsx");
+  // 印刷ダイアログを挟まずに保存させる。OSS のライブラリは使わない
+  it("押したらその場で PDF を保存し、ライブラリに頼らない", () => {
+    const buttonSource = readSource("components/commerce/ReceiptPrintButton.tsx");
+    const pdfSource = readSource("lib/commerce/receipt-pdf.ts");
+    const packageJson = readSource("package.json");
 
-    expect(source).toContain('import("html2canvas-pro")');
-    expect(source).toContain('import("jspdf")');
-    expect(source).not.toMatch(/^import .* from "(html2canvas-pro|jspdf)";$/m);
-    expect(source).toContain("pdf.save(");
+    expect(buttonSource).toContain("downloadReceiptPdf(fileName)");
+    expect(pdfSource).toContain("link.download = fileName");
+    for (const library of ["html2canvas", "jspdf"]) {
+      expect(packageJson).not.toContain(library);
+      expect(pdfSource).not.toContain(library);
+    }
   });
 
   it("PDF にするのは帳票の部分だけ", () => {
-    expect(readSource("components/commerce/ReceiptPrintButton.tsx")).toContain(
+    expect(readSource("lib/commerce/receipt-pdf.ts")).toContain(
       "[data-receipt-sheet]"
     );
     expect(readSource("components/commerce/ReceiptSheet.tsx")).toContain(
@@ -102,6 +175,79 @@ describe("領収書の体裁", () => {
 
   it("商品が少なくても明細の行数を保つ", () => {
     expect(sheetSource()).toContain("RECEIPT_MIN_DETAIL_ROWS");
+  });
+
+  // マスごとに線を引くと、境目だけ二重になって太く見える
+  it("PDF の罫線は共有している線を 1 本にまとめて引く", () => {
+    const source = readSource("lib/commerce/receipt-pdf.ts");
+
+    expect(source).toContain("drawn.has(key)");
+  });
+});
+
+describe("明細の摘要", () => {
+  // Shopify の name は「商品名 - 色」まで含む。そのままつなぐと色が二重になる
+  it("商品名と色・サイズを全角空白でつなぎ、二重に出さない", () => {
+    expect(
+      receiptLineDescription("MOYA500 - Classic Yellow", "Classic Yellow")
+    ).toBe("MOYA500　Classic Yellow");
+    expect(receiptLineDescription("ZIG STAKE - 20cm", "20cm")).toBe(
+      "ZIG STAKE　20cm"
+    );
+    expect(
+      receiptLineDescription(
+        "MOYA500 TPUウインドウ - Classic Yellow",
+        "Classic Yellow"
+      )
+    ).toBe("MOYA500 TPUウインドウ　Classic Yellow");
+  });
+
+  it("色・サイズの無い商品は商品名だけ", () => {
+    expect(receiptLineDescription("ガイロープ", "Default Title")).toBe("ガイロープ");
+    expect(receiptLineDescription("ガイロープ", null)).toBe("ガイロープ");
+  });
+});
+
+describe("PDF の組み立て", () => {
+  const pdfText = async () => {
+    const blob = buildImagePdf({
+      width: 2,
+      height: 3,
+      compressedGray: await deflate(new Uint8Array(6).fill(255)),
+      title: "領収書_1024",
+    });
+
+    return {
+      blob,
+      text: Buffer.from(await blob.arrayBuffer()).toString("latin1"),
+    };
+  };
+
+  it("A4 縦 1 ページの PDF になる", async () => {
+    const { blob, text } = await pdfText();
+
+    expect(blob.type).toBe("application/pdf");
+    expect(text.startsWith("%PDF-1.4\n")).toBe(true);
+    expect(text).toContain("/MediaBox [0 0 595.28 841.89]");
+    expect(text).toContain("/Count 1");
+    expect(text.trimEnd().endsWith("%%EOF")).toBe(true);
+  });
+
+  // 目次の位置がずれていると、ビューアによっては開けないか修復を求められる
+  it("目次（xref）の位置が各オブジェクトの先頭を指している", async () => {
+    const { text } = await pdfText();
+    const xrefAt = Number(text.match(/startxref\n(\d+)\n/)?.[1]);
+
+    expect(text.slice(xrefAt, xrefAt + 4)).toBe("xref");
+
+    const offsets = [...text.slice(xrefAt).matchAll(/^(\d{10}) 00000 n $/gm)].map(
+      (match) => Number(match[1])
+    );
+
+    expect(offsets).toHaveLength(6);
+    offsets.forEach((offset, index) => {
+      expect(text.slice(offset).startsWith(`${index + 1} 0 obj`)).toBe(true);
+    });
   });
 });
 
@@ -123,7 +269,7 @@ describe("領収書への導線", () => {
     const source = readSource("components/commerce/AccountPageContent.tsx");
     const linkSource = source.slice(
       source.indexOf("accountReceiptHref(order.id)"),
-      source.indexOf("領収書を見る")
+      source.indexOf("{RECEIPT_DOCUMENT_TITLE}")
     );
 
     expect(linkSource).toContain('target="_blank"');

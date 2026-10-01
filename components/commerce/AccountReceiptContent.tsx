@@ -6,8 +6,10 @@ import { ReceiptPrintButton } from "@/components/commerce/ReceiptPrintButton";
 import { ReceiptSheet } from "@/components/commerce/ReceiptSheet";
 import {
   isQualifiedInvoiceReady,
+  receiptFileName,
   receiptIssuer,
-  receiptLicenseNote,
+  receiptLineDescription,
+  receiptSummaryAmounts,
 } from "@/data/receipt";
 import {
   ACCOUNT_BASE_PATH,
@@ -36,7 +38,7 @@ const mainClassName =
  * 会員が自分で発行する領収書。
  *
  * Shopify は領収書そのものを配ってくれないので、注文データから組み立てる。
- * 宛名は請求先の氏名で固定し、ブラウザの印刷から PDF にしてもらう。
+ * 宛名は請求先の氏名で固定し、PDF はブラウザ上で作って保存させる。
  */
 export async function AccountReceiptContent({
   order: orderParam,
@@ -69,15 +71,17 @@ export async function AccountReceiptContent({
     );
   }
 
-  const total = amountOf(order.totalPrice);
-  const shipping = amountOf(order.totalShipping);
-  const tax = amountOf(order.totalTax);
+  const amounts = receiptSummaryAmounts({
+    total: amountOf(order.totalPrice),
+    shipping: amountOf(order.totalShipping),
+    tax: amountOf(order.totalTax),
+  });
 
   return (
     <main data-header-theme="onLight" data-receipt-page className={mainClassName}>
       <div className="mx-auto max-w-[720px]">
         <div className="flex justify-end print:hidden">
-          <ReceiptPrintButton fileName={`領収書_${order.name.replace(/^#/, "")}`} />
+          <ReceiptPrintButton fileName={receiptFileName(order.name, order.processedAt)} />
         </div>
 
         {/* ここから下が印刷される領域 */}
@@ -91,32 +95,18 @@ export async function AccountReceiptContent({
                 ? receiptIssuer.invoiceRegistrationNumber
                 : null
             }
-            subtotal={total - shipping - tax}
-            shipping={shipping}
-            tax={tax}
-            total={total}
+            subtotalExcludingTax={amounts.subtotalExcludingTax}
+            shippingExcludingTax={amounts.shippingExcludingTax}
+            tax={amounts.tax}
+            total={amounts.total}
             lines={order.lineItems.nodes.map((item) => ({
               id: item.id,
-              description:
-                item.variantTitle && item.variantTitle !== "Default Title"
-                  ? `${item.name}　${item.variantTitle}`
-                  : item.name,
+              description: receiptLineDescription(item.name, item.variantTitle),
               quantity: item.quantity,
               amount: amountOf(item.totalPrice ?? item.price),
             }))}
           />
         </div>
-
-        <p className="mt-[clamp(16px,calc(24px*var(--gap-scale-y)),24px)] font-body-ja text-[clamp(12px,calc(13px*var(--text-scale)),13px)] leading-[1.3] text-[var(--foreground)] print:hidden">
-          {receiptLicenseNote.before}
-          <Link
-            href={receiptLicenseNote.href}
-            className="underline underline-offset-2 hover:no-underline"
-          >
-            {receiptLicenseNote.linkLabel}
-          </Link>
-          {receiptLicenseNote.after}
-        </p>
       </div>
     </main>
   );

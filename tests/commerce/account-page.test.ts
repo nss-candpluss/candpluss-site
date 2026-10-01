@@ -472,7 +472,7 @@ describe("注文履歴の商品行", () => {
     expect(source).not.toContain('label="発送 ID"');
     expect(source).not.toContain('label="発送状態"');
     expect(source).not.toContain('label="店頭受け取り済み"');
-    expect(source).toContain("領収書を見る");
+    expect(source).toContain("{RECEIPT_DOCUMENT_TITLE}");
     expect(source).toContain("決済方法");
     expect(source).toContain("accountOrderPaymentMethods");
     // 決済方法は「銀行振込：ご入金確認中」のように支払い状況まで見せる
@@ -571,10 +571,10 @@ describe("注文履歴の商品行", () => {
 
     expect(source).toContain("accountOrderHasReceipt(order)");
     // 金額の話のすぐ後、発送情報より前に置く
-    expect(source.indexOf("領収書を見る")).toBeGreaterThan(
+    expect(source.indexOf("{RECEIPT_DOCUMENT_TITLE}")).toBeGreaterThan(
       source.indexOf("<OrderAmountSummary")
     );
-    expect(source.indexOf("領収書を見る")).toBeLessThan(
+    expect(source.indexOf("{RECEIPT_DOCUMENT_TITLE}")).toBeLessThan(
       source.indexOf('title="発送情報"')
     );
   });
