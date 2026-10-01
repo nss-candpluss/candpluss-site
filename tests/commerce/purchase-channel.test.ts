@@ -34,9 +34,9 @@ function readSource(relativePath: string) {
 }
 
 describe("公開ページの状態の切り替え", () => {
-  it("公開前は購入・会員とも閉じ、注意書きはテスト領域だけ", () => {
+  it("公開前は購入・会員とも閉じ、注意書きはどちらにも出さない", () => {
     expect(isPublicSiteOpen("prelaunch")).toBe(false);
-    expect(purchaseTestNoticeChannels("prelaunch")).toEqual(["test"]);
+    expect(purchaseTestNoticeChannels("prelaunch")).toEqual([]);
   });
 
   it("購入テスト中は購入・会員とも開き、注意書きを両系統に出す", () => {
@@ -44,9 +44,9 @@ describe("公開ページの状態の切り替え", () => {
     expect(purchaseTestNoticeChannels("purchaseTest")).toEqual(["test", "public"]);
   });
 
-  it("公開後は購入・会員とも開き、公開ページに注意書きを出さない", () => {
+  it("公開後は購入・会員とも開き、注意書きはどちらにも出さない", () => {
     expect(isPublicSiteOpen("launched")).toBe(true);
-    expect(purchaseTestNoticeChannels("launched")).not.toContain("public");
+    expect(purchaseTestNoticeChannels("launched")).toEqual([]);
   });
 
   it("購入と会員は同じ状態から決まり、片方だけ開くことがない", () => {

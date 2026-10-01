@@ -23,6 +23,8 @@ export const TEST_AREA_ROOT_PATH = "/shopify-test";
  * - `purchaseTest`: 公開ページでも購入と会員を開き、両系統に注意書きを出す
  * - `launched`: 公開ページでも購入と会員を開く（10/2 20:00 以降）
  *
+ * 注意書きは `purchaseTest` のときだけ出す。
+ *
  * テスト領域は常に購入・会員とも開いている。
  */
 export type PublicSiteMode = "prelaunch" | "purchaseTest" | "launched";
