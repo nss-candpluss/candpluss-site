@@ -74,7 +74,6 @@ export async function AccountReceiptContent({
   const amounts = receiptSummaryAmounts({
     total: amountOf(order.totalPrice),
     shipping: amountOf(order.totalShipping),
-    tax: amountOf(order.totalTax),
   });
 
   return (

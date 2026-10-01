@@ -444,6 +444,9 @@ describe("注文履歴の商品行", () => {
     expect(source).toContain('label="小計"');
     expect(source).toContain('label="配送料"');
     expect(source).toContain('label="消費税"');
+    // 利用明細書と同じ計算。Shopify の税額は送料の分を含まない
+    expect(source).toContain("receiptSummaryAmounts({");
+    expect(source).not.toContain("formatAmount(order.totalTax)");
     expect(source).toContain('label="ご請求額"');
     // 税はサマリーの独立した行にするので、金額に税込を付けない
     expect(source).toContain("formatAmount(order.totalPrice)");

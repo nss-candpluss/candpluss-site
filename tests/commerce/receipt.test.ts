@@ -76,30 +76,28 @@ describe("領収書の発行者情報", () => {
 describe("領収書の体裁", () => {
   const sheetSource = () => readSource("components/commerce/ReceiptSheet.tsx");
 
-  // 消費税には送料の分も含まれる。合計から送料（税込）と消費税を引くと、税抜合計が送料の税の分だけ小さく出る
+  // 送料も税込。Shopify の税額（送料の分を含まない）は使わず、税込の合計から割り戻す
   it("税抜合計・送料（税抜）・消費税を足すと合計金額になる", () => {
-    // ガイロープ 2,400 円＋送料 700 円。消費税は商品 218 円＋送料 64 円
-    expect(receiptSummaryAmounts({ total: 3100, shipping: 700, tax: 282 })).toEqual({
+    // ガイロープ 2,400 円＋送料 700 円。Shopify の税額は商品分の 218 円だけ
+    expect(receiptSummaryAmounts({ total: 3100, shipping: 700 })).toEqual({
       subtotalExcludingTax: 2182,
       shippingExcludingTax: 636,
       tax: 282,
       total: 3100,
     });
-    expect(
-      receiptSummaryAmounts({ total: 494060, shipping: 0, tax: 44915 })
-    ).toEqual({
+    expect(receiptSummaryAmounts({ total: 494060, shipping: 0 })).toEqual({
       subtotalExcludingTax: 449145,
       shippingExcludingTax: 0,
       tax: 44915,
       total: 494060,
     });
 
-    for (const [total, shipping, tax] of [
-      [3100, 700, 282],
-      [5699, 700, 518],
-      [372000, 0, 33818],
+    for (const [total, shipping] of [
+      [3100, 700],
+      [5699, 700],
+      [372000, 0],
     ]) {
-      const amounts = receiptSummaryAmounts({ total, shipping, tax });
+      const amounts = receiptSummaryAmounts({ total, shipping });
 
       expect(
         amounts.subtotalExcludingTax + amounts.shippingExcludingTax + amounts.tax

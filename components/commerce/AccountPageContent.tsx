@@ -24,7 +24,10 @@ import { Container } from "@/components/ui/Container";
 import { SiteGrid } from "@/components/ui/SiteGrid";
 import { SiteImage } from "@/components/ui/SiteImage";
 import { contactFormCopy } from "@/data/contact";
-import { RECEIPT_DOCUMENT_TITLE } from "@/data/receipt";
+import {
+  RECEIPT_DOCUMENT_TITLE,
+  receiptSummaryAmounts,
+} from "@/data/receipt";
 import {
   ACCOUNT_LOGIN_PATH,
   accountReceiptHref,
@@ -675,12 +678,25 @@ function OrderAmountSummary({
   order: CustomerOrderDetail;
   showRefunded: boolean;
 }) {
+  // Shopify の税額は送料の分を含まないので、利用明細書と同じく税込の合計から出す
+  const tax = order.totalPrice
+    ? {
+        amount: String(
+          receiptSummaryAmounts({
+            total: Number(order.totalPrice.amount),
+            shipping: Number(order.totalShipping?.amount ?? 0),
+          }).tax
+        ),
+        currencyCode: order.totalPrice.currencyCode,
+      }
+    : null;
+
   return (
     <OrderSidebarSection title="サマリー">
       <dl className="mt-3 flex flex-col gap-3">
         <OrderAmountRow label="小計" value={formatAmount(order.subtotal)} />
         <OrderAmountRow label="配送料" value={formatAmount(order.totalShipping)} />
-        <OrderAmountRow label="消費税" value={formatAmount(order.totalTax)} />
+        <OrderAmountRow label="消費税" value={formatAmount(tax)} />
         {showRefunded ? (
           <OrderAmountRow
             label="返金額"

@@ -30,23 +30,23 @@ export const RECEIPT_TAX_RATE_PERCENT = 10;
 /**
  * 集計欄の金額。税抜合計（商品）＋送料（税抜）＋消費税＝合計金額 になるように割り振る。
  *
- * 価格は税込で、Shopify の消費税額には送料にかかる分も含まれる。Customer
- * Account API は送料の消費税額を個別に返さないので、送料の税込額から割り戻す。
+ * 商品も送料も税込価格。Shopify の税額は送料の分を含まないので使わず、税込の
+ * 合計金額から1回だけ割り戻す（適格請求書は税率ごとに端数処理を1回にする）。
  * 商品の税抜額は残りから出すので、四捨五入の端数が出ても合計とは必ず一致する。
  */
 export function receiptSummaryAmounts({
   total,
   shipping,
-  tax,
 }: {
   total: number;
   shipping: number;
-  tax: number;
 }) {
-  const shippingTax = Math.round(
-    (shipping * RECEIPT_TAX_RATE_PERCENT) / (100 + RECEIPT_TAX_RATE_PERCENT)
-  );
-  const shippingExcludingTax = shipping - shippingTax;
+  const includedTax = (amount: number) =>
+    Math.round(
+      (amount * RECEIPT_TAX_RATE_PERCENT) / (100 + RECEIPT_TAX_RATE_PERCENT)
+    );
+  const tax = includedTax(total);
+  const shippingExcludingTax = shipping - includedTax(shipping);
 
   return {
     subtotalExcludingTax: total - tax - shippingExcludingTax,
