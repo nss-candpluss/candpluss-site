@@ -35,7 +35,7 @@ describe("shopping guide document", () => {
       "3.お支払いについて",
       "4.送料・配送について",
       "5.返品・交換・キャンセルについて",
-      "6.領収書、納品書について",
+      "6.納品書、利用明細書について",
     ]);
   });
 
@@ -43,7 +43,7 @@ describe("shopping guide document", () => {
     const shipping = JSON.stringify(section("4.送料・配送について"));
     const stock = JSON.stringify(section("2.在庫について"));
     const payment = JSON.stringify(section("3.お支払いについて"));
-    const receipt = JSON.stringify(section("6.領収書、納品書について"));
+    const receipt = JSON.stringify(section("6.納品書、利用明細書について"));
     const returns = JSON.stringify(
       section("5.返品・交換・キャンセルについて")?.subsections[0]?.blocks ?? []
     );
@@ -69,8 +69,12 @@ describe("shopping guide document", () => {
     // 上に余白が入り、同じ書き方の箇所と行間が揃わない。
     expect(shipping).toContain("その他、下記理由により商品の発送が遅れる場合がございます。\\n・年末年始");
     expect(JSON.stringify(shoppingGuideContent)).not.toContain('"bullets"');
-    expect(receipt).toContain("納品書は、お届けする製品に同梱し発送いたします。");
-    expect(receipt).not.toContain("領収書は発行後の宛名");
+    expect(receipt).toContain("納品書：お届けする製品に同梱し発送いたします。");
+    expect(receipt).toContain("利用明細書：当社からの個別発行は原則行っておりません。");
+    // 会員ページのタブ名と揃える
+    expect(receipt).toContain("会員ページの「ご注文履歴」より利用明細書をダウンロード");
+    expect(receipt).toContain("ゲスト購入（非会員）では利用明細書を発行できません");
+    expect(receipt).not.toContain("領収書");
     // リーガル文書は先方支給の原稿ごとに個別更新する。特定商取引法に基づく表記
     // とは同一文言を前提にせず、ショッピングガイド側の原稿だけを検証する。
     expect(returns).toContain("商品到着後8日以内にご連絡ください");
