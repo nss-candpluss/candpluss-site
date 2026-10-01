@@ -180,7 +180,7 @@ export function productAvailability(product: Product): string {
    * 画面が COMING SOON なのに構造化データが在庫ありを主張すると、
    * 検索結果から来た人が買えず、Google にも不一致とみなされる。
    *
-   * 10/2 の販売開始で `PUBLIC_WEB_PURCHASE_ENABLED` を戻せば、
+   * 10/2 の販売開始で `PUBLIC_SITE_MODE` を開けば、
    * 本来の在庫表記に戻る。発売時期が先の商品は戻した後も止めたまま。
    */
   if (!isProductWebPurchaseEnabled("public", product.handle)) {

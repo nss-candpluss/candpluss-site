@@ -10,8 +10,14 @@ import {
   isAccountEnabled,
 } from "@/lib/commerce/account-login";
 import {
+  purchaseTestNoticeChannels,
+} from "@/data/purchase-test-notice";
+import {
+  PUBLIC_SITE_MODE,
   TEST_AREA_ROOT_PATH,
   channelPath,
+  isPublicSiteOpen,
+  isWebPurchaseEnabled,
   resolvePurchaseChannel,
   showsStatusDisplayOverride,
 } from "@/lib/commerce/purchase-channel";
@@ -26,6 +32,28 @@ const rootDir = join(dirname(fileURLToPath(import.meta.url)), "../..");
 function readSource(relativePath: string) {
   return readFileSync(join(rootDir, relativePath), "utf8");
 }
+
+describe("公開ページの状態の切り替え", () => {
+  it("公開前は購入・会員とも閉じ、注意書きはテスト領域だけ", () => {
+    expect(isPublicSiteOpen("prelaunch")).toBe(false);
+    expect(purchaseTestNoticeChannels("prelaunch")).toEqual(["test"]);
+  });
+
+  it("購入テスト中は購入・会員とも開き、注意書きを両系統に出す", () => {
+    expect(isPublicSiteOpen("purchaseTest")).toBe(true);
+    expect(purchaseTestNoticeChannels("purchaseTest")).toEqual(["test", "public"]);
+  });
+
+  it("公開後は購入・会員とも開き、公開ページに注意書きを出さない", () => {
+    expect(isPublicSiteOpen("launched")).toBe(true);
+    expect(purchaseTestNoticeChannels("launched")).not.toContain("public");
+  });
+
+  it("購入と会員は同じ状態から決まり、片方だけ開くことがない", () => {
+    expect(isWebPurchaseEnabled("public")).toBe(isPublicSiteOpen(PUBLIC_SITE_MODE));
+    expect(isAccountEnabled("public")).toBe(isPublicSiteOpen(PUBLIC_SITE_MODE));
+  });
+});
 
 describe("resolvePurchaseChannel", () => {
   it("公開ページは public", () => {
@@ -151,8 +179,7 @@ describe("会員画面はリリースまでテスト領域だけで開く", () =
     }
   });
 
-  // 会員は購入の再開とは別タイミングで先行リリースする
-  it("会員画面の置き場所は会員のフラグだけで決まる", () => {
+  it("会員画面の置き場所は会員のフラグで決まる", () => {
     expect(ACCOUNT_BASE_PATH).toBe(
       isAccountEnabled("public") ? "/account" : `${TEST_AREA_ROOT_PATH}/account`
     );
@@ -318,11 +345,12 @@ describe("会員画面はリリースまでテスト領域だけで開く", () =
 
 describe("カートと会員への入口", () => {
   it("購入を止めている系統ではヘッダーのカートを出さない", () => {
-    expect(isHeaderIconLinkVisibleInChannel("Cart", "public")).toBe(false);
+    expect(isHeaderIconLinkVisibleInChannel("Cart", "public")).toBe(
+      isWebPurchaseEnabled("public")
+    );
     expect(isHeaderIconLinkVisibleInChannel("Cart", "test")).toBe(true);
   });
 
-  // 会員は購入とは別のフラグで開くので、カートとは独立して判定する
   it("ヘッダーのユーザーアイコンは会員フラグに従う", () => {
     expect(isHeaderIconLinkVisibleInChannel("User", "public")).toBe(
       isAccountEnabled("public")

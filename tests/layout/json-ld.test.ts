@@ -82,13 +82,12 @@ describe("json-ld", () => {
    * 画面が COMING SOON なのに在庫ありと宣言すると、検索結果から来た人が
    * 買えず、Google にも不一致とみなされる。
    */
-  it("公開ページの購入を止めている間は在庫ありと宣言しない", () => {
+  it.skipIf(isWebPurchaseEnabled("public"))("公開ページの購入を止めている間は在庫ありと宣言しない", () => {
     const offers = buildProductJsonLd(product).offers as Record<
       string,
       unknown
     >;
 
-    expect(isWebPurchaseEnabled("public")).toBe(false);
     expect(productAvailability(product)).toBe("https://schema.org/OutOfStock");
     expect(offers.availability).toBe("https://schema.org/OutOfStock");
     // 価格は画面の赤帯にも出しているので取り下げない
@@ -96,7 +95,7 @@ describe("json-ld", () => {
   });
 
   // 在庫切れの理由が「終売」ではなく「発売前」だと伝わるようにする
-  it("販売開始日時が決まっている商品には availabilityStarts を出す", () => {
+  it.skipIf(isWebPurchaseEnabled("public"))("販売開始日時が決まっている商品には availabilityStarts を出す", () => {
     const offers = buildProductJsonLd(product).offers as Record<
       string,
       unknown

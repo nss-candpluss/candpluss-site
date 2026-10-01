@@ -40,8 +40,7 @@ export function isHeaderIconLinkVisible(label: string): boolean {
 /**
  * 閉じている系統では入口も出さない。出すと行き先が 404 になる。
  *
- * カートは購入の再開（`PUBLIC_WEB_PURCHASE_ENABLED`）、会員は先行リリース
- * （`PUBLIC_ACCOUNT_ENABLED`）と、開くタイミングが別なので判定も分ける。
+ * カートは購入、会員は会員機能の開閉に従う。どちらも `PUBLIC_SITE_MODE` で決まる。
  * `headerCart` / `headerUser` のフラグは公開後も使うため、ここでは系統だけを見る。
  */
 export function isHeaderIconLinkVisibleInChannel(

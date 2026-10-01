@@ -16,10 +16,24 @@ export type PurchaseChannel = "public" | "test";
 export const TEST_AREA_ROOT_PATH = "/shopify-test";
 
 /**
- * 公開ページの WEB 購入。第一弾は Shopify 側の設定が追いつかないため止める。
- * 10/2 の販売開始でここを `true` に戻す。テスト領域は影響を受けない。
+ * 公開ページの状態。購入・会員・購入テストの注意書きはすべてここから決める。
+ * 何度も切り替えるので、フラグを個別に持たず一か所で揃えて動かす。
+ *
+ * - `prelaunch`: 購入も会員も閉じる。テスト領域だけで購入できる
+ * - `purchaseTest`: 公開ページでも購入と会員を開き、両系統に注意書きを出す
+ * - `launched`: 公開ページでも購入と会員を開く（10/2 20:00 以降）
+ *
+ * テスト領域は常に購入・会員とも開いている。
  */
-const PUBLIC_WEB_PURCHASE_ENABLED = false;
+export type PublicSiteMode = "prelaunch" | "purchaseTest" | "launched";
+
+export const PUBLIC_SITE_MODE = "prelaunch" as PublicSiteMode;
+
+export function isPublicSiteOpen(mode: PublicSiteMode = PUBLIC_SITE_MODE): boolean {
+  return mode !== "prelaunch";
+}
+
+const PUBLIC_WEB_PURCHASE_ENABLED = isPublicSiteOpen();
 
 export function isWebPurchaseEnabled(channel: PurchaseChannel): boolean {
   return channel === "test" || PUBLIC_WEB_PURCHASE_ENABLED;

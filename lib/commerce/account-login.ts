@@ -1,16 +1,14 @@
 import {
   TEST_AREA_ROOT_PATH,
+  isPublicSiteOpen,
   type PurchaseChannel,
 } from "@/lib/commerce/purchase-channel";
 
 /**
- * 公開ページの会員機能。
- *
- * 会員機能は購入の再開（`PUBLIC_WEB_PURCHASE_ENABLED`）とは別のタイミングで
- * 先行リリースする。準備ができたらここだけを `true` にすれば、公開ページの
- * `/account` が開き、ヘッダーのユーザーアイコンも出る。
+ * 公開ページの会員機能。購入と同じく `PUBLIC_SITE_MODE` に従う。
+ * 開くと公開ページの `/account` が開き、ヘッダーのユーザーアイコンも出る。
  */
-const PUBLIC_ACCOUNT_ENABLED = false;
+const PUBLIC_ACCOUNT_ENABLED = isPublicSiteOpen();
 
 export function isAccountEnabled(channel: PurchaseChannel): boolean {
   return channel === "test" || PUBLIC_ACCOUNT_ENABLED;

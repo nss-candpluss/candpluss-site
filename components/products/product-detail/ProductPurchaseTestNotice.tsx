@@ -15,7 +15,7 @@ export function ProductPurchaseTestNotice({
   channel,
   className = "",
 }: ProductPurchaseTestNoticeProps) {
-  if (!purchaseTestNoticeChannels.includes(channel)) {
+  if (!purchaseTestNoticeChannels().includes(channel)) {
     return null;
   }
 

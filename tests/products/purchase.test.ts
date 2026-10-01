@@ -168,9 +168,7 @@ describe("productStockAvailability", () => {
 
 describe("productAvailability", () => {
   // 公開ページの購入を止めている間は、本来の在庫表記より購入停止を優先する
-  it("購入を止めている間はステータスに関係なく OutOfStock", () => {
-    expect(isWebPurchaseEnabled("public")).toBe(false);
-
+  it.skipIf(isWebPurchaseEnabled("public"))("購入を止めている間はステータスに関係なく OutOfStock", () => {
     for (const status of Object.keys(shopifyStatuses)) {
       expect(
         productAvailability(buildProduct({ status: status as ProductStatus })),

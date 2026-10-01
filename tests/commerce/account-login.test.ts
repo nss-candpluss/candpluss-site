@@ -7,12 +7,15 @@ import {
   resolveCustomerAccountCallbackUrl,
   safeAccountReturnTo,
 } from "@/lib/commerce/account-login";
+import { isPublicSiteOpen } from "@/lib/commerce/purchase-channel";
 
 describe("会員画面の置き場所", () => {
   // 公開ページの購入を止めている間はテスト領域だけに置く
-  it("テスト領域を指す", () => {
-    expect(ACCOUNT_BASE_PATH).toBe("/shopify-test/account");
-    expect(ACCOUNT_LOGIN_PATH).toBe("/shopify-test/account/login");
+  it("公開ページが閉じている間はテスト領域、開いたら /account を指す", () => {
+    const base = isPublicSiteOpen() ? "/account" : "/shopify-test/account";
+
+    expect(ACCOUNT_BASE_PATH).toBe(base);
+    expect(ACCOUNT_LOGIN_PATH).toBe(`${base}/login`);
   });
 });
 

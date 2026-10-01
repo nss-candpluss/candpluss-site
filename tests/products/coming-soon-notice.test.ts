@@ -10,6 +10,7 @@ import {
 } from "@/data/product-launch-notices";
 import {
   isProductWebPurchaseEnabled,
+  isPublicSiteOpen,
   isWebPurchaseEnabled,
 } from "@/lib/commerce/purchase-channel";
 
@@ -25,9 +26,9 @@ const heroSources = [
 ] as const;
 
 describe("isWebPurchaseEnabled", () => {
-  // 第一弾は公開ページの購入を止める。10/2 の販売開始でここが両方 true になる
-  it("公開ページは止めて、テスト領域は買える", () => {
-    expect(isWebPurchaseEnabled("public")).toBe(false);
+  // 公開ページは `PUBLIC_SITE_MODE` に従い、テスト領域は常に買える
+  it("公開ページは状態に従い、テスト領域は買える", () => {
+    expect(isWebPurchaseEnabled("public")).toBe(isPublicSiteOpen());
     expect(isWebPurchaseEnabled("test")).toBe(true);
   });
 });
