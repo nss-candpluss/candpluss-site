@@ -37,7 +37,8 @@ describe("home lab slideshow", () => {
     expect(slideshowSource).toContain('className="pointer-coarse:hidden"');
     expect(slideshowSource).toContain('index === activeIndex ? "size-[11px] bg-white" : "size-[8px] bg-[#ccc]"');
     expect(slideshowSource).toContain("onPointerUp={handlePointerUp}");
-    expect(slideshowSource).toContain("h-svh");
+    expect(slideshowSource).toContain("h-[55svh]");
+    expect(slideshowSource).toContain("min-[768px]:h-svh");
     expect(slideshowSource).not.toContain("ScrollTrigger");
   });
 

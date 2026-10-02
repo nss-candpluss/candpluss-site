@@ -167,7 +167,7 @@ export function HomeLabSlideshow({ slides }: HomeLabSlideshowProps) {
   return (
     <div
       ref={viewportRef}
-      className="relative h-svh w-full touch-pan-y overflow-hidden bg-black"
+      className="relative h-[55svh] w-full touch-pan-y min-[768px]:h-svh overflow-hidden bg-black"
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerCancel}
