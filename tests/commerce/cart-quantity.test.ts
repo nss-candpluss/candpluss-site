@@ -66,6 +66,6 @@ describe("カート更新の在庫切り詰め通知", () => {
     // Shopify は在庫不足でもエラーにせず、在庫数まで切り詰めた数量を返す。
     const source = readSource("components/commerce/CartProvider.tsx");
     expect(source).toContain("line.quantity < quantity");
-    expect(source).toContain("在庫の上限により");
+    expect(source).toContain("ご注文可能な数量の上限を超えていたため");
   });
 });

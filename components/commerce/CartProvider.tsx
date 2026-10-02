@@ -130,7 +130,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         // Shopify は在庫が足りない場合、エラーにせず在庫数まで切り詰めた数量を返す。
         // 何も知らせないと入力した数量が入ったように見えるため明示する。
         if (line && line.quantity < quantity) {
-          setError(`在庫の上限により、数量を ${line.quantity} に変更しました。`);
+          setError(
+            `ご注文可能な数量の上限を超えていたため、数量を ${line.quantity} 点に変更しました。`
+          );
         }
       },
       removeLine: async (lineId) => {
