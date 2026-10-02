@@ -32,7 +32,7 @@ describe("home lab slideshow", () => {
   it("autoplays every 5 seconds with fade, gallery controls, dots and swipe", () => {
     expect(slideshowSource).toContain('"use client"');
     expect(slideshowSource).toContain("AUTOPLAY_INTERVAL_MS = 5000");
-    expect(slideshowSource).toContain("transition-opacity");
+    expect(slideshowSource).toContain("animate([{ opacity: 0 }, { opacity: 1 }]");
     expect(slideshowSource).toContain("<ProductGalleryControls");
     expect(slideshowSource).toContain('className="pointer-coarse:hidden"');
     expect(slideshowSource).toContain('index === activeIndex ? "size-[11px] bg-white" : "size-[8px] bg-[#ccc]"');

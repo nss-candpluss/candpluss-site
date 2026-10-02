@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type PointerEvent as ReactPointerEvent,
@@ -12,6 +13,7 @@ import { ProductGalleryControls } from "@/components/products/ProductGalleryCont
 import { SiteImage } from "@/components/ui/SiteImage";
 
 const AUTOPLAY_INTERVAL_MS = 5000;
+const FADE_MS = 1000;
 const SWIPE_MIN_PX = 48;
 const SWIPE_VIEWPORT_RATIO = 0.12;
 
@@ -39,6 +41,7 @@ export function HomeLabSlideshow({ slides }: HomeLabSlideshowProps) {
   const [isInView, setIsInView] = useState(false);
   const [isPageVisible, setIsPageVisible] = useState(true);
   const viewportRef = useRef<HTMLDivElement>(null);
+  const layerRefs = useRef(new Map<number, HTMLDivElement>());
   const swipeRef = useRef<{ pointerId: number; startX: number; startY: number } | null>(
     null
   );
@@ -56,6 +59,27 @@ export function HomeLabSlideshow({ slides }: HomeLabSlideshowProps) {
     },
     [activeIndex, total]
   );
+
+  // 直前の画像へ戻る場合は下に不透明のまま残っているため、CSS transition では
+  // 透明度が変化せずフェードしない。切り替えごとに必ず 0 からフェードさせる。
+  useLayoutEffect(() => {
+    if (previousIndex === null) {
+      return;
+    }
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    const animation = layerRefs.current
+      .get(activeIndex)
+      ?.animate([{ opacity: 0 }, { opacity: 1 }], {
+        duration: FADE_MS,
+        easing: "ease-in-out",
+      });
+
+    return () => animation?.finish();
+  }, [activeIndex, previousIndex]);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -159,7 +183,7 @@ export function HomeLabSlideshow({ slides }: HomeLabSlideshowProps) {
 
           // 新しい画像の読み込み・フェード中も、直前の画像を下に残して黒抜けを防ぐ
           const layerClassName = isActive
-            ? "z-20 opacity-100 transition-opacity duration-1000 ease-in-out motion-reduce:transition-none"
+            ? "z-20 opacity-100"
             : isPrevious
               ? "z-10 opacity-100"
               : "z-0 opacity-0";
@@ -167,6 +191,13 @@ export function HomeLabSlideshow({ slides }: HomeLabSlideshowProps) {
           return (
             <div
               key={src}
+              ref={(element) => {
+                if (element) {
+                  layerRefs.current.set(index, element);
+                } else {
+                  layerRefs.current.delete(index);
+                }
+              }}
               aria-hidden={isActive ? undefined : true}
               className={`absolute inset-0 ${layerClassName}`}
             >
