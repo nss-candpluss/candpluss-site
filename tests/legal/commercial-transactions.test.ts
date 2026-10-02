@@ -33,7 +33,7 @@ describe("commercial transactions document", () => {
     expect(item("商品代金以外に必要な料金")?.blocks).toEqual([
       {
         type: "paragraph",
-        text: "・送料：全国一律700円（税込価格5,000円以上で送料無料）\n・各種決済手数料（代引き手数料、後払い手数料など）",
+        text: "・送料：全国一律700円（税込価格5,000円以上で送料無料）\n・各種決済手数料（振込手数料など）",
       },
     ]);
     expect(JSON.stringify(commercialTransactionsContent)).not.toContain('"bullets"');
