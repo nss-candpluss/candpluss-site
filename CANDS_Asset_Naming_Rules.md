@@ -168,6 +168,11 @@ home-○○.webp
 
 home-image.webp
 
+home-slide-01.webp 〜 home-slide-09.webp
+
+Home 下部のスライドショー画像は home-slide-NN.webp（2桁連番）で管理し、
+表示順は data/home.ts の homeLabContent.slides に従う
+
 home-link-moya500.webp
 
 home-link-moya420.webp
