@@ -33,7 +33,7 @@ describe("commercial transactions document", () => {
     expect(item("商品代金以外に必要な料金")?.blocks).toEqual([
       {
         type: "paragraph",
-        text: "・送料：全国一律700円（税込価格5,000円以上で送料無料）\n・各種決済手数料（振込手数料など）",
+        text: "・送料：全国一律700円（税込合計5,000円以上のお買い上げで送料無料）\n・各種決済手数料（振込手数料など）",
       },
     ]);
     expect(JSON.stringify(commercialTransactionsContent)).not.toContain('"bullets"');
@@ -43,7 +43,7 @@ describe("commercial transactions document", () => {
     });
     expect(item("商品の引渡時期")?.blocks[0]).toEqual({
       type: "paragraph",
-      text: "決済承認（またはご入金確認）後、通常3営業日以内に発送いたします。ただし、予約商品等の場合は商品ページに記載の納期に基づきます。土・日・祝日の発送は行っておりません。",
+      text: "通常、12時までのご注文は当日発送いたします。銀行振込の場合は、ご入金確認後の発送となります。ただし、予約商品等の場合は商品ページに記載の納期に基づきます。土・日・祝日・年末年始の発送は行っておりません。",
     });
     expect(item("配送先")?.blocks[0]).toEqual({
       type: "paragraph",

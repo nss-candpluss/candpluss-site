@@ -48,9 +48,11 @@ describe("shopping guide document", () => {
       section("5.返品・交換・キャンセルについて")?.subsections[0]?.blocks ?? []
     );
 
-    expect(shipping).toContain("全国一律700円（税込価格5,000円以上で送料無料）");
+    expect(shipping).toContain(
+      "全国一律700円（税込合計5,000円以上のお買い上げで送料無料）"
+    );
     expect(shipping).toContain("各種決済手数料（振込手数料など）");
-    expect(shipping).toContain("ご注文確認後、通常3営業日以内に発送");
+    expect(shipping).toContain("通常、12時までのご注文は当日発送いたします。");
     expect(shipping).toContain("ヤマト運輸 / 佐川急便 / 日本郵便");
     expect(shipping).not.toContain("990円");
     expect(shipping).not.toContain("代引き手数料");

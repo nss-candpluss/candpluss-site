@@ -16,6 +16,7 @@ import { usePurchaseChannel } from "@/components/commerce/PurchaseChannelProvide
 import { ProductComingSoonBadge } from "@/components/products/ProductComingSoonBadge";
 import { ProductComingSoonNotice } from "@/components/products/product-detail/ProductComingSoonNotice";
 import { ProductPurchaseTestNotice } from "@/components/products/product-detail/ProductPurchaseTestNotice";
+import { ProductShippingNotice } from "@/components/products/product-detail/ProductShippingNotice";
 import { ProductDetailGalleryMedia } from "@/components/products/product-detail/ProductDetailGalleryMedia";
 import { ProductDetailGalleryModal } from "@/components/products/product-detail/ProductDetailGalleryModal";
 import { PRODUCT_DETAIL_ZOOM_IN_CURSOR } from "@/components/products/product-detail/gallery-cursors";
@@ -702,6 +703,7 @@ export function ProductDetailDesktopHero({
                 </span>
               ) : null}
             </button>
+            <ProductShippingNotice className="mt-[clamp(12px,1.8vh,20px)]" />
             <ProductPurchaseTestNotice
               channel={purchaseChannel}
               className="mt-[clamp(12px,1.8vh,20px)]"
