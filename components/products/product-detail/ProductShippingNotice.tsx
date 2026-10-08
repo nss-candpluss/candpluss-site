@@ -3,7 +3,7 @@ import Link from "next/link";
 import { bodyLinkUnderlineClassName } from "@/lib/typography";
 
 const shippingNoticeLines = [
-  "※通常、12時までのご注文で当日発送。（休業日を除く・銀行振込はご入金確認後）",
+  "※通常、12時までのご注文で翌日発送。（休業日を除く・銀行振込はご入金確認後）",
   "※税込合計5,000円以上のお買い上げで送料無料。",
 ] as const;
 

@@ -52,7 +52,7 @@ describe("shopping guide document", () => {
       "全国一律700円（税込合計5,000円以上のお買い上げで送料無料）"
     );
     expect(shipping).toContain("各種決済手数料（振込手数料など）");
-    expect(shipping).toContain("通常、12時までのご注文は当日発送いたします。");
+    expect(shipping).toContain("通常、12時までのご注文は翌日発送いたします。");
     expect(shipping).toContain("ヤマト運輸 / 佐川急便 / 日本郵便");
     expect(shipping).not.toContain("990円");
     expect(shipping).not.toContain("代引き手数料");
