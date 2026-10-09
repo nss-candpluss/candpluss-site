@@ -356,7 +356,7 @@ describe("注文履歴の商品行", () => {
         fulfillmentStatus: "FULFILLED",
         fulfillments: { nodes: [{ latestShipmentStatus: "OUT_FOR_DELIVERY" }] },
       })
-    ).toEqual({ label: "配達中", tone: "active" });
+    ).toEqual({ label: "配達中", tone: "moving" });
     // 個口ごとに状況が違うなら、注文全体の発送状態で伝える
     expect(
       accountOrderShipmentDisplay({
@@ -368,7 +368,7 @@ describe("注文履歴の商品行", () => {
           ],
         },
       })
-    ).toEqual({ label: "一部発送", tone: "active" });
+    ).toEqual({ label: "一部発送", tone: "prepared" });
     // 全部の個口が同じ状況なら、その状況を出してよい
     expect(
       accountOrderShipmentDisplay({
@@ -395,13 +395,13 @@ describe("注文履歴の商品行", () => {
       label: "お支払い取消",
       tone: "alert",
     });
-    // 発送保留は在庫待ちなど運営都合が多いので、進行中と同じ扱いにする
+    // 発送保留は在庫待ちなど運営都合が多いので、赤にせず準備中と並べる
     expect(
       accountOrderShipmentDisplay({
         fulfillmentStatus: "ON_HOLD",
         fulfillments: { nodes: [] },
       })
-    ).toEqual({ label: "発送保留中", tone: "active" });
+    ).toEqual({ label: "発送保留中", tone: "waiting" });
     expect(accountOrderPaymentDisplay(null, [])).toBeNull();
     // 配達を試みたまま止まっているのは、お客様に動いてほしい状態
     expect(
@@ -423,10 +423,47 @@ describe("注文履歴の商品行", () => {
       label: "お支払い確定前",
       tone: "active",
     });
+    // 支払いは段階を使わない。発送で足した色が支払いに出ないようにする
+    for (const code of ["PAID", "PENDING", "AUTHORIZED", "VOIDED"]) {
+      expect(["waiting", "active", "done", "alert"]).toContain(
+        accountOrderPaymentDisplay(code, [])?.tone
+      );
+    }
     // 集荷前の3つは、お客様から見ると同じ状態なのでまとめる
     expect(formatAccountShipmentStatus("CONFIRMED")).toBe("発送手配済み");
     expect(formatAccountShipmentStatus("LABEL_PURCHASED")).toBe("発送手配済み");
     expect(formatAccountShipmentStatus("LABEL_PRINTED")).toBe("発送手配済み");
+  });
+
+  it("発送のバッジは準備から配達まで段階的に濃くする", () => {
+    const toneOf = (
+      fulfillmentStatus: string,
+      latestShipmentStatus?: string
+    ) =>
+      accountOrderShipmentDisplay({
+        fulfillmentStatus,
+        fulfillments: {
+          nodes: latestShipmentStatus ? [{ latestShipmentStatus }] : [],
+        },
+      })?.tone;
+
+    expect(toneOf("UNFULFILLED")).toBe("waiting");
+    expect(toneOf("SCHEDULED")).toBe("waiting");
+    expect(toneOf("FULFILLED", "LABEL_PRINTED")).toBe("prepared");
+    expect(toneOf("FULFILLED", "CARRIER_PICKED_UP")).toBe("active");
+    expect(toneOf("FULFILLED", "IN_TRANSIT")).toBe("active");
+    expect(toneOf("FULFILLED", "OUT_FOR_DELIVERY")).toBe("moving");
+    expect(toneOf("FULFILLED", "DELIVERED")).toBe("done");
+    // 配送状況が届かない「発送済み」は、届いたか分からないので黒にしない
+    expect(toneOf("FULFILLED")).toBe("active");
+    expect(toneOf("FULFILLED", "FAILURE")).toBe("alert");
+    expect(toneOf("RESTOCKED")).toBe("alert");
+
+    // 色は 1 段ずつ濃くなる。白文字は #767676 より薄い地に載せない
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+    expect(source).toContain('prepared: "bg-[#c8c8c8] text-[var(--foreground)]"');
+    expect(source).toContain('active: "bg-[#767676] text-white"');
+    expect(source).toContain('moving: "bg-[#4a4a4a] text-white"');
   });
 
   it("注文履歴から内部用の常時表示項目を外す", () => {

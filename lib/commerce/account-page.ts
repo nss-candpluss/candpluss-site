@@ -477,8 +477,17 @@ export function formatAccountFinancialStatus(value?: string | null) {
  * waiting は注文したままでまだ何も動いていない状態、active は動き出したが
  * まだ終わっていない状態、done は終わったもの、alert は確認や対応が要るもの。
  * Shopify のコードで判定するので、日本語を変えても色は変わらない。
+ *
+ * `prepared` と `moving` は発送状況だけで使う。発送は準備から配達まで順に
+ * 進むので、waiting → prepared → active → moving → done と進むほど濃くする。
  */
-export type AccountStatusTone = "waiting" | "active" | "done" | "alert";
+export type AccountStatusTone =
+  | "waiting"
+  | "prepared"
+  | "active"
+  | "moving"
+  | "done"
+  | "alert";
 
 export type AccountStatusDisplay = { label: string; tone: AccountStatusTone };
 
@@ -523,6 +532,47 @@ function accountStatusTone(code?: string | null): AccountStatusTone {
   }
 
   return ACCOUNT_ALERT_STATUSES.has(key) ? "alert" : "active";
+}
+
+/**
+ * 発送状況の段階。注文全体の発送状態（fulfillmentStatus）と、
+ * 運送会社の配送状況（latestShipmentStatus）の両方のコードを受ける。
+ *
+ * 発送保留は在庫待ちなど運営都合のことも多いので、赤にせず準備中と並べる。
+ * 「発送済み」は配送状況が届かない注文で出る。届いたかは分からないので、
+ * 配達済みと同じ黒にはしない。
+ */
+const ACCOUNT_SHIPMENT_TONES: Record<string, AccountStatusTone> = {
+  IN_PROGRESS: "waiting",
+  ON_HOLD: "waiting",
+  OPEN: "waiting",
+  PENDING_FULFILLMENT: "waiting",
+  SCHEDULED: "waiting",
+  UNFULFILLED: "waiting",
+  CONFIRMED: "prepared",
+  LABEL_PRINTED: "prepared",
+  LABEL_PURCHASED: "prepared",
+  PARTIALLY_FULFILLED: "prepared",
+  CARRIER_PICKED_UP: "active",
+  FULFILLED: "active",
+  IN_TRANSIT: "active",
+  OUT_FOR_DELIVERY: "moving",
+  READY_FOR_PICKUP: "moving",
+  DELIVERED: "done",
+  PICKED_UP: "done",
+};
+
+function accountShipmentTone(code?: string | null): AccountStatusTone {
+  const key = code?.trim().toUpperCase();
+
+  if (!key) {
+    return "waiting";
+  }
+
+  return (
+    ACCOUNT_SHIPMENT_TONES[key] ??
+    (ACCOUNT_ALERT_STATUSES.has(key) ? "alert" : "active")
+  );
 }
 
 /** 銀行振込で入金確認前は「ご入金確認中」。それ以外の PENDING は「お支払い待ち」 */
@@ -631,7 +681,7 @@ export function accountOrderShipmentDisplay(order: {
     ? formatAccountShipmentStatus(code)
     : formatAccountFulfillmentStatus(code);
 
-  return label ? { label, tone: accountStatusTone(code) } : null;
+  return label ? { label, tone: accountShipmentTone(code) } : null;
 }
 
 export type AccountOrderOptionalFields = {

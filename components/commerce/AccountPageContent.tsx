@@ -728,13 +728,19 @@ function OrderAmountSummary({
   );
 }
 
-/** 待ちは薄いグレー、動き出したら濃いグレー、終わったら黒、要対応は赤 */
+/**
+ * 待ちから完了まで段階的に濃くし、終わったら黒、要対応は赤。
+ * 支払いは waiting / active / done / alert だけを使う。
+ */
 const ORDER_STATUS_BADGE_TONE: Record<AccountStatusTone, string> = {
+  waiting: "bg-[#f1f1f1] text-[var(--foreground)]",
+  // 黒文字のまま読める範囲で、準備中と見分けがつく濃さ
+  prepared: "bg-[#c8c8c8] text-[var(--foreground)]",
   // 白文字が読める範囲でいちばん薄いグレー。これ以上薄いとコントラストが足りない
   active: "bg-[#767676] text-white",
-  alert: "bg-[#fbeaed] text-[#9b1b30]",
+  moving: "bg-[#4a4a4a] text-white",
   done: "bg-[var(--foreground)] text-white",
-  waiting: "bg-[#f1f1f1] text-[var(--foreground)]",
+  alert: "bg-[#fbeaed] text-[#9b1b30]",
 };
 
 function OrderStatusBadge({ status }: { status: AccountStatusDisplay }) {
