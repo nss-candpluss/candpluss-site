@@ -7,6 +7,8 @@ import { describe, expect, it } from "vitest";
 import {
   ACCOUNT_BASE_PATH,
   ACCOUNT_LOGIN_PATH,
+  ACCOUNT_SESSION_REFRESH_PATH,
+  accountSessionRefreshHref,
   loginHintFromEmail,
   resolveCustomerAccountCallbackUrl,
   safeAccountReturnTo,
@@ -102,15 +104,75 @@ function readSource(relativePath: string) {
   return readFileSync(join(rootDir, relativePath), "utf8");
 }
 
+/*
+  アクセストークンは短時間で切れるが、Cookie は 30 日残る。
+  期限切れの扱いがページごとに食い違うと、会員画面とログインページが
+  送り合って ERR_TOO_MANY_REDIRECTS になる。
+*/
+describe("期限切れのログイン状態", () => {
+  it("ログインページは期限内のときだけ会員画面へ戻す", () => {
+    const source = readSource("components/commerce/AccountLoginContent.tsx");
+
+    expect(source).toContain("getLiveCustomerTokenSession()");
+    expect(source).not.toContain("getCustomerTokenSession()");
+  });
+
+  it("会員画面と領収書は、更新できるなら更新のルートへ送る", () => {
+    for (const path of [
+      "components/commerce/AccountPageContent.tsx",
+      "components/commerce/AccountReceiptContent.tsx",
+    ]) {
+      const source = readSource(path);
+
+      expect(source).toContain("hasRefreshableCustomerTokenSession()");
+      expect(source).toContain("accountSessionRefreshHref(");
+    }
+  });
+
+  it("更新できなければ Cookie を消してからログインページへ送る", () => {
+    const source = readSource("app/account/refresh/route.ts");
+
+    expect(source.indexOf("clearCustomerTokenSession()")).toBeGreaterThan(-1);
+    expect(source.indexOf("clearCustomerTokenSession()")).toBeLessThan(
+      source.indexOf("new URL(ACCOUNT_LOGIN_PATH, origin)")
+    );
+  });
+
+  it("更新のあとの戻り先は同じオリジンに限る", () => {
+    const source = readSource("app/account/refresh/route.ts");
+
+    expect(source).toContain("safeAccountReturnTo(");
+    expect(source).toContain("requested.origin === new URL(origin).origin");
+  });
+
+  it("戻り先はクエリごと渡す", () => {
+    expect(accountSessionRefreshHref("/account/receipt?order=a%2Fb")).toBe(
+      `${ACCOUNT_SESSION_REFRESH_PATH}?returnTo=${encodeURIComponent(
+        "/account/receipt?order=a%2Fb"
+      )}`
+    );
+    expect(ACCOUNT_SESSION_REFRESH_PATH).toBe("/account/refresh");
+  });
+});
+
 describe("ログアウトと id_token", () => {
   // Shopify のログアウトは id_token_hint が必須。欠けるとエラー画面で止まる
   it("トークン更新で id_token を失わない", () => {
-    const source = readSource("app/api/shopify/customer/route.ts");
+    const source = readSource("lib/shopify/customer-session.ts");
 
     expect(source).toContain("idToken: refreshed.idToken ?? session.idToken");
     expect(source).toContain(
       "refreshToken: refreshed.refreshToken ?? session.refreshToken"
     );
+    // 更新する場所ごとに引き継ぎを書くと、どこかで漏れる
+    for (const path of [
+      "app/api/shopify/customer/route.ts",
+      "app/account/refresh/route.ts",
+    ]) {
+      const routeSource = readSource(path);
+      expect(routeSource).toContain("refreshCustomerTokenSession(session)");
+      expect(routeSource).not.toContain("refreshCustomerToken(");
+    }
   });
 
   it("ログアウト後は会員ログインページへ戻す", () => {

@@ -7,7 +7,7 @@ import { isAccountEnabled } from "@/lib/commerce/account-login";
  * 消すだけでは URL 直打ちや履歴から入れてしまう。
  *
  * テスト領域の `/shopify-test/account` は別ルートなので開いたまま。OAuth の
- * ルートハンドラ（`authorize` / `login/start` / `logout`）はレイアウトを
+ * ルートハンドラ（`authorize` / `login/start` / `logout` / `refresh`）はレイアウトを
  * 通らないため、閉じている間も Shopify のコールバックを受けられる。
  */
 const isPublicAccountOpen = isAccountEnabled("public");

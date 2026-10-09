@@ -182,6 +182,7 @@ describe("会員画面はリリースまでテスト領域だけで開く", () =
       "app/account/authorize/route.ts",
       "app/account/login/start/route.ts",
       "app/account/logout/route.ts",
+      "app/account/refresh/route.ts",
     ]) {
       expect(existsSync(join(rootDir, path))).toBe(true);
     }
@@ -339,6 +340,7 @@ describe("会員画面はリリースまでテスト領域だけで開く", () =
     for (const path of [
       "app/account/authorize/route.ts",
       "app/account/login/start/route.ts",
+      "app/account/refresh/route.ts",
       "app/api/shopify/customer/profile/route.ts",
       "app/api/shopify/customer/address/route.ts",
       "components/layout/Header.tsx",

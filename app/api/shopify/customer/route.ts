@@ -1,11 +1,8 @@
-import {
-  fetchCustomerAccount,
-  refreshCustomerToken,
-} from "@/lib/shopify/customer-account";
+import { fetchCustomerAccount } from "@/lib/shopify/customer-account";
 import {
   clearCustomerTokenSession,
   getCustomerTokenSession,
-  saveCustomerTokenSession,
+  refreshCustomerTokenSession,
 } from "@/lib/shopify/customer-session";
 
 export const runtime = "nodejs";
@@ -18,16 +15,7 @@ export async function GET() {
 
   try {
     if (session.expiresAt <= Date.now() + 60_000 && session.refreshToken) {
-      const refreshed = await refreshCustomerToken(session.refreshToken);
-
-      // 更新の応答には id_token が付かないことがある。ログアウトにはログイン時の
-      // id_token が要るので、新しいものが無ければ手元のものを引き継ぐ
-      session = {
-        ...refreshed,
-        refreshToken: refreshed.refreshToken ?? session.refreshToken,
-        idToken: refreshed.idToken ?? session.idToken,
-      };
-      await saveCustomerTokenSession(session);
+      session = await refreshCustomerTokenSession(session);
     }
 
     const customer = await fetchCustomerAccount(session.accessToken);

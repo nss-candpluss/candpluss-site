@@ -30,8 +30,10 @@ import {
   receiptSummaryAmounts,
 } from "@/data/receipt";
 import {
+  ACCOUNT_BASE_PATH,
   ACCOUNT_LOGIN_PATH,
   accountReceiptHref,
+  accountSessionRefreshHref,
 } from "@/lib/commerce/account-login";
 import { normalizeJapanZoneCode } from "@/lib/commerce/japan-zone-code";
 import { formHalfSpanClassName } from "@/lib/layout";
@@ -80,7 +82,10 @@ import {
   type CustomerOrderDetail,
   type CustomerSection,
 } from "@/lib/shopify/customer-account";
-import { getLiveCustomerTokenSession } from "@/lib/shopify/customer-session";
+import {
+  getLiveCustomerTokenSession,
+  hasRefreshableCustomerTokenSession,
+} from "@/lib/shopify/customer-session";
 import {
   bodyLinkUnderlineClassName,
   bodyText,
@@ -1316,6 +1321,9 @@ export async function AccountPageContent() {
   const session = isStaticExport ? null : await getLiveCustomerTokenSession();
 
   if (!session && !isStaticExport) {
+    if (await hasRefreshableCustomerTokenSession()) {
+      redirect(accountSessionRefreshHref(ACCOUNT_BASE_PATH));
+    }
     /*
       Shopify のサインイン画面へ直接は送らない。
       あちらは新規と既存が一体で、こちらからはどちらか区別できない。

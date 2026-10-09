@@ -6,7 +6,10 @@ import {
   decryptSession,
   encryptSession,
 } from "@/lib/security/encrypted-session";
-import type { CustomerTokenSession } from "@/lib/shopify/customer-account";
+import {
+  refreshCustomerToken,
+  type CustomerTokenSession,
+} from "@/lib/shopify/customer-account";
 
 const CUSTOMER_SESSION_COOKIE = "cands_customer";
 const CUSTOMER_OAUTH_COOKIE = "cands_customer_oauth";
@@ -38,6 +41,37 @@ export async function getLiveCustomerTokenSession() {
   const session = await getCustomerTokenSession();
 
   return session && session.expiresAt > Date.now() ? session : null;
+}
+
+/**
+ * 期限は切れているが、更新トークンで延ばせる状態。
+ * Cookie は 30 日残るのに対し、アクセストークンは短時間で切れる。
+ */
+export async function hasRefreshableCustomerTokenSession() {
+  const session = await getCustomerTokenSession();
+
+  return Boolean(session?.refreshToken && session.expiresAt <= Date.now());
+}
+
+/** Route Handler からだけ呼ぶ。Cookie を書き換える */
+export async function refreshCustomerTokenSession(
+  session: CustomerTokenSession
+) {
+  if (!session.refreshToken) {
+    throw new Error("Customer refresh token is missing.");
+  }
+
+  const refreshed = await refreshCustomerToken(session.refreshToken);
+  // 更新の応答には id_token が付かないことがある。ログアウトにはログイン時の
+  // id_token が要るので、新しいものが無ければ手元のものを引き継ぐ
+  const next: CustomerTokenSession = {
+    ...refreshed,
+    refreshToken: refreshed.refreshToken ?? session.refreshToken,
+    idToken: refreshed.idToken ?? session.idToken,
+  };
+
+  await saveCustomerTokenSession(next);
+  return next;
 }
 
 export async function saveCustomerTokenSession(session: CustomerTokenSession) {

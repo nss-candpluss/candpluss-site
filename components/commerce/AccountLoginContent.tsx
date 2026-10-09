@@ -13,7 +13,7 @@ import {
   ACCOUNT_BASE_PATH,
   safeAccountReturnTo,
 } from "@/lib/commerce/account-login";
-import { getCustomerTokenSession } from "@/lib/shopify/customer-session";
+import { getLiveCustomerTokenSession } from "@/lib/shopify/customer-session";
 import { bodyText, uiText } from "@/lib/typography";
 
 type AccountLoginContentProps = {
@@ -72,7 +72,8 @@ export async function AccountLoginContent({
   const carriedReturnTo = returnTo === ACCOUNT_BASE_PATH ? undefined : returnTo;
 
   if (!isStaticExport) {
-    const session = await getCustomerTokenSession();
+    // 期限切れまで「ログイン済み」と見ると、会員画面と送り合って止まらなくなる
+    const session = await getLiveCustomerTokenSession();
     if (session) {
       redirect(returnTo);
     }

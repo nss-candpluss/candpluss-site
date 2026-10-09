@@ -38,6 +38,16 @@ export const ACCOUNT_LOGIN_PATH = `${ACCOUNT_BASE_PATH}/login`;
 /** OAuth を開始するルートハンドラ。Shopify のサインイン画面へ転送する */
 export const ACCOUNT_LOGIN_START_PATH = "/account/login/start";
 
+/**
+ * 期限の切れたアクセストークンを更新して `returnTo` へ戻すルートハンドラ。
+ * Cookie は描画中に書き換えられないので、会員画面からここへ送る。
+ */
+export const ACCOUNT_SESSION_REFRESH_PATH = "/account/refresh";
+
+export function accountSessionRefreshHref(returnTo: string) {
+  return `${ACCOUNT_SESSION_REFRESH_PATH}?returnTo=${encodeURIComponent(returnTo)}`;
+}
+
 /** 注文ごとの領収書。対象の注文は `order` クエリで渡す */
 export const ACCOUNT_RECEIPT_PATH = `${ACCOUNT_BASE_PATH}/receipt`;
 

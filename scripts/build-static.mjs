@@ -16,6 +16,7 @@ const runtimePaths = [
   "app/account/login/start",
   "app/account/authorize",
   "app/account/logout",
+  "app/account/refresh",
   "app/shopify-test",
   "proxy.ts",
 ];

@@ -14,12 +14,18 @@ import {
 import {
   ACCOUNT_BASE_PATH,
   ACCOUNT_LOGIN_PATH,
+  ACCOUNT_RECEIPT_PATH,
+  accountReceiptHref,
+  accountSessionRefreshHref,
 } from "@/lib/commerce/account-login";
 import {
   fetchCustomerOrder,
   type CustomerMoney,
 } from "@/lib/shopify/customer-account";
-import { getLiveCustomerTokenSession } from "@/lib/shopify/customer-session";
+import {
+  getLiveCustomerTokenSession,
+  hasRefreshableCustomerTokenSession,
+} from "@/lib/shopify/customer-session";
 import { bodyText, sectionTitle62ClassName } from "@/lib/typography";
 
 type AccountReceiptContentProps = {
@@ -46,6 +52,13 @@ export async function AccountReceiptContent({
   const session = await getLiveCustomerTokenSession();
 
   if (!session) {
+    if (await hasRefreshableCustomerTokenSession()) {
+      redirect(
+        accountSessionRefreshHref(
+          orderParam ? accountReceiptHref(orderParam) : ACCOUNT_RECEIPT_PATH
+        )
+      );
+    }
     redirect(ACCOUNT_LOGIN_PATH);
   }
 
