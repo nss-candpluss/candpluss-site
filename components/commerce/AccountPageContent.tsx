@@ -72,6 +72,7 @@ import {
   formatAccountMoneyAmount,
   formatAccountOrderDateTime,
   formatAccountName,
+  formatAccountFulfillmentShipmentStatus,
   formatAccountShipmentStatus,
   sortAccountAddresses,
 } from "@/lib/commerce/account-page";
@@ -883,11 +884,11 @@ function OrderFulfillments({
             </h5>
           ) : null}
           <SidebarFieldList>
-            {fulfillment.latestShipmentStatus ? (
+            {fulfillment.latestShipmentStatus?.trim() ? (
               <SidebarField
                 label="配送状況"
                 value={
-                  formatAccountShipmentStatus(
+                  formatAccountFulfillmentShipmentStatus(
                     fulfillment.latestShipmentStatus
                   ) ?? fulfillment.latestShipmentStatus
                 }

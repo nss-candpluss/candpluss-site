@@ -751,6 +751,45 @@ export function accountOrderHasReceipt(order: {
 }
 
 /**
+ * 運送会社から追跡情報が届く前の配送状況。
+ *
+ * ヤマト・佐川・日本郵便の追跡情報は Shopify に届かないので、発送登録した
+ * ときの CONFIRMED から先へ進まない。これを運送会社の状況として出すと、
+ * 荷物が届いた後も「発送手配済み」のままになる。
+ */
+const ACCOUNT_PRE_CARRIER_SHIPMENT_STATUSES = new Set([
+  "CONFIRMED",
+  "LABEL_PURCHASED",
+  "LABEL_PRINTED",
+]);
+
+/** 運送会社から届いた配送状況。まだ何も届いていなければ null */
+export function accountCarrierShipmentStatus(status?: string | null) {
+  const code = status?.trim().toUpperCase();
+
+  return code && !ACCOUNT_PRE_CARRIER_SHIPMENT_STATUSES.has(code)
+    ? code
+    : null;
+}
+
+/**
+ * 発送情報に出す 1 個口ごとの配送状況。
+ * 発送記録がある時点で発送は済んでいるので、運送会社の状況が届くまでは
+ * 「発送済み」と出す。状況が取れない発送記録は欄ごと出さない。
+ */
+export function formatAccountFulfillmentShipmentStatus(status?: string | null) {
+  if (!status?.trim()) {
+    return null;
+  }
+
+  const code = accountCarrierShipmentStatus(status);
+
+  return code
+    ? (formatAccountShipmentStatus(code) ?? code)
+    : formatAccountFulfillmentStatus("FULFILLED");
+}
+
+/**
  * 注文カードの配送状況バッジ。
  *
  * 個口が分かれていて状況もばらばらのときに、どれか 1 つの個口を選んで出すと
@@ -765,7 +804,7 @@ export function accountOrderShipmentDisplay(order: {
   };
 }): AccountStatusDisplay | null {
   const shipmentStatuses = order.fulfillments.nodes.map((fulfillment) =>
-    fulfillment.latestShipmentStatus?.trim().toUpperCase()
+    accountCarrierShipmentStatus(fulfillment.latestShipmentStatus)
   );
   const sharedStatus = shipmentStatuses[0];
   const usesShipmentStatus =

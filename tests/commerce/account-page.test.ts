@@ -28,6 +28,8 @@ import {
   accountOrderLineRefundedQuantity,
   accountOrderLineTitle,
   accountOrderLineVariantTitle,
+  accountCarrierShipmentStatus,
+  formatAccountFulfillmentShipmentStatus,
   accountOrderIsTruncated,
   accountOrderLinesByAmount,
   accountOrderMoreHref,
@@ -349,9 +351,10 @@ describe("注文履歴の商品行", () => {
         order.fulfillments.nodes
       ).parcels
     ).toHaveLength(1);
+    // 取り消した側の DELIVERED に引きずられない
     expect(accountOrderShipmentDisplay(order)).toEqual({
-      label: "発送手配済み",
-      tone: "prepared",
+      label: "発送済み",
+      tone: "active",
     });
     // 失敗した発送も届かないので外す。状態が取れない発送は消さない
     expect(
@@ -614,6 +617,44 @@ describe("注文履歴の商品行", () => {
     expect(formatAccountShipmentStatus("LABEL_PRINTED")).toBe("発送手配済み");
   });
 
+  /*
+    ヤマトなど日本の運送会社は追跡情報が Shopify に届かず、配送状況が
+    発送登録したときの CONFIRMED のまま残る。届いた後も「発送手配済み」に
+    見えないよう、運送会社の状況が届くまでは「発送済み」と出す。
+  */
+  it("運送会社の配送状況が届く前は「発送済み」と出す", () => {
+    expect(accountCarrierShipmentStatus("CONFIRMED")).toBeNull();
+    expect(accountCarrierShipmentStatus(" label_printed ")).toBeNull();
+    expect(accountCarrierShipmentStatus("LABEL_PURCHASED")).toBeNull();
+    expect(accountCarrierShipmentStatus(null)).toBeNull();
+    expect(accountCarrierShipmentStatus("in_transit")).toBe("IN_TRANSIT");
+
+    expect(formatAccountFulfillmentShipmentStatus("CONFIRMED")).toBe("発送済み");
+    expect(formatAccountFulfillmentShipmentStatus("LABEL_PRINTED")).toBe("発送済み");
+    expect(formatAccountFulfillmentShipmentStatus("IN_TRANSIT")).toBe("輸送中");
+    expect(formatAccountFulfillmentShipmentStatus("DELIVERED")).toBe("配達済み");
+    expect(formatAccountFulfillmentShipmentStatus(null)).toBeNull();
+    expect(formatAccountFulfillmentShipmentStatus(" ")).toBeNull();
+
+    // 個口の片方だけ運送会社の状況が届いたときは、注文全体の状態で出す
+    expect(
+      accountOrderShipmentDisplay({
+        fulfillmentStatus: "FULFILLED",
+        fulfillments: {
+          nodes: [
+            { latestShipmentStatus: "DELIVERED" },
+            { latestShipmentStatus: "CONFIRMED" },
+          ],
+        },
+      })
+    ).toEqual({ label: "発送済み", tone: "active" });
+
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+    expect(source).toContain(
+      "formatAccountFulfillmentShipmentStatus(\n                    fulfillment.latestShipmentStatus"
+    );
+  });
+
   it("発送のバッジは準備から配達まで段階的に濃くする", () => {
     const toneOf = (
       fulfillmentStatus: string,
@@ -628,7 +669,10 @@ describe("注文履歴の商品行", () => {
 
     expect(toneOf("UNFULFILLED")).toBe("waiting");
     expect(toneOf("SCHEDULED")).toBe("waiting");
-    expect(toneOf("FULFILLED", "LABEL_PRINTED")).toBe("prepared");
+    expect(toneOf("PARTIALLY_FULFILLED")).toBe("prepared");
+    // 運送会社の状況が届く前は、注文全体の「発送済み」で出す
+    expect(toneOf("FULFILLED", "LABEL_PRINTED")).toBe("active");
+    expect(toneOf("FULFILLED", "CONFIRMED")).toBe("active");
     expect(toneOf("FULFILLED", "CARRIER_PICKED_UP")).toBe("active");
     expect(toneOf("FULFILLED", "IN_TRANSIT")).toBe("active");
     expect(toneOf("FULFILLED", "OUT_FOR_DELIVERY")).toBe("moving");
