@@ -24,6 +24,12 @@ export const receiptIssuer = {
 /** 帳票の表題。画面の見出し・ページタイトル・会員ページのリンク・ファイル名で揃える */
 export const RECEIPT_DOCUMENT_TITLE = "利用明細書（兼 適格請求書）";
 
+/**
+ * 会員による利用明細書の発行（注文履歴のリンク・発行ページ・ショッピングガイドの案内）を出すか。
+ * 返金後の記載が適格請求書・適格返還請求書の要件を満たすか確認できるまで止める。
+ */
+export const RECEIPT_ISSUE_ENABLED = false;
+
 /** 消費税の標準税率。軽減税率の商品を扱いはじめたら区分が必要になる */
 export const RECEIPT_TAX_RATE_PERCENT = 10;
 

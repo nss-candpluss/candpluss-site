@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   RECEIPT_DOCUMENT_TITLE,
+  RECEIPT_ISSUE_ENABLED,
   RECEIPT_TAX_RATE_PERCENT,
   isQualifiedInvoiceReady,
   receiptFileName,
@@ -260,6 +261,18 @@ describe("領収書への導線", () => {
     expect(
       readSource("components/commerce/AccountPageContent.tsx")
     ).toContain("accountReceiptHref(order.id)");
+  });
+
+  // 返金後の記載がインボイスの要件を満たすか確認できるまで、リンクは出さない
+  it("利用明細書へのリンクは表示の切り替えで止めている", () => {
+    expect(RECEIPT_ISSUE_ENABLED).toBe(false);
+    expect(readSource("components/commerce/AccountPageContent.tsx")).toContain(
+      "{RECEIPT_ISSUE_ENABLED && accountOrderHasReceipt(order) ? ("
+    );
+    // URL を直接開いても出さない
+    expect(readSource("components/commerce/AccountReceiptContent.tsx")).toContain(
+      "if (!RECEIPT_ISSUE_ENABLED) {\n    notFound();"
+    );
   });
 
   // 会員ページを開いたまま、注文ごとに領収書を出せるようにする

@@ -1,11 +1,11 @@
 import { AccountReceiptContent } from "@/components/commerce/AccountReceiptContent";
 import { notFoundContent } from "@/data/error-pages";
-import { RECEIPT_DOCUMENT_TITLE } from "@/data/receipt";
+import { RECEIPT_DOCUMENT_TITLE, RECEIPT_ISSUE_ENABLED } from "@/data/receipt";
 import { isAccountEnabled } from "@/lib/commerce/account-login";
 import { createPageMetadata } from "@/lib/site-metadata";
 import { siteConfig } from "@/lib/site";
 
-export const metadata = isAccountEnabled("public")
+export const metadata = isAccountEnabled("public") && RECEIPT_ISSUE_ENABLED
   ? createPageMetadata({
       title: RECEIPT_DOCUMENT_TITLE,
       description: `${siteConfig.name}の${RECEIPT_DOCUMENT_TITLE}ページです。`,

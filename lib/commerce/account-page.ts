@@ -345,6 +345,60 @@ export type AccountPaymentMethodDisplay = {
   isCard: boolean;
 };
 
+type AccountOrderPaymentTransaction = {
+  kind?: string | null;
+  status?: string | null;
+  transactionAmount?: {
+    presentmentMoney?: { amount: string } | null;
+  } | null;
+};
+
+/** 決済で受け取った額。成功した売上・売上確定だけを足す。記録が無ければ null */
+export function accountOrderPaidAmount(
+  transactions: readonly AccountOrderPaymentTransaction[]
+) {
+  const paid = transactions.filter(
+    (transaction) =>
+      (transaction.kind === "SALE" || transaction.kind === "CAPTURE") &&
+      transaction.status?.toUpperCase() === "SUCCESS"
+  );
+  const amounts = paid.map((transaction) =>
+    Number(transaction.transactionAmount?.presentmentMoney?.amount)
+  );
+
+  return amounts.length && amounts.every(Number.isFinite)
+    ? amounts.reduce((sum, amount) => sum + amount, 0)
+    : null;
+}
+
+/**
+ * 返金のある注文のサマリーに出す金額。返金が無ければ null。
+ *
+ * Shopify の合計金額は、商品を指定した返金では減り、金額だけの返金では
+ * 減らない。どちらか見分けられないので、注文時の金額は決済の記録から出す。
+ * 合計金額のほうが大きいときは支払いが一部しか済んでいないので、そちらを使う。
+ */
+export function accountOrderRefundSummary(order: {
+  totalPrice: { amount: string };
+  totalRefunded?: { amount: string } | null;
+  transactions: readonly AccountOrderPaymentTransaction[];
+}) {
+  const refunded = Number(order.totalRefunded?.amount);
+  const paid = accountOrderPaidAmount(order.transactions);
+
+  if (!Number.isFinite(refunded) || refunded <= 0 || paid === null) {
+    return null;
+  }
+
+  const orderedTotal = Math.max(paid, Number(order.totalPrice.amount) || 0);
+
+  return {
+    orderedTotal,
+    refunded,
+    afterRefund: Math.max(0, orderedTotal - refunded),
+  };
+}
+
 export function accountOrderPaymentMethods(
   transactions: Array<{
     id: string;

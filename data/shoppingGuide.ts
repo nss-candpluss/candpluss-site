@@ -1,3 +1,4 @@
+import { RECEIPT_ISSUE_ENABLED } from "@/data/receipt";
 import type { ShoppingGuideContent } from "@/types/shoppingGuide";
 
 export const shoppingGuideContent = {
@@ -136,10 +137,14 @@ export const shoppingGuideContent = {
               type: "paragraph",
               text: "納品書：お届けする製品に同梱し発送いたします。\n利用明細書：当社からの個別発行は原則行っておりません。",
             },
-            {
-              type: "paragraph",
-              text: "【利用明細書をご希望のお客様へ】\n会員登録（無料）をしていただくと、商品購入後に会員ページの「ご注文履歴」より利用明細書をダウンロードいただけます。\nゲスト購入（非会員）では利用明細書を発行できませんので、発行を希望される場合は必ず会員登録をお願いいたします。",
-            },
+            ...(RECEIPT_ISSUE_ENABLED
+              ? ([
+                  {
+                    type: "paragraph",
+                    text: "【利用明細書をご希望のお客様へ】\n会員登録（無料）をしていただくと、商品購入後に会員ページの「ご注文履歴」より利用明細書をダウンロードいただけます。\nゲスト購入（非会員）では利用明細書を発行できませんので、発行を希望される場合は必ず会員登録をお願いいたします。",
+                  },
+                ] as const)
+              : []),
           ],
         },
       ],

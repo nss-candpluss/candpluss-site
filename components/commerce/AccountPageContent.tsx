@@ -26,6 +26,7 @@ import { SiteImage } from "@/components/ui/SiteImage";
 import { contactFormCopy } from "@/data/contact";
 import {
   RECEIPT_DOCUMENT_TITLE,
+  RECEIPT_ISSUE_ENABLED,
   RECEIPT_TAX_RATE_PERCENT,
   receiptSummaryAmounts,
 } from "@/data/receipt";
@@ -57,6 +58,7 @@ import {
   type AccountStatusDisplay,
   type AccountStatusTone,
   accountOrderPaymentMethods,
+  accountOrderRefundSummary,
   accountOrderMoreHref,
   accountOrderPagesFromParam,
   ACCOUNT_ORDER_PAGES_PARAM,
@@ -692,11 +694,17 @@ function OrderAmountSummary({
   order: CustomerOrderDetail;
   showRefunded: boolean;
 }) {
-  // 利用明細書と同じ内訳。Shopify の税額は送料の分を含まないので使わない
   const totalPrice = order.totalPrice;
+  /*
+    返金があるときは、上の内訳をご注文時の金額で出し、返金額と返金後の
+    お支払い金額を続ける。返金後の金額だけで内訳を出すと、返金済みとして
+    分けた商品と数字が合わなくなる。
+  */
+  const refund = showRefunded ? accountOrderRefundSummary(order) : null;
+  // 利用明細書と同じ内訳。Shopify の税額は送料の分を含まないので使わない
   const amounts = totalPrice
     ? receiptSummaryAmounts({
-        total: Number(totalPrice.amount),
+        total: refund?.orderedTotal ?? Number(totalPrice.amount),
         shipping: Number(order.totalShipping?.amount ?? 0),
       })
     : null;
@@ -704,6 +712,40 @@ function OrderAmountSummary({
     totalPrice && amount !== undefined
       ? { amount: String(amount), currencyCode: totalPrice.currencyCode }
       : null;
+
+  if (refund) {
+    return (
+      <OrderSidebarSection title="サマリー">
+        <dl className="mt-3 flex flex-col gap-3">
+          <OrderAmountRow
+            label="税抜合計"
+            value={formatAmount(money(amounts?.subtotalExcludingTax))}
+          />
+          <OrderAmountRow
+            label="送料（税抜）"
+            value={formatAmount(money(amounts?.shippingExcludingTax))}
+          />
+          <OrderAmountRow
+            label={`消費税 (${RECEIPT_TAX_RATE_PERCENT}%)`}
+            value={formatAmount(money(amounts?.tax))}
+          />
+          <OrderAmountRow
+            label="ご注文時の合計金額"
+            value={formatAmount(money(refund.orderedTotal))}
+          />
+          <OrderAmountRow
+            label="返金額"
+            value={`−${formatAmount(money(refund.refunded))}`}
+          />
+          <OrderAmountRow
+            label="返金後のお支払い金額"
+            value={formatAmount(money(refund.afterRefund))}
+            emphasized
+          />
+        </dl>
+      </OrderSidebarSection>
+    );
+  }
 
   return (
     <OrderSidebarSection title="サマリー">
@@ -1079,7 +1121,7 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
             />
 
             {/* 代金を受け取った注文だけ。金額の話のすぐ後に置く */}
-            {accountOrderHasReceipt(order) ? (
+            {RECEIPT_ISSUE_ENABLED && accountOrderHasReceipt(order) ? (
               <OrderSidebarSection>
                 <Link
                   href={accountReceiptHref(order.id)}

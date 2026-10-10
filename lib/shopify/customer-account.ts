@@ -104,6 +104,7 @@ export type CustomerOrderTransaction = {
   type: string;
   kind?: string | null;
   status?: string | null;
+  transactionAmount?: { presentmentMoney?: CustomerMoney | null } | null;
   typeDetails?: { name?: string | null; message?: string | null } | null;
   paymentDetails?: { cardBrand?: string | null; last4?: string | null } | null;
   paymentIcon?: { url: string; altText?: string | null } | null;
@@ -541,6 +542,7 @@ function customerOrderFields(limits: CustomerOrderLimits) {
                     type
                     kind
                     status
+                    transactionAmount { presentmentMoney { amount currencyCode } }
                     typeDetails { name message }
                     paymentDetails {
                       ... on CardPaymentDetails {

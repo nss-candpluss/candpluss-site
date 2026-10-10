@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { accountTextLinkClassName } from "@/components/commerce/accountStyles";
 import { ReceiptPrintButton } from "@/components/commerce/ReceiptPrintButton";
 import { ReceiptSheet } from "@/components/commerce/ReceiptSheet";
 import {
+  RECEIPT_ISSUE_ENABLED,
   isQualifiedInvoiceReady,
   receiptFileName,
   receiptIssuer,
@@ -49,6 +50,10 @@ const mainClassName =
 export async function AccountReceiptContent({
   order: orderParam,
 }: AccountReceiptContentProps) {
+  if (!RECEIPT_ISSUE_ENABLED) {
+    notFound();
+  }
+
   const session = await getLiveCustomerTokenSession();
 
   if (!session) {

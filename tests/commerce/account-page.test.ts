@@ -31,6 +31,8 @@ import {
   accountCarrierShipmentStatus,
   formatAccountFulfillmentShipmentStatus,
   accountOrderIsTruncated,
+  accountOrderPaidAmount,
+  accountOrderRefundSummary,
   accountOrderLinesByAmount,
   accountOrderMoreHref,
   accountOrderPagesFromParam,
@@ -294,6 +296,67 @@ describe("注文履歴の商品行", () => {
       ["sheet", 1],
       ["peg", 1],
     ]);
+  });
+
+  /*
+    Shopify の合計金額は、商品を指定した返金では減り、金額だけの返金では
+    減らない。どちらでもご注文時の金額と返金後の金額が同じになるようにする。
+  */
+  it("返金のある注文は、決済の記録からご注文時と返金後の金額を出す", () => {
+    const paid = (amount: string, kind = "SALE", status = "SUCCESS") => ({
+      kind,
+      status,
+      transactionAmount: { presentmentMoney: { amount } },
+    });
+    const transactions = [
+      paid("46400"),
+      paid("1650", "REFUND"),
+      paid("999", "SALE", "FAILURE"),
+      paid("46400", "AUTHORIZATION"),
+    ];
+    const expected = { orderedTotal: 46400, refunded: 1650, afterRefund: 44750 };
+
+    expect(
+      accountOrderRefundSummary({
+        totalPrice: { amount: "44750" },
+        totalRefunded: { amount: "1650" },
+        transactions,
+      })
+    ).toEqual(expected);
+    expect(
+      accountOrderRefundSummary({
+        totalPrice: { amount: "46400" },
+        totalRefunded: { amount: "1650" },
+        transactions,
+      })
+    ).toEqual(expected);
+
+    // 返金が無い、または決済の記録が取れないときは今までの表示に任せる
+    expect(
+      accountOrderRefundSummary({
+        totalPrice: { amount: "46400" },
+        totalRefunded: { amount: "0" },
+        transactions,
+      })
+    ).toBeNull();
+    expect(
+      accountOrderRefundSummary({
+        totalPrice: { amount: "46400" },
+        totalRefunded: { amount: "1650" },
+        transactions: [{ kind: "SALE", status: "PENDING" }],
+      })
+    ).toBeNull();
+    expect(accountOrderPaidAmount([{ kind: "SALE", status: "SUCCESS" }])).toBeNull();
+    expect(
+      accountOrderPaidAmount([paid("30000"), paid("16400", "CAPTURE")])
+    ).toBe(46400);
+
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+    expect(source).toContain('label="ご注文時の合計金額"');
+    expect(source).toContain('label="返金後のお支払い金額"');
+    expect(readSource("lib/shopify/customer-account.ts")).toContain(
+      "transactionAmount { presentmentMoney { amount currencyCode } }"
+    );
   });
 
   it("返金数は注文数の範囲に収め、取れないときは 0 とみなす", () => {

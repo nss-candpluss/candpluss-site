@@ -73,9 +73,13 @@ describe("shopping guide document", () => {
     expect(JSON.stringify(shoppingGuideContent)).not.toContain('"bullets"');
     expect(receipt).toContain("納品書：お届けする製品に同梱し発送いたします。");
     expect(receipt).toContain("利用明細書：当社からの個別発行は原則行っておりません。");
+    // 発行を止めている間は、会員ページから出せる案内を載せない
+    expect(receipt).not.toContain("利用明細書をご希望のお客様へ");
+    expect(receipt).not.toContain("より利用明細書をダウンロード");
     // 会員ページのタブ名と揃える
-    expect(receipt).toContain("会員ページの「ご注文履歴」より利用明細書をダウンロード");
-    expect(receipt).toContain("ゲスト購入（非会員）では利用明細書を発行できません");
+    expect(readFileSync(join(root, "data/shoppingGuide.ts"), "utf8")).toContain(
+      "会員ページの「ご注文履歴」より利用明細書をダウンロード"
+    );
     expect(receipt).not.toContain("領収書");
     // リーガル文書は先方支給の原稿ごとに個別更新する。特定商取引法に基づく表記
     // とは同一文言を前提にせず、ショッピングガイド側の原稿だけを検証する。
