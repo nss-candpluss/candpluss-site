@@ -33,6 +33,8 @@ import {
   accountOrderIsTruncated,
   accountOrderPaidAmount,
   accountOrderRefundSummary,
+  accountOrderRemovedItemsHeading,
+  accountOrderSummaryShipping,
   accountOrderLinesByAmount,
   accountOrderMoreHref,
   accountOrderPagesFromParam,
@@ -370,10 +372,37 @@ describe("注文履歴の商品行", () => {
   it("個口に分かれていない注文でも、返金済みの商品は別枠に出す", () => {
     const source = readSource("components/commerce/AccountPageContent.tsx");
 
-    expect(source).toContain("<ParcelHeading>返金済み</ParcelHeading>");
+    expect(source).toContain(
+      "<ParcelHeading>{accountOrderRemovedItemsHeading(order)}</ParcelHeading>"
+    );
     expect(source).toContain(
       "quantity: line.quantity - accountOrderLineRefundedQuantity(line)"
     );
+  });
+
+  // 入金前のキャンセルはお金が動いていないので、返金済みとは書かない
+  it("キャンセルした注文の商品は「キャンセル済み」の見出しで分ける", () => {
+    expect(
+      accountOrderRemovedItemsHeading({ cancelledAt: "2026-10-10T14:44:00Z" })
+    ).toBe("キャンセル済み");
+    expect(accountOrderRemovedItemsHeading({ cancelledAt: null })).toBe("返金済み");
+    expect(accountOrderRemovedItemsHeading({})).toBe("返金済み");
+  });
+
+  /*
+    入金前にキャンセルした #1056（ZIG STAKE 550 円＋送料 700 円）は、合計金額が
+    0 円になり送料 700 円だけが残った。そのまま割り振ると税抜合計が −636 円になる。
+  */
+  it("サマリーの送料は合計金額を超えない範囲に収める", () => {
+    expect(accountOrderSummaryShipping({ total: 0, shipping: 700 })).toBe(0);
+    expect(accountOrderSummaryShipping({ total: 1250, shipping: 700 })).toBe(700);
+    expect(accountOrderSummaryShipping({ total: 500, shipping: 700 })).toBe(500);
+    expect(accountOrderSummaryShipping({ total: 17710, shipping: 0 })).toBe(0);
+    expect(accountOrderSummaryShipping({ total: -1, shipping: 700 })).toBe(0);
+
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+
+    expect(source).toContain("shipping: accountOrderSummaryShipping({");
   });
 
   /*
@@ -764,7 +793,7 @@ describe("注文履歴の商品行", () => {
     expect(source).not.toContain('label="注文日時"');
     expect(source).not.toContain('label="支払い状況"');
     expect(source).toContain("サマリー");
-    // 利用明細書と同じ項目・同じ計算。Shopify の税額は送料の分を含まない
+    // 利用明細書と同じ項目・同じ計算（送料も課税）
     expect(source).toContain('label="税抜合計"');
     expect(source).toContain('label="送料（税抜）"');
     expect(source).toContain("label={`消費税 (${RECEIPT_TAX_RATE_PERCENT}%)`}");

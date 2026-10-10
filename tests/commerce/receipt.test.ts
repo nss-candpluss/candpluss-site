@@ -77,9 +77,9 @@ describe("領収書の発行者情報", () => {
 describe("領収書の体裁", () => {
   const sheetSource = () => readSource("components/commerce/ReceiptSheet.tsx");
 
-  // 送料も税込。Shopify の税額（送料の分を含まない）は使わず、税込の合計から割り戻す
+  // 送料も税込で課税。税込の合計から割り戻す
   it("税抜合計・送料（税抜）・消費税を足すと合計金額になる", () => {
-    // ガイロープ 2,400 円＋送料 700 円。Shopify の税額は商品分の 218 円だけ
+    // ガイロープ 2,400 円＋送料 700 円。送料に課税した Shopify のチェックアウトでも 282 円
     expect(receiptSummaryAmounts({ total: 3100, shipping: 700 })).toEqual({
       subtotalExcludingTax: 2182,
       shippingExcludingTax: 636,

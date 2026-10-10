@@ -399,6 +399,32 @@ export function accountOrderRefundSummary(order: {
   };
 }
 
+/**
+ * サマリーの内訳に使う送料。合計金額を超えない範囲に収める。
+ *
+ * 入金前にキャンセルすると Shopify の合計金額は 0 になるが、送料は注文時の
+ * 額のまま残る。そのまま割り振ると商品の税抜合計がマイナスになる。
+ */
+export function accountOrderSummaryShipping({
+  total,
+  shipping,
+}: {
+  total: number;
+  shipping: number;
+}) {
+  return Math.min(Math.max(0, shipping), Math.max(0, total));
+}
+
+/**
+ * 返金・キャンセルで注文から外れた商品の見出し。
+ * キャンセルは入金前でお金が動いていないこともあるので「返金済み」とは書かない。
+ */
+export function accountOrderRemovedItemsHeading(order: {
+  cancelledAt?: string | null;
+}) {
+  return order.cancelledAt ? "キャンセル済み" : "返金済み";
+}
+
 export function accountOrderPaymentMethods(
   transactions: Array<{
     id: string;

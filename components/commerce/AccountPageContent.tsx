@@ -59,6 +59,8 @@ import {
   type AccountStatusTone,
   accountOrderPaymentMethods,
   accountOrderRefundSummary,
+  accountOrderRemovedItemsHeading,
+  accountOrderSummaryShipping,
   accountOrderMoreHref,
   accountOrderPagesFromParam,
   ACCOUNT_ORDER_PAGES_PARAM,
@@ -701,11 +703,15 @@ function OrderAmountSummary({
     分けた商品と数字が合わなくなる。
   */
   const refund = showRefunded ? accountOrderRefundSummary(order) : null;
-  // 利用明細書と同じ内訳。Shopify の税額は送料の分を含まないので使わない
+  // 利用明細書と同じ内訳。送料も課税し、税込の合計から割り戻す
+  const summaryTotal = refund?.orderedTotal ?? Number(totalPrice?.amount ?? 0);
   const amounts = totalPrice
     ? receiptSummaryAmounts({
-        total: refund?.orderedTotal ?? Number(totalPrice.amount),
-        shipping: Number(order.totalShipping?.amount ?? 0),
+        total: summaryTotal,
+        shipping: accountOrderSummaryShipping({
+          total: summaryTotal,
+          shipping: Number(order.totalShipping?.amount ?? 0),
+        }),
       })
     : null;
   const money = (amount?: number) =>
@@ -1014,10 +1020,10 @@ function OrderPurchasedItems({ order }: { order: CustomerOrderDetail }) {
     order.fulfillments.nodes
   );
 
-  // 黙って消すと届かない理由が分からないので、返金した分は見出しで分ける
+  // 黙って消すと届かない理由が分からないので、返金・キャンセルした分は見出しで分ける
   const refundedGroup = refunded.length ? (
     <div>
-      <ParcelHeading>返金済み</ParcelHeading>
+      <ParcelHeading>{accountOrderRemovedItemsHeading(order)}</ParcelHeading>
       <OrderLineItems entries={refunded} />
     </div>
   ) : null;
