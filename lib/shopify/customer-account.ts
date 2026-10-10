@@ -3,7 +3,11 @@ import "server-only";
 import { z } from "zod";
 
 import { resolveCustomerAccountCallbackUrl } from "@/lib/commerce/account-login";
-import { shopifyCustomerProfileUrlFromAccountUrl } from "@/lib/commerce/account-page";
+import {
+  accountOrderIsTruncated,
+  accountOrderWithoutCancelledFulfillments,
+  shopifyCustomerProfileUrlFromAccountUrl,
+} from "@/lib/commerce/account-page";
 
 const customerAccountConfigSchema = z.object({
   clientId: z.string().min(1),
@@ -90,6 +94,7 @@ export type CustomerFulfillmentDetail = {
       quantity?: number | null;
       lineItem: { id: string };
     }>;
+    pageInfo?: CustomerConnectionPageInfo;
   };
   events: { nodes: Array<{ id: string; status: string; happenedAt: string }> };
 };
@@ -133,8 +138,12 @@ export type CustomerOrderDetail = {
   shippingAddress?: CustomerAddressDetail | null;
   billingAddress?: CustomerAddressDetail | null;
   transactions: CustomerOrderTransaction[];
-  fulfillments: { nodes: CustomerFulfillmentDetail[] };
+  fulfillments: {
+    nodes: CustomerFulfillmentDetail[];
+    pageInfo?: CustomerConnectionPageInfo;
+  };
   lineItems: {
+    pageInfo?: CustomerConnectionPageInfo;
     nodes: Array<{
       id: string;
       name: string;
@@ -158,9 +167,19 @@ export type CustomerOrderDetail = {
 /** 取れなかった理由も画面に出したいので、失敗を投げずに持ち回る */
 export type CustomerSection<T> = { data: T | null; error: string | null };
 
+/** 一覧の取得で打ち切った続きがあるかどうか */
+export type CustomerConnectionPageInfo = { hasNextPage: boolean };
+
+export type CustomerOrderHistory = {
+  nodes: CustomerOrderDetail[];
+  hasNextPage: boolean;
+  /** 2 ページ目以降の取得に失敗したとき。読めた分はそのまま出す */
+  moreError: string | null;
+};
+
 export type CustomerAccountSnapshot = {
   profile: CustomerAccount;
-  orders: CustomerSection<CustomerOrderDetail[]>;
+  orders: CustomerSection<CustomerOrderHistory>;
 };
 
 const ADDRESS_FIELDS = `
@@ -456,29 +475,40 @@ async function loadSection<T>(load: () => Promise<T>): Promise<CustomerSection<T
   }
 }
 
+/** 注文履歴を 1 回に読む件数。「さらに表示」を押すたびに、この件数ずつ増える */
+export const CUSTOMER_ORDERS_PAGE_SIZE = 20;
+
 /**
- * 会員画面に出す情報をまとめて集める。
- *
- * 注文はプロフィールと別のアクセススコープに依存するので、片方が失敗しても
- * 道連れにならないようクエリを分ける。
- *
- * ストアクレジットは Headless の顧客トークンでは許可されないため扱わない。
+ * 1 回の表示で読み進められるページ数の上限。
+ * ページごとに取得を重ねるので、URL を書き換えて際限なく読ませない。
  */
-export async function fetchCustomerAccountSnapshot(
-  accessToken: string
-): Promise<CustomerAccountSnapshot> {
-  const [profile, orders] =
-    await Promise.all([
-      fetchCustomerAccount(accessToken),
-      loadSection(async () => {
-        const data = await customerAccountRequest<{
-          customer?: { orders: { nodes: CustomerOrderDetail[] } } | null;
-        }>(
-          accessToken,
-          `query CustomerOrders {
-            customer {
-              orders(first: 20, reverse: true) {
-                nodes {
+export const CUSTOMER_ORDER_PAGES_MAX = 10;
+
+type CustomerOrderLimits = {
+  fulfillments: number;
+  fulfillmentLineItems: number;
+  lineItems: number;
+};
+
+/**
+ * 一覧で読む件数。Customer Account API はクエリ全体のコストに上限があり、
+ * 注文ごとの件数がページの件数分掛け合わさるので、一覧では大きくしない。
+ */
+const ORDER_LIST_LIMITS: CustomerOrderLimits = {
+  fulfillments: 10,
+  fulfillmentLineItems: 20,
+  lineItems: 20,
+};
+
+/** 一覧で読み切れなかった注文だけ、1 件ずつこの件数で読み直す */
+const ORDER_FULL_LIMITS: CustomerOrderLimits = {
+  fulfillments: 20,
+  fulfillmentLineItems: 50,
+  lineItems: 100,
+};
+
+function customerOrderFields(limits: CustomerOrderLimits) {
+  return `
                   id
                   name
                   number
@@ -520,7 +550,8 @@ export async function fetchCustomerAccountSnapshot(
                     }
                     paymentIcon { url altText }
                   }
-                  fulfillments(first: 10) {
+                  fulfillments(first: ${limits.fulfillments}) {
+                    pageInfo { hasNextPage }
                     nodes {
                       id
                       status
@@ -531,7 +562,8 @@ export async function fetchCustomerAccountSnapshot(
                       isPickedUp
                       requiresShipping
                       trackingInformation { company number url }
-                      fulfillmentLineItems(first: 20) {
+                      fulfillmentLineItems(first: ${limits.fulfillmentLineItems}) {
+                        pageInfo { hasNextPage }
                         nodes {
                           id
                           quantity
@@ -543,7 +575,8 @@ export async function fetchCustomerAccountSnapshot(
                       }
                     }
                   }
-                  lineItems(first: 20) {
+                  lineItems(first: ${limits.lineItems}) {
+                    pageInfo { hasNextPage }
                     nodes {
                       id
                       name
@@ -561,16 +594,133 @@ export async function fetchCustomerAccountSnapshot(
                       totalDiscount { amount currencyCode }
                       image { url altText }
                     }
-                  }
-                }
-              }
-            }
-          }`
-        );
+                  }`;
+}
 
-        return data.customer?.orders.nodes ?? [];
-      }),
-    ]);
+async function fetchCustomerOrdersPage(
+  accessToken: string,
+  after: string | null
+) {
+  const data = await customerAccountRequest<{
+    customer?: {
+      orders: {
+        nodes: CustomerOrderDetail[];
+        pageInfo: { hasNextPage: boolean; endCursor?: string | null };
+      };
+    } | null;
+  }>(
+    accessToken,
+    `query CustomerOrders($first: Int!, $after: String) {
+      customer {
+        orders(first: $first, after: $after, reverse: true) {
+          pageInfo { hasNextPage endCursor }
+          nodes { ${customerOrderFields(ORDER_LIST_LIMITS)} }
+        }
+      }
+    }`,
+    { first: CUSTOMER_ORDERS_PAGE_SIZE, after }
+  );
+
+  return (
+    data.customer?.orders ?? { nodes: [], pageInfo: { hasNextPage: false } }
+  );
+}
+
+/**
+ * 一覧の件数に収まらなかった注文を読み直す。
+ * 読み直しに失敗しても、注文履歴ごと出せなくなるよりは読めた分を出す。
+ */
+async function fetchFullCustomerOrder(
+  accessToken: string,
+  order: CustomerOrderDetail
+) {
+  try {
+    const data = await customerAccountRequest<{
+      order?: CustomerOrderDetail | null;
+    }>(
+      accessToken,
+      `query CustomerOrderFull($id: ID!) {
+        order(id: $id) { ${customerOrderFields(ORDER_FULL_LIMITS)} }
+      }`,
+      { id: order.id }
+    );
+
+    return data.order ?? order;
+  } catch {
+    return order;
+  }
+}
+
+/**
+ * 新しい順に `pages` ページ分の注文を読む。
+ *
+ * 1 回の取得量を増やすとコストの上限に当たるので、件数を増やすのではなく
+ * 同じ量の取得をページ数だけ重ねる。
+ */
+async function fetchCustomerOrders(
+  accessToken: string,
+  pages: number
+): Promise<CustomerOrderHistory> {
+  const nodes: CustomerOrderDetail[] = [];
+  let after: string | null = null;
+  let hasNextPage = false;
+  let moreError: string | null = null;
+
+  for (let page = 0; page < pages; page += 1) {
+    let result: Awaited<ReturnType<typeof fetchCustomerOrdersPage>>;
+
+    try {
+      result = await fetchCustomerOrdersPage(accessToken, after);
+    } catch (cause) {
+      if (page === 0) {
+        throw cause;
+      }
+      moreError = sectionError(cause);
+      break;
+    }
+
+    nodes.push(...result.nodes);
+    after = result.pageInfo.endCursor ?? null;
+    hasNextPage = result.pageInfo.hasNextPage && after !== null;
+
+    if (!hasNextPage) {
+      break;
+    }
+  }
+
+  // 取得が重ならないよう 1 件ずつ。読み切れない注文はめったにない
+  const completed: CustomerOrderDetail[] = [];
+  for (const order of nodes) {
+    completed.push(
+      accountOrderIsTruncated(order)
+        ? await fetchFullCustomerOrder(accessToken, order)
+        : order
+    );
+  }
+
+  return {
+    nodes: completed.map(accountOrderWithoutCancelledFulfillments),
+    hasNextPage,
+    moreError,
+  };
+}
+
+/**
+ * 会員画面に出す情報をまとめて集める。
+ *
+ * 注文はプロフィールと別のアクセススコープに依存するので、片方が失敗しても
+ * 道連れにならないようクエリを分ける。
+ *
+ * ストアクレジットは Headless の顧客トークンでは許可されないため扱わない。
+ */
+export async function fetchCustomerAccountSnapshot(
+  accessToken: string,
+  { orderPages = 1 }: { orderPages?: number } = {}
+): Promise<CustomerAccountSnapshot> {
+  const [profile, orders] = await Promise.all([
+    fetchCustomerAccount(accessToken),
+    loadSection(() => fetchCustomerOrders(accessToken, orderPages)),
+  ]);
 
   return { profile, orders };
 }

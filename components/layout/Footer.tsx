@@ -1,6 +1,8 @@
+import { CopyrightYear } from "@/components/layout/CopyrightYear";
 import { SiteNavLink } from "@/components/layout/SiteNavLink";
 import { hoverUnderlineHoverClassName } from "@/components/ui/TextLink";
 import { footerContent } from "@/data/footer";
+import { japanYear } from "@/lib/japan-year";
 import { isContactLinkVisible, isSocialLinkVisible } from "@/lib/site-navigation-visibility";
 import { maskGraphicStyle } from "@/lib/maskStyle";
 import { uiText } from "@/lib/typography";
@@ -16,7 +18,7 @@ const navLinkClassName = `${hoverUnderlineHoverClassName} font-ui-en ${uiText(16
 const copyrightClassName = `font-ui-en ${uiText(13)} font-bold text-[var(--foreground)]`;
 
 export function Footer() {
-  const currentYear = new Date().getFullYear();
+  const currentYear = japanYear();
   const socialLinks = footerContent.socialLinks.filter((link) => isSocialLinkVisible(link.label));
 
   return (
@@ -75,7 +77,7 @@ export function Footer() {
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between md:gap-x-[calc(32px*var(--gap-scale-x))]">
           <div className="hidden flex-wrap items-center gap-x-[calc(32px*var(--gap-scale-x))] gap-y-4 md:flex">
             <p className={copyrightClassName}>
-              {footerContent.copyright} {currentYear}
+              {footerContent.copyright} <CopyrightYear fallbackYear={currentYear} />
             </p>
             {footerContent.legalLinks.map((link) => (
               <SiteNavLink key={link.href} href={link.href} className={legalLinkClassName}>
@@ -107,7 +109,7 @@ export function Footer() {
           </nav>
 
           <p className={`${copyrightClassName} md:hidden`}>
-            {footerContent.copyright} {currentYear}
+            {footerContent.copyright} <CopyrightYear fallbackYear={currentYear} />
           </p>
         </div>
       </div>

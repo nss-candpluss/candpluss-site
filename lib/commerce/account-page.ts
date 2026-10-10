@@ -87,7 +87,21 @@ export type AccountOrderLineEntry<T> = { line: T; quantity: number };
 type AccountOrderParcelLine = AccountOrderLineAmount & {
   id: string;
   quantity: number;
+  /** 返金した分を引いた数。Shopify は返品しても `quantity` を減らさない */
+  refundableQuantity?: number;
 };
+
+/** 注文行のうち返金した数 */
+export function accountOrderLineRefundedQuantity(line: {
+  quantity: number;
+  refundableQuantity?: number;
+}) {
+  if (line.refundableQuantity === undefined) {
+    return 0;
+  }
+
+  return Math.min(line.quantity, Math.max(0, line.quantity - line.refundableQuantity));
+}
 
 type AccountOrderParcelSource = {
   id: string;
@@ -112,12 +126,82 @@ function accountOrderEntriesByAmount<T extends AccountOrderLineAmount>(
   );
 }
 
+/** 発送されなかった記録。エラーと失敗は配送アプリや倉庫連携で残る */
+const ACCOUNT_VOID_FULFILLMENT_STATUSES = new Set([
+  "CANCELLED",
+  "ERROR",
+  "FAILURE",
+]);
+
+/**
+ * 取り消した発送や失敗した発送は Shopify の注文に残り続ける。個口や発送状況に
+ * 数えると、発送をやり直した注文が実際より多い個口に見え、状況も混ざる。
+ */
+export function accountOrderWithoutCancelledFulfillments<
+  T extends { fulfillments: { nodes: Array<{ status?: string | null }> } },
+>(order: T): T {
+  return {
+    ...order,
+    fulfillments: {
+      ...order.fulfillments,
+      nodes: order.fulfillments.nodes.filter(
+        (fulfillment) =>
+          !ACCOUNT_VOID_FULFILLMENT_STATUSES.has(
+            fulfillment.status?.trim().toUpperCase() ?? ""
+          )
+      ),
+    },
+  };
+}
+
+type AccountConnection = { pageInfo?: { hasNextPage: boolean } | null };
+
+/** 一覧の件数で打ち切られ、商品や発送記録の一部が欠けている注文か */
+export function accountOrderIsTruncated(order: {
+  lineItems: AccountConnection;
+  fulfillments: AccountConnection & {
+    nodes: Array<{ fulfillmentLineItems: AccountConnection }>;
+  };
+}) {
+  return Boolean(
+    order.lineItems.pageInfo?.hasNextPage ||
+      order.fulfillments.pageInfo?.hasNextPage ||
+      order.fulfillments.nodes.some(
+        (fulfillment) => fulfillment.fulfillmentLineItems.pageInfo?.hasNextPage
+      )
+  );
+}
+
+export const ACCOUNT_ORDER_PAGES_PARAM = "orderPages";
+
+/** 表示中の注文履歴のページ数。URL の値は信用せず、範囲に収める */
+export function accountOrderPagesFromParam(
+  value: string | string[] | undefined,
+  max: number
+) {
+  const pages = Number.parseInt(Array.isArray(value) ? value[0] : value ?? "", 10);
+
+  return Number.isFinite(pages) ? Math.min(Math.max(pages, 1), max) : 1;
+}
+
+/** 「さらに表示」の行き先。注文履歴のタブを開いたまま、保存の通知は消す */
+export function accountOrderMoreHref(currentSearch: string, pages: number) {
+  const params = new URLSearchParams(
+    accountPageTabHref("orders", currentSearch).slice(1)
+  );
+  params.set(ACCOUNT_ORDER_PAGES_PARAM, String(pages));
+  return `?${params.toString()}`;
+}
+
 /**
  * 注文を個口ごとに分ける。
  *
  * 1 つの注文行が複数の個口に分かれることがあるので、個数は注文行の数量では
- * なく、その個口に入っている数を使う。どの個口にも入っていない残りは
- * まだ発送されていない分として `pending` に回す。
+ * なく、その個口に入っている数を使う。返金した分は `refunded` に分け、
+ * どの個口にも入らず返金もしていない残りを未発送の `pending` に回す。
+ *
+ * 返金が発送前の分か、発送して返品された分かは区別できないので、
+ * 返金した数はまず未発送の分から引く。
  */
 export function accountOrderParcels<T extends AccountOrderParcelLine>(
   lineItems: readonly T[],
@@ -151,12 +235,24 @@ export function accountOrderParcels<T extends AccountOrderParcelLine>(
     lineItems
       .map((line) => ({
         line,
-        quantity: line.quantity - (shippedQuantity.get(line.id) ?? 0),
+        quantity:
+          line.quantity -
+          (shippedQuantity.get(line.id) ?? 0) -
+          accountOrderLineRefundedQuantity(line),
       }))
       .filter((entry) => entry.quantity > 0)
   );
 
-  return { parcels, pending };
+  const refunded = accountOrderEntriesByAmount(
+    lineItems
+      .map((line) => ({
+        line,
+        quantity: accountOrderLineRefundedQuantity(line),
+      }))
+      .filter((entry) => entry.quantity > 0)
+  );
+
+  return { parcels, pending, refunded };
 }
 
 export function formatAccountPostalCode(value?: string | null) {

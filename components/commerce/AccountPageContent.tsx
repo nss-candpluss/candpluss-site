@@ -45,6 +45,7 @@ import {
   accountAddressTitles,
   accountOrderHasReceipt,
   accountOrderLineImageAlt,
+  accountOrderLineRefundedQuantity,
   accountOrderLineTitle,
   accountOrderLineVariantTitle,
   accountOrderLinesByAmount,
@@ -56,6 +57,9 @@ import {
   type AccountStatusDisplay,
   type AccountStatusTone,
   accountOrderPaymentMethods,
+  accountOrderMoreHref,
+  accountOrderPagesFromParam,
+  ACCOUNT_ORDER_PAGES_PARAM,
   accountPageTabHref,
   accountOrderShipmentDisplay,
   formatAccountAddressLine,
@@ -72,6 +76,7 @@ import {
   sortAccountAddresses,
 } from "@/lib/commerce/account-page";
 import {
+  CUSTOMER_ORDER_PAGES_MAX,
   fetchCustomerAccountSnapshot,
   getShopifyCustomerProfileUrl,
   isEmailMarketingSubscribed,
@@ -110,7 +115,9 @@ function formatDateTime(value?: string | null) {
     return NOT_REGISTERED;
   }
 
+  // サーバーは UTC で動くので、指定しないと 9 時間ずれる
   return new Intl.DateTimeFormat("ja-JP", {
+    timeZone: "Asia/Tokyo",
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
@@ -959,18 +966,36 @@ function ParcelHeading({ children }: { children: string }) {
  * 分かれていない注文は商品を並べるだけで、見出しは付けない。
  */
 function OrderPurchasedItems({ order }: { order: CustomerOrderDetail }) {
-  const { parcels, pending } = accountOrderParcels(
+  const { parcels, pending, refunded } = accountOrderParcels(
     order.lineItems.nodes,
     order.fulfillments.nodes
   );
 
+  // 黙って消すと届かない理由が分からないので、返金した分は見出しで分ける
+  const refundedGroup = refunded.length ? (
+    <div>
+      <ParcelHeading>返金済み</ParcelHeading>
+      <OrderLineItems entries={refunded} />
+    </div>
+  ) : null;
+
   if (parcels.length < 2) {
+    const entries = accountOrderLinesByAmount(order.lineItems.nodes)
+      .map((line) => ({
+        line,
+        quantity: line.quantity - accountOrderLineRefundedQuantity(line),
+      }))
+      .filter((entry) => entry.quantity > 0);
+
+    if (!refundedGroup) {
+      return <OrderLineItems entries={entries} />;
+    }
+
     return (
-      <OrderLineItems
-        entries={accountOrderLinesByAmount(order.lineItems.nodes).map(
-          (line) => ({ line, quantity: line.quantity })
-        )}
-      />
+      <div className="flex flex-col gap-[calc(48px*var(--gap-scale-y))]">
+        {entries.length ? <OrderLineItems entries={entries} /> : null}
+        {refundedGroup}
+      </div>
     );
   }
 
@@ -990,6 +1015,7 @@ function OrderPurchasedItems({ order }: { order: CustomerOrderDetail }) {
           <OrderLineItems entries={pending} />
         </div>
       ) : null}
+      {refundedGroup}
     </div>
   );
 }
@@ -1298,18 +1324,44 @@ function AccountSettingsPanel({
   );
 }
 
-function OrdersPanel({ orders }: { orders: CustomerAccountSnapshot["orders"] }) {
+function OrdersPanel({
+  orders,
+  moreHref,
+}: {
+  orders: CustomerAccountSnapshot["orders"];
+  /** 続きがあり、まだ読み進められるときだけ渡す */
+  moreHref: string | null;
+}) {
   return (
     <SectionBody
       section={orders}
       empty="注文履歴はありません。"
-      isEmpty={(list) => list.length === 0}
-      render={(list) => (
-        <ul className="flex flex-col gap-10">
-          {list.map((order) => (
-            <OrderCard key={order.id} order={order} />
-          ))}
-        </ul>
+      isEmpty={(history) => history.nodes.length === 0}
+      render={(history) => (
+        <>
+          <ul className="flex flex-col gap-10">
+            {history.nodes.map((order) => (
+              <OrderCard key={order.id} order={order} />
+            ))}
+          </ul>
+          {history.moreError ? (
+            <div className="mt-10">
+              <SectionError error={history.moreError} />
+            </div>
+          ) : null}
+          {history.hasNextPage && moreHref ? (
+            <div className="mt-10 flex justify-center">
+              {/* 読み足した分は今の位置の下に続くので、先頭へ戻さない */}
+              <Link
+                href={moreHref}
+                scroll={false}
+                className={`${accountTextLinkClassName} ${uiText(16)}`}
+              >
+                さらに表示
+              </Link>
+            </div>
+          ) : null}
+        </>
       )}
     />
   );
@@ -1322,7 +1374,27 @@ function OrdersPanel({ orders }: { orders: CustomerAccountSnapshot["orders"] }) 
  * いまは Customer Account API から何が取れるかを確認するための仮画面なので、
  * 取得できた項目をそのまま並べている。未登録の項目は「登録なし」で埋める。
  */
-export async function AccountPageContent() {
+export type AccountPageSearchParams = Promise<
+  Record<string, string | string[] | undefined>
+>;
+
+function searchStringFromParams(
+  params: Awaited<AccountPageSearchParams>
+) {
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    for (const item of Array.isArray(value) ? value : value ? [value] : []) {
+      search.append(key, item);
+    }
+  }
+  return search.toString();
+}
+
+export async function AccountPageContent({
+  searchParams,
+}: {
+  searchParams: AccountPageSearchParams;
+}) {
   const isStaticExport = process.env.STATIC_EXPORT === "true";
   const session = isStaticExport ? null : await getLiveCustomerTokenSession();
 
@@ -1343,10 +1415,22 @@ export async function AccountPageContent() {
   let snapshot: Awaited<ReturnType<typeof fetchCustomerAccountSnapshot>> | null =
     null;
   let snapshotError: string | null = null;
+  let orderPages = 1;
+  let currentSearch = "";
 
   if (session) {
+    // 静的書き出しでは URL の検索部分を読めないので、ログイン中のときだけ読む
+    const params = await searchParams;
+    currentSearch = searchStringFromParams(params);
+    orderPages = accountOrderPagesFromParam(
+      params[ACCOUNT_ORDER_PAGES_PARAM],
+      CUSTOMER_ORDER_PAGES_MAX
+    );
+
     try {
-      snapshot = await fetchCustomerAccountSnapshot(session.accessToken);
+      snapshot = await fetchCustomerAccountSnapshot(session.accessToken, {
+        orderPages,
+      });
     } catch (cause) {
       snapshotError =
         cause instanceof Error ? cause.message : "アカウント情報を取得できませんでした。";
@@ -1411,7 +1495,16 @@ export async function AccountPageContent() {
 
           <AccountTabs
             panels={{
-              orders: <OrdersPanel orders={snapshot.orders} />,
+              orders: (
+                <OrdersPanel
+                  orders={snapshot.orders}
+                  moreHref={
+                    orderPages < CUSTOMER_ORDER_PAGES_MAX
+                      ? accountOrderMoreHref(currentSearch, orderPages + 1)
+                      : null
+                  }
+                />
+              ),
               account: (
                 <AccountSettingsPanel
                   addresses={addresses}

@@ -1,4 +1,7 @@
-import { AccountPageContent } from "@/components/commerce/AccountPageContent";
+import {
+  AccountPageContent,
+  type AccountPageSearchParams,
+} from "@/components/commerce/AccountPageContent";
 import { notFoundContent } from "@/data/error-pages";
 import { isAccountEnabled } from "@/lib/commerce/account-login";
 import { createPageMetadata } from "@/lib/site-metadata";
@@ -17,6 +20,10 @@ export const metadata = isAccountEnabled("public")
       description: notFoundContent.body.join(" "),
     };
 
-export default function AccountPage() {
-  return <AccountPageContent />;
+export default function AccountPage({
+  searchParams,
+}: {
+  searchParams: AccountPageSearchParams;
+}) {
+  return <AccountPageContent searchParams={searchParams} />;
 }

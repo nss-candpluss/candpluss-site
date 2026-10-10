@@ -1,4 +1,7 @@
-import { AccountPageContent } from "@/components/commerce/AccountPageContent";
+import {
+  AccountPageContent,
+  type AccountPageSearchParams,
+} from "@/components/commerce/AccountPageContent";
 import { ACCOUNT_BASE_PATH } from "@/lib/commerce/account-login";
 import { createPageMetadata } from "@/lib/site-metadata";
 import { siteConfig } from "@/lib/site";
@@ -10,6 +13,10 @@ export const metadata = createPageMetadata({
   index: false,
 });
 
-export default function ShopifyTestAccountPage() {
-  return <AccountPageContent />;
+export default function ShopifyTestAccountPage({
+  searchParams,
+}: {
+  searchParams: AccountPageSearchParams;
+}) {
+  return <AccountPageContent searchParams={searchParams} />;
 }

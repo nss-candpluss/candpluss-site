@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import { footerContent } from "@/data/footer";
+import { japanYear } from "@/lib/japan-year";
 import { isSocialLinkVisible } from "@/lib/site-navigation-visibility";
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -83,6 +84,15 @@ describe("footer nav links", () => {
     expect(labels.indexOf("LINE")).toBe(labels.indexOf("Instagram") + 1);
     expect(line?.icon).toBe("/assets/icons/icon-sns-line.svg");
     expect(line?.href).toBe("https://lin.ee/qNFv6Jn");
+  });
+
+  it("switches the copyright year at midnight on New Year's Day in Japan", () => {
+    expect(japanYear(new Date("2026-12-31T14:59:59Z"))).toBe(2026);
+    expect(japanYear(new Date("2026-12-31T15:00:00Z"))).toBe(2027);
+
+    // 静的ページはビルド時の年で固まるので、表示する年はブラウザで求め直す
+    expect(footerSource).not.toContain("getFullYear()");
+    expect(footerSource.match(/<CopyrightYear fallbackYear=\{currentYear\} \/>/g)).toHaveLength(2);
   });
 
   it("reuses footer social links in the hamburger menu", () => {

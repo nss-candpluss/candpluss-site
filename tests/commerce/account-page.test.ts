@@ -25,15 +25,20 @@ import {
   accountPageNotice,
   accountPageTabHref,
   accountOrderLineImageAlt,
+  accountOrderLineRefundedQuantity,
   accountOrderLineTitle,
   accountOrderLineVariantTitle,
+  accountOrderIsTruncated,
   accountOrderLinesByAmount,
+  accountOrderMoreHref,
+  accountOrderPagesFromParam,
   accountOrderOptionalFields,
   accountOrderParcelLabel,
   accountOrderParcels,
   accountOrderPaymentDisplay,
   accountOrderPaymentMethods,
   accountOrderShipmentDisplay,
+  accountOrderWithoutCancelledFulfillments,
   formatAccountCardBrand,
   formatAccountCarrierName,
   formatAccountAddressLine,
@@ -99,6 +104,19 @@ describe("会員ページの見出し", () => {
       "2026/09/20 20:28"
     );
     expect(formatAccountOrderDateTime(null)).toBeNull();
+  });
+
+  // サーバーは UTC で動く。指定が抜けると発送日時や配送履歴が 9 時間ずれる
+  it("会員ページの日時はどれも日本時間で出す", () => {
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+    const formatters = source.split("new Intl.DateTimeFormat(").slice(1);
+
+    expect(formatters.length).toBeGreaterThan(0);
+    for (const formatter of formatters) {
+      expect(formatter.slice(0, formatter.indexOf("})"))).toContain(
+        'timeZone: "Asia/Tokyo"'
+      );
+    }
   });
 
   it("認証用 URL から Shopify のプロフィール画面 URL を組み立てる", () => {
@@ -245,6 +263,167 @@ describe("注文履歴の商品行", () => {
     expect(pending.map((entry) => [entry.line.id, entry.quantity])).toEqual([
       ["rope", 2],
     ]);
+  });
+
+  it("返金した分は未発送に残さず、返金済みとして分けて返す", () => {
+    const lineItems = [
+      { id: "tent", quantity: 1, refundableQuantity: 1, price: { amount: "48000" } },
+      { id: "sheet", quantity: 1, refundableQuantity: 0, price: { amount: "17710" } },
+      { id: "rope", quantity: 3, refundableQuantity: 3, price: { amount: "800" } },
+      { id: "peg", quantity: 4, refundableQuantity: 3, price: { amount: "1200" } },
+    ];
+    const { pending, refunded } = accountOrderParcels(lineItems, [
+      {
+        id: "f1",
+        fulfillmentLineItems: {
+          nodes: [
+            { quantity: 1, lineItem: { id: "tent" } },
+            { quantity: 2, lineItem: { id: "rope" } },
+          ],
+        },
+      },
+    ]);
+
+    expect(pending.map((entry) => [entry.line.id, entry.quantity])).toEqual([
+      ["peg", 3],
+      ["rope", 1],
+    ]);
+    expect(refunded.map((entry) => [entry.line.id, entry.quantity])).toEqual([
+      ["sheet", 1],
+      ["peg", 1],
+    ]);
+  });
+
+  it("返金数は注文数の範囲に収め、取れないときは 0 とみなす", () => {
+    expect(accountOrderLineRefundedQuantity({ quantity: 4, refundableQuantity: 3 })).toBe(1);
+    expect(accountOrderLineRefundedQuantity({ quantity: 2, refundableQuantity: 0 })).toBe(2);
+    expect(accountOrderLineRefundedQuantity({ quantity: 2, refundableQuantity: -1 })).toBe(2);
+    expect(accountOrderLineRefundedQuantity({ quantity: 2, refundableQuantity: 5 })).toBe(0);
+    expect(accountOrderLineRefundedQuantity({ quantity: 2 })).toBe(0);
+  });
+
+  it("個口に分かれていない注文でも、返金済みの商品は別枠に出す", () => {
+    const source = readSource("components/commerce/AccountPageContent.tsx");
+
+    expect(source).toContain("<ParcelHeading>返金済み</ParcelHeading>");
+    expect(source).toContain(
+      "quantity: line.quantity - accountOrderLineRefundedQuantity(line)"
+    );
+  });
+
+  /*
+    追跡番号を直すために発送を取り消して登録し直すと、取り消した側も
+    注文に残る。数えると 1 点の注文が「全2個口」に見える。
+  */
+  it("取り消した発送や失敗した発送は個口にも発送状況にも数えない", () => {
+    const order = accountOrderWithoutCancelledFulfillments({
+      fulfillmentStatus: "FULFILLED",
+      fulfillments: {
+        nodes: [
+          {
+            id: "cancelled",
+            status: "CANCELLED",
+            latestShipmentStatus: "DELIVERED",
+            fulfillmentLineItems: {
+              nodes: [{ quantity: 1, lineItem: { id: "sheet" } }],
+            },
+          },
+          {
+            id: "redone",
+            status: "SUCCESS",
+            latestShipmentStatus: "CONFIRMED",
+            fulfillmentLineItems: {
+              nodes: [{ quantity: 1, lineItem: { id: "sheet" } }],
+            },
+          },
+        ],
+      },
+    });
+
+    expect(order.fulfillments.nodes.map((fulfillment) => fulfillment.id)).toEqual(
+      ["redone"]
+    );
+    expect(
+      accountOrderParcels(
+        [{ id: "sheet", quantity: 1, price: { amount: "17710" } }],
+        order.fulfillments.nodes
+      ).parcels
+    ).toHaveLength(1);
+    expect(accountOrderShipmentDisplay(order)).toEqual({
+      label: "発送手配済み",
+      tone: "prepared",
+    });
+    // 失敗した発送も届かないので外す。状態が取れない発送は消さない
+    expect(
+      accountOrderWithoutCancelledFulfillments({
+        fulfillments: {
+          nodes: [
+            { status: null },
+            { status: "cancelled" },
+            { status: "ERROR" },
+            { status: "FAILURE" },
+            { status: "SUCCESS" },
+          ],
+        },
+      }).fulfillments.nodes
+    ).toEqual([{ status: null }, { status: "SUCCESS" }]);
+  });
+
+  it("注文データを受け取った時点で取り消した発送を外す", () => {
+    const source = readSource("lib/shopify/customer-account.ts");
+
+    expect(source).toContain(
+      "nodes: completed.map(accountOrderWithoutCancelledFulfillments)"
+    );
+  });
+
+  it("一覧の件数で打ち切られた注文を見分ける", () => {
+    const order = (overrides: {
+      lineItems?: boolean;
+      fulfillments?: boolean;
+      fulfillmentLineItems?: boolean;
+    }) => ({
+      lineItems: { pageInfo: { hasNextPage: Boolean(overrides.lineItems) } },
+      fulfillments: {
+        pageInfo: { hasNextPage: Boolean(overrides.fulfillments) },
+        nodes: [
+          {
+            fulfillmentLineItems: {
+              pageInfo: { hasNextPage: Boolean(overrides.fulfillmentLineItems) },
+            },
+          },
+        ],
+      },
+    });
+
+    expect(accountOrderIsTruncated(order({}))).toBe(false);
+    expect(accountOrderIsTruncated(order({ lineItems: true }))).toBe(true);
+    expect(accountOrderIsTruncated(order({ fulfillments: true }))).toBe(true);
+    expect(accountOrderIsTruncated(order({ fulfillmentLineItems: true }))).toBe(true);
+    // 件数の情報が無い注文は、読み直さずにそのまま出す
+    expect(
+      accountOrderIsTruncated({
+        lineItems: {},
+        fulfillments: { nodes: [{ fulfillmentLineItems: {} }] },
+      })
+    ).toBe(false);
+  });
+
+  it("注文履歴のページ数は URL の値を信用せず範囲に収める", () => {
+    expect(accountOrderPagesFromParam(undefined, 10)).toBe(1);
+    expect(accountOrderPagesFromParam("3", 10)).toBe(3);
+    expect(accountOrderPagesFromParam(["2", "5"], 10)).toBe(2);
+    expect(accountOrderPagesFromParam("0", 10)).toBe(1);
+    expect(accountOrderPagesFromParam("-4", 10)).toBe(1);
+    expect(accountOrderPagesFromParam("999", 10)).toBe(10);
+    expect(accountOrderPagesFromParam("abc", 10)).toBe(1);
+  });
+
+  it("「さらに表示」は注文履歴のタブのまま次のページ数を指す", () => {
+    expect(accountOrderMoreHref("", 2)).toBe("?tab=orders&orderPages=2");
+    expect(
+      accountOrderMoreHref("tab=orders&orderPages=2&saved=profile&savedAt=1", 3)
+    ).toBe("?tab=orders&orderPages=3");
   });
 
   it("個口の見出しは左右で同じ呼び方にする", () => {
@@ -500,7 +679,7 @@ describe("注文履歴の商品行", () => {
     expect(source).toContain("fulfillments.length > 1");
     expect(source).not.toContain("つ目の発送");
     expect(readSource("lib/shopify/customer-account.ts")).toContain(
-      "fulfillmentLineItems(first: 20)"
+      "fulfillmentLineItems(first: ${limits.fulfillmentLineItems})"
     );
     expect(source).toContain('label="配送業者"');
     expect(source).toContain('label="追跡番号"');
@@ -935,8 +1114,15 @@ describe("会員ページの画面構成", () => {
     // プライバシーポリシーはフッターから辿れるので、会員ページには出さない
     expect(contentSource).not.toContain("accountMemberCopy.privacy");
     expect(contentSource).not.toContain("activeTabId");
-    expect(testPageSource).not.toContain("searchParams");
-    expect(publicPageSource).not.toContain("searchParams");
+    // 検索部分は注文履歴の読み足しにだけ使い、開くタブはサーバーで決めない
+    expect(contentSource).not.toContain("params.tab");
+    expect(contentSource).toContain("params[ACCOUNT_ORDER_PAGES_PARAM]");
+    for (const pageSource of [testPageSource, publicPageSource]) {
+      expect(pageSource).toContain(
+        "<AccountPageContent searchParams={searchParams} />"
+      );
+      expect(pageSource).not.toContain("await searchParams");
+    }
   });
 
   // リンクのまま残すことで、JavaScript が動く前のクリックでも同じ場所へ行ける
