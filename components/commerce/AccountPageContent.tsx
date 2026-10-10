@@ -58,9 +58,11 @@ import {
   type AccountStatusDisplay,
   type AccountStatusTone,
   accountOrderPaymentMethods,
-  accountOrderRefundSummary,
+  accountOrderRefundedLabel,
   accountOrderRemovedItemsHeading,
-  accountOrderSummaryShipping,
+  accountOrderSettlement,
+  accountOrderSettlementNotes,
+  type AccountOrderSettlement,
   accountOrderMoreHref,
   accountOrderPagesFromParam,
   ACCOUNT_ORDER_PAGES_PARAM,
@@ -687,100 +689,139 @@ function OrderAmountRow({
  * 購入商品の隣に置く金額まとめ。
  *
  * 税を独立した行に出すので、各行の金額には税込を付けない。
- * 狭い列に収めるため項目ごとの注釈も出さない。
+ * 狭い列に収めるため項目ごとの注釈は出さず、金額の意味を取り違えそうな
+ * 状況（キャンセル・返金・確認中）だけ、金額の下に一言添える。
  */
-function OrderAmountSummary({
-  order,
-  showRefunded,
-}: {
-  order: CustomerOrderDetail;
-  showRefunded: boolean;
-}) {
-  const totalPrice = order.totalPrice;
-  /*
-    返金があるときは、上の内訳をご注文時の金額で出し、返金額と返金後の
-    お支払い金額を続ける。返金後の金額だけで内訳を出すと、返金済みとして
-    分けた商品と数字が合わなくなる。
-  */
-  const refund = showRefunded ? accountOrderRefundSummary(order) : null;
-  // 利用明細書と同じ内訳。送料も課税し、税込の合計から割り戻す
-  const summaryTotal = refund?.orderedTotal ?? Number(totalPrice?.amount ?? 0);
-  const amounts = totalPrice
-    ? receiptSummaryAmounts({
-        total: summaryTotal,
-        shipping: accountOrderSummaryShipping({
-          total: summaryTotal,
-          shipping: Number(order.totalShipping?.amount ?? 0),
-        }),
-      })
-    : null;
-  const money = (amount?: number) =>
-    totalPrice && amount !== undefined
-      ? { amount: String(amount), currencyCode: totalPrice.currencyCode }
-      : null;
-
-  if (refund) {
-    return (
-      <OrderSidebarSection title="サマリー">
-        <dl className="mt-3 flex flex-col gap-3">
-          <OrderAmountRow
-            label="税抜合計"
-            value={formatAmount(money(amounts?.subtotalExcludingTax))}
-          />
-          <OrderAmountRow
-            label="送料（税抜）"
-            value={formatAmount(money(amounts?.shippingExcludingTax))}
-          />
-          <OrderAmountRow
-            label={`消費税 (${RECEIPT_TAX_RATE_PERCENT}%)`}
-            value={formatAmount(money(amounts?.tax))}
-          />
-          <OrderAmountRow
-            label="ご注文時の合計金額"
-            value={formatAmount(money(refund.orderedTotal))}
-          />
-          <OrderAmountRow
-            label="返金額"
-            value={`−${formatAmount(money(refund.refunded))}`}
-          />
-          <OrderAmountRow
-            label="返金後のお支払い金額"
-            value={formatAmount(money(refund.afterRefund))}
-            emphasized
-          />
-        </dl>
-      </OrderSidebarSection>
-    );
-  }
+function OrderAmountSummary({ order }: { order: CustomerOrderDetail }) {
+  const settlement = accountOrderSettlement(order);
+  const notes = accountOrderSettlementNotes(settlement);
+  const money = (amount: number) => ({
+    amount: String(amount),
+    currencyCode: order.totalPrice.currencyCode,
+  });
 
   return (
     <OrderSidebarSection title="サマリー">
-      <dl className="mt-3 flex flex-col gap-3">
+      {settlement.kind === "active" || settlement.kind === "cancelledUnpaid" ? (
+        <OrderBreakdownRows order={order} settlement={settlement} money={money} />
+      ) : null}
+      {settlement.kind === "settled" ? (
+        <OrderSettlementRows settlement={settlement} money={money} />
+      ) : null}
+      {notes.length ? (
+        <div className="mt-3 flex flex-col gap-1">
+          {notes.map((note) => (
+            <p
+              key={note}
+              className={`font-body-ja text-[var(--color-muted)] ${bodyText(14)}`}
+            >
+              {note}
+            </p>
+          ))}
+        </div>
+      ) : null}
+    </OrderSidebarSection>
+  );
+}
+
+type SummaryMoney = (amount: number) => { amount: string; currencyCode: string };
+
+/**
+ * 税抜合計・送料・消費税・合計金額の内訳。利用明細書と同じ計算で、送料も
+ * 課税し税込の合計から割り戻す。
+ *
+ * キャンセルも返金もない注文は、今の合計金額が注文時の金額と同じなので
+ * そこから出す。入金前にキャンセルした注文はご請求が無いので、すべて 0 円。
+ */
+function OrderBreakdownRows({
+  order,
+  settlement,
+  money,
+}: {
+  order: CustomerOrderDetail;
+  settlement: Extract<AccountOrderSettlement, { kind: "active" | "cancelledUnpaid" }>;
+  money: SummaryMoney;
+}) {
+  const amounts =
+    settlement.kind === "active"
+      ? receiptSummaryAmounts({
+          total: Number(order.totalPrice.amount),
+          shipping: Number(order.totalShipping?.amount ?? 0),
+        })
+      : receiptSummaryAmounts({ total: 0, shipping: 0 });
+
+  return (
+    <dl className="mt-3 flex flex-col gap-3">
+      <OrderAmountRow
+        label="税抜合計"
+        value={formatAmount(money(amounts.subtotalExcludingTax))}
+      />
+      <OrderAmountRow
+        label="送料（税抜）"
+        value={formatAmount(money(amounts.shippingExcludingTax))}
+      />
+      <OrderAmountRow
+        label={`消費税 (${RECEIPT_TAX_RATE_PERCENT}%)`}
+        value={formatAmount(money(amounts.tax))}
+      />
+      <OrderAmountRow
+        label="合計金額"
+        value={formatAmount(money(amounts.total))}
+        emphasized
+      />
+      {settlement.kind === "active" && settlement.awaitingPayment ? (
         <OrderAmountRow
-          label="税抜合計"
-          value={formatAmount(money(amounts?.subtotalExcludingTax))}
+          label="お支払い済み金額"
+          value={formatAmount(money(settlement.paid))}
         />
+      ) : null}
+    </dl>
+  );
+}
+
+/**
+ * 返金がある、または入金後にキャンセルした注文の精算。
+ *
+ * 入金の額からは商品・送料・税の内訳を正しく戻せないので、内訳は出さず、
+ * 決済と返金の記録で確かめられる金額だけを出す。
+ */
+function OrderSettlementRows({
+  settlement,
+  money,
+}: {
+  settlement: Extract<AccountOrderSettlement, { kind: "settled" }>;
+  money: SummaryMoney;
+}) {
+  const showRefunds = settlement.refundsConfirmed;
+  const showNet = showRefunds && settlement.refunded > 0;
+
+  return (
+    <dl className="mt-3 flex flex-col gap-3">
+      <OrderAmountRow
+        label="お支払い済み金額"
+        value={formatAmount(money(settlement.paid))}
+        emphasized={!showNet}
+      />
+      {showRefunds && settlement.refunded > 0 ? (
         <OrderAmountRow
-          label="送料（税抜）"
-          value={formatAmount(money(amounts?.shippingExcludingTax))}
+          label={accountOrderRefundedLabel(settlement)}
+          value={`−${formatAmount(money(settlement.refunded))}`}
         />
+      ) : null}
+      {showRefunds && settlement.refundPending > 0 ? (
         <OrderAmountRow
-          label={`消費税 (${RECEIPT_TAX_RATE_PERCENT}%)`}
-          value={formatAmount(money(amounts?.tax))}
+          label="返金手続き中"
+          value={`−${formatAmount(money(settlement.refundPending))}`}
         />
-        {showRefunded ? (
-          <OrderAmountRow
-            label="返金額"
-            value={formatAmount(order.totalRefunded)}
-          />
-        ) : null}
+      ) : null}
+      {showNet ? (
         <OrderAmountRow
-          label="合計金額"
-          value={formatAmount(order.totalPrice)}
+          label="差引お支払い額"
+          value={formatAmount(money(settlement.net))}
           emphasized
         />
-      </dl>
-    </OrderSidebarSection>
+      ) : null}
+    </dl>
   );
 }
 
@@ -1121,10 +1162,7 @@ function OrderCard({ order }: { order: CustomerOrderDetail }) {
 
           {/* 1 列に畳んだときは、購入商品との境目にも線を引く */}
           <div className="flex flex-col border-t border-[var(--color-divider)] pt-[clamp(20px,calc(32px*var(--gap-scale-y)),32px)] min-[1025px]:border-t-0 min-[1025px]:pt-0">
-            <OrderAmountSummary
-              order={order}
-              showRefunded={optional.showRefunded}
-            />
+            <OrderAmountSummary order={order} />
 
             {/* 代金を受け取った注文だけ。金額の話のすぐ後に置く */}
             {RECEIPT_ISSUE_ENABLED && accountOrderHasReceipt(order) ? (

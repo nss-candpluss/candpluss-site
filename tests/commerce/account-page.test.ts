@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { receiptSummaryAmounts } from "@/data/receipt";
 import { accountMemberCopy } from "@/lib/commerce/account-field-notes";
 import {
   ACCOUNT_CANCELLED_BADGE,
@@ -31,10 +32,10 @@ import {
   accountCarrierShipmentStatus,
   formatAccountFulfillmentShipmentStatus,
   accountOrderIsTruncated,
-  accountOrderPaidAmount,
-  accountOrderRefundSummary,
+  accountOrderRefundedLabel,
   accountOrderRemovedItemsHeading,
-  accountOrderSummaryShipping,
+  accountOrderSettlement,
+  accountOrderSettlementNotes,
   accountOrderLinesByAmount,
   accountOrderMoreHref,
   accountOrderPagesFromParam,
@@ -300,65 +301,305 @@ describe("注文履歴の商品行", () => {
     ]);
   });
 
-  /*
-    Shopify の合計金額は、商品を指定した返金では減り、金額だけの返金では
-    減らない。どちらでもご注文時の金額と返金後の金額が同じになるようにする。
-  */
-  it("返金のある注文は、決済の記録からご注文時と返金後の金額を出す", () => {
-    const paid = (amount: string, kind = "SALE", status = "SUCCESS") => ({
+  describe("お支払いサマリーの精算状況", () => {
+    let nextId = 0;
+    const tx = (
+      amount: string,
+      kind = "SALE",
+      status = "SUCCESS",
+      extra: { id?: string; type?: string; currencyCode?: string; name?: string } = {}
+    ) => ({
+      id: extra.id ?? `t${(nextId += 1)}`,
+      type: extra.type ?? "CARD",
       kind,
       status,
-      transactionAmount: { presentmentMoney: { amount } },
+      transactionAmount: {
+        presentmentMoney: { amount, currencyCode: extra.currencyCode ?? "JPY" },
+      },
+      typeDetails: extra.name ? { name: extra.name } : null,
     });
-    const transactions = [
-      paid("46400"),
-      paid("1650", "REFUND"),
-      paid("999", "SALE", "FAILURE"),
-      paid("46400", "AUTHORIZATION"),
-    ];
-    const expected = { orderedTotal: 46400, refunded: 1650, afterRefund: 44750 };
+    const bank = { type: "MANUAL", name: "銀行振込" };
+    const settle = (order: {
+      cancelledAt?: string | null;
+      financialStatus: string;
+      totalRefunded?: string;
+      transactions: ReturnType<typeof tx>[];
+    }) =>
+      accountOrderSettlement({
+        currencyCode: "JPY",
+        cancelledAt: order.cancelledAt ?? null,
+        financialStatus: order.financialStatus,
+        totalRefunded: { amount: order.totalRefunded ?? "0", currencyCode: "JPY" },
+        transactions: order.transactions,
+      });
+    const cancelledAt = "2026-10-10T14:44:00Z";
 
-    expect(
-      accountOrderRefundSummary({
-        totalPrice: { amount: "44750" },
-        totalRefunded: { amount: "1650" },
-        transactions,
-      })
-    ).toEqual(expected);
-    expect(
-      accountOrderRefundSummary({
-        totalPrice: { amount: "46400" },
-        totalRefunded: { amount: "1650" },
-        transactions,
-      })
-    ).toEqual(expected);
+    it("1. 支払い済みの注文は、今の内訳をそのまま出す", () => {
+      const settlement = settle({
+        financialStatus: "PAID",
+        transactions: [tx("17710")],
+      });
 
-    // 返金が無い、または決済の記録が取れないときは今までの表示に任せる
-    expect(
-      accountOrderRefundSummary({
-        totalPrice: { amount: "46400" },
-        totalRefunded: { amount: "0" },
-        transactions,
-      })
-    ).toBeNull();
-    expect(
-      accountOrderRefundSummary({
-        totalPrice: { amount: "46400" },
-        totalRefunded: { amount: "1650" },
-        transactions: [{ kind: "SALE", status: "PENDING" }],
-      })
-    ).toBeNull();
-    expect(accountOrderPaidAmount([{ kind: "SALE", status: "SUCCESS" }])).toBeNull();
-    expect(
-      accountOrderPaidAmount([paid("30000"), paid("16400", "CAPTURE")])
-    ).toBe(46400);
+      expect(settlement).toEqual({ kind: "active", awaitingPayment: false, paid: 17710 });
+      expect(accountOrderSettlementNotes(settlement)).toEqual([]);
+    });
 
-    const source = readSource("components/commerce/AccountPageContent.tsx");
-    expect(source).toContain('label="ご注文時の合計金額"');
-    expect(source).toContain('label="返金後のお支払い金額"');
-    expect(readSource("lib/shopify/customer-account.ts")).toContain(
-      "transactionAmount { presentmentMoney { amount currencyCode } }"
-    );
+    it("2. 銀行振込の未入金は、ご請求額を残したままお支払い済み 0 円と出す", () => {
+      const settlement = settle({
+        financialStatus: "PENDING",
+        transactions: [tx("1250", "SALE", "PENDING", bank)],
+      });
+
+      expect(settlement).toEqual({ kind: "active", awaitingPayment: true, paid: 0 });
+    });
+
+    // #1056（ZIG STAKE 550 円＋送料 700 円）を入金前にキャンセルした形
+    it("3. 入金前のキャンセルはご請求なしとし、返金済みとは書かない", () => {
+      const settlement = settle({
+        cancelledAt,
+        financialStatus: "VOIDED",
+        transactions: [tx("1250", "SALE", "FAILURE", bank)],
+      });
+
+      expect(settlement).toEqual({ kind: "cancelledUnpaid" });
+      expect(accountOrderSettlementNotes(settlement)).toEqual([
+        "キャンセルのため、ご請求はありません。",
+      ]);
+      // キャンセル前の未入金には当てはめない
+      expect(
+        settle({
+          financialStatus: "PENDING",
+          transactions: [tx("1250", "SALE", "PENDING", bank)],
+        }).kind
+      ).toBe("active");
+    });
+
+    it("4. 入金後のキャンセルで返金前は、お支払い済み金額を残す", () => {
+      const settlement = settle({
+        cancelledAt,
+        financialStatus: "PAID",
+        transactions: [tx("3100")],
+      });
+
+      expect(settlement).toMatchObject({
+        kind: "settled",
+        cancelled: true,
+        paid: 3100,
+        refunded: 0,
+        net: 3100,
+        refundsConfirmed: true,
+      });
+      expect(accountOrderSettlementNotes(settlement)).toEqual([
+        "ご返金については、別途ご案内いたします。",
+      ]);
+    });
+
+    it("5. 一部返金は、確認できた返金額と差引額を分けて出す", () => {
+      const settlement = settle({
+        financialStatus: "PARTIALLY_REFUNDED",
+        totalRefunded: "10000",
+        transactions: [tx("100000"), tx("10000", "REFUND")],
+      });
+
+      expect(settlement).toMatchObject({
+        kind: "settled",
+        paid: 100000,
+        refunded: 10000,
+        net: 90000,
+        refundsConfirmed: true,
+        manualPayment: false,
+      });
+      expect(accountOrderSettlementNotes(settlement)).toEqual([]);
+    });
+
+    it("6. 全額返金は差引 0 円とし、全額返金済みと添える", () => {
+      const settlement = settle({
+        cancelledAt,
+        financialStatus: "REFUNDED",
+        totalRefunded: "3100",
+        transactions: [tx("3100"), tx("3100", "REFUND")],
+      });
+
+      expect(settlement).toMatchObject({ kind: "settled", refunded: 3100, net: 0 });
+      expect(accountOrderSettlementNotes(settlement)).toEqual(["全額返金済みです。"]);
+    });
+
+    it("7. 手続き中の返金は返金済みに数えず、成功した分は出す", () => {
+      for (const totalRefunded of ["1000", "3000"]) {
+        const settlement = settle({
+          financialStatus: "PARTIALLY_REFUNDED",
+          totalRefunded,
+          transactions: [
+            tx("10000"),
+            tx("1000", "REFUND"),
+            tx("2000", "REFUND", "PENDING"),
+          ],
+        });
+
+        expect(settlement).toMatchObject({
+          kind: "settled",
+          refunded: 1000,
+          refundPending: 2000,
+          net: 9000,
+          refundsConfirmed: true,
+        });
+        expect(accountOrderSettlementNotes(settlement)).toEqual([
+          "手続き中の金額は、完了後に返金済み金額へ反映されます。",
+        ]);
+      }
+    });
+
+    it("8. 失敗した返金は返金済みに数えず、完了していないと添える", () => {
+      const settlement = settle({
+        financialStatus: "PAID",
+        transactions: [tx("10000"), tx("2000", "REFUND", "FAILURE")],
+      });
+
+      expect(settlement).toMatchObject({
+        kind: "settled",
+        refunded: 0,
+        refundFailed: true,
+        net: 10000,
+      });
+      expect(accountOrderSettlementNotes(settlement)).toEqual([
+        "返金が完了していない金額があります。お問い合わせください。",
+      ]);
+    });
+
+    it("返金の合計と取引の記録が食い違うときは、返金の金額を確定しない", () => {
+      const settlement = settle({
+        financialStatus: "PARTIALLY_REFUNDED",
+        totalRefunded: "5000",
+        transactions: [tx("10000"), tx("1000", "REFUND")],
+      });
+
+      expect(settlement).toMatchObject({ kind: "settled", refundsConfirmed: false });
+      expect(accountOrderSettlementNotes(settlement)).toEqual([
+        "返金の状況を確認しています。詳しくはお問い合わせください。",
+      ]);
+      // 返金の合計だけあって取引が無いときも同じ
+      expect(
+        settle({
+          financialStatus: "PARTIALLY_REFUNDED",
+          totalRefunded: "1000",
+          transactions: [tx("10000")],
+        })
+      ).toMatchObject({ kind: "settled", refundsConfirmed: false });
+    });
+
+    it("記録が読めない・矛盾する注文は、金額を確定しない", () => {
+      // 入金が無いのに返金がある
+      expect(
+        settle({
+          financialStatus: "REFUNDED",
+          totalRefunded: "1000",
+          transactions: [tx("1000", "REFUND")],
+        }).kind
+      ).toBe("unknown");
+      // 入金より多く返している
+      expect(
+        settle({
+          financialStatus: "REFUNDED",
+          totalRefunded: "2000",
+          transactions: [tx("1000"), tx("2000", "REFUND")],
+        }).kind
+      ).toBe("unknown");
+      // 通貨が違う
+      expect(
+        settle({
+          financialStatus: "PAID",
+          transactions: [tx("10", "SALE", "SUCCESS", { currencyCode: "USD" })],
+        }).kind
+      ).toBe("unknown");
+      // 状態の分からない返金取引
+      expect(
+        settle({
+          financialStatus: "PAID",
+          transactions: [tx("1000"), tx("100", "REFUND", "UNKNOWN")],
+        }).kind
+      ).toBe("unknown");
+      // キャンセル済みで支払い済みなのに入金の記録が無い
+      expect(
+        settle({ cancelledAt, financialStatus: "PAID", transactions: [] }).kind
+      ).toBe("unknown");
+      expect(
+        accountOrderSettlementNotes({ kind: "unknown" })
+      ).toEqual(["お支払い状況を確認しています。詳しくはお問い合わせください。"]);
+    });
+
+    it("同じ取引が重複して届いても 1 回だけ数える", () => {
+      const sale = tx("10000", "SALE", "SUCCESS", { id: "sale" });
+      const refund = tx("1000", "REFUND", "SUCCESS", { id: "refund" });
+
+      expect(
+        settle({
+          financialStatus: "PARTIALLY_REFUNDED",
+          totalRefunded: "1000",
+          transactions: [sale, sale, refund, refund],
+        })
+      ).toMatchObject({ paid: 10000, refunded: 1000, net: 9000 });
+    });
+
+    it("手動の決済の返金は「ご返金手続き済み金額」とし、着金済みとは書かない", () => {
+      const settlement = settle({
+        cancelledAt,
+        financialStatus: "REFUNDED",
+        totalRefunded: "1250",
+        transactions: [tx("1250", "SALE", "SUCCESS", bank), tx("1250", "REFUND", "SUCCESS", bank)],
+      });
+
+      expect(settlement).toMatchObject({ kind: "settled", manualPayment: true, net: 0 });
+      expect(
+        accountOrderRefundedLabel(settlement as { manualPayment: boolean })
+      ).toBe("ご返金手続き済み金額");
+      expect(accountOrderSettlementNotes(settlement)).toEqual([
+        "全額のご返金手続きが済んでいます。",
+        "お振込みでのご返金は、着金まで日数がかかる場合があります。",
+      ]);
+      expect(accountOrderRefundedLabel({ manualPayment: false })).toBe("返金済み金額");
+    });
+
+    it("12・13. 注文の変更や 0 円の注文は、キャンセルとして扱わない", () => {
+      expect(settle({ financialStatus: "PAID", transactions: [] })).toEqual({
+        kind: "active",
+        awaitingPayment: false,
+        paid: 0,
+      });
+      expect(
+        settle({ financialStatus: "PAID", transactions: [tx("3100"), tx("0", "CHANGE")] })
+          .kind
+      ).toBe("active");
+    });
+
+    it("9〜11. 内訳は今の合計金額（割引後）から割り戻し、合計と一致する", () => {
+      // 送料あり（#1056 の注文時）・送料無料（#1057）・割引後の合計
+      expect(receiptSummaryAmounts({ total: 1250, shipping: 700 })).toEqual({
+        subtotalExcludingTax: 500,
+        shippingExcludingTax: 636,
+        tax: 114,
+        total: 1250,
+      });
+      expect(receiptSummaryAmounts({ total: 5880, shipping: 0 }).tax).toBe(535);
+      const discounted = receiptSummaryAmounts({ total: 2860, shipping: 700 });
+      expect(
+        discounted.subtotalExcludingTax + discounted.shippingExcludingTax + discounted.tax
+      ).toBe(2860);
+    });
+
+    it("サマリーは精算状況で組み立て、返金の注文には推測した内訳を出さない", () => {
+      const source = readSource("components/commerce/AccountPageContent.tsx");
+
+      expect(source).toContain("const settlement = accountOrderSettlement(order);");
+      expect(source).toContain('label="お支払い済み金額"');
+      expect(source).toContain('label="差引お支払い額"');
+      expect(source).toContain('label="返金手続き中"');
+      expect(source).toContain("receiptSummaryAmounts({ total: 0, shipping: 0 })");
+      expect(source).not.toContain('label="ご注文時の合計金額"');
+      expect(source).not.toContain("accountOrderSummaryShipping");
+      expect(readSource("lib/shopify/customer-account.ts")).toContain(
+        "transactionAmount { presentmentMoney { amount currencyCode } }"
+      );
+    });
   });
 
   it("返金数は注文数の範囲に収め、取れないときは 0 とみなす", () => {
@@ -388,23 +629,6 @@ describe("注文履歴の商品行", () => {
     expect(accountOrderRemovedItemsHeading({ cancelledAt: null })).toBe("返金済み");
     expect(accountOrderRemovedItemsHeading({})).toBe("返金済み");
   });
-
-  /*
-    入金前にキャンセルした #1056（ZIG STAKE 550 円＋送料 700 円）は、合計金額が
-    0 円になり送料 700 円だけが残った。そのまま割り振ると税抜合計が −636 円になる。
-  */
-  it("サマリーの送料は合計金額を超えない範囲に収める", () => {
-    expect(accountOrderSummaryShipping({ total: 0, shipping: 700 })).toBe(0);
-    expect(accountOrderSummaryShipping({ total: 1250, shipping: 700 })).toBe(700);
-    expect(accountOrderSummaryShipping({ total: 500, shipping: 700 })).toBe(500);
-    expect(accountOrderSummaryShipping({ total: 17710, shipping: 0 })).toBe(0);
-    expect(accountOrderSummaryShipping({ total: -1, shipping: 700 })).toBe(0);
-
-    const source = readSource("components/commerce/AccountPageContent.tsx");
-
-    expect(source).toContain("shipping: accountOrderSummaryShipping({");
-  });
-
   /*
     追跡番号を直すために発送を取り消して登録し直すと、取り消した側も
     注文に残る。数えると 1 点の注文が「全2個口」に見える。
@@ -803,7 +1027,7 @@ describe("注文履歴の商品行", () => {
     expect(source).not.toContain('label="小計"');
     expect(source).not.toContain('label="ご請求額"');
     // 税はサマリーの独立した行にするので、金額に税込を付けない
-    expect(source).toContain("formatAmount(order.totalPrice)");
+    expect(source).toContain("formatAmount(money(amounts.total))");
     expect(source).not.toContain("formatMoney(order.totalPrice)");
     expect(source).toContain("formatAccountMoney");
     expect(source).toContain("発送情報");

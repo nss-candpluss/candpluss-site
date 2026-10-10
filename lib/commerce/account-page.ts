@@ -345,74 +345,268 @@ export type AccountPaymentMethodDisplay = {
   isCard: boolean;
 };
 
-type AccountOrderPaymentTransaction = {
+type AccountOrderSettlementTransaction = {
+  id?: string;
+  type?: string;
   kind?: string | null;
   status?: string | null;
   transactionAmount?: {
-    presentmentMoney?: { amount: string } | null;
+    presentmentMoney?: { amount: string; currencyCode?: string } | null;
   } | null;
+  typeDetails?: { name?: string | null } | null;
 };
 
-/** 決済で受け取った額。成功した売上・売上確定だけを足す。記録が無ければ null */
-export function accountOrderPaidAmount(
-  transactions: readonly AccountOrderPaymentTransaction[]
-) {
-  const paid = transactions.filter(
-    (transaction) =>
-      (transaction.kind === "SALE" || transaction.kind === "CAPTURE") &&
-      transaction.status?.toUpperCase() === "SUCCESS"
-  );
-  const amounts = paid.map((transaction) =>
-    Number(transaction.transactionAmount?.presentmentMoney?.amount)
-  );
+/**
+ * サマリーに出す精算の状況。
+ *
+ * - `active`: キャンセルも返金もない注文。内訳は今の合計金額から出す
+ * - `cancelledUnpaid`: 入金前にキャンセルした注文。ご請求は無い
+ * - `settled`: 返金がある、または入金後にキャンセルした注文。決済と返金の記録から出す
+ * - `unknown`: 記録が食い違っていて、金額を確定できない注文
+ */
+export type AccountOrderSettlement =
+  | { kind: "active"; awaitingPayment: boolean; paid: number }
+  | { kind: "cancelledUnpaid" }
+  | {
+      kind: "settled";
+      cancelled: boolean;
+      paid: number;
+      /** `false` のときは返金の金額を確定できないので、返金の行も差引も出さない */
+      refundsConfirmed: boolean;
+      refunded: number;
+      refundPending: number;
+      refundFailed: boolean;
+      net: number;
+      /** 銀行振込など手動の決済。返金の記録は当店が登録したもので、着金までは示さない */
+      manualPayment: boolean;
+    }
+  | { kind: "unknown" };
 
-  return amounts.length && amounts.every(Number.isFinite)
-    ? amounts.reduce((sum, amount) => sum + amount, 0)
-    : null;
+const ACCOUNT_PAID_FINANCIAL_STATUSES = new Set([
+  "PAID",
+  "PARTIALLY_PAID",
+  "PARTIALLY_REFUNDED",
+  "REFUNDED",
+]);
+
+const ACCOUNT_MANUAL_PAYMENT_TYPES = new Set([
+  "BANK_DEPOSIT",
+  "CASH_ON_DELIVERY",
+  "CUSTOM",
+  "MANUAL",
+]);
+
+function isManualPaymentTransaction(transaction: AccountOrderSettlementTransaction) {
+  return (
+    ACCOUNT_MANUAL_PAYMENT_TYPES.has(transaction.type?.trim().toUpperCase() ?? "") ||
+    isBankTransferTransaction({
+      type: transaction.type ?? "",
+      typeDetails: transaction.typeDetails,
+    })
+  );
+}
+
+/** 金額を最小単位の整数にする。小数の足し算で 1 円ずれないように */
+function moneyUnits(amount?: string | null) {
+  const value = Number(amount);
+
+  return Number.isFinite(value) ? Math.round(value * 100) : null;
 }
 
 /**
- * 返金のある注文のサマリーに出す金額。返金が無ければ null。
+ * 注文の精算の状況を、キャンセル・決済・返金の記録から決める。
  *
- * Shopify の合計金額は、商品を指定した返金では減り、金額だけの返金では
- * 減らない。どちらか見分けられないので、注文時の金額は決済の記録から出す。
- * 合計金額のほうが大きいときは支払いが一部しか済んでいないので、そちらを使う。
+ * Shopify の合計金額はキャンセルや返金で変わるので、0 円かどうかでは判定しない。
+ * 入金は成功した売上・売上確定だけ、返金は成功した返金取引だけを数える。
+ * 返金の合計（`totalRefunded`）は照合にだけ使い、取引の記録と食い違うときは
+ * 返金の金額を出さない。
  */
-export function accountOrderRefundSummary(order: {
-  totalPrice: { amount: string };
-  totalRefunded?: { amount: string } | null;
-  transactions: readonly AccountOrderPaymentTransaction[];
-}) {
-  const refunded = Number(order.totalRefunded?.amount);
-  const paid = accountOrderPaidAmount(order.transactions);
+export function accountOrderSettlement(order: {
+  cancelledAt?: string | null;
+  financialStatus?: string | null;
+  currencyCode: string;
+  totalRefunded?: { amount: string; currencyCode?: string } | null;
+  transactions: readonly AccountOrderSettlementTransaction[];
+}): AccountOrderSettlement {
+  const seen = new Set<string>();
+  const transactions = order.transactions.filter((transaction) => {
+    if (!transaction.id) {
+      return true;
+    }
+    if (seen.has(transaction.id)) {
+      return false;
+    }
+    seen.add(transaction.id);
+    return true;
+  });
 
-  if (!Number.isFinite(refunded) || refunded <= 0 || paid === null) {
-    return null;
+  let paid = 0;
+  let refunded = 0;
+  let refundPending = 0;
+  let refundFailed = false;
+  let hasRefundTransaction = false;
+  let manualRefund = false;
+
+  for (const transaction of transactions) {
+    const kind = transaction.kind?.trim().toUpperCase();
+    const status = transaction.status?.trim().toUpperCase();
+    const isSale = kind === "SALE" || kind === "CAPTURE";
+    const isRefund = kind === "REFUND";
+
+    if (!isSale && !isRefund) {
+      continue;
+    }
+
+    const money = transaction.transactionAmount?.presentmentMoney;
+    const units = moneyUnits(money?.amount);
+    const currency = money?.currencyCode;
+
+    if (isRefund) {
+      hasRefundTransaction = true;
+    }
+
+    // 金額や通貨が読めない入金・返金があると、どの合計も確定できない
+    if (
+      (isRefund || status === "SUCCESS") &&
+      (units === null || (currency && currency !== order.currencyCode))
+    ) {
+      return { kind: "unknown" };
+    }
+
+    if (isSale) {
+      if (status === "SUCCESS") {
+        paid += units ?? 0;
+      }
+      continue;
+    }
+
+    if (status === "SUCCESS") {
+      refunded += units ?? 0;
+      manualRefund ||= isManualPaymentTransaction(transaction);
+    } else if (status === "PENDING" || status === "AWAITING_RESPONSE") {
+      refundPending += units ?? 0;
+    } else if (status === "FAILURE" || status === "ERROR") {
+      refundFailed = true;
+    } else {
+      return { kind: "unknown" };
+    }
   }
 
-  const orderedTotal = Math.max(paid, Number(order.totalPrice.amount) || 0);
+  const totalRefunded = moneyUnits(order.totalRefunded?.amount ?? "0");
+  const totalRefundedCurrency = order.totalRefunded?.currencyCode;
+
+  if (
+    totalRefunded === null ||
+    (totalRefundedCurrency && totalRefundedCurrency !== order.currencyCode)
+  ) {
+    return { kind: "unknown" };
+  }
+
+  const cancelled = Boolean(order.cancelledAt);
+  const status = order.financialStatus?.trim().toUpperCase() ?? "";
+  const yen = (units: number) => units / 100;
+
+  if (!cancelled && !hasRefundTransaction && totalRefunded === 0) {
+    return {
+      kind: "active",
+      awaitingPayment: status !== "PAID",
+      paid: yen(paid),
+    };
+  }
+
+  if (cancelled && paid === 0 && !hasRefundTransaction && totalRefunded === 0) {
+    return ACCOUNT_PAID_FINANCIAL_STATUSES.has(status)
+      ? { kind: "unknown" }
+      : { kind: "cancelledUnpaid" };
+  }
+
+  // 入金の記録が無いのに返金がある、または入金より多く返している
+  if (paid === 0 || refunded > paid) {
+    return { kind: "unknown" };
+  }
+
+  /*
+    返金の合計が、成功した返金だけの合計か、手続き中の分まで含めた合計の
+    どちらかに合えば、取引ごとの状態を信用する。どちらにも合わなければ、
+    返金の金額は確定できない。
+  */
+  const refundsConfirmed =
+    totalRefunded === refunded || totalRefunded === refunded + refundPending;
 
   return {
-    orderedTotal,
-    refunded,
-    afterRefund: Math.max(0, orderedTotal - refunded),
+    kind: "settled",
+    cancelled,
+    paid: yen(paid),
+    refundsConfirmed,
+    refunded: yen(refunded),
+    refundPending: yen(refundPending),
+    refundFailed,
+    net: yen(paid - refunded),
+    manualPayment:
+      manualRefund ||
+      transactions.some(
+        (transaction) =>
+          ["SALE", "CAPTURE"].includes(transaction.kind?.trim().toUpperCase() ?? "") &&
+          transaction.status?.trim().toUpperCase() === "SUCCESS" &&
+          isManualPaymentTransaction(transaction)
+      ),
   };
 }
 
-/**
- * サマリーの内訳に使う送料。合計金額を超えない範囲に収める。
- *
- * 入金前にキャンセルすると Shopify の合計金額は 0 になるが、送料は注文時の
- * 額のまま残る。そのまま割り振ると商品の税抜合計がマイナスになる。
- */
-export function accountOrderSummaryShipping({
-  total,
-  shipping,
-}: {
-  total: number;
-  shipping: number;
-}) {
-  return Math.min(Math.max(0, shipping), Math.max(0, total));
+/** 手動の決済では、返金の記録は当店が手続きした額であって、着金の確認ではない */
+export function accountOrderRefundedLabel(settlement: { manualPayment: boolean }) {
+  return settlement.manualPayment ? "ご返金手続き済み金額" : "返金済み金額";
+}
+
+/** サマリーの金額の下に添える説明。金額の意味を取り違えないように */
+export function accountOrderSettlementNotes(settlement: AccountOrderSettlement) {
+  switch (settlement.kind) {
+    case "active":
+      return [];
+    case "cancelledUnpaid":
+      return ["キャンセルのため、ご請求はありません。"];
+    case "unknown":
+      return ["お支払い状況を確認しています。詳しくはお問い合わせください。"];
+  }
+
+  if (!settlement.refundsConfirmed) {
+    return ["返金の状況を確認しています。詳しくはお問い合わせください。"];
+  }
+
+  const notes: string[] = [];
+  const refundedLabel = accountOrderRefundedLabel(settlement);
+
+  if (settlement.refundPending > 0) {
+    notes.push(`手続き中の金額は、完了後に${refundedLabel}へ反映されます。`);
+  }
+  if (settlement.refundFailed) {
+    notes.push("返金が完了していない金額があります。お問い合わせください。");
+  }
+  if (
+    settlement.refunded > 0 &&
+    settlement.net === 0 &&
+    settlement.refundPending === 0 &&
+    !settlement.refundFailed
+  ) {
+    notes.push(
+      settlement.manualPayment
+        ? "全額のご返金手続きが済んでいます。"
+        : "全額返金済みです。"
+    );
+  }
+  if (settlement.manualPayment && settlement.refunded > 0) {
+    notes.push("お振込みでのご返金は、着金まで日数がかかる場合があります。");
+  }
+  if (
+    settlement.cancelled &&
+    settlement.refunded === 0 &&
+    settlement.refundPending === 0 &&
+    !settlement.refundFailed
+  ) {
+    notes.push("ご返金については、別途ご案内いたします。");
+  }
+
+  return notes;
 }
 
 /**
