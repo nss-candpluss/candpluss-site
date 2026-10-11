@@ -727,7 +727,7 @@ export async function fetchCustomerAccountSnapshot(
   return { profile, orders };
 }
 
-async function customerAccountRequest<T>(
+export async function customerAccountRequest<T>(
   accessToken: string,
   query: string,
   variables: Record<string, unknown> = {}
