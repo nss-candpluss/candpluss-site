@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { AccountReceiptView } from "@/components/commerce/AccountReceiptContent";
-import { ReturnInvoiceSheet, SimplifiedInvoiceSheet } from "@/components/commerce/InvoiceSheet";
+import { invoiceDetailRows, ReturnInvoiceSheet, SimplifiedInvoiceSheet } from "@/components/commerce/InvoiceSheet";
 import { INVOICE_RULES_VERSION, PROVISIONAL_INVOICE_TAX_CONFIG } from "@/lib/invoice/config";
 import type { CustomerAccountInvoiceOrder } from "@/lib/invoice/customer-account-order";
 import { customerReceiptFromAccountOrder } from "@/lib/invoice/customer-receipt";
@@ -255,15 +255,15 @@ describe("領収書 兼 適格簡易請求書の帳票", () => {
       "取引年月日 2026年10月9日",
       "決済日 2026年10月1日",
       "注文番号 #1054",
-      "領収金額",
-      "¥17,710-",
+      "領収金額 ¥17,710 （税込） うち消費税額 1,610円",
       "グランドシート",
-      "10%対象 17,710 円 1,610 円",
-      "合計 17,710 円 1,610 円",
+      "10%対象 17,710円 1,610円",
+      "合計 17,710円 1,610円",
       "金額はすべて税込です。",
     ]) {
       expect(text).toContain(expected);
     }
+    expect(text).not.toContain("¥17,710-");
     expect(text).not.toContain("発行日");
     expect(text).not.toContain("領収日");
     expect(text).not.toContain("様");
@@ -295,29 +295,85 @@ describe("領収書 兼 適格簡易請求書の帳票", () => {
 
     for (const expected of [
       "コーヒー豆 ※ 1 1,080 1,080",
-      "ガイロープ 1 2,400 2,400",
-      "割引 −240",
+      "ガイロープ 1 2,400 2,400 └ 割引 −240",
       "送料（通常配送） 1,100",
-      "10%対象 3,260 円 296 円",
-      "8%対象（軽減税率） 1,080 円 80 円",
-      "合計 4,340 円 376 円",
+      "10%対象 3,260円 296円",
+      "8%対象（軽減税率） 1,080円 80円",
+      "合計 4,340円 376円",
       "※は軽減税率（8%）の対象です。",
+      "うち消費税額 376円",
     ]) {
       expect(text).toContain(expected);
     }
   });
 
-  it("テストデータのみ：明細の金額の合計は、税率ごとの合計と一致する", () => {
+  it("テストデータのみ：明細の金額の合計は、税率ごとの合計・領収金額と一致する", () => {
     const view = issuable(viewOf(mixedOrder));
-    const html = renderToStaticMarkup(createElement(SimplifiedInvoiceSheet, { document: view.invoice }));
-    const detail = html.slice(html.lastIndexOf("<table"));
-    const amounts = [...detail.matchAll(/<tr[^>]*>(?:(?!<\/tr>).)*?<td[^>]*>([−\d,]+)<\/td><\/tr>/g)].map((match) =>
-      Number(match[1].replace("−", "-").replace(/,/g, ""))
-    );
 
-    expect(amounts.reduce((sum, amount) => sum + amount, 0)).toBe(view.invoice.taxSummary.total);
+    expect(detailAmounts(view.invoice).reduce((sum, amount) => sum + amount, 0)).toBe(view.invoice.taxSummary.total);
+    expect(view.invoice.receipt.receivedAmount).toBe(view.invoice.taxSummary.total);
+  });
+
+  // 商品が少ない注文でも、空の行で表の高さを埋めない
+  it("明細は商品・割引・送料の行だけで、空の行を足さない", () => {
+    const view = issuable(viewOf(order1054));
+
+    expect(detailAmounts(view.invoice)).toEqual(view.invoice.lines.map((line) => line.unitPrice * line.quantity));
+    expect(detailHtml(view.invoice).match(/<tr/g)).toHaveLength(1 + view.invoice.lines.length);
+  });
+
+  it("割引のない注文には割引の行を出さない", () => {
+    const view = issuable(viewOf(order1054));
+
+    expect(view.invoice.lines.every((line) => line.discount === 0)).toBe(true);
+    expect(sheetText(createElement(SimplifiedInvoiceSheet, { document: view.invoice }))).not.toContain("割引");
+  });
+
+  it("請求額 0 円の送料は出さず、割引のある送料は割引も並べる（書類の送料の記録は変えない）", () => {
+    const { invoice } = issuable(viewOf(mixedOrder));
+    const shipping = invoice.shipping!;
+    const free = { ...invoice, shipping: { ...shipping, discount: shipping.price, amount: yen(0) } };
+    const discounted = { ...invoice, shipping: { ...shipping, discount: yen(100), amount: yen(shipping.price - 100) } };
+
+    expect(invoiceDetailRows(free).some((row) => row.key.startsWith("shipping"))).toBe(false);
+    expect(free.shipping.price).toBe(1100);
+    expect(invoiceDetailRows({ ...invoice, shipping: null }).some((row) => row.key.startsWith("shipping"))).toBe(false);
+    expect(
+      invoiceDetailRows(discounted)
+        .filter((row) => row.key.startsWith("shipping"))
+        .map(({ description, amount, attachedToPrevious }) => [description, amount, attachedToPrevious ?? false])
+    ).toEqual([
+      ["送料（通常配送）", 1100, false],
+      ["└ 送料の割引", -100, true],
+    ]);
+  });
+
+  // 表示の整理で書類の値を変えていない
+  it("帳票を描いても、書類の金額・税額・法定記載事項の値は変わらない", () => {
+    const view = issuable(viewOf(mixedOrder));
+    const before = structuredClone(view.invoice);
+
+    renderToStaticMarkup(createElement(SimplifiedInvoiceSheet, { document: view.invoice }));
+    expect(view.invoice).toEqual(before);
+    expect(view.invoice.taxSummary.rates.map((rate) => [rate.ratePercent, rate.totalIncludingTax, rate.tax])).toEqual([
+      [10, 3260, 296],
+      [8, 1080, 80],
+    ]);
   });
 });
+
+function detailHtml(document: Parameters<typeof SimplifiedInvoiceSheet>[0]["document"]) {
+  const html = renderToStaticMarkup(createElement(SimplifiedInvoiceSheet, { document }));
+
+  return html.slice(html.indexOf("data-receipt-detail"), html.indexOf("data-receipt-summary"));
+}
+
+/** 明細の表の、各行の金額（右端の列） */
+function detailAmounts(document: Parameters<typeof SimplifiedInvoiceSheet>[0]["document"]) {
+  return [...detailHtml(document).matchAll(/<tr[^>]*>(?:(?!<\/tr>).)*?<td[^>]*>([−\d,]+)<\/td><\/tr>/g)].map((match) =>
+    Number(match[1].replace("−", "-").replace(/,/g, ""))
+  );
+}
 
 describe("適格返還請求書の帳票", () => {
   it("テストデータのみ：返還年月日・元の取引年月日・返還金額と消費税額を載せ、領収書を兼ねない", () => {
@@ -335,10 +391,9 @@ describe("適格返還請求書の帳票", () => {
       "登録番号 T5290001041852",
       "返還年月日 2026年10月12日",
       "元の取引年月日 2026年10月5日",
-      "返還金額",
-      "¥1,740-",
+      "返還金額 ¥1,740 （税込） うち消費税額 158円",
       "三角自在金具 6個セット 1 1,740",
-      "10%対象 1,740 円 158 円",
+      "10%対象 1,740円 158円",
     ]) {
       expect(text).toContain(expected);
     }

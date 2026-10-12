@@ -50,7 +50,8 @@ function drawRules(
     return at;
   };
 
-  for (const cell of sheet.querySelectorAll<HTMLElement>("th, td")) {
+  // 表のマスだけでなく、金額の下線や区切り線も画面と同じに引く
+  for (const cell of sheet.querySelectorAll<HTMLElement>("*")) {
     const style = getComputedStyle(cell);
     const rect = relativeRect(cell.getBoundingClientRect(), origin, scale);
     const right = rect.left + rect.width;
@@ -284,21 +285,23 @@ function renderPages(sheet: HTMLElement): HTMLCanvasElement[] {
     ctx.textBaseline = "alphabetic";
 
     let y = 0;
+    let top = slice.top;
+    // 切った位置の罫線は、上下のページの両方に半分ずつ掛かる。上のページは線の太さの分だけ下まで描いて
+    // 線を欠けさせない。続きのページは見出しの下の線を太さの分まで写し、切った行の線の残りは描かない
+    const half = Math.ceil(scale / 2) + 1;
 
     if (index > 0) {
       ctx.textAlign = "left";
       ctx.fillText(continuation, 0, caption.size * 1.2);
       y = bandHeight;
-      ctx.drawImage(canvas, 0, headTop, canvas.width, headBottom - headTop, 0, y, canvas.width, headBottom - headTop);
-      y += headBottom - headTop;
+      ctx.drawImage(canvas, 0, headTop, canvas.width, headBottom + half - headTop, 0, y, canvas.width, headBottom + half - headTop);
+      y += headBottom + half - headTop;
+      top = slice.top + half;
     }
 
-    // 切った位置の罫線は、上下のページの両方に半分ずつ掛かる。下のページは線の中心から描くので、
-    // 上のページは線の太さの分だけ下まで描いて線を欠けさせない
-    const bottom =
-      index < slices.length - 1 ? Math.min(canvas.height, slice.bottom + Math.ceil(scale / 2) + 1) : slice.bottom;
+    const bottom = index < slices.length - 1 ? Math.min(canvas.height, slice.bottom + half) : slice.bottom;
 
-    ctx.drawImage(canvas, 0, slice.top, canvas.width, bottom - slice.top, 0, y, canvas.width, bottom - slice.top);
+    ctx.drawImage(canvas, 0, top, canvas.width, bottom - top, 0, y, canvas.width, bottom - top);
 
     ctx.textAlign = "right";
     ctx.fillText(`${index + 1} / ${slices.length}`, page.width, page.height - caption.size * 0.5);

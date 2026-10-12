@@ -34,15 +34,16 @@ describe("領収書の発行者情報", () => {
     expect(receiptIssuer.address).toContain("大野城市");
   });
 
-  // 屋号と問い合わせ先を先に、運営会社を後に並べる
-  it("屋号・TEL・運営会社・住所の順に並べる", () => {
+  // 発行事業者の欄に、事業者名・所在地・連絡先・登録番号をまとめる
+  it("屋号・事業者名・住所・TEL・登録番号の順に並べる", () => {
     const source = readSource("components/commerce/InvoiceSheet.tsx");
     const order = [
       "{document.issuer.brandName}",
-      "TEL：{receiptIssuer.tel}",
-      "運営：{document.issuer.name}",
+      "{document.issuer.name}",
       "{receiptIssuer.postalCode}",
       "{receiptIssuer.address}",
+      "TEL {receiptIssuer.tel}",
+      "登録番号 {document.issuer.registrationNumber}",
     ].map((text) => source.indexOf(text));
 
     expect(receiptIssuer.brandName).toBe("C AND+S");
@@ -69,7 +70,9 @@ describe("領収書の発行者情報", () => {
   it("領収書・返還請求書とも登録番号を印字する", () => {
     const source = readSource("components/commerce/InvoiceSheet.tsx");
 
-    expect(source.match(/registrationRow\(document\)/g)).toHaveLength(2);
+    // 発行事業者の欄は両方の帳票が使う枠（SheetFrame）にある。描いた結果は帳票のテストで確かめる
+    expect(source.match(/<IssuerBlock document=\{document\} \/>/g)).toHaveLength(1);
+    expect(source.match(/<SheetFrame\b/g)).toHaveLength(2);
   });
 });
 
@@ -180,8 +183,9 @@ describe("領収書の体裁", () => {
     expect(sheetSource()).not.toContain("--text-scale");
   });
 
-  it("商品が少なくても明細の行数を保つ", () => {
-    expect(sheetSource()).toContain("RECEIPT_MIN_DETAIL_ROWS");
+  // 行の数だけの表にする。空の行で A4 を埋めると、商品 1 点でも空白の表が残る
+  it("明細に空の行を足さない", () => {
+    expect(sheetSource()).not.toMatch(/MIN_DETAIL_ROWS|blankRow/);
   });
 
   // マスごとに線を引くと、境目だけ二重になって太く見える
