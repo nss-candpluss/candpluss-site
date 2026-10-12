@@ -8,6 +8,10 @@ import {
   accountOrderWithoutCancelledFulfillments,
   shopifyCustomerProfileUrlFromAccountUrl,
 } from "@/lib/commerce/account-page";
+import {
+  INVOICE_ORDER_FIELDS,
+  type CustomerAccountInvoiceOrder,
+} from "@/lib/invoice/customer-account-order";
 
 const customerAccountConfigSchema = z.object({
   clientId: z.string().min(1),
@@ -457,6 +461,25 @@ export async function fetchCustomerOrder(accessToken: string, orderId: string) {
           }
         }
       }
+    }`,
+    { id: orderId }
+  );
+
+  return data.order ?? null;
+}
+
+/**
+ * 領収書 兼 適格簡易請求書・適格返還請求書を組み立てるための 1 件分の注文。
+ * 注文時の販売記録・決済・返金・出荷の記録だけを読み、氏名・住所・連絡先は読まない。
+ * `fetchCustomerOrder` と同じく、ログイン中のお客様本人の注文しか返らない。
+ */
+export async function fetchCustomerInvoiceOrder(accessToken: string, orderId: string) {
+  const data = await customerAccountRequest<{
+    order?: CustomerAccountInvoiceOrder | null;
+  }>(
+    accessToken,
+    `query CustomerInvoiceOrder($id: ID!) {
+      order(id: $id) { ${INVOICE_ORDER_FIELDS} }
     }`,
     { id: orderId }
   );

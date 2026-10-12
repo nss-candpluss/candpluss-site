@@ -8,10 +8,13 @@ import { downloadReceiptPdf } from "@/lib/commerce/receipt-pdf";
 type ReceiptPrintButtonProps = {
   /** 保存するファイル名（拡張子なし） */
   fileName: string;
+  /** 帳票が複数あるページで、保存する帳票（`data-receipt-sheet` の値） */
+  sheetKey?: string;
+  label?: string;
 };
 
 /** 押したらそのまま PDF を保存する。作れなかったときだけ印刷ダイアログに逃がす */
-export function ReceiptPrintButton({ fileName }: ReceiptPrintButtonProps) {
+export function ReceiptPrintButton({ fileName, sheetKey, label = "PDFダウンロード" }: ReceiptPrintButtonProps) {
   const [isGenerating, setIsGenerating] = useState(false);
 
   return (
@@ -22,7 +25,7 @@ export function ReceiptPrintButton({ fileName }: ReceiptPrintButtonProps) {
         setIsGenerating(true);
 
         try {
-          await downloadReceiptPdf(fileName);
+          await downloadReceiptPdf(fileName, sheetKey);
         } catch {
           window.print();
         } finally {
@@ -31,7 +34,7 @@ export function ReceiptPrintButton({ fileName }: ReceiptPrintButtonProps) {
       }}
       className={`${accountPrimaryButtonClassName} disabled:cursor-wait disabled:opacity-60`}
     >
-      {isGenerating ? "PDFを作成しています" : "PDFダウンロード"}
+      {isGenerating ? "PDFを作成しています" : label}
     </button>
   );
 }

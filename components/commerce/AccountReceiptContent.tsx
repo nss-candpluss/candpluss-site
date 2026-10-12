@@ -1,17 +1,13 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
-import { accountTextLinkClassName } from "@/components/commerce/accountStyles";
-import { ReceiptPrintButton } from "@/components/commerce/ReceiptPrintButton";
-import { ReceiptSheet } from "@/components/commerce/ReceiptSheet";
 import {
-  RECEIPT_ISSUE_ENABLED,
-  isQualifiedInvoiceReady,
-  receiptFileName,
-  receiptIssuer,
-  receiptLineDescription,
-  receiptSummaryAmounts,
-} from "@/data/receipt";
+  accountSubHeadingClassName,
+  accountTextLinkClassName,
+} from "@/components/commerce/accountStyles";
+import { ReturnInvoiceSheet, SimplifiedInvoiceSheet } from "@/components/commerce/InvoiceSheet";
+import { ReceiptPrintButton } from "@/components/commerce/ReceiptPrintButton";
+import { RECEIPT_ISSUE_ENABLED } from "@/data/receipt";
 import {
   ACCOUNT_BASE_PATH,
   ACCOUNT_LOGIN_PATH,
@@ -20,9 +16,15 @@ import {
   accountSessionRefreshHref,
 } from "@/lib/commerce/account-login";
 import {
-  fetchCustomerOrder,
-  type CustomerMoney,
-} from "@/lib/shopify/customer-account";
+  customerReceiptView,
+  invoiceFileName,
+  RECEIPT_NOTICES,
+  REFUND_NOTICES,
+  RETURN_INVOICE_NOTICE,
+  type CustomerReceiptView,
+  type CustomerRefundView,
+} from "@/lib/invoice/customer-receipt-view";
+import { loadCustomerReceipt } from "@/lib/invoice/load-customer-receipt";
 import {
   getLiveCustomerTokenSession,
   hasRefreshableCustomerTokenSession,
@@ -34,18 +36,52 @@ type AccountReceiptContentProps = {
   order?: string;
 };
 
-function amountOf(money?: CustomerMoney | null) {
-  return money ? Number(money.amount) : 0;
-}
-
 const mainClassName =
   "px-[var(--container-x)] pt-[calc(var(--header-height)+var(--container-y-top))] pb-[var(--container-y-bottom)]";
 
+const sheetBoxClassName =
+  "mt-[calc(24px*var(--gap-scale-y))] border border-[var(--color-divider)] p-[4%] print:mt-0 print:border-0 print:p-0";
+
+function yenText(value: number) {
+  return `${value.toLocaleString("ja-JP")}円`;
+}
+
+/** 返金の状況。書類とは別に示し、印刷・PDF には含めない */
+function RefundStatus({ refunds }: { refunds: CustomerRefundView }) {
+  return (
+    <section className="mt-[calc(40px*var(--gap-scale-y))] print:hidden" aria-labelledby="refund-status">
+      <h2 id="refund-status" className={accountSubHeadingClassName}>
+        ご返金の状況
+      </h2>
+      <div className={`mt-[calc(16px*var(--gap-scale-y))] font-body-ja ${bodyText(15)}`}>
+        {refunds.refunded > 0 ? <p>ご返金済み：{yenText(refunds.refunded)}</p> : null}
+        {refunds.pending > 0 ? <p>ご返金の手続き中：{yenText(refunds.pending)}</p> : null}
+        {refunds.failed ? <p>{REFUND_NOTICES.failed}</p> : null}
+        {refunds.needsReview ? <p>{REFUND_NOTICES.needsReview}</p> : null}
+        <p className="mt-[calc(8px*var(--gap-scale-y))]">{REFUND_NOTICES.original}</p>
+      </div>
+    </section>
+  );
+}
+
+function BackLink() {
+  return (
+    <Link
+      href={ACCOUNT_BASE_PATH}
+      className={`mt-[calc(32px*var(--gap-scale-y))] inline-block ${accountTextLinkClassName} ${bodyText(15)}`}
+    >
+      マイページへ戻る
+    </Link>
+  );
+}
+
 /**
- * 会員が自分で発行する領収書。
+ * 会員が自分で発行する領収書 兼 適格簡易請求書。
  *
- * Shopify は領収書そのものを配ってくれないので、注文データから組み立てる。
- * 宛名は請求先の氏名で固定し、PDF はブラウザ上で作って保存させる。
+ * Shopify は領収書そのものを配ってくれないので、注文時の販売記録・決済・出荷の記録から
+ * 毎回組み立てる（`lib/invoice`）。現在の合計（キャンセル・返金後の金額）は使わない。
+ * 返金は領収書を書き換えず、返金の状況と適格返還請求書で別に示す。
+ * PDF はブラウザ上で作って保存させ、サーバーには残さない。
  */
 export async function AccountReceiptContent({
   order: orderParam,
@@ -68,62 +104,68 @@ export async function AccountReceiptContent({
   }
 
   const orderId = orderParam ? decodeURIComponent(orderParam) : null;
-  const order = orderId
-    ? await fetchCustomerOrder(session.accessToken, orderId).catch(() => null)
-    : null;
 
-  if (!order) {
+  return (
+    <AccountReceiptView
+      view={customerReceiptView(
+        orderId ? await loadCustomerReceipt(session.accessToken, orderId) : { status: "notFound" }
+      )}
+    />
+  );
+}
+
+/** 領収書のページの中身。判定の済んだ内容だけを受け取り、取得や認証はしない */
+export function AccountReceiptView({ view }: { view: CustomerReceiptView }) {
+  if (view.status === "notice") {
     return (
       <main data-header-theme="onLight" className={mainClassName}>
         <h1 className={`font-heading ${sectionTitle62ClassName}`}>Receipt</h1>
         <p className={`mt-[var(--section-title-gap)] font-body-ja ${bodyText(15)}`}>
-          対象の注文が見つかりませんでした。
+          {RECEIPT_NOTICES[view.notice]}
         </p>
-        <Link
-          href={ACCOUNT_BASE_PATH}
-          className={`mt-[calc(32px*var(--gap-scale-y))] inline-block ${accountTextLinkClassName} ${bodyText(15)}`}
-        >
-          マイページへ戻る
-        </Link>
+        {view.refunds ? <RefundStatus refunds={view.refunds} /> : null}
+        <BackLink />
       </main>
     );
   }
-
-  const amounts = receiptSummaryAmounts({
-    total: amountOf(order.totalPrice),
-    shipping: amountOf(order.totalShipping),
-  });
 
   return (
     <main data-header-theme="onLight" data-receipt-page className={mainClassName}>
       <div className="mx-auto max-w-[720px]">
         <div className="flex justify-end print:hidden">
-          <ReceiptPrintButton fileName={receiptFileName(order.name, order.processedAt)} />
+          <ReceiptPrintButton
+            fileName={invoiceFileName(view.invoice)}
+            sheetKey={view.invoice.documentId}
+          />
         </div>
 
         {/* ここから下が印刷される領域 */}
-        <div className="mt-[calc(24px*var(--gap-scale-y))] border border-[var(--color-divider)] p-[4%] print:mt-0 print:border-0 print:p-0">
-          <ReceiptSheet
-            recipientName={order.billingAddress?.name?.trim() ?? ""}
-            issuedAt={order.processedAt}
-            orderName={order.name}
-            registrationNumber={
-              isQualifiedInvoiceReady()
-                ? receiptIssuer.invoiceRegistrationNumber
-                : null
-            }
-            subtotalExcludingTax={amounts.subtotalExcludingTax}
-            shippingExcludingTax={amounts.shippingExcludingTax}
-            tax={amounts.tax}
-            total={amounts.total}
-            lines={order.lineItems.nodes.map((item) => ({
-              id: item.id,
-              description: receiptLineDescription(item.name, item.variantTitle),
-              quantity: item.quantity,
-              amount: amountOf(item.totalPrice ?? item.price),
-            }))}
-          />
+        <div className={sheetBoxClassName}>
+          <SimplifiedInvoiceSheet document={view.invoice} />
         </div>
+
+        {view.refunds ? <RefundStatus refunds={view.refunds} /> : null}
+
+        {view.returnInvoices.map((document, index) => (
+          <section key={document.documentId} className="mt-[calc(40px*var(--gap-scale-y))] print:mt-0 print:break-before-page">
+            <div className="flex justify-end print:hidden">
+              <ReceiptPrintButton
+                fileName={invoiceFileName(document, index)}
+                sheetKey={document.documentId}
+                label="適格返還請求書のPDFダウンロード"
+              />
+            </div>
+            <div className={sheetBoxClassName}>
+              <ReturnInvoiceSheet document={document} />
+            </div>
+          </section>
+        ))}
+
+        {view.returnInvoiceWithheld ? (
+          <p className={`mt-[calc(24px*var(--gap-scale-y))] font-body-ja ${bodyText(15)} print:hidden`}>
+            {RETURN_INVOICE_NOTICE}
+          </p>
+        ) : null}
       </div>
     </main>
   );

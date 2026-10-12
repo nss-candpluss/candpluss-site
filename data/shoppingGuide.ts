@@ -1,4 +1,4 @@
-import { RECEIPT_ISSUE_ENABLED } from "@/data/receipt";
+import { RECEIPT_GUIDE_NOTICE_ENABLED } from "@/data/receipt";
 import type { ShoppingGuideContent } from "@/types/shoppingGuide";
 
 export const shoppingGuideContent = {
@@ -137,7 +137,7 @@ export const shoppingGuideContent = {
               type: "paragraph",
               text: "納品書：お届けする製品に同梱し発送いたします。\n利用明細書：当社からの個別発行は原則行っておりません。",
             },
-            ...(RECEIPT_ISSUE_ENABLED
+            ...(RECEIPT_GUIDE_NOTICE_ENABLED
               ? ([
                   {
                     type: "paragraph",

@@ -1142,10 +1142,19 @@ describe("注文履歴の商品行", () => {
     expect(accountOrderHasReceipt({ financialStatus: "PARTIALLY_PAID" })).toBe(
       false
     );
-    expect(accountOrderHasReceipt({ financialStatus: "REFUNDED" })).toBe(false);
+    expect(accountOrderHasReceipt({ financialStatus: "VOIDED" })).toBe(false);
+    // 当初の領収書は返金後も当初の内容で出す。出せるかは領収書のページで判定する
+    expect(accountOrderHasReceipt({ financialStatus: "REFUNDED" })).toBe(true);
     expect(
       accountOrderHasReceipt({
         financialStatus: "PAID",
+        cancelledAt: "2026-09-20T10:00:00Z",
+      })
+    ).toBe(true);
+    // 入金前のキャンセル（#1056〜#1058 と同じ形）には出さない
+    expect(
+      accountOrderHasReceipt({
+        financialStatus: "VOIDED",
         cancelledAt: "2026-09-20T10:00:00Z",
       })
     ).toBe(false);

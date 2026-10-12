@@ -1006,22 +1006,20 @@ export const ACCOUNT_CANCELLED_BADGE: AccountStatusDisplay = {
 };
 
 /**
- * 領収書を出してよいか。
+ * 注文履歴に領収書へのリンクを出すか。
  *
  * 入金が済んでいない注文で領収書が出ると、支払いの証明として使われてしまう。
- * 代金を受け取った注文だけに絞る。一部返金は受け取った事実が残るので出す。
+ * 代金を受け取った注文だけに絞る。入金前のキャンセル（VOIDED）は出さない。
  */
 export function accountOrderHasReceipt(order: {
   cancelledAt?: string | null;
   financialStatus?: string | null;
 }) {
-  if (order.cancelledAt) {
-    return false;
-  }
-
   const status = order.financialStatus?.trim().toUpperCase();
 
-  return status === "PAID" || status === "PARTIALLY_REFUNDED";
+  // 返金・出荷後のキャンセルがあっても、当初に代金を受け取った事実は残る。
+  // 発行できるか（出荷済みか、取引が成立しているか）は領収書のページで判定する
+  return status === "PAID" || status === "PARTIALLY_REFUNDED" || status === "REFUNDED";
 }
 
 /**
