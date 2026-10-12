@@ -64,6 +64,28 @@ export type ShopifyAmounts = {
   total: Yen;
   tax: Yen;
   rates: { ratePercent: number; amount: Yen; tax: Yen }[];
+  /**
+   * 販売記録 1 件ごとの金額と、Shopify が割り振った税額（注文時の記録だけ）。
+   * 利用明細書の「税抜合計」「送料（税抜）」の内訳に使う。返金・テストの記録では省く
+   */
+  allocations?: ShopifySaleAllocation[];
+};
+
+/**
+ * Shopify が注文全体の税額を販売記録ごとに割り振った値。割り切れない 1 円は 1 円ずつ
+ * 割り振られ、合計すると注文の税額になる。割り振りは後から変わらない
+ * （Customer Account API の `Sale`）
+ */
+export type ShopifySaleAllocation = {
+  lineType: "product" | "shipping";
+  /** 商品の行の ID。送料は `null` */
+  lineId: string | null;
+  /** 割引後・税込の金額（`totalAmount`） */
+  amount: Yen;
+  /** 割り振られた税額（`totalTaxAmount`） */
+  tax: Yen;
+  /** 税の明細の税率。税の明細が無ければ `null` */
+  ratePercent: number | null;
 };
 
 /** ご注文内容。注文時の販売記録から作り、後から変えない */

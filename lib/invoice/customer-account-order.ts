@@ -16,6 +16,7 @@ import {
   type InvoiceRefund,
   type InvoiceShipping,
   type ShopifyAmounts,
+  type ShopifySaleAllocation,
 } from "@/lib/invoice/order";
 import { TAX_RATE_PERCENTS, type PriceBasis, type TaxRatePercent } from "@/lib/invoice/tax";
 
@@ -266,6 +267,15 @@ function buildSale(
   let shipping: InvoiceShipping | null = null;
   let shippingSales = 0;
   const counted: CustomerAccountSale[] = [];
+  const allocations: ShopifySaleAllocation[] = [];
+  const allocate = (sale: CustomerAccountSale, lineType: ShopifySaleAllocation["lineType"], lineId: string | null) =>
+    allocations.push({
+      lineType,
+      lineId,
+      amount: parseShopifyYen(sale.totalAmount),
+      tax: parseShopifyYen(sale.totalTaxAmount),
+      ratePercent: sale.taxes.length === 1 ? (sale.taxes[0].taxLine.ratePercentage ?? null) : null,
+    });
 
   for (const sale of agreement?.sales.nodes ?? []) {
     if (sale.actionType !== "ORDER") {
@@ -278,6 +288,7 @@ function buildSale(
     counted.push(sale);
 
     if (sale.__typename === "ProductSale" && sale.lineItem) {
+      allocate(sale, "product", sale.lineItem.id);
       const label = receiptLineDescription(sale.lineItem.name, sale.lineItem.variantTitle);
       const rate = saleRate(sale, amount, label, issues);
       const quantity = sale.quantity ?? 0;
@@ -321,6 +332,7 @@ function buildSale(
 
     if (sale.__typename === "ShippingLineSale") {
       shippingSales += 1;
+      allocate(sale, "shipping", null);
       const rate = saleRate(sale, amount, "送料", issues);
 
       // 送料無料（0 円）は、税の明細が 0 円でも無くても送料を載せない
@@ -351,7 +363,7 @@ function buildSale(
     processedAt: order.processedAt,
     lines,
     shipping,
-    shopifyReference: agreement ? shopifyAmounts(counted, 1, issues) : null,
+    shopifyReference: agreement ? { ...shopifyAmounts(counted, 1, issues), allocations } : null,
   };
 }
 

@@ -1,5 +1,6 @@
 import {
   emptyLedger,
+  invoiceStatementBreakdown,
   InvoiceDocumentError,
   type InvoiceDocument,
   type InvoiceIssuer,
@@ -18,7 +19,12 @@ import {
   type TransactionDateBasis,
 } from "@/lib/invoice/eligibility";
 import { InvoiceMoneyError, type Yen } from "@/lib/invoice/money";
-import { issueReason, refundAmount, type InvoiceIssueReason } from "@/lib/invoice/order";
+import {
+  issueReason,
+  refundAmount,
+  type InvoiceIssueReason,
+  type InvoiceOrderRecord,
+} from "@/lib/invoice/order";
 import { refundSummary, type RefundSummary } from "@/lib/invoice/settlement";
 import type { InvoiceTaxConfig } from "@/lib/invoice/tax";
 
@@ -76,6 +82,22 @@ function reasonsOf(evaluation: InvoiceIssueEvaluation<InvoiceDocument>) {
   ];
 }
 
+function invoiceAvailability(
+  evaluation: InvoiceIssueEvaluation<SimplifiedInvoiceDocument>,
+  record: InvoiceOrderRecord
+): DocumentAvailability<SimplifiedInvoiceDocument> {
+  const result = availability(evaluation);
+
+  if (result.status !== "issuable") {
+    return result;
+  }
+
+  // 集計欄の内訳を Shopify の税額の割り振りから作れない注文は出さない（`invoiceStatementBreakdown`）
+  const { reasons } = invoiceStatementBreakdown(record.sale, result.document.taxSummary);
+
+  return reasons.length > 0 ? { status: "unavailable", reasons } : result;
+}
+
 function availability<D extends InvoiceDocument>(
   evaluation: InvoiceIssueEvaluation<D>
 ): DocumentAvailability<D> {
@@ -111,7 +133,7 @@ export function customerReceiptFromAccountOrder(
 
     return {
       status: "evaluated",
-      invoice: availability(plan.invoice),
+      invoice: invoiceAvailability(plan.invoice, record),
       refunds: refundSummary(record),
       returnInvoices: plan.returns.map((evaluation, index) => {
         const refund = refunds[index];

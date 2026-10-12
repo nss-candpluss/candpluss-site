@@ -25,7 +25,7 @@ export const receiptIssuer = {
  * 帳票の表題。画面の見出し・ページタイトル・会員ページのリンク・ファイル名で揃える。
  * 書類の表題（`INVOICE_DOCUMENT_TITLES.invoice`）と同じ文言にする。
  */
-export const RECEIPT_DOCUMENT_TITLE = "領収書 兼 適格簡易請求書";
+export const RECEIPT_DOCUMENT_TITLE = "利用明細書（兼 適格簡易請求書）";
 
 /**
  * 会員による領収書の発行（注文履歴のリンク・発行ページ・書類の発行の運用）を出すか。

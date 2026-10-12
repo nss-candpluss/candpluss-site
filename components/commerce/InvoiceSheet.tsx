@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 import { receiptIssuer } from "@/data/receipt";
 import {
   INVOICE_DOCUMENT_TITLES,
+  InvoiceDocumentError,
+  STATEMENT_TAX_RATE_PERCENT,
   type InvoiceDocument,
   type ReturnInvoiceDocument,
   type SimplifiedInvoiceDocument,
@@ -10,21 +12,19 @@ import {
 import { isReducedRate } from "@/lib/invoice/tax";
 
 /*
-  寸法は用紙の幅に対する割合（cqw）で持つ。A4（余白 12mm）では 1cqw ≒ 1.86mm ≒ 5.3pt。
-  画面では 1 枚に続けて出し、A4 に収まらない分は PDF・印刷で明細の行の切れ目から次のページに送る
-  （`lib/commerce/receipt-pdf.ts`）。文字は縮めないので、明細より上は 1 ページ目に収める。
-  PDF は罫線と文字だけを描き直すので、背景色や影は使わない（画面と PDF で見え方が変わる）。
-  税率ごとの金額・消費税額・合計は書類（`lib/invoice/documents.ts`）の値をそのまま出し、ここでは計算しない。
+  株式会社NSS 指定の利用明細書の書式（`ReceiptSheet`）をもとにする。寸法は用紙の幅に対する割合（cqw）で持つ。
+  画面では 1 枚に続けて出し、A4（余白 12mm）に収まらない分は PDF・印刷で明細の行の切れ目から
+  次のページに送る（`lib/commerce/receipt-pdf.ts`）。文字は縮めないので、明細より上は 1 ページ目に収める。
+  集計欄の金額は書類（`lib/invoice/documents.ts`）の値をそのまま出し、ここでは計算しない。
 */
-const RULE_STRONG = "border-[#333]";
-const RULE_LIGHT = "border-[#c4c4c4]";
-const textClassName = "text-[1.7cqw] leading-[1.6]";
-const noteClassName = "text-[1.45cqw] leading-[1.6]";
-const headCellClassName = `border-y ${RULE_STRONG} px-[1.2cqw] h-[4.2cqw] text-[1.5cqw] leading-none font-normal`;
-// 長い商品名は折り返す。1 行の行は 4.4cqw、折り返した行は上下に余白を持って高くなる
-const bodyCellClassName = `border-b ${RULE_LIGHT} px-[1.2cqw] h-[4.4cqw] py-[0.7cqw] text-[1.6cqw] leading-[1.35]`;
-// Tailwind が読み取れるよう、クラス名は組み立てずにそのまま書く
-const lastRowClassName = "[&>tr:last-child>td]:border-[#333]";
+const cellClassName = "border border-[#333] px-[1.9cqw]";
+const headClassName = `${cellClassName} h-[3.9cqw] text-center text-[1.6cqw] leading-none font-normal`;
+const summaryValueClassName = `${cellClassName} h-[6.6cqw] text-right text-[1.6cqw] leading-none`;
+const summaryCellClassName = `${cellClassName} h-[4.7cqw] text-[1.6cqw] leading-none`;
+// 長い商品名は折り返す。1 行の行は高さ 4.4cqw のまま、折り返した行だけ上下に余白を持って高くなる
+const detailCellClassName = `${cellClassName} h-[4.4cqw] py-[0.6cqw] text-[1.6cqw] leading-[1.3]`;
+const metaRowClassName = "grid grid-cols-[15cqw_auto] text-[1.6cqw] leading-[2.75cqw]";
+const noteClassName = "text-[1.4cqw] leading-[2.4cqw]";
 
 function yenText(value: number) {
   return value < 0 ? `−${(-value).toLocaleString("ja-JP")}` : value.toLocaleString("ja-JP");
@@ -44,19 +44,18 @@ function rateLabel(ratePercent: number, reducedRate: boolean) {
 type DetailRow = {
   key: string;
   description: string;
-  reducedRate: boolean;
   quantity: number | null;
-  unitPrice: number | null;
+  /** 税込金額 */
   amount: number;
-  /** 割引のように、直前の行に付く行。字下げして示し、PDF でも同じページに置く */
-  attachedToPrevious?: boolean;
+  /** 割引のように、前の行と同じページに置く行 */
+  keepWithPrevious?: boolean;
 };
 
 function MetaList({ rows }: { rows: [string, string][] }) {
   return (
-    <dl className={textClassName}>
+    <dl>
       {rows.map(([term, value]) => (
-        <div key={term} className="grid grid-cols-[14cqw_auto]">
+        <div key={term} className={metaRowClassName}>
           <dt>{term}</dt>
           <dd>{value}</dd>
         </div>
@@ -65,143 +64,117 @@ function MetaList({ rows }: { rows: [string, string][] }) {
   );
 }
 
-/** 発行事業者。登録番号は事業者名と並べて示す */
 function IssuerBlock({ document }: { document: InvoiceDocument }) {
   return (
-    <div className={`mt-[3cqw] border-t ${RULE_LIGHT} pt-[2cqw] ${textClassName}`}>
+    <div className="mt-[2.75cqw] text-[1.6cqw] leading-[2.75cqw]">
       {document.issuer.brandName ? <p>{document.issuer.brandName}</p> : null}
-      <p>{document.issuer.name}</p>
-      <p>
-        {receiptIssuer.postalCode} {receiptIssuer.address}
-      </p>
-      <p>TEL {receiptIssuer.tel}</p>
-      <p className="mt-[0.8cqw]">登録番号 {document.issuer.registrationNumber}</p>
+      <p>TEL：{receiptIssuer.tel}</p>
+      <p className="mt-[2.75cqw]">運営：{document.issuer.name}</p>
+      <p>{receiptIssuer.postalCode}</p>
+      <p>{receiptIssuer.address}</p>
     </div>
   );
 }
 
-function AmountLead({
-  label,
-  document,
-  note,
-}: {
-  label: string;
-  document: InvoiceDocument;
-  note: string;
-}) {
-  const amount = document.kind === "invoice" ? document.receipt.receivedAmount : document.taxSummary.total;
+/** NSS 指定の集計欄。税抜合計・送料（税抜）・消費税（10%）・合計金額 */
+function StatementSummary({ document }: { document: SimplifiedInvoiceDocument }) {
+  const summary = document.statement;
+
+  // 集計欄を作れない注文は、発行の判定（`customer-receipt.ts`）で止めている
+  if (!summary) {
+    throw new InvoiceDocumentError("利用明細書の集計欄を作れない書類です");
+  }
 
   return (
-    <div>
-      <p className={textClassName}>{label}</p>
-      <p
-        className={`mt-[1cqw] flex max-w-[48cqw] items-baseline justify-between gap-[2cqw] border-b ${RULE_STRONG} pb-[1cqw]`}
-      >
-        <span className="text-[3.6cqw] leading-none font-semibold">¥{yenText(amount)}</span>
-        <span className="text-[1.5cqw] leading-none">（税込）</span>
-      </p>
-      <p className={`mt-[1cqw] ${textClassName}`}>うち消費税額 {yenText(document.taxSummary.tax)}円</p>
-      <p className="mt-[2cqw] text-[1.5cqw] leading-[1.6]">{note}</p>
-    </div>
-  );
-}
-
-function DetailTable({
-  rows,
-  withUnitPrice,
-  itemLabel,
-}: {
-  rows: DetailRow[];
-  withUnitPrice: boolean;
-  itemLabel: string;
-}) {
-  return (
-    <table data-receipt-detail className="mt-[6cqw] w-full table-fixed border-collapse">
-      <colgroup>
-        <col />
-        <col className="w-[10cqw]" />
-        {withUnitPrice ? <col className="w-[15cqw]" /> : null}
-        <col className="w-[17cqw]" />
-      </colgroup>
+    <table className="mt-[3.9cqw] w-[69.2%] table-fixed border-collapse">
       <thead>
         <tr>
-          <th className={`${headCellClassName} text-left`}>{itemLabel}</th>
-          <th className={`${headCellClassName} text-right`}>数量</th>
-          {withUnitPrice ? <th className={`${headCellClassName} text-right`}>単価</th> : null}
-          <th className={`${headCellClassName} text-right`}>金額</th>
+          <th className={headClassName}>税抜合計</th>
+          <th className={headClassName}>送料（税抜）</th>
+          <th className={headClassName}>消費税（{STATEMENT_TAX_RATE_PERCENT}%）</th>
+          <th className={headClassName}>合計金額</th>
         </tr>
       </thead>
-      <tbody className={lastRowClassName}>
-        {rows.map((row) => (
-          <tr
-            key={row.key}
-            data-receipt-keep-with-previous={row.attachedToPrevious || undefined}
-            className="break-inside-avoid"
-          >
-            <td className={`${bodyCellClassName} text-left ${row.attachedToPrevious ? "pl-[3.2cqw]" : ""}`}>
-              {row.description}
-              {row.reducedRate ? " ※" : ""}
-            </td>
-            <td className={`${bodyCellClassName} text-right`}>{row.quantity ?? ""}</td>
-            {withUnitPrice ? (
-              <td className={`${bodyCellClassName} text-right`}>
-                {row.unitPrice === null ? "" : yenText(row.unitPrice)}
-              </td>
-            ) : null}
-            <td className={`${bodyCellClassName} text-right`}>{yenText(row.amount)}</td>
-          </tr>
-        ))}
+      <tbody>
+        <tr>
+          <td className={summaryValueClassName}>{yenText(summary.productsExcludingTax)} 円</td>
+          <td className={summaryValueClassName}>{yenText(summary.shippingExcludingTax)} 円</td>
+          <td className={summaryValueClassName}>{yenText(summary.tax)} 円</td>
+          <td className={`${summaryValueClassName} text-[1.8cqw] font-semibold`}>{yenText(summary.total)} 円</td>
+        </tr>
       </tbody>
     </table>
   );
 }
 
-/** 税率ごとの対象金額（税込）と消費税額。明細の下、金額の列にそろえて右に置く */
-function RateSummary({ document, amountLabel }: { document: InvoiceDocument; amountLabel: string }) {
-  const hasReducedRate = document.taxSummary.rates.some((rate) => isReducedRate(rate.ratePercent));
-
+/** 適格返還請求書の、税率ごとの返還金額と消費税額 */
+function RateSummary({ document }: { document: ReturnInvoiceDocument }) {
   return (
-    <div className="mt-[3cqw] flex break-inside-avoid flex-col items-end">
-      <table data-receipt-summary className="w-[62cqw] table-fixed border-collapse">
-        <colgroup>
-          <col />
-          <col className="w-[20cqw]" />
-          <col className="w-[17cqw]" />
-        </colgroup>
-        <thead>
-          <tr>
-            <th className={`${headCellClassName} text-left`}>税率区分</th>
-            <th className={`${headCellClassName} text-right`}>{amountLabel}</th>
-            <th className={`${headCellClassName} text-right`}>消費税額</th>
-          </tr>
-        </thead>
-        <tbody>
-          {document.taxSummary.rates.map((rate) => (
-            <tr key={rate.ratePercent}>
-              <td className={`${bodyCellClassName} text-left`}>
-                {rateLabel(rate.ratePercent, isReducedRate(rate.ratePercent))}
-              </td>
-              <td className={`${bodyCellClassName} text-right`}>{yenText(rate.totalIncludingTax)}円</td>
-              <td className={`${bodyCellClassName} text-right`}>{yenText(rate.tax)}円</td>
-            </tr>
-          ))}
-          <tr>
-            <td className={`${bodyCellClassName} border-b-[#333] text-left font-semibold`}>合計</td>
-            <td className={`${bodyCellClassName} border-b-[#333] text-right font-semibold`}>
-              {yenText(document.taxSummary.total)}円
+    <table className="mt-[3.9cqw] w-[69.2%] table-fixed border-collapse">
+      <colgroup>
+        <col className="w-[38%]" />
+        <col className="w-[34%]" />
+        <col className="w-[28%]" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th className={headClassName}>税率区分</th>
+          <th className={headClassName}>返還金額</th>
+          <th className={headClassName}>消費税額</th>
+        </tr>
+      </thead>
+      <tbody>
+        {document.taxSummary.rates.map((rate) => (
+          <tr key={rate.ratePercent}>
+            <td className={`${summaryCellClassName} text-left`}>
+              {rateLabel(rate.ratePercent, isReducedRate(rate.ratePercent))}
             </td>
-            <td className={`${bodyCellClassName} border-b-[#333] text-right font-semibold`}>
-              {yenText(document.taxSummary.tax)}円
-            </td>
+            <td className={`${summaryCellClassName} text-right`}>{yenText(rate.totalIncludingTax)} 円</td>
+            <td className={`${summaryCellClassName} text-right`}>{yenText(rate.tax)} 円</td>
           </tr>
-        </tbody>
-      </table>
+        ))}
+        <tr>
+          <td className={`${summaryCellClassName} text-left`}>合計</td>
+          <td className={`${summaryCellClassName} text-right font-semibold`}>
+            {yenText(document.taxSummary.total)} 円
+          </td>
+          <td className={`${summaryCellClassName} text-right`}>{yenText(document.taxSummary.tax)} 円</td>
+        </tr>
+      </tbody>
+    </table>
+  );
+}
 
-      <div className={`mt-[1.6cqw] w-[62cqw] ${noteClassName}`}>
-        <p>金額はすべて税込です。</p>
-        {hasReducedRate ? <p>※は軽減税率（8%）の対象です。</p> : null}
-      </div>
-    </div>
+/** NSS 指定の明細。摘要・数量・税込金額。行は内容の数だけ出す */
+function DetailTable({ rows }: { rows: DetailRow[] }) {
+  return (
+    <table data-receipt-detail className="mt-[4.4cqw] w-full table-fixed border-collapse">
+      <colgroup>
+        <col className="w-[61.1%]" />
+        <col className="w-[16.6%]" />
+        <col className="w-[22.3%]" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th className={headClassName}>摘要</th>
+          <th className={headClassName}>数量</th>
+          <th className={headClassName}>税込金額</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row) => (
+          <tr
+            key={row.key}
+            data-receipt-keep-with-previous={row.keepWithPrevious || undefined}
+            className="break-inside-avoid"
+          >
+            <td className={`${detailCellClassName} text-left`}>{row.description}</td>
+            <td className={`${detailCellClassName} text-center`}>{row.quantity ?? ""}</td>
+            <td className={`${detailCellClassName} text-right`}>{yenText(row.amount)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }
 
@@ -225,13 +198,13 @@ function SheetFrame({
       <article
         data-receipt-sheet={sheetKey}
         data-receipt-continuation={`${title}（続き）　ご注文 ${document.orderName}`}
-        className="bg-white font-body-ja text-[#111]"
+        className="bg-white font-body-ja text-[var(--foreground)]"
       >
-        <h1 className="text-center font-body-ja text-[3.2cqw] leading-none font-semibold">{title}</h1>
+        <h1 className="text-center font-body-ja text-[4.5cqw] leading-none font-normal">{title}</h1>
 
-        <div className="mt-[7cqw] flex items-start justify-between gap-[6cqw]">
-          <div className="min-w-0 flex-1">{lead}</div>
-          <div className="w-[40cqw] shrink-0">
+        <div className="mt-[7.5cqw] flex items-start justify-between gap-[4cqw]">
+          <div className="min-w-0">{lead}</div>
+          <div className="shrink-0">
             <MetaList rows={meta} />
             <IssuerBlock document={document} />
           </div>
@@ -243,6 +216,18 @@ function SheetFrame({
   );
 }
 
+function AmountLead({ label, amount, note }: { label: string; amount: number; note: string }) {
+  return (
+    <>
+      <p className="text-[1.6cqw] leading-none">{label}</p>
+      <p className="mt-[1.6cqw] border-b border-[#333] pb-[1.2cqw] text-[3.6cqw] leading-none font-semibold">
+        ¥{yenText(amount)}-
+      </p>
+      <p className="mt-[1.6cqw] text-[1.6cqw] leading-[2.75cqw]">{note}</p>
+    </>
+  );
+}
+
 /**
  * 領収書の欄の日付の見出し。Shopify の決済の記録の日で、実際にお金が届いた日とは限らない。
  * 銀行振込などの手動の決済は、当店が入金を確認して登録した日になる
@@ -251,27 +236,27 @@ export function receiptDateLabel(document: SimplifiedInvoiceDocument) {
   return document.receipt.manualPayment ? "入金確認日" : "決済日";
 }
 
-/** 明細の行。割引は商品の直後に、請求額 0 円の送料は出さない（書類の記録には残る） */
+function registrationRow(document: InvoiceDocument): [string, string] {
+  return ["登録番号", document.issuer.registrationNumber];
+}
+
+/** 明細の行（税込）。割引は商品の直後に、請求額 0 円の送料は出さない（集計欄の送料は 0 円と出す） */
 export function invoiceDetailRows(document: SimplifiedInvoiceDocument): DetailRow[] {
   const rows: DetailRow[] = document.lines.flatMap((line) => [
     {
       key: line.lineId,
       description: line.description,
-      reducedRate: line.reducedRate,
       quantity: line.quantity,
-      unitPrice: line.unitPrice,
       amount: line.unitPrice * line.quantity,
     },
     ...(line.discount > 0
       ? [
           {
             key: `${line.lineId}:discount`,
-            description: "└ 割引",
-            reducedRate: false,
+            description: "　割引",
             quantity: null,
-            unitPrice: null,
             amount: -line.discount,
-            attachedToPrevious: true,
+            keepWithPrevious: true,
           },
         ]
       : []),
@@ -281,20 +266,16 @@ export function invoiceDetailRows(document: SimplifiedInvoiceDocument): DetailRo
     rows.push({
       key: "shipping",
       description: `送料（${document.shipping.title}）`,
-      reducedRate: document.shipping.reducedRate,
       quantity: null,
-      unitPrice: null,
       amount: document.shipping.price,
     });
     if (document.shipping.discount > 0) {
       rows.push({
         key: "shipping:discount",
-        description: "└ 送料の割引",
-        reducedRate: false,
+        description: "　送料の割引",
         quantity: null,
-        unitPrice: null,
         amount: -document.shipping.discount,
-        attachedToPrevious: true,
+        keepWithPrevious: true,
       });
     }
   }
@@ -302,7 +283,7 @@ export function invoiceDetailRows(document: SimplifiedInvoiceDocument): DetailRo
   return rows;
 }
 
-/** 領収書 兼 適格簡易請求書。小売業の適格簡易請求書なので、宛名・発行日は載せない */
+/** 利用明細書（兼 適格簡易請求書）。小売業の適格簡易請求書なので、宛名は載せない */
 export function SimplifiedInvoiceSheet({ document }: { document: SimplifiedInvoiceDocument }) {
   return (
     <SheetFrame
@@ -312,39 +293,37 @@ export function SimplifiedInvoiceSheet({ document }: { document: SimplifiedInvoi
       lead={
         <AmountLead
           label="領収金額"
-          document={document}
+          amount={document.receipt.receivedAmount}
           note={`ご注文 ${document.orderName} の代金として、上記の金額を正に領収いたしました。`}
         />
       }
       meta={[
         ["取引年月日", formatDocumentDate(document.transactionDate)],
         [receiptDateLabel(document), formatDocumentDate(document.receipt.receivedDate)],
+        registrationRow(document),
         ["注文番号", document.orderName],
       ]}
     >
-      <DetailTable rows={invoiceDetailRows(document)} withUnitPrice itemLabel="品名" />
-      <RateSummary document={document} amountLabel="対象金額（税込）" />
+      <StatementSummary document={document} />
+      <DetailTable rows={invoiceDetailRows(document)} />
     </SheetFrame>
   );
 }
 
 /** 適格返還請求書。領収書は兼ねない */
 export function ReturnInvoiceSheet({ document }: { document: ReturnInvoiceDocument }) {
+  const hasReducedRate = document.taxSummary.rates.some((rate) => isReducedRate(rate.ratePercent));
   const rows: DetailRow[] = [
     ...document.lines.map((line) => ({
       key: line.lineId,
-      description: line.description,
-      reducedRate: line.reducedRate,
+      description: `${line.description}${line.reducedRate ? " ※" : ""}`,
       quantity: line.quantity,
-      unitPrice: null,
       amount: line.amount,
     })),
     ...document.otherAmounts.map((item, index) => ({
       key: `other-${index}`,
-      description: item.description,
-      reducedRate: item.reducedRate,
+      description: `${item.description}${item.reducedRate ? " ※" : ""}`,
       quantity: null,
-      unitPrice: null,
       amount: item.amount,
     })),
   ];
@@ -357,18 +336,23 @@ export function ReturnInvoiceSheet({ document }: { document: ReturnInvoiceDocume
       lead={
         <AmountLead
           label="返還金額"
-          document={document}
+          amount={document.taxSummary.total}
           note={`ご注文 ${document.orderName} について、下記のとおりご返金いたしました。`}
         />
       }
       meta={[
         ["返還年月日", formatDocumentDate(document.returnDate)],
         ["元の取引年月日", formatDocumentDate(document.originalTransactionDate)],
+        registrationRow(document),
         ["注文番号", document.orderName],
       ]}
     >
-      <DetailTable rows={rows} withUnitPrice={false} itemLabel="内容" />
-      <RateSummary document={document} amountLabel="返還金額（税込）" />
+      <RateSummary document={document} />
+      <DetailTable rows={rows} />
+      <div className={`mt-[2cqw] ${noteClassName}`}>
+        <p>金額はすべて税込です。</p>
+        {hasReducedRate ? <p>※は軽減税率（8%）の対象です。</p> : null}
+      </div>
     </SheetFrame>
   );
 }

@@ -58,7 +58,7 @@ function returnFor(
 describe("領収書 兼 適格簡易請求書の記載内容", () => {
   it("表題は 2 種類だけ。返還請求書は領収書を兼ねない", () => {
     expect(INVOICE_DOCUMENT_TITLES).toEqual({
-      invoice: "領収書 兼 適格簡易請求書",
+      invoice: "利用明細書（兼 適格簡易請求書）",
       returnInvoice: "適格返還請求書",
     });
   });

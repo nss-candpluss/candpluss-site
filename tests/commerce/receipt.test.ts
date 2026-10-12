@@ -34,16 +34,15 @@ describe("領収書の発行者情報", () => {
     expect(receiptIssuer.address).toContain("大野城市");
   });
 
-  // 発行事業者の欄に、事業者名・所在地・連絡先・登録番号をまとめる
-  it("屋号・事業者名・住所・TEL・登録番号の順に並べる", () => {
+  // NSS 指定の書式どおり、屋号と問い合わせ先を先に、運営会社を後に並べる
+  it("屋号・TEL・運営会社・住所の順に並べる", () => {
     const source = readSource("components/commerce/InvoiceSheet.tsx");
     const order = [
       "{document.issuer.brandName}",
-      "{document.issuer.name}",
+      "TEL：{receiptIssuer.tel}",
+      "運営：{document.issuer.name}",
       "{receiptIssuer.postalCode}",
       "{receiptIssuer.address}",
-      "TEL {receiptIssuer.tel}",
-      "登録番号 {document.issuer.registrationNumber}",
     ].map((text) => source.indexOf(text));
 
     expect(receiptIssuer.brandName).toBe("C AND+S");
@@ -70,9 +69,7 @@ describe("領収書の発行者情報", () => {
   it("領収書・返還請求書とも登録番号を印字する", () => {
     const source = readSource("components/commerce/InvoiceSheet.tsx");
 
-    // 発行事業者の欄は両方の帳票が使う枠（SheetFrame）にある。描いた結果は帳票のテストで確かめる
-    expect(source.match(/<IssuerBlock document=\{document\} \/>/g)).toHaveLength(1);
-    expect(source.match(/<SheetFrame\b/g)).toHaveLength(2);
+    expect(source.match(/registrationRow\(document\)/g)).toHaveLength(2);
   });
 });
 
@@ -108,8 +105,9 @@ describe("領収書の体裁", () => {
     }
   });
 
-  it("表題は領収書 兼 適格簡易請求書で、画面・タイトル・リンク・ファイル名で揃える", () => {
-    expect(RECEIPT_DOCUMENT_TITLE).toBe("領収書 兼 適格簡易請求書");
+  // NSS 指定の「利用明細書（兼 適格請求書）」を、宛名を省く適格簡易請求書として出す
+  it("表題は利用明細書（兼 適格簡易請求書）で、画面・タイトル・リンク・ファイル名で揃える", () => {
+    expect(RECEIPT_DOCUMENT_TITLE).toBe("利用明細書（兼 適格簡易請求書）");
     expect(RECEIPT_DOCUMENT_TITLE).toBe(INVOICE_DOCUMENT_TITLES.invoice);
     expect(readSource("components/commerce/InvoiceSheet.tsx")).toContain("INVOICE_DOCUMENT_TITLES.invoice");
 
@@ -125,10 +123,10 @@ describe("領収書の体裁", () => {
   // 旧来の明細書のファイル名。発行日は日本時間で数える。UTC のままだと朝 9 時前の注文が前日になる
   it("旧来のファイル名は「表題_注文番号_発行日」", () => {
     expect(receiptFileName("#1024", "2026-10-01T05:00:00Z")).toBe(
-      "領収書 兼 適格簡易請求書_1024_20261001"
+      "利用明細書（兼 適格簡易請求書）_1024_20261001"
     );
     expect(receiptFileName("#1025", "2026-10-01T16:30:00Z")).toBe(
-      "領収書 兼 適格簡易請求書_1025_20261002"
+      "利用明細書（兼 適格簡易請求書）_1025_20261002"
     );
   });
 

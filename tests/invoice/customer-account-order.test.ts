@@ -84,7 +84,15 @@ describe("実データ：#1054（入金済み・出荷済み）", () => {
       { lineId: ITEMS.groundSheet.id, description: "グランドシート", quantity: 1, unitPrice: 17710, discount: 0, ratePercent: 10 },
     ]);
     expect(record.sale.shipping).toBeNull();
-    expect(record.sale.shopifyReference).toEqual({ total: 17710, tax: 1610, rates: [{ ratePercent: 10, amount: 17710, tax: 1610 }] });
+    expect(record.sale.shopifyReference).toEqual({
+      total: 17710,
+      tax: 1610,
+      rates: [{ ratePercent: 10, amount: 17710, tax: 1610 }],
+      allocations: [
+        { lineType: "product", lineId: ITEMS.groundSheet.id, amount: 17710, tax: 1610, ratePercent: 10 },
+        { lineType: "shipping", lineId: null, amount: 0, tax: 0, ratePercent: null },
+      ],
+    });
   });
 
   it("Shopify の税額と一致し、取消済みの出荷は使わず有効な出荷の日を取引年月日にする", () => {
@@ -142,6 +150,14 @@ describe("実データ：入金前にキャンセルした注文（#1056〜#1058
     const record = convert(order1056);
 
     expect(record.sale.shipping).toEqual({ title: "通常配送", price: 700, discount: 0, ratePercent: 10 });
+    // 利用明細書の「送料（税抜）」に使う、Shopify が送料に割り振った税額（700 円の送料に 64 円）
+    expect(record.sale.shopifyReference?.allocations).toContainEqual({
+      lineType: "shipping",
+      lineId: null,
+      amount: 700,
+      tax: 64,
+      ratePercent: 10,
+    });
     expect(record.refunds[0]).toMatchObject({
       refundId: "gid://shopify/Refund/1",
       createdAt: "2026-10-03T01:00:00Z",
@@ -558,6 +574,7 @@ describe("会員ページに渡す書類と返金の状況（customerReceiptFrom
             },
           ],
           shipping: null,
+          statement: { productsExcludingTax: 16100, shippingExcludingTax: 0, tax: 1610, total: 17710 },
         },
       },
       refunds: null,
