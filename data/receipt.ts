@@ -31,7 +31,8 @@ export const RECEIPT_DOCUMENT_TITLE = "領収書 兼 適格簡易請求書";
  * 会員による領収書の発行（注文履歴のリンク・発行ページ・書類の発行の運用）を出すか。
  * 発行した書類の再現性・保存の要件と、税務上の未確定の事項を確認できるまで止める。
  */
-export const RECEIPT_ISSUE_ENABLED = false;
+// 本番の動作確認のため一時的に有効化している（正式公開ではない）。確認が終わったらこのコミットを戻す
+export const RECEIPT_ISSUE_ENABLED = true;
 
 /**
  * ショッピングガイドに、会員ページから領収書を出せる案内を載せるか。

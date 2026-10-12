@@ -96,11 +96,8 @@ describe("Customer Account API からの書類の組み立て（loadCustomerRece
     expect(fetchCustomerInvoiceOrder).toHaveBeenCalledWith(TOKEN, ORDER_ID);
     expect(result.status).toBe("evaluated");
     if (result.status !== "evaluated") return;
-    // 本番の仮の運用は会員ページからの発行を止めているので、発行できる書類は返さない
-    expect(result.invoice).toMatchObject({ status: "unavailable" });
-    expect(result.invoice.status === "unavailable" && result.invoice.reasons.map((reason) => reason.code)).toEqual([
-      "memberPageDisabled",
-    ]);
+    // 本番の動作確認の間だけ会員ページからの発行を開けているので、発行できる書類を返す（一時的）
+    expect(result.invoice).toMatchObject({ status: "issuable" });
   });
 
   it("本人の注文でない（Shopify が返さない）注文は notFound", async () => {

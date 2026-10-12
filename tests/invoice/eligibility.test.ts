@@ -54,16 +54,17 @@ function refundOf(refundId: string, lineId: string, quantity: number, amount: nu
 }
 
 describe("仮の設定", () => {
-  it("会員ページからの発行と返還請求書は停止中", () => {
+  // 本番の動作確認の間だけ、会員ページからの発行を開けている（一時的）。返還請求書は停止のまま
+  it("会員ページからの発行は動作確認のため一時的に有効、返還請求書は停止中", () => {
     expect(PROVISIONAL_INVOICE_ISSUE_POLICY).toEqual({
-      memberPageIssueEnabled: false,
+      memberPageIssueEnabled: true,
       returnInvoiceEnabled: false,
     });
     expect(PROVISIONAL_TRANSACTION_DATE_BASIS).toBe("shippedAt");
     expect(PROVISIONAL_INVOICE_TAX_CONFIG).toEqual({ priceBasis: "taxIncluded", rounding: "halfUp" });
   });
 
-  it("仮の運用のままでは、条件のそろった注文でも会員ページからは発行しない", () => {
+  it("動作確認中の運用では、条件のそろった注文を会員ページから発行する（一時的）", () => {
     const evaluation = evaluateInvoiceIssue(
       issueContext(orderRecord({ fulfillments: shippedAll }), { policy: PROVISIONAL_INVOICE_ISSUE_POLICY })
     );
@@ -71,8 +72,8 @@ describe("仮の設定", () => {
     expect(evaluation.taxFacts.status).toBe("confirmed");
     expect(evaluation.legal.status).toBe("complete");
     expect(evaluation.reconciliation).toBe("match");
-    expect(codes(evaluation.policy.reasons)).toEqual(["memberPageDisabled"]);
-    expect(evaluation.decision).toBe("notIssuable");
+    expect(codes(evaluation.policy.reasons)).toEqual([]);
+    expect(evaluation.decision).toBe("issuable");
   });
 });
 

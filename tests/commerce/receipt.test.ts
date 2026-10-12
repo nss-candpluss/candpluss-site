@@ -321,7 +321,8 @@ describe("領収書への導線", () => {
 
   // 返金後の記載がインボイスの要件を満たすか確認できるまで、リンクは出さない
   it("領収書へのリンクとページは表示の切り替えで止めている", () => {
-    expect(RECEIPT_ISSUE_ENABLED).toBe(false);
+    // 本番の動作確認の間だけ true（一時的）
+    expect(RECEIPT_ISSUE_ENABLED).toBe(true);
     expect(readSource("components/commerce/AccountPageContent.tsx")).toContain(
       "{RECEIPT_ISSUE_ENABLED && accountOrderHasReceipt(order) ? ("
     );
