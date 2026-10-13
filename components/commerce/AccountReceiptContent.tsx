@@ -39,8 +39,9 @@ type AccountReceiptContentProps = {
 const mainClassName =
   "px-[var(--container-x)] pt-[calc(var(--header-height)+var(--container-y-top))] pb-[var(--container-y-bottom)]";
 
+// 画面では A4 の縦横比の用紙として見せる。明細が多い注文は内容に合わせて縦に伸びる
 const sheetBoxClassName =
-  "mt-[calc(24px*var(--gap-scale-y))] border border-[var(--color-divider)] p-[4%] print:mt-0 print:border-0 print:p-0";
+  "mt-[calc(24px*var(--gap-scale-y))] aspect-[210/297] border border-[var(--color-divider)] p-[4%] print:mt-0 print:aspect-auto print:border-0 print:p-0";
 
 function yenText(value: number) {
   return `${value.toLocaleString("ja-JP")}円`;

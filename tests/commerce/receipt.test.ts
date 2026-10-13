@@ -186,6 +186,14 @@ describe("領収書の体裁", () => {
     expect(sheetSource()).not.toMatch(/MIN_DETAIL_ROWS|blankRow/);
   });
 
+  // 空の行で高さを埋める代わりに、画面の用紙を A4 の縦横比にする（印刷では用紙そのものが A4）
+  it("画面の用紙は A4 の縦横比で、印刷では縦横比を外す", () => {
+    const source = readSource("components/commerce/AccountReceiptContent.tsx");
+
+    expect(source).toContain("aspect-[210/297]");
+    expect(source).toContain("print:aspect-auto");
+  });
+
   // マスごとに線を引くと、境目だけ二重になって太く見える
   it("PDF の罫線は共有している線を 1 本にまとめて引く", () => {
     const source = readSource("lib/commerce/receipt-pdf.ts");
