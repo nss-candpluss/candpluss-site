@@ -7,6 +7,10 @@ import {
   randomBytes,
 } from "node:crypto";
 
+const IV_LENGTH = 12;
+// 指定しないと Node は 4 バイトまで切り詰めた認証タグも受け入れてしまう
+const AUTH_TAG_LENGTH = 16;
+
 function encryptionKey() {
   const secret = process.env.SESSION_SECRET;
   if (!secret || secret.length < 32) {
@@ -25,8 +29,10 @@ function decodeBase64Url(value: string) {
 }
 
 export function encryptSession<T>(value: T) {
-  const iv = randomBytes(12);
-  const cipher = createCipheriv("aes-256-gcm", encryptionKey(), iv);
+  const iv = randomBytes(IV_LENGTH);
+  const cipher = createCipheriv("aes-256-gcm", encryptionKey(), iv, {
+    authTagLength: AUTH_TAG_LENGTH,
+  });
   const encrypted = Buffer.concat([
     cipher.update(JSON.stringify(value), "utf8"),
     cipher.final(),
@@ -53,12 +59,16 @@ export function decryptSession<T>(value?: string | null): T | null {
       return null;
     }
 
-    const decipher = createDecipheriv(
-      "aes-256-gcm",
-      encryptionKey(),
-      decodeBase64Url(ivValue)
-    );
-    decipher.setAuthTag(decodeBase64Url(authTagValue));
+    const iv = decodeBase64Url(ivValue);
+    const authTag = decodeBase64Url(authTagValue);
+    if (iv.length !== IV_LENGTH || authTag.length !== AUTH_TAG_LENGTH) {
+      return null;
+    }
+
+    const decipher = createDecipheriv("aes-256-gcm", encryptionKey(), iv, {
+      authTagLength: AUTH_TAG_LENGTH,
+    });
+    decipher.setAuthTag(authTag);
     const decrypted = Buffer.concat([
       decipher.update(decodeBase64Url(encryptedValue)),
       decipher.final(),
