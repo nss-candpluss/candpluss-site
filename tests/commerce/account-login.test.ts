@@ -35,6 +35,19 @@ describe("safeAccountReturnTo", () => {
     expect(safeAccountReturnTo("https://evil.example")).toBe(ACCOUNT_BASE_PATH);
     expect(safeAccountReturnTo(undefined)).toBe(ACCOUNT_BASE_PATH);
   });
+
+  it("rejects paths that browsers resolve to another origin", () => {
+    expect(safeAccountReturnTo("/\\evil.example")).toBe(ACCOUNT_BASE_PATH);
+    expect(safeAccountReturnTo("/\t/evil.example")).toBe(ACCOUNT_BASE_PATH);
+    expect(safeAccountReturnTo("/\n/evil.example")).toBe(ACCOUNT_BASE_PATH);
+    expect(safeAccountReturnTo("/\\/evil.example")).toBe(ACCOUNT_BASE_PATH);
+  });
+
+  it("keeps query and hash of same-origin paths", () => {
+    expect(safeAccountReturnTo("/account?tab=orders#latest")).toBe(
+      "/account?tab=orders#latest"
+    );
+  });
 });
 
 describe("loginHintFromEmail", () => {

@@ -55,9 +55,26 @@ export function accountReceiptHref(orderId: string) {
   return `${ACCOUNT_RECEIPT_PATH}?order=${encodeURIComponent(orderId)}`;
 }
 
+const RETURN_TO_RESOLUTION_ORIGIN = "https://return-to.invalid";
+
+/**
+ * 文字列の見た目だけでは `/\host` や `/<TAB>/host` が別オリジンに解決されて
+ * しまうので、URL として解決したうえで同じオリジンに留まるかを確かめる。
+ */
 export function safeAccountReturnTo(value: string | null | undefined) {
-  return value?.startsWith("/") && !value.startsWith("//")
-    ? value
+  if (!value?.startsWith("/")) {
+    return ACCOUNT_BASE_PATH;
+  }
+
+  let resolved: URL;
+  try {
+    resolved = new URL(value, RETURN_TO_RESOLUTION_ORIGIN);
+  } catch {
+    return ACCOUNT_BASE_PATH;
+  }
+
+  return resolved.origin === RETURN_TO_RESOLUTION_ORIGIN
+    ? `${resolved.pathname}${resolved.search}${resolved.hash}`
     : ACCOUNT_BASE_PATH;
 }
 
