@@ -27,11 +27,24 @@ const nextConfig: NextConfig = {
   ...(!isStaticExport
     ? {
         async headers() {
+          const securityHeaders = {
+            source: "/:path*",
+            headers: [
+              { key: "X-Content-Type-Options", value: "nosniff" },
+              { key: "X-Frame-Options", value: "SAMEORIGIN" },
+              {
+                key: "Referrer-Policy",
+                value: "strict-origin-when-cross-origin",
+              },
+            ],
+          };
+
           if (siteConfig.allowSearchIndexing) {
-            return [];
+            return [securityHeaders];
           }
 
           return [
+            securityHeaders,
             {
               source: "/:path*",
               headers: [
