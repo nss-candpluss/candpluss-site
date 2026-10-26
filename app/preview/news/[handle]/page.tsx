@@ -20,7 +20,7 @@ import { uiText } from "@/lib/typography";
 
 import { ExhibitProducts } from "./ExhibitProducts";
 
-type ShopifyTestNewsDetailPageProps = {
+type PreviewNewsDetailPageProps = {
   params: Promise<{
     handle: string;
   }>;
@@ -106,7 +106,7 @@ function TestNewsBody({ body }: { body: readonly TestNewsBodyBlock[] }) {
  */
 export async function generateMetadata({
   params,
-}: ShopifyTestNewsDetailPageProps): Promise<Metadata> {
+}: PreviewNewsDetailPageProps): Promise<Metadata> {
   const { handle } = await params;
   const article = getTestArticleByHandle(handle);
 
@@ -117,16 +117,16 @@ export async function generateMetadata({
   return createPageMetadata({
     title: `${article.title}（テスト）`,
     description: resolveArticleExcerpt(article),
-    path: `/shopify-test/news/${handle}`,
+    path: `/preview/news/${handle}`,
     image: getNewsOgImage(article),
     ogType: "article",
     index: false,
   });
 }
 
-export default async function ShopifyTestNewsDetailPage({
+export default async function PreviewNewsDetailPage({
   params,
-}: ShopifyTestNewsDetailPageProps) {
+}: PreviewNewsDetailPageProps) {
   const { handle } = await params;
   const article = getTestArticleByHandle(handle);
 

@@ -25,6 +25,7 @@ export const sitemapStaticPaths = [
 /** 公開後もクロールさせないパス */
 export const robotsDisallowPaths = [
   TEST_AREA_ROOT_PATH,
+  "/preview",
   "/account",
   "/contact/confirm",
   "/contact/thanks",
