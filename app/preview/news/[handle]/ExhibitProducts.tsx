@@ -208,7 +208,7 @@ function ProductDialog({
   }, [onClose]);
 
   return createPortal(
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-[max(16px,env(safe-area-inset-top))] max-[1025px]:pt-[max(72px,calc(env(safe-area-inset-top)+56px))] min-[1025px]:px-[72px]">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-[max(16px,env(safe-area-inset-top))] max-[1025px]:pt-[max(72px,calc(env(safe-area-inset-top)+56px))] max-[1025px]:pb-[max(32px,calc(env(safe-area-inset-bottom)+16px))] min-[1025px]:px-[72px]">
       <button
         type="button"
         aria-label="閉じる"
