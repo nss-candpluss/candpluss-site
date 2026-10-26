@@ -24,6 +24,13 @@ const productTagVariantClassName = {
   参考出展: "bg-[var(--color-new)] text-white",
 } as const satisfies Record<NonNullable<TestNewsProductItem["tag"]>, string>;
 
+/**
+ * ポップアップの角丸（16px）でバーが切れないよう、トラックの上下に同じ幅の余白を取る。
+ * scrollbar-width / scrollbar-color を指定すると Chrome で ::-webkit-scrollbar が無効になるため使わない。
+ */
+const dialogScrollbarClassName =
+  "[&::-webkit-scrollbar]:w-[10px] [&::-webkit-scrollbar-track]:my-[16px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-[3px] [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-thumb]:bg-black/30 [&::-webkit-scrollbar-thumb]:bg-clip-padding";
+
 const focusRingClassName =
   "focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black";
 
@@ -73,7 +80,7 @@ function ProductGallery({ images, name }: { images: readonly string[]; name: str
           {images.map((src, imageIndex) => (
             <div
               key={`${src}-${imageIndex}`}
-              className="relative aspect-video w-full shrink-0 snap-center bg-[var(--color-line)]"
+              className="relative aspect-[6/5] w-full shrink-0 snap-center bg-[var(--color-line)]"
             >
               <SiteImage
                 src={src}
@@ -87,11 +94,14 @@ function ProductGallery({ images, name }: { images: readonly string[]; name: str
           ))}
         </div>
 
-        <ProductGalleryControls
-          hasImages={images.length > 1}
-          onPrevious={() => goTo(index - 1)}
-          onNext={() => goTo(index + 1)}
-        />
+        {/* タブレット・スマホはスワイプとサムネイルで切り替える */}
+        <div className="max-[1025px]:hidden">
+          <ProductGalleryControls
+            hasImages={images.length > 1}
+            onPrevious={() => goTo(index - 1)}
+            onNext={() => goTo(index + 1)}
+          />
+        </div>
 
         <p
           aria-live="polite"
@@ -198,7 +208,7 @@ function ProductDialog({
   }, [onClose]);
 
   return createPortal(
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-[max(16px,env(safe-area-inset-top))]">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-[max(16px,env(safe-area-inset-top))] max-[1025px]:pt-[max(72px,calc(env(safe-area-inset-top)+56px))] min-[1025px]:px-[72px]">
       <button
         type="button"
         aria-label="閉じる"
@@ -211,49 +221,52 @@ function ProductDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative flex max-h-full w-full max-w-[800px] flex-col overflow-hidden rounded-[16px] bg-white text-[var(--foreground)] shadow-[0_8px_32px_rgba(25,25,25,0.14)]"
+        className="relative flex max-h-full w-full max-w-[800px] flex-col"
       >
-        {/*
-          data-lenis-prevent: Lenis は window の wheel / touchmove を preventDefault するため、
-          付けないとポップアップ内がスクロールできない。
-        */}
-        <div
-          ref={scrollerRef}
-          data-lenis-prevent
-          className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-[clamp(16px,calc(40px*var(--layout-scale-x)),40px)] pt-[72px] pb-[clamp(32px,calc(48px*var(--gap-scale-y)),48px)]"
-        >
-          <ProductGallery images={item.gallery} name={item.name} />
+        {/* スクロールバーも角丸で切り抜くため、角丸とスクロールを別の要素に分ける */}
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[16px] bg-white text-[var(--foreground)] shadow-[0_8px_32px_rgba(25,25,25,0.14)]">
+          {/*
+            data-lenis-prevent: Lenis は window の wheel / touchmove を preventDefault するため、
+            付けないとポップアップ内がスクロールできない。
+          */}
+          <div
+            ref={scrollerRef}
+            data-lenis-prevent
+            className={`min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-[clamp(16px,calc(40px*var(--layout-scale-x)),40px)] pt-[clamp(16px,calc(40px*var(--layout-scale-x)),40px)] pb-[clamp(32px,calc(48px*var(--gap-scale-y)),48px)] ${dialogScrollbarClassName}`}
+          >
+            <ProductGallery images={item.gallery} name={item.name} />
 
-          <h2
-            id={titleId}
-            className={`mt-[clamp(32px,calc(48px*var(--gap-scale-y)),48px)] font-body-ja font-semibold ${uiText(24)}`}
-          >
-            {item.name}
-          </h2>
-          <p
-            className={`mt-[clamp(20px,calc(32px*var(--gap-scale-y)),32px)] font-body-ja font-semibold ${uiText(15)}`}
-          >
-            {item.catchcopy}
-          </p>
-          <p
-            className={`mt-[clamp(10px,calc(14px*var(--gap-scale-y)),14px)] font-body-ja ${bodyText(14)}`}
-          >
-            {item.description}
-          </p>
-          {item.href ? (
-            <Link
-              href={item.href}
-              className={`group mt-[clamp(24px,calc(36px*var(--gap-scale-y)),36px)] inline-flex items-center gap-x-[calc(8px*var(--gap-scale-x))] font-ui-en font-semibold ${uiText(15)}`}
+            <h2
+              id={titleId}
+              className={`mt-[clamp(32px,calc(48px*var(--gap-scale-y)),48px)] font-body-ja font-semibold ${uiText(24)}`}
             >
-              {/* TextLink（文字 18px / 矢印 24px）と同じ比率で、文字サイズに追従させる */}
-              <span
-                aria-hidden="true"
-                className="size-[calc(4/3*1em)] shrink-0 bg-current"
-                style={arrowMaskStyle}
-              />
-              <HoverUnderlineText variant="groupHover">商品詳細ページへ</HoverUnderlineText>
-            </Link>
-          ) : null}
+              {item.name}
+            </h2>
+            <p
+              className={`mt-[clamp(20px,calc(32px*var(--gap-scale-y)),32px)] font-body-ja font-semibold ${uiText(15)}`}
+            >
+              {item.catchcopy}
+            </p>
+            <p
+              className={`mt-[clamp(10px,calc(14px*var(--gap-scale-y)),14px)] font-body-ja ${bodyText(14)}`}
+            >
+              {item.description}
+            </p>
+            {item.href ? (
+              <Link
+                href={item.href}
+                className={`group mt-[clamp(24px,calc(36px*var(--gap-scale-y)),36px)] inline-flex items-center gap-x-[calc(8px*var(--gap-scale-x))] font-ui-en font-semibold ${uiText(15)}`}
+              >
+                {/* TextLink（文字 18px / 矢印 24px）と同じ比率で、文字サイズに追従させる */}
+                <span
+                  aria-hidden="true"
+                  className="size-[calc(4/3*1em)] shrink-0 bg-current"
+                  style={arrowMaskStyle}
+                />
+                <HoverUnderlineText variant="groupHover">商品詳細ページへ</HoverUnderlineText>
+              </Link>
+            ) : null}
+          </div>
         </div>
 
         <button
@@ -261,7 +274,7 @@ function ProductDialog({
           type="button"
           aria-label="閉じる"
           onClick={onClose}
-          className={`absolute top-[16px] right-[16px] z-10 flex size-[40px] items-center justify-center rounded-full border border-[#ccc] bg-white [-webkit-tap-highlight-color:transparent] ${focusRingClassName}`}
+          className={`absolute top-0 left-[calc(100%+16px)] z-10 flex size-[40px] max-[1025px]:top-[-56px] max-[1025px]:right-0 max-[1025px]:left-auto items-center justify-center rounded-full border border-[#ccc] bg-white [-webkit-tap-highlight-color:transparent] ${focusRingClassName}`}
         >
           <svg aria-hidden="true" viewBox="0 0 12 12" className="size-[12px]">
             <path d="M1 1L11 11M11 1L1 11" fill="none" stroke="currentColor" strokeWidth="1.5" />
