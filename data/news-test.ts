@@ -1,5 +1,4 @@
 import type { NewsArticle, NewsArticleInlineLink } from "@/lib/news/types";
-import { PRODUCT_IMAGE_PLACEHOLDER } from "@/lib/products/image-paths";
 
 /** 展示製品などのカード。image 未設定時はグレーの枠だけを出す */
 export type TestNewsProductItem = {
@@ -8,7 +7,7 @@ export type TestNewsProductItem = {
   image?: string;
   /** 製品名の左に出すタグ */
   tag?: "初公開" | "参考出展";
-  /** ポップアップのギャラリー画像（16:9 で表示する） */
+  /** ポップアップのギャラリー画像（一覧と同じ 6:5 で表示する） */
   gallery: readonly string[];
   /** ポップアップの見出し下に出すキャッチコピー */
   catchcopy: string;
@@ -18,10 +17,24 @@ export type TestNewsProductItem = {
   href?: string;
 };
 
-/** ギャラリー画像の差し替え前に 5 枚分の枠を確認するためのダミー */
-function dummyGallery(image: string): readonly string[] {
-  return [image, ...Array.from({ length: 4 }, () => PRODUCT_IMAGE_PLACEHOLDER)];
+/**
+ * 1 枚目は一覧と同じ `<base>.webp`、2 枚目以降は `<restBase>-02.webp` からの連番。
+ * MOYA500 / MOYA420 のように 2 枚目以降を共有する商品は restBase を指定する。
+ */
+function productGallery(
+  base: string,
+  restBase: string = base,
+  count: number = 5
+): readonly string[] {
+  return [
+    `${base}.webp`,
+    ...Array.from(
+      { length: count - 1 },
+      (_, index) => `${restBase}-${String(index + 2).padStart(2, "0")}.webp`
+    ),
+  ];
 }
+
 /** 詳細本文を文章・見出し・画像の順に並べるためのブロック */
 export type TestNewsBodyBlock =
   | { type: "text"; content: string; inlineLinks?: readonly NewsArticleInlineLink[] }
@@ -56,7 +69,10 @@ const fieldstyleExpo2026Body = [
         category: "大型ドームシェルター",
         image: "/images/news/news-20260918-01-moya500.webp",
         href: "/products/moya500",
-        gallery: dummyGallery("/images/news/news-20260918-01-moya500.webp"),
+        gallery: productGallery(
+          "/images/news/news-20260918-01-moya500",
+          "/images/news/news-20260918-01-moya"
+        ),
         catchcopy: "四季を楽しむための、ひとつの答え",
         description:
           "MOYA500は、軽量性と高い耐久性を兼ね備えたリップストップシルナイロンと、優れた強度・弾力性を持つDAC製7000系ジュラルミンポールを採用。直径約5mの大型シェルターでありながら、6本のポールによる合理的なフレーム構造で、シンプルな設営と優れた耐風性を両立しました。開放的な空間と環境に応じて調整できる多彩な機能により、春の雨や夏の日差し、秋の冷え込み、冬の厳しい風まで対応。日本の移ろう四季を、快適に楽しむために設計されたドームシェルターです。",
@@ -67,7 +83,10 @@ const fieldstyleExpo2026Body = [
         image: "/images/news/news-20260918-01-moya420.webp",
         tag: "初公開",
         href: "/products/moya420",
-        gallery: dummyGallery("/images/news/news-20260918-01-moya420.webp"),
+        gallery: productGallery(
+          "/images/news/news-20260918-01-moya420",
+          "/images/news/news-20260918-01-moya"
+        ),
         catchcopy: "自由な時間を楽しむための、最適な空間。",
         description:
           "MOYA420は、MOYA500の機能性と美しいドーム構造を、よりコンパクトなサイズに凝縮したドームシェルターです。軽量で高耐久なリップストップシルナイロンと、優れた強度・弾力性を持つDAC製7000系ジュラルミンポールを採用。幅約4.2mのゆとりある居住空間を確保しながら、優れた携行性とスムーズな設営を実現しました。ソロでは贅沢に、デュオでは快適に。季節やフィールドを問わず、自分らしいキャンプスタイルを自由に楽しむために設計されたドームシェルターです。",
@@ -78,7 +97,7 @@ const fieldstyleExpo2026Body = [
         image: "/images/news/news-20260918-01-nokuta.webp",
         tag: "初公開",
         href: "/products/nokuta",
-        gallery: dummyGallery("/images/news/news-20260918-01-nokuta.webp"),
+        gallery: productGallery("/images/news/news-20260918-01-nokuta"),
         catchcopy: "空の下に、守られる場所を",
         description:
           "NOKUTAは、MOYAシリーズとの美しい連結を追求して設計されたヘキサタープです。独自のカーブラインがシェルターと自然につながり、居住空間を屋外へとシームレスに拡張。150Dポリエステルオックスフォード生地に、遮光率100%のブラックコーティング、UV50+、撥水・撥油・防汚性能を備え、強い日差しや変化する天候にも対応します。単体での使用はもちろん、片面の跳ね上げなど多彩なアレンジにも対応。MOYAと同色の専用カラーにより、機能と美しさがひとつにつながるタープです。",
@@ -88,7 +107,11 @@ const fieldstyleExpo2026Body = [
         category: "鍛造ペグ",
         image: "/images/news/news-20260918-01-zig-stake.webp",
         href: "/products/jig-stake",
-        gallery: dummyGallery("/images/news/news-20260918-01-zig-stake.webp"),
+        gallery: productGallery(
+          "/images/news/news-20260918-01-zig-stake",
+          "/images/news/news-20260918-01-zig-stake",
+          4
+        ),
         catchcopy: "大地を捉え、離さない",
         description:
           "JIG STAKEは、確かな打ち込みと保持力を追求した、燕三条製のオリジナルペグです。素材には高い強度と硬度を備えるS55Cスチールを採用。先端に向かって細くなる独自の凸型断面が硬い地面への打ち込みを助け、広い接地面によって地中でしっかりと保持します。さらに、打撃を捉えやすいワイドヘッドと大型センターホールを備え、設営・撤収時の扱いやすさにも配慮。表面にはカチオン黒色電着塗装を施し、防錆性と耐久性を高めています。燕三条の金属加工技術を、一本のペグに。",
@@ -98,7 +121,7 @@ const fieldstyleExpo2026Body = [
         category: "MOYA 薪ストーブ用 拡張テント",
         image: "/images/news/news-20260918-01-homa.webp",
         tag: "参考出展",
-        gallery: dummyGallery("/images/news/news-20260918-01-homa.webp"),
+        gallery: productGallery("/images/news/news-20260918-01-homa"),
         catchcopy: "薪ストーブのための、専用拡張スペース",
         description:
           "MOYAと連結することで、薪ストーブを設置するための専用スペースを本体の外側へ拡張。薪ストーブの設置場所をMOYAのメイン居住空間から分けることで、限られたテント内のスペースを圧迫することなく、冬のキャンプスタイルに対応します。MOYAとの接続部分から薪ストーブの配置、煙突を通す位置まで、薪ストーブとの併用を前提に設計。専用TCルーフシートと組み合わせることで、火の粉などにも配慮した冬季用の拡張システムを構成します。",
@@ -108,7 +131,7 @@ const fieldstyleExpo2026Body = [
         category: "MOYA 拡張テント",
         image: "/images/news/news-20260918-01-noma.webp",
         tag: "参考出展",
-        gallery: dummyGallery("/images/news/news-20260918-01-noma.webp"),
+        gallery: productGallery("/images/news/news-20260918-01-noma"),
         catchcopy: "MOYAに、もうひとつの空間を",
         description:
           "MOYAの居住空間を外側へ拡張し、新たな「部屋」を生み出す専用拡張テント。MOYA本体と連結することで、ひとつの大きな空間として使うだけでなく、就寝スペース、ギア収納、プライベートスペースなど、目的に応じた独立性のある空間を追加できます。人数が増えたとき。荷物が増えたとき。あるいは、過ごし方を分けたいとき。キャンプスタイルに合わせて必要な空間を必要なだけ追加する。MOYAシリーズが持つ自由な拡張性を、さらに広げるための専用オプションです。",
@@ -118,7 +141,7 @@ const fieldstyleExpo2026Body = [
         category: "MOYA to CAR 連結テント",
         image: "/images/news/news-20260918-01-tsugu-v.webp",
         tag: "参考出展",
-        gallery: dummyGallery("/images/news/news-20260918-01-tsugu-v.webp"),
+        gallery: productGallery("/images/news/news-20260918-01-tsugu-v"),
         catchcopy: "車両まで、MOYAの空間に",
         description:
           "TSUGU-VはMOYA500と車両を繋ぎ、キャンプサイトの空間をさらに広げる専用コネクションモジュールです。MOYA500とは専用ジッパーでダイレクトに接続し、反対側を車両のサイドまたはリアへ連結。車内とMOYAの間にひとつの空間をつくることで、荷物の出し入れや車内へのアクセスをスムーズにし、車両そのものをMOYA500の拡張スペースとして活用できます。MOYA500と同じシルナイロンを使用し、専用フレームや車高に対応する調整機構、2箇所の出入口などを搭載。テントと車両。それぞれの空間を繋ぎ、フィールドでの過ごし方をさらに自由にするための専用モジュールです。",
@@ -128,7 +151,7 @@ const fieldstyleExpo2026Body = [
         category: "MOYA to MOYA 連結テント",
         image: "/images/news/news-20260918-01-tsugu-m.webp",
         tag: "参考出展",
-        gallery: dummyGallery("/images/news/news-20260918-01-tsugu-m.webp"),
+        gallery: productGallery("/images/news/news-20260918-01-tsugu-m"),
         catchcopy: "MOYAどうしを繋ぎ、空間をひとつに",
         description:
           "2つのMOYAを接続し、それぞれの居住空間をひとつに繋ぐ専用コネクションモジュール。両端をMOYAの開口部へ専用ジッパーでダイレクトに連結することで、それぞれのMOYAを行き来できる動線を形成します。リビングと寝室。大人と子ども。仲間同士。それぞれの空間を分けながら、必要なときにはひとつに繋がる。単純にテントの面積を広げるのではなく、人数やシーンに合わせて、フィールドでの過ごし方をさらに自由にするための専用モジュールです。",
