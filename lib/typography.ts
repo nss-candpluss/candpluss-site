@@ -49,6 +49,8 @@ const UI_TEXT_RANGE_PX = {
     "text-[clamp(13px,calc(14px*var(--text-scale)),14px)] leading-[clamp(13px,calc(14px*var(--text-scale)),14px)]",
   "14-15":
     "text-[clamp(14px,calc(15px*var(--text-scale)),15px)] leading-[clamp(14px,calc(15px*var(--text-scale)),15px)]",
+  "14-16":
+    "text-[clamp(14px,calc(16px*var(--text-scale)),16px)] leading-[clamp(14px,calc(16px*var(--text-scale)),16px)]",
   "15-16":
     "text-[clamp(15px,calc(16px*var(--text-scale)),16px)] leading-[clamp(15px,calc(16px*var(--text-scale)),16px)]",
   "16-18":
