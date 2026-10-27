@@ -69,7 +69,7 @@ const linkedShopifyProductHandles = new Set([
   "moya500",
   "moya420",
   "nokuta",
-  "zig-stake",
+  "jig-stake",
 ]);
 
 function isResolvedInternalHref(href: string): boolean {

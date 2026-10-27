@@ -17,7 +17,7 @@ export const laboAboutContent = {
   label: "ABOUT C AND+S LABO",
   bodyTitle: "製品をもっと深く知るための場所",
   body:
-    "MOYAシリーズの製品展示をはじめ、ZIG STAKEなど、C AND+Sの製品を実際にご覧いただけます。オンラインでは感じることのできないサイズ感や素材感、細部のこだわりまで、ぜひご体感ください。",
+    "MOYAシリーズの製品展示をはじめ、JIG STAKEなど、C AND+Sの製品を実際にご覧いただけます。オンラインでは感じることのできないサイズ感や素材感、細部のこだわりまで、ぜひご体感ください。",
   image: {
     src: "/images/labo/labo-about-image01.webp",
     alt: "C AND+S LABO",
@@ -42,9 +42,9 @@ export const laboActivitiesContent = {
       image: "/images/labo/labo-can-image02.webp",
     },
     {
-      id: "zig-stake",
+      id: "jig-stake",
       title: "細部まで手に取って確かめる",
-      body: "燕三条で製造するZIG STAKEを展示。重量感や形状、仕上げなど写真ではわからない細部の品質を、実物を手に取って触って直接ご体感いただけます。",
+      body: "燕三条で製造するJIG STAKEを展示。重量感や形状、仕上げなど写真ではわからない細部の品質を、実物を手に取って触って直接ご体感いただけます。",
       image: "/images/labo/labo-can-image01.webp",
     },
     {

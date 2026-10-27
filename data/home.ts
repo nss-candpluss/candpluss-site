@@ -46,11 +46,11 @@ export const homeMainProducts = {
       image: "/images/home/home-link-nokuta.webp",
     },
     {
-      id: "zig-stake",
-      title: "ZIG STAKE",
+      id: "jig-stake",
+      title: "JIG STAKE",
       caption: "BUILT TO HOLD.",
-      href: "/products/zig-stake",
-      image: "/images/home/home-link-zigstake.webp",
+      href: "/products/jig-stake",
+      image: "/images/home/home-link-jigstake.webp",
     },
   ],
   link: {

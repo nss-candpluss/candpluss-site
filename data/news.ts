@@ -76,11 +76,11 @@ const fieldstyleExpo2026Body = [
       {
         name: "JIG STAKE",
         category: "鍛造ペグ",
-        image: "/images/news/news-20260918-01-zig-stake.webp",
+        image: "/images/news/news-20260918-01-jig-stake.webp",
         href: "/products/jig-stake",
         gallery: productGallery(
-          "/images/news/news-20260918-01-zig-stake",
-          "/images/news/news-20260918-01-zig-stake",
+          "/images/news/news-20260918-01-jig-stake",
+          "/images/news/news-20260918-01-jig-stake",
           4
         ),
         catchcopy: "大地を捉え、離さない",

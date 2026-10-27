@@ -9,7 +9,7 @@ import { sectionTitle62ClassName } from "@/lib/typography";
 export const metadata = createPageMetadata({
   title: "Products",
   description:
-    "C AND+Sの製品一覧。ドームシェルターMOYA、タープNOKUTA、燕三条製ペグZIG STAKEなど、テント・タープからアクセサリーまでご覧いただけます。",
+    "C AND+Sの製品一覧。ドームシェルターMOYA、タープNOKUTA、燕三条製ペグJIG STAKEなど、テント・タープからアクセサリーまでご覧いただけます。",
   path: "/products",
 });
 

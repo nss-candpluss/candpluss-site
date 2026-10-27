@@ -94,7 +94,7 @@ moya500/
 
 nokuta/
 
-zig-stake20/
+jig-stake20/
 
 現在は商品画像を Shopify で管理しているため
 public/images/products/ には _shared/placeholder.webp のみを置いている
@@ -179,7 +179,7 @@ home-link-moya420.webp
 
 home-link-nokuta.webp
 
-home-link-zigstake.webp
+home-link-jigstake.webp
 
 PRODUCTS / LABO / SUPPORT の導線カードは複数ページで共有するため
 public/images/common/ に link-products.webp / link-labo.webp / link-support.webp
@@ -266,7 +266,7 @@ moya500/
 
 nokuta/
 
-zig-stake20/
+jig-stake20/
 
 ---
 

@@ -110,7 +110,7 @@ URLハンドルは、サイトのアドレス末尾です。
 4. 「URLハンドル」を半角英小文字とハイフンだけにする
 5. 保存する
 
-よい例：`moya500` / `nokuta` / `zig-stake20`  
+よい例：`moya500` / `nokuta` / `jig-stake20`  
 避けてください：日本語、スペース、大文字混在
 
 タイトルが英語なら、最初から正しいハンドルになっていることがあります。その場合は変更不要です。
@@ -334,7 +334,7 @@ ShopifyのURL欄はフルURLが必要です。
 
 ```text
 https://candpluss.camp/products#tent-option
-https://candpluss.camp/products/zig-stake20
+https://candpluss.camp/products/jig-stake20
 https://candpluss.camp/products/aluminum-jammer-set
 ```
 

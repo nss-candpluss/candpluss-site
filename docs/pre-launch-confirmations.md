@@ -147,7 +147,7 @@
 | MOYA500 | THE GRAND DOME SHELTER. |
 | MOYA420 | THE GRAND DOME SHELTER. |
 | NOKUTA | PROTECTION UNDER THE SKY. |
-| ZIG STAKE | BUILT TO HOLD. |
+| JIG STAKE | BUILT TO HOLD. |
 
 並んで表示されるため、2つの違いが伝わりません。MOYA420 は「MOYA500 をよりコンパクトな
 サイズに凝縮した」製品なので、サイズ感の違いを出す余地があります。
@@ -232,15 +232,15 @@ MOYA500 と MOYA420 の商品ページに、関連商品への「詳細ページ
 |---|---|
 | インナーテント 詳細ページ | 該当商品 |
 | メッシュインナーテント 詳細ページ | 該当商品 |
-| **ZIG STAKE20 詳細ページ** | `/products/zig-stake` |
+| **JIG STAKE20 詳細ページ** | `/products/jig-stake` |
 | 三角自在金具 詳細ページ | 該当商品 |
 | ガイロープ 詳細ページ | 該当商品 |
 
-**リンクの飛び先は正しいです。** 表示される文字が「ZIG STAKE20」となっている点だけの問題です。
-ZIG STAKE には 20cm と 30cm があるので、意図が2通り考えられます。
+**リンクの飛び先は正しいです。** 表示される文字が「JIG STAKE20」となっている点だけの問題です。
+JIG STAKE には 20cm と 30cm があるので、意図が2通り考えられます。
 
-**確認したいこと**: 「ZIG STAKE 詳細ページ」（商品全体へ）と
-「ZIG STAKE 20cm 詳細ページ」（サイズを明示）のどちらが意図か。
+**確認したいこと**: 「JIG STAKE 詳細ページ」（商品全体へ）と
+「JIG STAKE 20cm 詳細ページ」（サイズを明示）のどちらが意図か。
 
 **決まり次第の対応**: Shopify 側の登録内容なので、**サイト側では修正できません**。
 

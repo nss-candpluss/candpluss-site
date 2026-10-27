@@ -15,7 +15,7 @@ describe("home Main Products", () => {
       "MOYA500",
       "MOYA420",
       "NOKUTA",
-      "ZIG STAKE",
+      "JIG STAKE",
     ]);
     expect(homeMainProducts.items.map((item) => item.caption)).toEqual([
       "THE GRAND DOME SHELTER.",
@@ -27,7 +27,7 @@ describe("home Main Products", () => {
       "/images/home/home-link-moya500.webp",
       "/images/home/home-link-moya420.webp",
       "/images/home/home-link-nokuta.webp",
-      "/images/home/home-link-zigstake.webp",
+      "/images/home/home-link-jigstake.webp",
     ]);
     // href は Shopify の handle と一致させる。一覧（/products）のカードと
     // 同じ詳細ページに遷移しないと、ローカル catalog の旧商品ページが開いてしまう。
@@ -35,7 +35,7 @@ describe("home Main Products", () => {
       "/products/moya500",
       "/products/moya420",
       "/products/nokuta",
-      "/products/zig-stake",
+      "/products/jig-stake",
     ]);
     expect(homeMainProducts.link).toEqual({
       label: "ALL PRODUCTS",

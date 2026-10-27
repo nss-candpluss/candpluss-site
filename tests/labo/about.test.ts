@@ -32,7 +32,7 @@ describe("labo about section", () => {
     expect(laboAboutContent.label).toBe("ABOUT C AND+S LABO");
     expect(laboAboutContent.bodyTitle).toBe("製品をもっと深く知るための場所");
     expect(laboAboutContent.body).toContain(
-      "MOYAシリーズの製品展示をはじめ、ZIG STAKEなど"
+      "MOYAシリーズの製品展示をはじめ、JIG STAKEなど"
     );
     expect(laboAboutContent.image.src).toBe(
       "/images/labo/labo-about-image01.webp"

@@ -17,7 +17,7 @@ export const productLaunchNoticeByHandle: Record<string, string> = {
   moya500: LAUNCH_2026_10_02,
   moya420: LAUNCH_2027_SPRING,
   nokuta: LAUNCH_2026_12,
-  "zig-stake": LAUNCH_2026_10_02,
+  "jig-stake": LAUNCH_2026_10_02,
 
   // MOYA500 オプション
   moya500_roofsheet: LAUNCH_2026_10_LATE,

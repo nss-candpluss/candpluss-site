@@ -33,14 +33,14 @@ describe("getProductVariantParamName", () => {
 });
 
 describe("getProductDetailHref", () => {
-  // zig-stake は Shopify のオプション名が Size なので ?size= になる
+  // jig-stake は Shopify のオプション名が Size なので ?size= になる
   it("names the query after the Shopify option", () => {
     expect(
       getProductDetailHref({ handle: "moya500", variantOptionName: "COLOR" }, "cy")
     ).toBe("/products/moya500?color=cy");
     expect(
-      getProductDetailHref({ handle: "zig-stake", variantOptionName: "SIZE" }, "20cm")
-    ).toBe("/products/zig-stake?size=20cm");
+      getProductDetailHref({ handle: "jig-stake", variantOptionName: "SIZE" }, "20cm")
+    ).toBe("/products/jig-stake?size=20cm");
   });
 
   // Shopify の Default Title 由来の ID は選択肢にならないため URL に出さない

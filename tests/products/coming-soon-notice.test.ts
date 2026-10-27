@@ -239,7 +239,7 @@ describe("販売開始時期のデータ", () => {
       "moya500",
       "moya420",
       "nokuta",
-      "zig-stake",
+      "jig-stake",
       "moya500_roofsheet",
       "moya500_groundsheet",
       "moya500_innertent",
