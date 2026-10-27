@@ -163,7 +163,7 @@ export const newsItems = [
     title: "FIELDSTYLE EXPO 2026出展決定！",
     tag: "Information",
     excerpt:
-      "FIELDSTYLE EXPO 2026（2026年11月14日〜15日／AICHI SKY EXPO）への出展が決定しました。ドームシェルター「MOYA500」「MOYA420」、タープ「NOKUTA」ほか多数の製品を展示予定です。",
+      "FIELDSTYLE EXPO 2026（2026年11月14日〜15日／AICHI SKY EXPO）に出展します。MOYAシリーズやNOKUTAをはじめ、C AND+Sの製品を多数展示。HOMA、NOMA、TSUGU-V、TSUGU-Mなど、MOYAシリーズ専用連結オプションの開発中プロトタイプを初公開します。",
     image: "/images/news/news-20260918-01.webp",
     imageAlt:
       "FIELDSTYLE EXPO 2026 の告知ビジュアル。OUTDOOR & LIFESTYLE FESTA FIELDSTYLE EXPO 2026 11.14sat 15sun Aichi Sky Expo",
