@@ -39,20 +39,24 @@ describe("splitContentByInlineLinks", () => {
 
   it("分割後のテキストを連結すると元の本文に戻る", () => {
     const article = newsItems.find((item) => item.handle === "fieldstyle-expo-2026");
-
-    expect(article?.inlineLinks).toBeDefined();
-
-    const segments = splitContentByInlineLinks(
-      article?.content ?? "",
-      article?.inlineLinks
+    const block = article?.body?.find(
+      (item) => item.type === "text" && "inlineLinks" in item
     );
 
-    expect(segments.map((segment) => segment.text).join("")).toBe(article?.content);
+    expect(block?.type).toBe("text");
+
+    if (block?.type !== "text" || !("inlineLinks" in block)) {
+      return;
+    }
+
+    const segments = splitContentByInlineLinks(block.content, block.inlineLinks);
+
+    expect(segments.map((segment) => segment.text).join("")).toBe(block.content);
     expect(segments.filter((segment) => segment.kind === "link")).toEqual([
       {
         kind: "link",
-        text: "C AND+S公式Instagramアカウント",
-        href: "https://www.instagram.com/c_and_plus_s?igsh=MXI0bDJ6Znp3bm81dw==",
+        text: "https://field-style.jp/",
+        href: "https://field-style.jp/",
       },
     ]);
   });

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/layout/JsonLd";
 import { MaskedImage } from "@/components/ui/MaskedImage";
 import { Container } from "@/components/ui/Container";
+import { NewsArticleBody } from "@/components/news/NewsArticleBody";
 import { NewsArticleContent } from "@/components/news/NewsArticleContent";
 import { NewsDetailNavigation } from "@/components/news/NewsDetailNavigation";
 import {
@@ -27,6 +28,8 @@ type NewsDetailPageProps = {
     handle: string;
   }>;
 };
+
+const mainImageSizes = "(min-width: 980px) 980px, 100vw";
 
 export async function generateStaticParams() {
   const handles = await getAllArticleHandles();
@@ -96,14 +99,22 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
             alt={article.imageAlt ?? ""}
             aspectClassName="aspect-video"
             containerClassName="mt-[calc(36px*var(--gap-scale-y))] bg-[var(--color-line)]"
-            sizes="(min-width: 980px) 980px, 100vw"
+            sizes={mainImageSizes}
             priority
           />
 
-          <NewsArticleContent
-            article={article}
-            className="mt-[calc(48px*var(--gap-scale-y))]"
-          />
+          {article.body ? (
+            <NewsArticleBody
+              body={article.body}
+              imageSizes={mainImageSizes}
+              className="mt-[calc(48px*var(--gap-scale-y))]"
+            />
+          ) : (
+            <NewsArticleContent
+              article={article}
+              className="mt-[calc(48px*var(--gap-scale-y))]"
+            />
+          )}
 
           <NewsDetailNavigation newer={newer} older={older} />
         </article>

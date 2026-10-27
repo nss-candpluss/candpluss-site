@@ -5,6 +5,31 @@ export type NewsArticleInlineLink = {
   href: string;
 };
 
+/** 詳細本文の製品カード。クリックで説明とギャラリーのポップアップを開く */
+export type NewsExhibitProduct = {
+  name: string;
+  category: string;
+  image?: string;
+  /** 製品名の左に出すタグ */
+  tag?: "初公開" | "参考出展";
+  /** ポップアップのギャラリー画像（一覧と同じ 6:5 で表示する） */
+  gallery: readonly string[];
+  /** ポップアップの見出し下に出すキャッチコピー */
+  catchcopy: string;
+  /** ポップアップの説明文 */
+  description: string;
+  /** ポップアップ下部の「商品詳細ページへ」のリンク先。商品ページが無い製品は未設定 */
+  href?: string;
+};
+
+/** 詳細本文を文章・見出し・画像・製品カードの順に並べるためのブロック */
+export type NewsArticleBodyBlock =
+  | { type: "text"; content: string; inlineLinks?: readonly NewsArticleInlineLink[] }
+  | { type: "heading"; text: string }
+  /** 元画像の縦横比のまま全幅で表示する */
+  | { type: "image"; src: string; alt: string; width: number; height: number }
+  | { type: "products"; items: readonly NewsExhibitProduct[] };
+
 /** Shopify Storefront API Article へ差し替えやすい共通型 */
 export type NewsArticle = {
   id: string;
@@ -38,6 +63,11 @@ export type NewsArticle = {
     label: string;
     href: string;
   };
+  /**
+   * 指定時は詳細本文を content ではなくこちらで描画する（任意）。
+   * 一覧・TOP のカードと meta description は引き続き content を使う。
+   */
+  body?: readonly NewsArticleBodyBlock[];
 };
 
 export type NewsArticlesPagination = {
