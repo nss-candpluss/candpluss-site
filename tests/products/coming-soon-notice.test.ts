@@ -201,14 +201,14 @@ describe("一覧カード", () => {
 });
 
 describe("販売開始時期のデータ", () => {
-  it("MOYA420 系は 2027年春、NOKUTA は 2026年12月、MOYA500 ルーフシートは 11月下旬、それ以外は 10/2", () => {
+  it("MOYA420 系は 2027年春、NOKUTA は 2026年12月、MOYA500 ルーフシートは 11月中旬〜下旬、それ以外は 10/2", () => {
     expect(productLaunchNoticeByHandle.moya500).toBe(
       "2026年10月2日(金)20:00 販売開始"
     );
     expect(productLaunchNoticeByHandle.moya420).toBe("2027年春 発売予定");
     expect(productLaunchNoticeByHandle.nokuta).toBe("2026年12月 発売予定");
     expect(productLaunchNoticeByHandle.moya500_roofsheet).toBe(
-      "2026年11月下旬 発売予定"
+      "2026年11月中旬〜下旬 発売予定"
     );
 
     for (const [handle, notice] of Object.entries(productLaunchNoticeByHandle)) {
@@ -217,7 +217,7 @@ describe("販売開始時期のデータ", () => {
         : handle === "nokuta"
           ? "2026年12月 発売予定"
           : handle === "moya500_roofsheet"
-            ? "2026年11月下旬 発売予定"
+            ? "2026年11月中旬〜下旬 発売予定"
             : "2026年10月2日(金)20:00 販売開始";
 
       expect(notice, handle).toBe(expected);
