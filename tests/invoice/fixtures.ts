@@ -1,4 +1,4 @@
-import { PROVISIONAL_INVOICE_TAX_CONFIG } from "@/lib/invoice/config";
+import { INVOICE_TAX_CONFIG } from "@/lib/invoice/config";
 import { emptyLedger, type InvoiceIssuer } from "@/lib/invoice/documents";
 import type { InvoiceIssueContext, InvoiceIssuePolicy } from "@/lib/invoice/eligibility";
 import { yen } from "@/lib/invoice/money";
@@ -183,7 +183,7 @@ export function issueContext(
     record,
     ledger: emptyLedger(ORDER_ID),
     issuer,
-    taxConfig: PROVISIONAL_INVOICE_TAX_CONFIG,
+    taxConfig: INVOICE_TAX_CONFIG,
     transactionDateBasis: "shippedAt",
     policy: enabledPolicy,
     rulesVersion: RULES_VERSION,

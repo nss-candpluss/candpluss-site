@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  PROVISIONAL_INVOICE_ISSUE_POLICY,
-  PROVISIONAL_INVOICE_TAX_CONFIG,
-  PROVISIONAL_TRANSACTION_DATE_BASIS,
+  INVOICE_ISSUE_POLICY,
+  INVOICE_TAX_CONFIG,
+  INVOICE_TRANSACTION_DATE_BASIS,
 } from "@/lib/invoice/config";
 import { appendDocument, emptyLedger } from "@/lib/invoice/documents";
 import {
@@ -32,7 +32,7 @@ import {
   shipping,
 } from "./fixtures";
 
-/** テストデータのみ（Shopify API 未検証）。取引年月日は仮設定の出荷日基準 */
+/** テストデータのみ（Shopify API 未検証）。取引年月日は出荷日基準 */
 
 const codes = (reasons: readonly { code: string }[]) => reasons.map((item) => item.code);
 
@@ -53,20 +53,19 @@ function refundOf(refundId: string, lineId: string, quantity: number, amount: nu
   });
 }
 
-describe("仮の設定", () => {
-  // 本番の動作確認の間だけ、会員ページからの発行を開けている（一時的）。返還請求書は停止のまま
-  it("会員ページからの発行は動作確認のため一時的に有効、返還請求書は停止中", () => {
-    expect(PROVISIONAL_INVOICE_ISSUE_POLICY).toEqual({
+describe("書類の設定", () => {
+  it("会員ページからの発行は有効、返還請求書は停止中", () => {
+    expect(INVOICE_ISSUE_POLICY).toEqual({
       memberPageIssueEnabled: true,
       returnInvoiceEnabled: false,
     });
-    expect(PROVISIONAL_TRANSACTION_DATE_BASIS).toBe("shippedAt");
-    expect(PROVISIONAL_INVOICE_TAX_CONFIG).toEqual({ priceBasis: "taxIncluded", rounding: "halfUp" });
+    expect(INVOICE_TRANSACTION_DATE_BASIS).toBe("shippedAt");
+    expect(INVOICE_TAX_CONFIG).toEqual({ priceBasis: "taxIncluded", rounding: "halfUp" });
   });
 
-  it("動作確認中の運用では、条件のそろった注文を会員ページから発行する（一時的）", () => {
+  it("条件のそろった注文を会員ページから発行する", () => {
     const evaluation = evaluateInvoiceIssue(
-      issueContext(orderRecord({ fulfillments: shippedAll }), { policy: PROVISIONAL_INVOICE_ISSUE_POLICY })
+      issueContext(orderRecord({ fulfillments: shippedAll }), { policy: INVOICE_ISSUE_POLICY })
     );
 
     expect(evaluation.taxFacts.status).toBe("confirmed");

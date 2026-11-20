@@ -7,7 +7,7 @@ import { invoiceDetailRows, ReturnInvoiceSheet, SimplifiedInvoiceSheet } from "@
 import { invoiceStatementBreakdown } from "@/lib/invoice/documents";
 import { invoiceOrderFromCustomerAccount } from "@/lib/invoice/customer-account-order";
 import { saleTaxBreakdown } from "@/lib/invoice/order";
-import { INVOICE_RULES_VERSION, PROVISIONAL_INVOICE_TAX_CONFIG } from "@/lib/invoice/config";
+import { INVOICE_RULES_VERSION, INVOICE_TAX_CONFIG } from "@/lib/invoice/config";
 import type { CustomerAccountInvoiceOrder } from "@/lib/invoice/customer-account-order";
 import { customerReceiptFromAccountOrder } from "@/lib/invoice/customer-receipt";
 import {
@@ -48,7 +48,7 @@ function viewOf(input: CustomerAccountInvoiceOrder, policy: InvoiceIssuePolicy =
       capturedAt: CAPTURED_AT,
       issuer,
       rulesVersion: INVOICE_RULES_VERSION,
-      taxConfig: PROVISIONAL_INVOICE_TAX_CONFIG,
+      taxConfig: INVOICE_TAX_CONFIG,
       transactionDateBasis: "shippedAt",
       policy,
     })
@@ -164,7 +164,7 @@ describe("お客様への案内（customerReceiptView）", () => {
     expect(viewOf({ ...order1054, transactions: [cardSale(17000)] })).toMatchObject({ notice: "contact" });
   });
 
-  it("運用で停止中（本番の仮の設定）なら、条件のそろった注文でも発行しない", () => {
+  it("会員ページからの発行を止めた運用なら、条件のそろった注文でも発行しない", () => {
     expect(viewOf(order1054, { memberPageIssueEnabled: false, returnInvoiceEnabled: false })).toMatchObject({
       status: "notice",
       notice: "contact",
@@ -182,7 +182,7 @@ describe("お客様への案内（customerReceiptView）", () => {
     expect(view.returnInvoices.map((document) => document.taxSummary.total)).toEqual([1740]);
     expect(view.returnInvoiceWithheld).toBe(false);
 
-    // 返還請求書を止めている運用（本番の仮の設定）では、作らずに案内だけを出す
+    // 返還請求書を止めている運用では、作らずに案内だけを出す
     const withheld = issuable(viewOf(refunded, { memberPageIssueEnabled: true, returnInvoiceEnabled: false }));
     expect(withheld.returnInvoices).toEqual([]);
     expect(withheld.returnInvoiceWithheld).toBe(true);
@@ -404,7 +404,7 @@ describe("利用明細書（兼 適格簡易請求書）の帳票", () => {
       capturedAt: CAPTURED_AT,
       issuer,
       rulesVersion: INVOICE_RULES_VERSION,
-      taxConfig: PROVISIONAL_INVOICE_TAX_CONFIG,
+      taxConfig: INVOICE_TAX_CONFIG,
       transactionDateBasis: "shippedAt",
       policy: enabledPolicy,
     });
@@ -452,7 +452,7 @@ function invoiceOutcome(input: CustomerAccountInvoiceOrder) {
     capturedAt: CAPTURED_AT,
     issuer,
     rulesVersion: INVOICE_RULES_VERSION,
-    taxConfig: PROVISIONAL_INVOICE_TAX_CONFIG,
+    taxConfig: INVOICE_TAX_CONFIG,
     transactionDateBasis: "shippedAt",
     policy: enabledPolicy,
   });
@@ -465,7 +465,7 @@ function invoiceOutcome(input: CustomerAccountInvoiceOrder) {
 /** 販売記録から集計欄の内訳を作る（発行の判定を通さない） */
 function breakdownOf(input: CustomerAccountInvoiceOrder) {
   const record = invoiceOrderFromCustomerAccount(input, { capturedAt: CAPTURED_AT, priceBasis: "taxIncluded" });
-  const { summary, reasons } = invoiceStatementBreakdown(record.sale, saleTaxBreakdown(record.sale, PROVISIONAL_INVOICE_TAX_CONFIG));
+  const { summary, reasons } = invoiceStatementBreakdown(record.sale, saleTaxBreakdown(record.sale, INVOICE_TAX_CONFIG));
 
   return {
     columns: summary && [summary.productsExcludingTax, summary.shippingExcludingTax, summary.tax, summary.total],

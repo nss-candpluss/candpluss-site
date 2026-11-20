@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { INVOICE_RULES_VERSION, PROVISIONAL_INVOICE_TAX_CONFIG } from "@/lib/invoice/config";
+import { INVOICE_RULES_VERSION, INVOICE_TAX_CONFIG } from "@/lib/invoice/config";
 import {
   INVOICE_ORDER_FIELDS,
   invoiceOrderFromCustomerAccount,
@@ -38,7 +38,7 @@ import { enabledPolicy, issuer, RULES_VERSION } from "./fixtures";
  * 「実データ」と書いたものは `account-fixtures.ts` の実際の注文の形を写したもの。
  */
 
-const config = PROVISIONAL_INVOICE_TAX_CONFIG;
+const config = INVOICE_TAX_CONFIG;
 
 const convert = (input: CustomerAccountInvoiceOrder) =>
   invoiceOrderFromCustomerAccount(input, { capturedAt: CAPTURED_AT, priceBasis: "taxIncluded" });
@@ -592,7 +592,7 @@ describe("会員ページに渡す書類と返金の状況（customerReceiptFrom
     }
   });
 
-  it("仮の運用（会員ページからの発行は停止中）では発行しない", () => {
+  it("会員ページからの発行を止めた運用では発行しない", () => {
     const result = evaluated(order1054, { policy: { memberPageIssueEnabled: false, returnInvoiceEnabled: false } });
 
     expect(result.invoice).toEqual({ status: "unavailable", reasons: [expect.objectContaining({ code: "memberPageDisabled" })] });

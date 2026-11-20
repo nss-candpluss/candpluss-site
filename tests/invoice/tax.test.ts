@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { PROVISIONAL_INVOICE_TAX_CONFIG } from "@/lib/invoice/config";
+import { INVOICE_TAX_CONFIG } from "@/lib/invoice/config";
 import { InvoiceMoneyError, parseShopifyYen, yen } from "@/lib/invoice/money";
 import {
   orderLineAmount,
@@ -22,7 +22,7 @@ import {
 
 import { line, shipping } from "./fixtures";
 
-const config = PROVISIONAL_INVOICE_TAX_CONFIG;
+const config = INVOICE_TAX_CONFIG;
 
 function sale(lines: InvoiceOrderLine[], shippingFee: InvoiceShipping | null = null): InvoiceOrderSale {
   return {

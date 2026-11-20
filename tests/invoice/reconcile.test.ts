@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { PROVISIONAL_INVOICE_TAX_CONFIG } from "@/lib/invoice/config";
+import { INVOICE_TAX_CONFIG } from "@/lib/invoice/config";
 import { yen } from "@/lib/invoice/money";
 import type { InvoiceOrderRecord, InvoiceOrderSale, ShopifyAmounts } from "@/lib/invoice/order";
 import { reconcileAmounts, reconcileOrder } from "@/lib/invoice/reconcile";
@@ -8,7 +8,7 @@ import { taxBreakdown } from "@/lib/invoice/tax";
 
 import { line, lineRefund, orderRecord, shipping } from "./fixtures";
 
-const config = PROVISIONAL_INVOICE_TAX_CONFIG;
+const config = INVOICE_TAX_CONFIG;
 
 function amounts(rates: [ratePercent: number, amount: number, tax: number][]): ShopifyAmounts {
   return {

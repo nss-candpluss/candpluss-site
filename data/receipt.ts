@@ -29,17 +29,15 @@ export const RECEIPT_DOCUMENT_TITLE = "利用明細書（兼 適格簡易請求�
 
 /**
  * 会員による領収書の発行（注文履歴のリンク・発行ページ・書類の発行の運用）を出すか。
- * 発行した書類の再現性・保存の要件と、税務上の未確定の事項を確認できるまで止める。
+ * 止めると、発行済みの書類を会員が開き直せなくなる。
  */
-// 本番の動作確認のため一時的に有効化している（正式公開ではない）。確認が終わったらこのコミットを戻す
 export const RECEIPT_ISSUE_ENABLED = true;
 
 /**
  * ショッピングガイドに、会員ページから領収書を出せる案内を載せるか。
- * 本番の動作確認で発行だけを一時的に開けても公開中の文面が変わらないよう、
- * `RECEIPT_ISSUE_ENABLED` とは別に持つ。正式公開で案内の文言を改めるときに有効にする。
+ * 発行を一時的に止めても公開中の文面を別に扱えるよう、`RECEIPT_ISSUE_ENABLED` とは別に持つ。
  */
-export const RECEIPT_GUIDE_NOTICE_ENABLED = false;
+export const RECEIPT_GUIDE_NOTICE_ENABLED = true;
 
 /** 消費税の標準税率。軽減税率の商品を扱いはじめたら区分が必要になる */
 export const RECEIPT_TAX_RATE_PERCENT = 10;

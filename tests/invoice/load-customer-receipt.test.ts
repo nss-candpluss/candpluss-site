@@ -96,7 +96,6 @@ describe("Customer Account API からの書類の組み立て（loadCustomerRece
     expect(fetchCustomerInvoiceOrder).toHaveBeenCalledWith(TOKEN, ORDER_ID);
     expect(result.status).toBe("evaluated");
     if (result.status !== "evaluated") return;
-    // 本番の動作確認の間だけ会員ページからの発行を開けているので、発行できる書類を返す（一時的）
     expect(result.invoice).toMatchObject({ status: "issuable" });
   });
 

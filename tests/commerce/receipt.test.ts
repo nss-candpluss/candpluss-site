@@ -329,9 +329,7 @@ describe("領収書への導線", () => {
     ).toContain("accountReceiptHref(order.id)");
   });
 
-  // 返金後の記載がインボイスの要件を満たすか確認できるまで、リンクは出さない
-  it("領収書へのリンクとページは表示の切り替えで止めている", () => {
-    // 本番の動作確認の間だけ true（一時的）
+  it("領収書へのリンクとページは同じ表示の切り替えで開け閉めする", () => {
     expect(RECEIPT_ISSUE_ENABLED).toBe(true);
     expect(readSource("components/commerce/AccountPageContent.tsx")).toContain(
       "{RECEIPT_ISSUE_ENABLED && accountOrderHasReceipt(order) ? ("
@@ -342,9 +340,8 @@ describe("領収書への導線", () => {
     );
   });
 
-  // 本番の動作確認で会員ページの発行だけを開けても、公開中のショッピングガイドの文面は変えない
   it("ショッピングガイドの案内は、会員ページの発行とは別に切り替える", () => {
-    expect(RECEIPT_GUIDE_NOTICE_ENABLED).toBe(false);
+    expect(RECEIPT_GUIDE_NOTICE_ENABLED).toBe(true);
     const guideSource = readSource("data/shoppingGuide.ts");
 
     expect(guideSource).toContain("...(RECEIPT_GUIDE_NOTICE_ENABLED");

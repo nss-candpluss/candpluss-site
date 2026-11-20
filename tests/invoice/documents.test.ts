@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { PROVISIONAL_INVOICE_TAX_CONFIG } from "@/lib/invoice/config";
+import { INVOICE_TAX_CONFIG } from "@/lib/invoice/config";
 import {
   appendDocument,
   buildInvoiceDocument,
@@ -25,7 +25,7 @@ const receipt = { receivedAmount: yen(5880), receivedDate: "2026-10-02", manualP
 const common = {
   issuer,
   rulesVersion: RULES_VERSION,
-  taxConfig: PROVISIONAL_INVOICE_TAX_CONFIG,
+  taxConfig: INVOICE_TAX_CONFIG,
 };
 
 function invoiceFor(
