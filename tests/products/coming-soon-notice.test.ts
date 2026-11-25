@@ -35,13 +35,13 @@ describe("isWebPurchaseEnabled", () => {
 
 describe("isProductWebPurchaseEnabled", () => {
   // テスト領域でも、発売時期が先の商品は公開ページと同じ告知に揃える
-  it("テスト領域で買えるのは 10/2 販売開始の商品だけ", () => {
+  it("テスト領域で買えるのは販売開始済みの商品だけ", () => {
     expect(isProductWebPurchaseEnabled("test", "moya500")).toBe(true);
     expect(isProductWebPurchaseEnabled("test", "guyrope")).toBe(true);
+    expect(isProductWebPurchaseEnabled("test", "moya500_roofsheet")).toBe(true);
     expect(isProductWebPurchaseEnabled("test", "moya420")).toBe(false);
     expect(isProductWebPurchaseEnabled("test", "moya420_roofsheet")).toBe(false);
     expect(isProductWebPurchaseEnabled("test", "nokuta")).toBe(false);
-    expect(isProductWebPurchaseEnabled("test", "moya500_roofsheet")).toBe(false);
   });
 
   it("販売開始時期が未登録の商品は系統の判定に従う", () => {
@@ -201,14 +201,14 @@ describe("一覧カード", () => {
 });
 
 describe("販売開始時期のデータ", () => {
-  it("MOYA420 系は 2027年春、NOKUTA は 2026年12月、MOYA500 ルーフシートは 11月中旬〜下旬、それ以外は 10/2", () => {
+  it("MOYA420 系は 2027年春、NOKUTA は 2026年12月、MOYA500 ルーフシートは 11/25、それ以外は 10/2", () => {
     expect(productLaunchNoticeByHandle.moya500).toBe(
       "2026年10月2日(金)20:00 販売開始"
     );
     expect(productLaunchNoticeByHandle.moya420).toBe("2027年春 発売予定");
     expect(productLaunchNoticeByHandle.nokuta).toBe("2026年12月 発売予定");
     expect(productLaunchNoticeByHandle.moya500_roofsheet).toBe(
-      "2026年11月中旬〜下旬 発売予定"
+      "2026年11月25日(水) 販売開始"
     );
 
     for (const [handle, notice] of Object.entries(productLaunchNoticeByHandle)) {
@@ -217,7 +217,7 @@ describe("販売開始時期のデータ", () => {
         : handle === "nokuta"
           ? "2026年12月 発売予定"
           : handle === "moya500_roofsheet"
-            ? "2026年11月中旬〜下旬 発売予定"
+            ? "2026年11月25日(水) 販売開始"
             : "2026年10月2日(金)20:00 販売開始";
 
       expect(notice, handle).toBe(expected);
@@ -230,6 +230,7 @@ describe("販売開始時期のデータ", () => {
       "2026-10-02T20:00:00+09:00"
     );
     expect(productLaunchStartsAtByHandle.nokuta).toBeUndefined();
+    expect(productLaunchStartsAtByHandle.moya500_roofsheet).toBeUndefined();
     expect(productLaunchStartsAtByHandle.moya420).toBeUndefined();
   });
 

@@ -8,7 +8,7 @@
  * データも分けている（一覧は「〜発売」、この枠は「〜販売開始」）。
  */
 const LAUNCH_2026_10_02 = "2026年10月2日(金)20:00 販売開始";
-const LAUNCH_2026_11_LATE = "2026年11月中旬〜下旬 発売予定";
+const LAUNCH_2026_11_25 = "2026年11月25日(水) 販売開始";
 const LAUNCH_2026_12 = "2026年12月 発売予定";
 const LAUNCH_2027_SPRING = "2027年春 発売予定";
 
@@ -20,7 +20,7 @@ export const productLaunchNoticeByHandle: Record<string, string> = {
   "jig-stake": LAUNCH_2026_10_02,
 
   // MOYA500 オプション
-  moya500_roofsheet: LAUNCH_2026_11_LATE,
+  moya500_roofsheet: LAUNCH_2026_11_25,
   moya500_groundsheet: LAUNCH_2026_10_02,
   moya500_innertent: LAUNCH_2026_10_02,
   "moya500_innertent-mesh": LAUNCH_2026_10_02,
@@ -39,14 +39,19 @@ export const productLaunchNoticeByHandle: Record<string, string> = {
   "gearaid-sil-nylon-patch": LAUNCH_2026_10_02,
 };
 
+const LAUNCHED_NOTICES: ReadonlySet<string> = new Set([
+  LAUNCH_2026_10_02,
+  LAUNCH_2026_11_25,
+]);
+
 /**
- * 10/2 以外の時期が入っている商品は、WEB 購入を開けても発売前のまま扱う。
+ * 販売開始済みの時期以外が入っている商品は、WEB 購入を開けても発売前のまま扱う。
  * 未登録の商品は時期の縛りが無いものとして買える側に倒す。
  */
 export function isProductLaunched(handle: string): boolean {
   const notice = productLaunchNoticeByHandle[handle];
 
-  return notice === undefined || notice === LAUNCH_2026_10_02;
+  return notice === undefined || LAUNCHED_NOTICES.has(notice);
 }
 
 /** 10/2 の販売開始日時。構造化データの `availabilityStarts` に出す */
@@ -56,7 +61,7 @@ const LAUNCH_2026_10_02_STARTS_AT = "2026-10-02T20:00:00+09:00";
  * 販売開始日時。表示用の文言と取り違えないよう別の定数にするが、対象商品は
  * 上の表から引いて二重管理を避ける。
  *
- * 2026年11月中旬〜下旬・12月・2027年春の商品は日時が決まっていないので入れない。日付の無い
+ * 2026年11月25日（時刻なし）・12月・2027年春の商品は日時が決まっていないので入れない。日時の無い
  * 予定を構造化データに書くと、実際の販売開始とずれても直したことに気付けない。
  */
 export const productLaunchStartsAtByHandle: Record<string, string> =
