@@ -9,14 +9,14 @@
  */
 const LAUNCH_2026_10_02 = "2026年10月2日(金)20:00 販売開始";
 const LAUNCH_2026_11_25 = "2026年11月25日(水) 販売開始";
-const LAUNCH_2026_12 = "2026年12月 発売予定";
+const LAUNCH_2026_12_01 = "2026年12月1日(火)20:00 販売開始";
 const LAUNCH_2027_SPRING = "2027年春 発売予定";
 
 export const productLaunchNoticeByHandle: Record<string, string> = {
   // テント・シェルター / タープ / ペグ
   moya500: LAUNCH_2026_10_02,
   moya420: LAUNCH_2027_SPRING,
-  nokuta: LAUNCH_2026_12,
+  nokuta: LAUNCH_2026_12_01,
   "jig-stake": LAUNCH_2026_10_02,
 
   // MOYA500 オプション
@@ -54,19 +54,22 @@ export function isProductLaunched(handle: string): boolean {
   return notice === undefined || LAUNCHED_NOTICES.has(notice);
 }
 
-/** 10/2 の販売開始日時。構造化データの `availabilityStarts` に出す */
-const LAUNCH_2026_10_02_STARTS_AT = "2026-10-02T20:00:00+09:00";
+/** 販売開始日時が決まっている時期。構造化データの `availabilityStarts` に出す */
+const LAUNCH_STARTS_AT_BY_NOTICE: Record<string, string> = {
+  [LAUNCH_2026_10_02]: "2026-10-02T20:00:00+09:00",
+  [LAUNCH_2026_12_01]: "2026-12-01T20:00:00+09:00",
+};
 
 /**
  * 販売開始日時。表示用の文言と取り違えないよう別の定数にするが、対象商品は
  * 上の表から引いて二重管理を避ける。
  *
- * 2026年11月25日（時刻なし）・12月・2027年春の商品は日時が決まっていないので入れない。日時の無い
+ * 2026年11月25日（時刻なし）・2027年春の商品は日時が決まっていないので入れない。日時の無い
  * 予定を構造化データに書くと、実際の販売開始とずれても直したことに気付けない。
  */
 export const productLaunchStartsAtByHandle: Record<string, string> =
   Object.fromEntries(
     Object.entries(productLaunchNoticeByHandle)
-      .filter(([, notice]) => notice === LAUNCH_2026_10_02)
-      .map(([handle]) => [handle, LAUNCH_2026_10_02_STARTS_AT])
+      .filter(([, notice]) => notice in LAUNCH_STARTS_AT_BY_NOTICE)
+      .map(([handle, notice]) => [handle, LAUNCH_STARTS_AT_BY_NOTICE[notice]])
   );

@@ -201,12 +201,12 @@ describe("一覧カード", () => {
 });
 
 describe("販売開始時期のデータ", () => {
-  it("MOYA420 系は 2027年春、NOKUTA は 2026年12月、MOYA500 ルーフシートは 11/25、それ以外は 10/2", () => {
+  it("MOYA420 系は 2027年春、NOKUTA は 12/1、MOYA500 ルーフシートは 11/25、それ以外は 10/2", () => {
     expect(productLaunchNoticeByHandle.moya500).toBe(
       "2026年10月2日(金)20:00 販売開始"
     );
     expect(productLaunchNoticeByHandle.moya420).toBe("2027年春 発売予定");
-    expect(productLaunchNoticeByHandle.nokuta).toBe("2026年12月 発売予定");
+    expect(productLaunchNoticeByHandle.nokuta).toBe("2026年12月1日(火)20:00 販売開始");
     expect(productLaunchNoticeByHandle.moya500_roofsheet).toBe(
       "2026年11月25日(水) 販売開始"
     );
@@ -215,7 +215,7 @@ describe("販売開始時期のデータ", () => {
       const expected = handle.startsWith("moya420")
         ? "2027年春 発売予定"
         : handle === "nokuta"
-          ? "2026年12月 発売予定"
+          ? "2026年12月1日(火)20:00 販売開始"
           : handle === "moya500_roofsheet"
             ? "2026年11月25日(水) 販売開始"
             : "2026年10月2日(金)20:00 販売開始";
@@ -225,11 +225,13 @@ describe("販売開始時期のデータ", () => {
   });
 
   // 日時が決まっていない商品に availabilityStarts を出すと、ずれても気付けない
-  it("日時が決まっている 10/2 の商品だけ availabilityStarts の対象にする", () => {
+  it("日時が決まっている 10/2 と 12/1 の商品だけ availabilityStarts の対象にする", () => {
     expect(productLaunchStartsAtByHandle.moya500).toBe(
       "2026-10-02T20:00:00+09:00"
     );
-    expect(productLaunchStartsAtByHandle.nokuta).toBeUndefined();
+    expect(productLaunchStartsAtByHandle.nokuta).toBe(
+      "2026-12-01T20:00:00+09:00"
+    );
     expect(productLaunchStartsAtByHandle.moya500_roofsheet).toBeUndefined();
     expect(productLaunchStartsAtByHandle.moya420).toBeUndefined();
   });
