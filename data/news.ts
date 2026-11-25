@@ -159,6 +159,25 @@ const fieldstyleExpo2026Body = [
  */
 export const newsItems = [
   {
+    id: "005",
+    title: "NOKUTA販売開始日のお知らせ",
+    tag: "Information",
+    excerpt:
+      "全遮光ヘキサタープ「NOKUTA」の販売開始日が決定いたしました。",
+    image: "/images/news/news-20261125-01.webp",
+    imageAlt:
+      "草原に設営した全遮光ヘキサタープ NOKUTA。イエローとブラックの幕が濃い影をつくる",
+    ogImage: "/images/news/og/news-20261125-01.jpg",
+    publishedAt: "2026-11-25",
+    handle: "nokuta-order-information",
+    content:
+      "全遮光ヘキサタープ「NOKUTA」の販売開始日が決定いたしました。\n2026年12月1日（火曜日）20:00より、販売開始いたします。\nMOYAシリーズとの連結など多彩なアレンジにも対応するタープです。MOYA500とあわせてぜひご覧ください。",
+    contentLink: {
+      label: "NOKUTA 商品ページ",
+      href: "/products/nokuta",
+    },
+  },
+  {
     id: "004",
     title: "FIELDSTYLE EXPO 2026出展決定！",
     tag: "Information",

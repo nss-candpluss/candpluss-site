@@ -34,15 +34,17 @@ describe("News の公開日", () => {
     expect(publishedAtByHandle["moya500-order-information"]).toBe("2026-09-15");
     expect(publishedAtByHandle["official-website-open"]).toBe("2026-09-15");
     expect(publishedAtByHandle["fieldstyle-expo-2026"]).toBe("2026-09-18");
+    expect(publishedAtByHandle["nokuta-order-information"]).toBe("2026-11-25");
   });
 
-  it("最新順に並べたとき先頭が FIELDSTYLE EXPO 2026 のお知らせになる", () => {
+  it("最新順に並べたとき先頭が NOKUTA 販売開始日のお知らせになる", () => {
     // 同一日付は data/news.ts の配列順（上ほど新しい）で並ぶ。
     const sorted = [...newsItems].sort((a, b) =>
       b.publishedAt.localeCompare(a.publishedAt)
     );
 
-    expect(sorted.map((item) => item.handle).slice(0, 3)).toEqual([
+    expect(sorted.map((item) => item.handle).slice(0, 4)).toEqual([
+      "nokuta-order-information",
       "fieldstyle-expo-2026",
       "moya500-order-information",
       "official-website-open",
