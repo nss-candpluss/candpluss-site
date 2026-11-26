@@ -108,11 +108,11 @@ export const laboAccessContent = {
   },
   details: [
     { label: "営業時間", value: "10:00〜17:00" },
-    { label: "定休日", value: "土・日・祝日・年末年始" },
+    { label: "定休日", value: "祝日・年末年始" },
     { label: "駐車場", value: "あり" },
   ],
   map: {
-    src: "https://maps.google.com/maps?q=%E7%A6%8F%E5%B2%A1%E7%9C%8C%E5%A4%A7%E9%87%8E%E5%9F%8E%E5%B8%82%E4%B9%99%E9%87%911-10-40&hl=ja&z=16&output=embed",
+    src: "https://www.google.com/maps/embed?origin=mfe&pb=!1m3!2m1!1z56aP5bKh55yM5aSn6YeO5Z-O5biC5LmZ6YeRMS0xMC00MA!6i16!3m1!1sja!5m1!1sja",
     title: "C AND+S LABO の地図",
   },
 } as const;

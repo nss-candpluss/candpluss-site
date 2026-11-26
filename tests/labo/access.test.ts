@@ -26,11 +26,12 @@ describe("labo access section", () => {
     });
     expect(laboAccessContent.details).toEqual([
       { label: "営業時間", value: "10:00〜17:00" },
-      { label: "定休日", value: "土・日・祝日・年末年始" },
+      { label: "定休日", value: "祝日・年末年始" },
       { label: "駐車場", value: "あり" },
     ]);
-    expect(laboAccessContent.map.src).toContain("maps.google.com/maps");
-    expect(laboAccessContent.map.src).toContain("output=embed");
+    expect(laboAccessContent.map.src).toMatch(
+      /^https:\/\/www\.google\.com\/maps\/embed\?/
+    );
   });
 
   it("places the map in the about two-column layout", () => {
